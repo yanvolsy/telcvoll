@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الإعدادات</title>
+<link rel="stylesheet" href="/assets/app.css">
+<link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
+<link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
+<link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="/manifest.webmanifest">
+</head>
+<body>
+<header class="top admin-nav">
+  <a class="brand" href="/admin/index.html" aria-label="TELC Voll"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
+  <nav><a href="/admin/index.html">الرئيسية</a><a href="#" id="logoutLink">خروج</a></nav>
+</header>
+<main class="wrap">
+  <div class="panel">
+    <h1>الإعدادات</h1>
+    <form id="f">
+      <input name="site_name" placeholder="اسم الموقع">
+      <input name="logo_text" placeholder="نص الشعار">
+      <input name="default_passing_percent" type="number" placeholder="60">
+      <button class="btn">حفظ</button>
+    </form>
+    <div id="msg"></div>
+  </div>
+</main>
+<footer class="admin-footer">TELC Voll — لوحة إدارة المنصة</footer>
+<script src="/assets/i18n.js"></script>
+<script src="/assets/app.js"></script><script src="/assets/admin-guard.js"></script>
+<script>
+logoutLink.onclick = async (e) => { e.preventDefault(); await api('admin-logout', { method: 'POST' }); location.href = '/admin/login.html'; };
+
+(async () => {
+  try {
+    const { settings } = await api('admin-settings');
+    f.site_name.value = settings.site_name || '';
+    f.logo_text.value = settings.logo_text || '';
+    f.default_passing_percent.value = settings.default_passing_percent || 60;
+  } catch (err) {
+    location.href = '/admin/login.html';
+  }
+})();
+
+f.onsubmit = async (e) => {
+  e.preventDefault();
+  const fd = new FormData(f);
+  await api('admin-settings', { method: 'POST', body: {
+    site_name: fd.get('site_name'), logo_text: fd.get('logo_text'),
+    default_passing_percent: fd.get('default_passing_percent'),
+  }});
+  msg.innerHTML = '<div class="alert ok">تم الحفظ.</div>';
+};
+</script>
+</body>
+</html>

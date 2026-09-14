@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d1310"><title>لوحة الطالب</title>
+<link rel="stylesheet" href="/assets/app.css">
+<link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
+<link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
+<link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="/manifest.webmanifest">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/dashboard.html"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
+  <nav>
+    <a href="/summaries.html" data-i18n="nav_summaries">الملخصات</a><a href="/telc-chat.html" id="telcChatNav" data-i18n="nav_speaking">مساعد TELC</a><a href="#" id="logoutLink" data-i18n="nav_logout">خروج</a>
+  </nav>
+</header>
+<main class="student-hub" id="content"><div class="student-loading">جارٍ التحميل…</div></main>
+<script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
+<script>
+const SECTION_ORDER=['Lesen','Hören','Sprachbausteine','Schreiben','Sprechen'];
+const TEIL_ORDER={Lesen:['Teil 1','Teil 2','Teil 3'],Hören:['Teil 1','Teil 2','Teil 3'],Sprachbausteine:['Teil 1','Teil 2'],Schreiben:['Teil 1'],Sprechen:['Teil 1','Teil 2','Teil 3']};
+const SECTION_AR={Lesen:'Lesen',Hören:'Hören',Sprachbausteine:'Sprachbausteine',Schreiben:'Schreiben',Sprechen:'Sprechen'};
+let state={level:'B2',section:'Lesen',exercises:[],student:null};
+const $=id=>document.getElementById(id);
+function lang(){return getLang();}
+function text(ar,de){return lang()==='ar'?ar:de;}
+function exerciseDuration(x){return Number(x.settings_json?.duration_seconds||x.duration_seconds||90)||90;}
+function sectionIcon(s){return ({Lesen:'◫',Hören:'◉',Sprachbausteine:'⌘',Schreiben:'✎',Sprechen:'◌'})[s]||'•';}
+function levelAvailable(level){return state.exercises.some(x=>(x.level||'B2')===level);}
+function render(){
+  const list=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===state.section);
+  const has=levelAvailable(state.level);
+  $('content').innerHTML=`
+    <section class="hub-head">
+      <div><span class="tag">${text('منصة الطالب','Schülerbereich')}</span><h1>${text('تدريب TELC Voll','TELC Voll Training')}</h1><p class="muted">${text('مرحباً '+(state.student?.name||'Student')+' — اختر المستوى والقسم ثم افتح التمرين.','Hallo '+(state.student?.name||'Student')+' — wähle Niveau und Prüfungsteil.')}</p></div>
+      <div class="hub-kpi"><strong>${state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===state.section).length}</strong><span>${text('تمرين','Übungen')}</span></div>
+    </section>
+    <section class="level-switch" aria-label="TELC Voll Niveau">
+      ${['B1','B2','C1'].map(l=>`<button class="level-btn ${state.level===l?'active':''} ${!levelAvailable(l)?'empty':''}" data-level="${l}">Telc ${l}</button>`).join('')}
+    </section>
+    <nav class="section-switch" aria-label="Prüfungsteile">
+      ${SECTION_ORDER.map(s=>`<button class="section-btn ${state.section===s?'active':''}" data-section="${s}"><span>${sectionIcon(s)}</span>${s}</button>`).join('')}
+    </nav>
+    <section class="topic-toolbar">
+      <div><h2>${SECTION_AR[state.section]}</h2><p class="muted">${text('تمارين '+state.section+' للمستوى '+state.level,'Übungen für '+state.section+' · Niveau '+state.level)}</p></div>
+      <div class="topic-tools"><input id="search" placeholder="${text('ابحث عن الموضوع…','Thema suchen…')}"/><select id="teilFilter">${(TEIL_ORDER[state.section]||[]).map((t,i)=>`<option value="${t}" ${i===0?'selected':''}>${t}</option>`).join('')}</select></div>
+    </section>
+    <div id="topicGrid" class="topic-grid"></div>
+
+    <a id="telcStudyFloat" class="telc-study-float" href="/telc-chat.html" aria-label="مساعد TELC" title="مساعد TELC">✦ <span data-i18n="chat_float_label">مساعد TELC</span></a>
+    <section class="self-test">
+      <div class="self-test-badge">${text('امتحان كامل','Vollständige Prüfung')}</div>
+      <h2>${text('محاكاة الامتحان الكامل','Vollständige Prüfungssimulation')}</h2>
+      <p>${text('في كل مرة يختار النظام تمارين من المواضيع المنشورة الموجودة في أقسام المنصة. لا توجد نسخة ثانية من المحتوى: بنك التمارين الحالي هو المصدر.','Die Simulation wählt jedes Mal veröffentlichte Aufgaben aus den vorhandenen Bereichen. Es gibt keinen zweiten Inhaltsbestand.')}</p>
+      <div class="self-test-features">
+        <article><b>${text('خلط عشوائي','Zufällige Auswahl')}</b><span>${text('اختيار عشوائي من المواضيع المتاحة','Zufällige Aufgaben aus dem verfügbaren Bestand')}</span></article>
+        <article><b>${text('تخصيص كامل','Vollständig anpassbar')}</b><span>${text('اختيار المستوى والأجزاء قبل البدء','Niveau und Teile vor dem Start wählen')}</span></article>
+        <article><b>${text('نتيجة كاملة','Gesamtergebnis')}</b><span>${text('تجميع نتائج الأسئلة المصححة آلياً','Zusammenfassung der automatisch bewerteten Aufgaben')}</span></article>
+      </div>
+      <a class="btn self-test-btn" href="/self-test.html?level=${encodeURIComponent(state.level)}">${text('ابدأ امتحان عشوائي','Zufällige Prüfung starten')} <span>←</span></a>
+    </section>`;
+  document.querySelectorAll('[data-level]').forEach(b=>b.onclick=()=>{state.level=b.dataset.level;state.section='Lesen';render();});
+  document.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>{state.section=b.dataset.section;render();});
+  const nav=$('telcChatNav'); if(nav) nav.href='/telc-chat.html';
+  $('search').oninput=renderTopics; $('teilFilter').onchange=renderTopics; renderTopics();
+}
+function renderTopics(){
+  const q=($('search')?.value||'').trim().toLowerCase(); const teil=$('teilFilter')?.value || (TEIL_ORDER[state.section]||[])[0] || '';
+  let list=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===state.section);
+  if(teil) list=list.filter(x=>x.teil===teil); if(q) list=list.filter(x=>(x.title+' '+(x.body||'')).toLowerCase().includes(q));
+  $('topicGrid').innerHTML=list.length?list.map((x,i)=>`<article class="topic-card"><div class="topic-card-head"><span class="topic-index">${String(i+1).padStart(2,'0')}</span><span class="tag">Telc ${esc(x.level||'B2')}</span></div><h3>${esc(x.title)}</h3><div class="topic-meta"><span>${esc(x.teil)}</span><span>${esc(x.task_type)}</span><span>${exerciseDuration(x)} min</span></div><a class="btn light" href="/exercise.html?id=${x.id}">${text('فتح التمرين','Übung öffnen')} →</a></article>`).join(''):`<div class="empty-panel"><h3>${text('لا توجد تمارين منشورة هنا','Keine veröffentlichten Übungen')}</h3><p class="muted">${text('يمكن للمشرف إضافة الموضوع من لوحة الإدارة.','Der Administrator kann Aufgaben im Adminbereich hinzufügen.')}</p></div>`;
+}
+logoutLink.onclick=async e=>{e.preventDefault();await api('auth-logout',{method:'POST'});location.href='/';};
+(async()=>{try{const d=await api('me');state.exercises=d.exercises||[];state.student=d.student;const urlLevel=qs('level');if(['B1','B2','C1'].includes(urlLevel))state.level=urlLevel;render();}catch(e){location.href='/?error=session';}})();
+document.addEventListener('langchange',render);
+</script></body></html>

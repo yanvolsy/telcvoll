@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080808">
+<title data-i18n="exam_page_title">محاكاة الامتحان</title>
+<link rel="stylesheet" href="/assets/app.css">
+<link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
+<link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
+<link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="/manifest.webmanifest">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/dashboard.html">TELC Voll</a>
+  <nav>
+    <a href="/dashboard.html" data-i18n="nav_home">الرئيسية</a>
+    <a href="/errors.html" data-i18n="nav_errors">أخطائي</a>
+    <a href="/summaries.html" data-i18n="nav_summaries">الملخصات</a>
+    <a href="/speaking.html">Sprechen AI</a>
+    <a href="#" id="logoutLink" data-i18n="nav_logout">خروج</a>
+  </nav>
+</header>
+<main class="wrap" id="content">
+  <p class="muted" data-i18n="loading">جارٍ التحميل…</p>
+</main>
+<footer data-i18n="footer">TELC Voll</footer>
+<script src="/assets/i18n.js"></script>
+<script src="/assets/app.js"></script>
+<script>
+logoutLink.onclick = async (e) => {
+  e.preventDefault();
+  await api('auth-logout', { method: 'POST' });
+  location.href = '/';
+};
+
+(async () => {
+  const id = qs('id');
+  try {
+    const { exam, parts } = await api('exam-get?id=' + encodeURIComponent(id));
+    const partCards = parts.map((part) => {
+      const ex = part.exercise;
+      return `<div class="card" style="margin:12px 0">
+        <span class="tag">${esc(part.section)} · ${esc(part.teil)}</span>
+        <h3>${ex ? esc(ex.title) : t('exam_no_task')}</h3>
+        ${ex ? `<a class="btn" href="/exercise.html?id=${ex.id}&duration=${part.duration_seconds}">${t('exam_start_btn',{min:Math.ceil(part.duration_seconds/60)})}</a>` : ''}
+      </div>`;
+    }).join('');
+    content.innerHTML = `
+      <div class="panel">
+        <span class="tag">PRÜFUNGSSIMULATION</span>
+        <h1>${esc(exam.title)}</h1>
+        <p class="muted">${t('exam_desc')}</p>
+        ${partCards}
+      </div>`;
+  } catch (err) {
+    content.innerHTML = `<div class="alert bad">${esc(err.message)}</div>`;
+  }
+})();
+document.addEventListener('langchange', () => location.reload());
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "telc-platform-netlify",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TELC Platform converted to Netlify Functions + Postgres",
+  "dependencies": {
+    "pg": "^8.11.5",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "cookie": "^0.6.0"
+  }
+}

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080808"><title>TELC Voll · Sprechen</title>
+<link rel="stylesheet" href="/assets/app.css">
+<link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
+<link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
+<link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="/manifest.webmanifest">
+<style>
+.spk-shell{max-width:980px;margin:auto}.spk-task{direction:ltr;text-align:left;white-space:pre-wrap;line-height:1.7}
+.spk-chat{display:flex;flex-direction:column;gap:12px;margin-top:18px;max-height:52vh;overflow:auto}
+.bubble{padding:14px 16px;border-radius:16px;max-width:82%;line-height:1.65;white-space:pre-wrap}
+.bubble.jerry{align-self:flex-start;background:#222;direction:ltr;text-align:left}.bubble.partner{align-self:flex-start;background:rgba(255,255,255,.08);direction:ltr;text-align:left}.bubble.me{align-self:flex-end;background:rgba(255,130,0,.15);direction:ltr;text-align:left}
+.spk-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.spk-row textarea{min-height:90px;flex:1;min-width:240px;direction:ltr;text-align:left}
+.spk-phases{display:flex;gap:8px;flex-wrap:wrap}.phase.active{outline:2px solid currentColor}
+.eval-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.eval-item{padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:12px}.eval-score{font-size:20px;font-weight:700}
+@media(max-width:650px){.eval-grid{grid-template-columns:1fr}.bubble{max-width:94%}}
+</style>
+</head>
+<body>
+<header class="top"><a class="brand" href="/dashboard.html">TELC Voll</a><nav>
+<a href="/dashboard.html">الرئيسية</a><a href="/errors.html">أخطائي</a><a href="/summaries.html">الملخصات</a><a href="#" id="logout">خروج</a>
+</nav></header>
+<main class="wrap spk-shell"><div class="panel">
+<div id="loading">جارٍ تحميل موضوع Sprechen…</div>
+<div id="app" hidden>
+<div class="spk-phases" id="phases"></div>
+<span class="tag" id="level"></span><h1 id="title"></h1>
+<div class="question"><strong id="teilLabel"></strong><div class="spk-task" id="task"></div></div>
+<div class="spk-chat" id="chat"></div>
+<div class="spk-row"><button class="btn dark" id="mic">🎙️ تحدث</button><button class="btn" id="stop" disabled>إيقاف</button><button class="btn" id="finish">إنهاء وتقييم Jerry</button></div>
+<div class="spk-row"><textarea id="input" placeholder="إذا لم يعمل الميكروفون، اكتب إجابتك بالألمانية هنا…"></textarea><button class="btn dark" id="send">إرسال</button></div>
+<div id="eval" class="card" hidden></div>
+</div></div></main>
+<footer>TELC Voll</footer>
+<script src="/assets/app.js"></script>
+<script>
+const id=new URLSearchParams(location.search).get('id');
+const $=x=>document.getElementById(x); let ex=null, history=[], transcript=[], recognition=null, busy=false;
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function addBubble(who,text){const d=document.createElement('div');d.className='bubble '+who;d.textContent=text;$('chat').appendChild(d);$('chat').scrollTop=$('chat').scrollHeight}
+function currentTeil(){return String(ex.teil||'Teil 1').match(/Teil\\s*[123]/i)?.[0]||'Teil 1'}
+function speak(text){if(!('speechSynthesis'in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='de-DE';speechSynthesis.speak(u)}
+function setPhase(t){const u=new URLSearchParams(location.search); if(t===currentTeil())return; u.set('teil',t); location.href='/speaking.html?id='+encodeURIComponent(id)+'&teil='+encodeURIComponent(t)}
+function renderPhases(){const selected=currentTeil(); $('phases').innerHTML=['Teil 1','Teil 2','Teil 3'].map(t=>`<button class="btn phase ${t===selected?'active':''}" data-t="${t}">${t}</button>`).join('');document.querySelectorAll('.phase').forEach(b=>b.onclick=()=>setPhase(b.dataset.t))}
+async function load(){try{
+ const wanted=new URLSearchParams(location.search).get('teil');
+ let data=await api('exercise-get?id='+encodeURIComponent(id));
+ ex=data.exercise;
+ if(String(ex.section)!=='Sprechen')throw new Error('هذا ليس تمرين Sprechen.');
+ // If a phase was requested, resolve the corresponding published exercise for the same topic.
+ if(wanted && wanted!==currentTeil()){
+   const list=await api('exercises-list',{method:'GET',query:{level:ex.level,section:'Sprechen'}});
+   const rows=Array.isArray(list?.exercises)?list.exercises:(Array.isArray(list)?list:[]);
+   const same=rows.find(x=>String(x.teil||'').replace(/\\s/g,'').toLowerCase()===wanted.replace(/\\s/g,'').toLowerCase() &&
+     (String(x.title||'').trim().toLowerCase()===String(ex.title||'').trim().toLowerCase() || String(x.body||'').includes(String(ex.title||''))));
+   if(same){data=await api('exercise-get',{method:'GET',query:{id:same.id}});ex=data.exercise}
+ }
+ $('level').textContent=ex.level||'';$('title').textContent=ex.title||'Sprechen';$('teilLabel').textContent=ex.teil||'Teil 1';$('task').textContent=ex.body||'';renderPhases();$('chat').innerHTML='';history=[];transcript=[];addBubble('jerry','Ich bin Jerry. Dein Partner beginnt gleich. Sprich bitte auf Deutsch.');$('app').hidden=false;$('loading').hidden=true;
+ }catch(e){$('loading').textContent=e?.message||'Fehler beim Laden.'}}
+async function send(text){text=String(text||'').trim();if(!text||busy)return;busy=true;$('send').disabled=true;addBubble('me',text);transcript.push('Schüler: '+text);history.push({role:'student',content:text});$('input').value='';
+ try{const r=await api('ai-speaking-session',{method:'POST',body:{id,mode:'turn',transcript:transcript.join('\\n'),history}});if(r.reply){addBubble('partner',r.reply);speak(r.reply);history.push({role:'partner',content:r.reply})}}catch(e){addBubble('jerry','Fehler: '+(e?.message||'AI'));}finally{busy=false;$('send').disabled=false}}
+$('send').onclick=()=>send($('input').value);$('input').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.ctrlKey)send($('input').value)});
+$('mic').onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$('input').focus();return} recognition=new SR();recognition.lang='de-DE';recognition.interimResults=false;recognition.continuous=false;recognition.onresult=e=>$('input').value=(e.results[0]?.[0]?.transcript||'');recognition.onend=()=>{$('mic').disabled=false;$('stop').disabled=true};recognition.onerror=()=>{$('mic').disabled=false;$('stop').disabled=true};recognition.start();$('mic').disabled=true;$('stop').disabled=false};
+$('stop').onclick=()=>{if(recognition)recognition.stop()};
+$('finish').onclick=async()=>{if(busy||!transcript.length)return;busy=true;$('finish').disabled=true;try{const r=await api('ai-speaking-session',{method:'POST',body:{id,mode:'evaluate',transcript:transcript.join('\\n')}});$('eval').hidden=false;$('eval').innerHTML='<h2>Jerry · Bewertung</h2><p><b>Gesamt: '+esc(r.total)+' / 25</b></p><div class="eval-grid">'+(r.criteria||[]).map(c=>`<div class="eval-item"><b>${esc(c.label)}</b><div class="eval-score">${esc(c.score)} / ${esc(c.max||5)}</div><div>${esc(c.comment)}</div></div>`).join('')+'</div><hr><h3>Stärken</h3><ul>'+(r.strengths||[]).map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul><h3>Prioritäten</h3><ul>'+(r.priorities||[]).map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul><p>'+esc(r.summary_de||'')+'</p><p>'+esc(r.summary_ar||'')+'</p>';$('eval').scrollIntoView({behavior:'smooth'})}catch(e){addBubble('jerry','Fehler bei der Bewertung: '+(e?.message||'AI'))}finally{busy=false;$('finish').disabled=false}};
+$('logout').onclick=async e=>{e.preventDefault();await api('auth-logout',{method:'POST'});location.href='/'};
+load();
+</script></body></html>

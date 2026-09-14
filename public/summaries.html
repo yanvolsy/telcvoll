@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080808">
+<title data-i18n="sum_page_title">الملخصات</title>
+<link rel="stylesheet" href="/assets/app.css">
+<link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
+<link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
+<link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="/manifest.webmanifest">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/dashboard.html">TELC Voll</a>
+  <nav>
+    <a href="/dashboard.html" data-i18n="nav_home">الرئيسية</a>
+    <a href="/errors.html" data-i18n="nav_errors">أخطائي</a>
+    <a href="/summaries.html" data-i18n="nav_summaries">الملخصات</a>
+    <a href="/speaking.html">Sprechen AI</a>
+    <a href="#" id="logoutLink" data-i18n="nav_logout">خروج</a>
+  </nav>
+</header>
+<main class="wrap">
+  <h1 data-i18n="sum_page_title">الملخصات</h1>
+  <div class="grid" id="list"><p class="muted" data-i18n="loading">جارٍ التحميل…</p></div>
+</main>
+<footer data-i18n="footer">TELC Voll</footer>
+<script src="/assets/i18n.js"></script>
+<script src="/assets/app.js"></script>
+<script>
+logoutLink.onclick = async (e) => {
+  e.preventDefault();
+  await api('auth-logout', { method: 'POST' });
+  location.href = '/';
+};
+
+(async () => {
+  try {
+    const { summaries } = await api('summaries-list');
+    list.innerHTML = summaries.map((r) => `
+      <article class="card">
+        <span class="tag">${esc(r.section)} · ${esc(r.teil)}</span>
+        <h2>${esc(r.title)}</h2>
+        <p>${esc(r.body).replace(/\n/g, '<br>')}</p>
+        ${r.keywords ? `<p><b>${t('sum_keywords')}</b> ${esc(r.keywords)}</p>` : ''}
+        ${r.strategy ? `<p><b>${t('sum_strategy')}</b> ${esc(r.strategy).replace(/\n/g, '<br>')}</p>` : ''}
+        ${r.common_errors ? `<p><b>${t('sum_errors')}</b> ${esc(r.common_errors).replace(/\n/g, '<br>')}</p>` : ''}
+      </article>`).join('') || `<div class="card">${t('sum_none')}</div>`;
+  } catch (err) {
+    location.href = '/?error=session';
+  }
+})();
+document.addEventListener('langchange', () => location.reload());
+</script>
+</body>
+</html>
