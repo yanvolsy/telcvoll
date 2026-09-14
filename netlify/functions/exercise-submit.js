@@ -16,7 +16,7 @@ exports.handler = async (event) => {
   const pool = db();
   const client = await pool.connect();
   try {
-    const exRes = await client.query("SELECT * FROM exercises WHERE id=$1 AND status='published'", [id]);
+    const exRes = await client.query("SELECT * FROM exercises WHERE id=$1 AND status='published' AND deleted_at IS NULL", [id]);
     const exercise = exRes.rows[0];
     if (!exercise) return json(404, { error: 'Not found' });
 

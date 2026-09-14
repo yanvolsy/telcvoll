@@ -11,7 +11,7 @@ exports.handler = async (event) => {
 
   const pool = db();
   await pool.query("ALTER TABLE exercises ADD COLUMN IF NOT EXISTS level VARCHAR(20) NOT NULL DEFAULT 'B2'");
-  const exRes = await pool.query("SELECT * FROM exercises WHERE id=$1 AND status='published'", [id]);
+  const exRes = await pool.query("SELECT * FROM exercises WHERE id=$1 AND status='published' AND deleted_at IS NULL", [id]);
   const exercise = exRes.rows[0];
   if (!exercise) return json(404, { error: 'Exercise not found' });
 

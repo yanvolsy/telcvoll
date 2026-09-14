@@ -15,7 +15,7 @@ exports.handler = async (event) => {
 
   const meRes = await pool.query('SELECT id,name,email FROM students WHERE id=$1', [student.student_id]);
   const exRes = await pool.query(
-    `SELECT * FROM exercises WHERE status='published'
+    `SELECT * FROM exercises WHERE status='published' AND deleted_at IS NULL
      ORDER BY level,
        CASE section
          WHEN 'Lesen' THEN 1 WHEN 'Hören' THEN 2 WHEN 'Sprachbausteine' THEN 3

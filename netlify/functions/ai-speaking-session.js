@@ -32,13 +32,13 @@ exports.handler=async(event)=>{
   let b={}; try{b=JSON.parse(event.body||'{}')}catch{}
   const id=parseInt(b.id||'0',10), mode=String(b.mode||'turn');
   if(!id) return json(400,{error:'Missing exercise id.'});
-  const ex=(await db().query("SELECT id,title,body,level,section,teil FROM exercises WHERE id=$1 AND status='published'",[id])).rows[0];
+  const ex=(await db().query("SELECT id,title,body,level,section,teil FROM exercises WHERE id=$1 AND status='published' AND deleted_at IS NULL",[id])).rows[0];
   if(!ex || String(ex.section)!=='Sprechen') return json(404,{error:'Sprechen exercise not found.'});
   const transcript=String(b.transcript||'').slice(0,12000);
   const history=Array.isArray(b.history)?b.history.slice(-12):[];
   const requestedTeil=String(b.teil||'').trim();
   if(mode==='resolve' && requestedTeil){
-    const q=await db().query("SELECT id,title,body,level,section,teil FROM exercises WHERE status='published' AND section='Sprechen' AND level=$1 AND lower(trim(title))=lower(trim($2)) AND lower(replace(trim(teil),' ',''))=lower(replace(trim($3),' ','')) ORDER BY id LIMIT 1",
+    const q=await db().query("SELECT id,title,body,level,section,teil FROM exercises WHERE status='published' AND deleted_at IS NULL AND section='Sprechen' AND level=$1 AND lower(trim(title))=lower(trim($2)) AND lower(replace(trim(teil),' ',''))=lower(replace(trim($3),' ','')) ORDER BY id LIMIT 1",
       [ex.level||'B2',ex.title||'',requestedTeil]);
     if(q.rows[0]) return json(200,{exercise:q.rows[0]});
     return json(404,{error:'Für dieses Thema wurde kein passender '+requestedTeil+' gefunden.'});

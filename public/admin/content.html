@@ -39,7 +39,7 @@
   </nav>
 </header>
 <main class="wrap">
-  <h1>Content Management</h1>
+  <h1>Content Management</h1><div class="alert ok" style="margin-bottom:15px">نظام المحتوى: Niveau → Bereich → Teil → Thema → Fragen. لا يُنشر أي موضوع للمحاكاة إلا عند اختيار «Veröffentlicht».</div>
   <p class="muted">TELC VOLL → Niveau → Bereich → Teil → Thema. Genau dieselbe Struktur wie beim Lerner, plus volle Verwaltung.</p>
   <div class="cm-wrap">
     <aside class="cm-filters card">
@@ -131,7 +131,7 @@ function editorHtml(t={}, items=[]){
       <div><label>Bereich</label><select class="f-section">
         ${['Lesen','Hören','Sprachbausteine','Schreiben','Sprechen'].map(s=>`<option ${t.section===s?'selected':''}>${s}</option>`).join('')}
       </select></div>
-      <div><label>Teil</label><input class="f-teil" value="${esc(t.teil||'')}" placeholder="z.B. Teil 1"></div>
+      <div><label>Teil</label><select class="f-teil"><option value="">Teil wählen</option>${[1,2,3].map(n=>`<option value="Teil ${n}" ${t.teil===`Teil ${n}`?"selected":""}>Teil ${n}</option>`).join('')}</select></div>
     </div>
     <label>Titel</label><input class="f-title" value="${esc(t.title||'')}" required>
     <div class="row2">
@@ -220,7 +220,7 @@ function bindEditorForm(exercise){
       access_mode: f.querySelector('.f-access').value,
       items: collectItems(),
     };
-    try {
+    try { validateTopic(topic);
       const r = await api('admin-topic', { method:'POST', body:{ action:'save', topic } });
       document.getElementById('formMsg').innerHTML = `<div class="alert ok">Gespeichert.</div>`;
       loadTopics();
