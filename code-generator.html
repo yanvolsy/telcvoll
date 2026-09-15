@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Code Generator — TELC VOLL</title>
+<link rel="stylesheet" href="/assets/app.css">
+<link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
+<link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
+<link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="/manifest.webmanifest">
+<style>
+  .cg-form label{display:block;font-weight:600;margin:14px 0 4px}
+  .cg-form input,.cg-form select{width:100%;padding:8px;border:1px solid #ccc;border-radius:6px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+  .code-pill{display:inline-block;background:#eef7f0;border:1px solid #bfe3c9;border-radius:6px;
+    padding:4px 10px;margin:4px 6px 0 0;font-family:monospace}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/dashboard.html">TELC VOLL</a>
+  <nav>
+    <a href="/dashboard.html">الرئيسية</a>
+    <a href="/admin/content.html">Content Management</a>
+    <a href="/admin/codes.html">Codes</a>
+    <a href="#" id="logoutLink">خروج</a>
+  </nav>
+</header>
+<main class="wrap">
+  <h1>Code Generator</h1>
+  <p class="muted">Erzeuge Zugangscodes für ein Thema, einen Bereich, mehrere Themen, ein ganzes Niveau oder einen kompletten Plan.</p>
+  <form id="genForm" class="card cg-form" style="max-width:640px">
+    <label>Zugriffstyp</label>
+    <select id="scopeType">
+      <option value="topic">Ein bestimmtes Thema</option>
+      <option value="section">Ein bestimmter Bereich</option>
+      <option value="topics">Mehrere Themen</option>
+      <option value="level">Ein komplettes Niveau</option>
+      <option value="plan">Ein kompletter Plan</option>
+    </select>
+
+    <div id="levelField"><label>Niveau</label><select id="fLevel"></select></div>
+    <div id="sectionField" style="display:none"><label>Bereich</label>
+      <select id="fSection"><option>Lesen</option><option>Hören</option><option>Sprachbausteine</option><option>Schreiben</option><option>Sprechen</option></select>
+    </div>
+    <div id="topicField" style="display:none"><label>Thema(en)</label>
+      <select id="fTopics" multiple size="8"></select>
+      <p class="muted">Strg/Cmd gedrückt halten für Mehrfachauswahl.</p>
+    </div>
+    <div id="planField" style="display:none"><label>Plan</label><select id="fPlan"></select></div>
+
+    <label>Beschriftung (optional, nur intern)</label>
+    <input id="fLabel" placeholder="z. B. Naturmuseum — Klasse A">
+
+    <div class="row3">
+      <div><label>Gültigkeitsdauer (Tage)</label><input type="number" id="fDuration" value="30"></div>
+      <div><label>Max. Nutzungen</label><input type="number" id="fMaxUses" value="1"></div>
+      <div><label>Anzahl Codes</label><input type="number" id="fCount" value="1"></div>
+    </div>
+
+    <button class="btn" style="margin-top:18px">Code generieren</button>
+  </form>
+  <div id="result" class="card" style="margin-top:16px;display:none">
+    <h3>Generierte Codes</h3>
+    <div id="codesOut"></div>
+  </div>
+</main>
+<footer>TELC VOLL — Code Generator</footer>
+<script src="/assets/app.js"></script><script src="/assets/admin-guard.js"></script>
+<script>
+logoutLink.onclick=async(e)=>{e.preventDefault();await api('admin-logout',{method:'POST'});location.href='/admin/login.html';};
+
+function syncFields(){
+  const v = scopeType.value;
+  levelField.style.display = (v==='level'||v==='section'||v==='topic'||v==='topics') ? '' : 'none';
+  sectionField.style.display = (v==='section') ? '' : 'none';
+  topicField.style.display = (v==='topic'||v==='topics') ? '' : 'none';
+  planField.style.display = (v==='plan') ? '' : 'none';
+  if (v==='topic'||v==='topics') loadTopicsForLevel();
+}
+scopeType.onchange = syncFields;
+fLevel.onchange = () => { if (scopeType.value==='topic'||scopeType.value==='topics') loadTopicsForLevel(); };
+
+async function loadTopicsForLevel(){
+  const { topics } = await api('admin-topic?level=' + encodeURIComponent(fLevel.value));
+  fTopics.innerHTML = topics.map(t => `<option value="${t.id}">${esc(t.section)} · ${esc(t.teil)} · ${esc(t.title)}</option>`).join('');
+}
+
+(async () => {
+  const { plans, levels } = await api('admin-codes');
+  fLevel.innerHTML = (levels && levels.length ? levels : ['B1','B2','C1']).map(l=>`<option>${esc(l)}</option>`).join('');
+  fPlan.innerHTML = plans.map(p=>`<option value="${p.id}">${esc(p.name)} (${p.duration_days}j)</option>`).join('');
+  syncFields();
+})();
+
+genForm.onsubmit = async (e) => {
+  e.preventDefault();
+  const scope_type = scopeType.value;
+  const body = {
+    action: 'generate-scoped-code',
+    scope_type,
+    level: (scope_type!=='plan') ? fLevel.value : null,
+    section: scope_type==='section' ? fSection.value : null,
+    exercise_ids: (scope_type==='topic'||scope_type==='topics') ? [...fTopics.selectedOptions].map(o=>o.value) : null,
+    plan_id: scope_type==='plan' ? fPlan.value : null,
+    label: fLabel.value,
+    duration_days: fDuration.value,
+    max_uses: fMaxUses.value,
+    count: fCount.value,
+  };
+  try {
+    const { codes } = await api('admin-codes', { method:'POST', body });
+    result.style.display = '';
+    codesOut.innerHTML = codes.map(c => `<span class="code-pill">${esc(c)}</span>`).join('');
+  } catch (err) {
+    result.style.display = '';
+    codesOut.innerHTML = `<div class="alert bad">${esc(err.message)}</div>`;
+  }
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0d1310">
+<title>TELC Voll — لوحة الإدارة</title>
+<link rel="stylesheet" href="/assets/app.css">
+<link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
+<link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
+<link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="/manifest.webmanifest">
+<style>
+/* Admin dashboard: same visual language as the student platform, with management-focused density. */
+.admin-dashboard{min-height:calc(100vh - 74px);padding:34px clamp(18px,4vw,56px) 70px;max-width:1480px;margin:auto}
+.admin-dashboard-head{display:flex;align-items:flex-end;justify-content:space-between;gap:28px;padding:28px 0 24px}
+.admin-dashboard-head h1{font-size:clamp(38px,5vw,66px);line-height:1.02;letter-spacing:-.055em;margin:9px 0 10px}
+.admin-dashboard-head p{margin:0;max-width:760px;font-size:15px}
+.admin-head-side{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.admin-overview{display:grid;grid-template-columns:repeat(5,1fr);gap:13px;margin:4px 0 28px}
+.admin-stat{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:17px 18px;box-shadow:var(--shadow);min-width:0;position:relative;overflow:hidden}
+.admin-stat:before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--green)}
+.admin-stat .stat-label{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--muted);font-size:12px;font-weight:800}
+.admin-stat .stat-icon{width:30px;height:30px;display:grid;place-items:center;border-radius:9px;background:var(--green-soft);color:var(--green);font-weight:950}
+.admin-stat strong{display:block;font-size:32px;line-height:1;margin-top:15px;letter-spacing:-.04em}
+.admin-section-head{display:flex;align-items:end;justify-content:space-between;gap:15px;margin:34px 0 13px}
+.admin-section-head h2{margin:0;font-size:25px;letter-spacing:-.03em}
+.admin-section-head p{margin:0;color:var(--muted);font-size:12px}
+.admin-tools-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.admin-tool{display:flex;flex-direction:column;min-height:190px;padding:20px;background:var(--white);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);text-decoration:none;transition:transform .18s,border-color .18s,box-shadow .18s}
+.admin-tool:hover{transform:translateY(-2px);border-color:var(--green);box-shadow:0 18px 40px rgba(16,35,30,.11)}
+.admin-tool-icon{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:var(--green-soft);color:var(--green);font-size:19px;font-weight:950;margin-bottom:15px}
+.admin-tool h3{margin:0 0 6px;font-size:18px}.admin-tool p{margin:0;color:var(--muted);font-size:12px;line-height:1.7}
+.admin-tool .tool-link{margin-top:auto;padding-top:17px;color:var(--green);font-size:12px;font-weight:900}
+.admin-footer{padding:22px 4vw;color:var(--muted);font-size:11px;text-align:center;border-top:1px solid var(--line)}
+@media(max-width:1100px){.admin-overview{grid-template-columns:repeat(3,1fr)}.admin-tools-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.admin-dashboard{padding:20px 13px 55px}.admin-dashboard-head{align-items:flex-start;flex-direction:column}.admin-dashboard-head h1{font-size:42px}.admin-head-side{width:100%;justify-content:flex-start}.admin-overview{grid-template-columns:1fr 1fr}.admin-tools-grid{grid-template-columns:1fr}.admin-stat strong{font-size:28px}}
+</style>
+</head>
+<body class="admin-shell">
+<header class="top admin-nav">
+  <a class="brand" href="/admin/index.html" aria-label="TELC Voll"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
+  <nav>
+    <a href="/admin/index.html" class="admin-home-link">الرئيسية</a>
+    <a href="#" id="logoutLink">خروج</a>
+  </nav>
+</header>
+
+<main class="admin-dashboard">
+  <section class="admin-dashboard-head">
+    <div>
+      <span class="tag" id="eyebrow">لوحة المشرف</span>
+      <h1 id="pageTitle">إدارة المنصة</h1>
+      <p class="muted" id="pageDesc">إدارة المحتوى والطلاب والامتحانات والخطط والإحصائيات من مكان واحد.</p>
+    </div>
+
+  </section>
+
+  <section class="admin-overview" id="stats" aria-label="Overview">
+    <div class="admin-stat"><div class="stat-label"><span>الطلاب</span><span class="stat-icon">◉</span></div><strong>—</strong></div>
+    <div class="admin-stat"><div class="stat-label"><span>التمارين</span><span class="stat-icon">✦</span></div><strong>—</strong></div>
+    <div class="admin-stat"><div class="stat-label"><span>رموز الدخول</span><span class="stat-icon">⌁</span></div><strong>—</strong></div>
+    <div class="admin-stat"><div class="stat-label"><span>الامتحانات</span><span class="stat-icon">▣</span></div><strong>—</strong></div>
+    <div class="admin-stat"><div class="stat-label"><span>المحاولات</span><span class="stat-icon">↗</span></div><strong>—</strong></div>
+  </section>
+
+  <section>
+    <div class="admin-section-head">
+      <div><h2 id="manageTitle">إدارة المنصة</h2><p id="manageDesc">الوصول السريع إلى كل أدوات الإدارة الأساسية.</p></div>
+    </div>
+    <div class="admin-tools-grid">
+      <a class="admin-tool" href="/admin/questions.html">
+        <span class="admin-tool-icon">✦</span><h3>إدارة التمارين</h3><p>إنشاء، تعديل، نشر وتعطيل تمارين Lesen وHören وSprachbausteine وSchreiben وSprechen.</p><span class="tool-link">فتح إدارة التمارين ←</span>
+      </a>
+      <a class="admin-tool" href="/admin/plans.html">
+        <span class="admin-tool-icon">◈</span><h3>إدارة الخطط</h3><p>إنشاء الخطط وتعديل المدة والمحاولات وميزات الوصول وحالة كل خطة.</p><span class="tool-link">فتح إدارة الخطط ←</span>
+      </a>
+      <a class="admin-tool" href="/admin/codes.html">
+        <span class="admin-tool-icon">⌁</span><h3>إدارة الأكواد</h3><p>إنشاء رموز الدخول ونسخها وتعطيلها واستبدالها ومتابعة استخدامها.</p><span class="tool-link">فتح إدارة الأكواد ←</span>
+      </a>
+      <a class="admin-tool" href="/admin/exams.html">
+        <span class="admin-tool-icon">▣</span><h3>إدارة الامتحان التجريبي</h3><p>تحديد أقسام الامتحان والوقت والتمارين التي تظهر في المحاكاة.</p><span class="tool-link">فتح إدارة الامتحان ←</span>
+      </a>
+      <a class="admin-tool" href="/admin/summaries.html">
+        <span class="admin-tool-icon">≡</span><h3>إدارة الملخصات</h3><p>إضافة وتنظيم الملخصات والاستراتيجيات والكلمات المهمة للطلاب.</p><span class="tool-link">فتح إدارة الملخصات ←</span>
+      </a>
+      <a class="admin-tool" href="/admin/students.html">
+        <span class="admin-tool-icon">◉</span><h3>الطلاب والإحصائيات</h3><p>إدارة الطلاب ومتابعة المحاولات والنتائج وتحليل أداء الأقسام والـ Teil.</p><span class="tool-link">فتح الطلاب والإحصائيات ←</span>
+      </a>
+      <a class="admin-tool" href="/admin/settings.html">
+        <span class="admin-tool-icon">⚙</span><h3>الإعدادات</h3><p>إدارة اسم المنصة والشعار ونسبة النجاح والإعدادات الأساسية.</p><span class="tool-link">فتح الإعدادات ←</span>
+      </a>
+    </div>
+  </section>
+
+
+</main>
+<footer class="admin-footer">TELC Voll — لوحة إدارة المنصة · B1 · B2 · C1</footer>
+
+<script src="/assets/i18n.js"></script>
+<script src="/assets/app.js"></script><script src="/assets/admin-guard.js"></script>
+<script>
+const ADMIN_TEXT={
+ ar:{eyebrow:'لوحة المشرف',title:'إدارة المنصة',desc:'إدارة المحتوى والطلاب والخطط والأكواد والامتحان التجريبي من مكان واحد.',manage:'إدارة المنصة',manageDesc:'الوصول السريع إلى الأدوات الأساسية لإدارة TELC Voll.',home:'الرئيسية',logout:'خروج',stats:['الطلاب','التمارين','رموز الدخول','الامتحانات','المحاولات'],tools:[['إدارة التمارين','إنشاء وتعديل ونشر وإدارة جميع التمارين.','فتح إدارة التمارين ←'],['إدارة الخطط','إنشاء الخطط وتعديل المدة والمحاولات وحالة الوصول.','فتح إدارة الخطط ←'],['إدارة الأكواد','إنشاء رموز الدخول ومتابعة استخدامها.','فتح إدارة الأكواد ←'],['إدارة الامتحان التجريبي','تحديد أقسام ووقت وتمارين المحاكاة.','فتح إدارة الامتحان ←'],['إدارة الملخصات','تنظيم الملخصات والاستراتيجيات والكلمات المهمة.','فتح إدارة الملخصات ←'],['الطلاب والإحصائيات','إدارة الطلاب ومتابعة النتائج وتحليل الأداء.','فتح الطلاب والإحصائيات ←'],['الإعدادات','إدارة اسم المنصة والشعار والإعدادات الأساسية.','فتح الإعدادات ←']]},
+ de:{eyebrow:'Adminbereich',title:'Plattform verwalten',desc:'Inhalte, Schüler, Pläne, Codes und die Probeprüfung an einem Ort verwalten.',manage:'Verwaltung',manageDesc:'Schneller Zugriff auf die wichtigsten TELC-Voll-Werkzeuge.',home:'Startseite',logout:'Abmelden',stats:['Schüler','Übungen','Zugangscodes','Prüfungen','Versuche'],tools:[['Übungen verwalten','Alle Übungen erstellen, bearbeiten und veröffentlichen.','Übungen öffnen →'],['Pläne verwalten','Pläne, Dauer, Versuche und Zugriff verwalten.','Pläne öffnen →'],['Zugangscodes verwalten','Codes erstellen und ihre Nutzung verwalten.','Codes öffnen →'],['Probeprüfung verwalten','Bereiche, Zeiten und Aufgaben der Simulation festlegen.','Probeprüfung öffnen →'],['Zusammenfassungen verwalten','Zusammenfassungen, Strategien und wichtige Wörter pflegen.','Zusammenfassungen öffnen →'],['Schüler & Statistiken','Schüler, Ergebnisse und Leistung analysieren.','Schüler & Statistiken öffnen →'],['Einstellungen','Plattformname und Grundeinstellungen verwalten.','Einstellungen öffnen →']]}
+};
+const toolLinks=['/admin/questions.html','/admin/plans.html','/admin/codes.html','/admin/exams.html','/admin/summaries.html','/admin/students.html','/admin/settings.html'];
+function renderAdminLang(){
+ const L=ADMIN_TEXT[getLang()]||ADMIN_TEXT.ar;
+ document.getElementById('eyebrow').textContent=L.eyebrow;document.getElementById('pageTitle').textContent=L.title;document.getElementById('pageDesc').textContent=L.desc;
+ document.getElementById('manageTitle').textContent=L.manage;document.getElementById('manageDesc').textContent=L.manageDesc;
+ document.querySelector('.admin-home-link').textContent=L.home;document.getElementById('logoutLink').textContent=L.logout;
+ document.querySelectorAll('.admin-stat .stat-label span:first-child').forEach((el,i)=>el.textContent=L.stats[i]);
+ document.querySelectorAll('.admin-tool').forEach((el,i)=>{el.querySelector('h3').textContent=L.tools[i][0];el.querySelector('p').textContent=L.tools[i][1];el.querySelector('.tool-link').textContent=L.tools[i][2];});
+
+}
+document.getElementById('logoutLink').onclick=async(e)=>{e.preventDefault();await api('admin-logout',{method:'POST'});location.href='/admin/login.html';};
+(async()=>{try{const {stats}=await api('admin-stats');const map={students:0,exercises:1,access_codes:2,exams:3,attempts:4};document.querySelectorAll('.admin-stat strong').forEach((el,i)=>{const key=Object.keys(map).find(k=>map[k]===i);el.textContent=Number(stats?.[key]||0).toLocaleString(getLang()==='ar'?'ar-DZ':'de-DE');});}catch(e){location.href='/admin/login.html';}})();
+document.addEventListener('langchange',renderAdminLang);renderAdminLang();
+</script>
+</body></html>

@@ -1,0 +1,167 @@
+const crypto = require('crypto');
+const { db } = require('./_lib/db');
+const { json } = require('./_lib/auth');
+const { requireAdmin } = require('./_lib/guard');
+
+function cleanCode(value) {
+  return String(value || '').trim().toUpperCase().replace(/\s+/g, '');
+}
+
+function makeCode() {
+  // Short, easy-to-type activation code. Keep the plan/level independent.
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let suffix = '';
+  for (let i = 0; i < 6; i++) suffix += alphabet[crypto.randomInt(0, alphabet.length)];
+  return `TV-${suffix}`;
+}
+
+exports.handler = async (event) => {
+  if (!requireAdmin(event)) return json(401, { error: 'unauthenticated' });
+
+  const pool = db();
+
+  try {
+    if (event.httpMethod === 'POST') {
+      let body;
+      try { body = JSON.parse(event.body || '{}'); }
+      catch { return json(400, { error: 'Bad request' }); }
+
+      const action = String(body.action || '');
+
+      // Create / update a plan. No schema changes.
+      if (action === 'plan' || action === 'update-plan') {
+        const planKey = String(body.plan_key || '').trim();
+        const name = String(body.name || '').trim();
+        const days = Math.max(1, parseInt(body.days || 1, 10));
+        const attempts = Math.max(0, parseInt(body.attempts || 0, 10));
+        const ai = !!body.ai;
+
+        if (!planKey || !name) return json(422, { error: 'اسم الخطة ومعرفها مطلوبان.' });
+
+        if (action === 'update-plan') {
+          const id = parseInt(body.id || 0, 10);
+          if (!id) return json(422, { error: 'معرف الخطة غير صالح.' });
+
+          await pool.query(
+            `UPDATE plans
+             SET plan_key=$1,name=$2,duration_days=$3,max_attempts=$4,ai_enabled=$5
+             WHERE id=$6`,
+            [planKey, name, days, attempts, ai, id]
+          );
+          return json(200, { ok: true });
+        }
+
+        await pool.query(
+          'INSERT INTO plans(plan_key,name,duration_days,max_attempts,ai_enabled) VALUES($1,$2,$3,$4,$5)',
+          [planKey, name, days, attempts, ai]
+        );
+        return json(200, { ok: true });
+      }
+
+      if (action === 'toggle-plan') {
+        const id = parseInt(body.id || 0, 10);
+        await pool.query('UPDATE plans SET active=NOT active WHERE id=$1', [id]);
+        return json(200, { ok: true });
+      }
+
+      // Generate access codes.
+      if (action === 'code') {
+        const planId = parseInt(body.plan_id || 0, 10);
+        const planRes = await pool.query('SELECT * FROM plans WHERE id=$1', [planId]);
+        const plan = planRes.rows[0];
+        if (!plan) return json(404, { error: 'Plan not found' });
+
+        const count = Math.min(100, Math.max(1, parseInt(body.count || 1, 10)));
+        const created = [];
+
+        for (let i = 0; i < count; i++) {
+          let code;
+          for (;;) {
+            code = makeCode();
+            const exists = await pool.query('SELECT id FROM access_codes WHERE code=$1', [code]);
+            if (!exists.rows[0]) break;
+          }
+
+          await pool.query(
+            `INSERT INTO access_codes(code,plan_id,expires_at)
+             VALUES($1,$2,NOW() + ($3 || ' days')::interval)`,
+            [code, planId, plan.duration_days]
+          );
+          created.push(code);
+        }
+
+        return json(200, { ok: true, codes: created });
+      }
+
+      if (action === 'toggle-code') {
+        const id = parseInt(body.id || 0, 10);
+        await pool.query('UPDATE access_codes SET active=NOT active WHERE id=$1', [id]);
+        return json(200, { ok: true });
+      }
+
+      // Hard-delete only unused codes. Used codes are disabled instead, so active sessions
+      // and historical relationships are not broken.
+      if (action === 'delete-code') {
+        const id = parseInt(body.id || 0, 10);
+        const check = await pool.query(
+          'SELECT id,student_id,session_token FROM access_codes WHERE id=$1',
+          [id]
+        );
+        const row = check.rows[0];
+        if (!row) return json(404, { error: 'رمز الدخول غير موجود.' });
+
+        if (row.student_id || row.session_token) {
+          await pool.query('UPDATE access_codes SET active=FALSE WHERE id=$1', [id]);
+          return json(200, { ok: true, softDeleted: true });
+        }
+
+        await pool.query('DELETE FROM access_codes WHERE id=$1', [id]);
+        return json(200, { ok: true, softDeleted: false });
+      }
+
+      // Replace the code value without changing its plan or expiry.
+      if (action === 'replace-code') {
+        const id = parseInt(body.id || 0, 10);
+        let newCode = cleanCode(body.code);
+
+        if (!id || !newCode) return json(422, { error: 'الرمز الجديد مطلوب.' });
+
+        const duplicate = await pool.query(
+          'SELECT id FROM access_codes WHERE code=$1 AND id<>$2',
+          [newCode, id]
+        );
+        if (duplicate.rows[0]) return json(409, { error: 'هذا الرمز مستخدم مسبقاً.' });
+
+        await pool.query('UPDATE access_codes SET code=$1 WHERE id=$2', [newCode, id]);
+        return json(200, { ok: true, code: newCode });
+      }
+
+      return json(400, { error: 'Unknown action' });
+    }
+
+    const plans = (await pool.query(
+      `SELECT p.*,
+              COUNT(c.id)::int AS code_count,
+              COUNT(c.id) FILTER (WHERE c.active=TRUE AND c.expires_at > NOW())::int AS active_code_count
+       FROM plans p
+       LEFT JOIN access_codes c ON c.plan_id=p.id
+       GROUP BY p.id
+       ORDER BY p.active DESC, p.duration_days ASC, p.id ASC`
+    )).rows;
+
+    const codes = (await pool.query(
+      `SELECT c.*, p.name AS plan_name, p.duration_days, p.active AS plan_active,
+              s.name AS student_name
+       FROM access_codes c
+       JOIN plans p ON p.id=c.plan_id
+       LEFT JOIN students s ON s.id=c.student_id
+       ORDER BY c.id DESC
+       LIMIT 500`
+    )).rows;
+
+    return json(200, { plans, codes });
+  } catch (e) {
+    console.error(e);
+    return json(500, { error: e.code === '23505' ? 'المعرف أو الرمز موجود مسبقاً.' : 'حدث خطأ في العملية.' });
+  }
+};

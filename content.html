@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Content Management — TELC VOLL</title>
+<link rel="stylesheet" href="/assets/app.css">
+<link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
+<link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
+<link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="/manifest.webmanifest">
+<style>
+  .cm-wrap{display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start}
+  @media (max-width:860px){.cm-wrap{grid-template-columns:1fr}}
+  .cm-filters{display:flex;flex-direction:column;gap:10px;position:sticky;top:60px}
+  .cm-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+  .cm-list li{display:flex;justify-content:space-between;gap:8px;padding:8px 10px;border:1px solid #e2e2e2;border-radius:8px;cursor:pointer}
+  .cm-list li.draft{opacity:.75}
+  .cm-list li:hover{background:#f5f7f6}
+  .cm-badge{font-size:11px;padding:2px 6px;border-radius:5px;background:#eee}
+  .cm-form label{display:block;font-weight:600;margin:14px 0 4px}
+  .cm-form input,.cm-form select,.cm-form textarea{width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;font-family:inherit}
+  .cm-form textarea{min-height:80px}
+  .item-row{border:1px solid #ddd;border-radius:8px;padding:10px;margin-top:10px;background:#fafbfa}
+  .opt-row{display:flex;gap:6px;align-items:center;margin-top:6px}
+  .opt-row input[type=text]{flex:1}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/dashboard.html">TELC VOLL</a>
+  <nav>
+    <a href="/dashboard.html">الرئيسية</a>
+    <a href="/admin/content.html">Content Management</a>
+    <a href="/admin/code-generator.html">Code Generator</a>
+    <a href="#" id="logoutLink">خروج</a>
+  </nav>
+</header>
+<main class="wrap">
+  <h1>Content Management</h1><div class="alert ok" style="margin-bottom:15px">نظام المحتوى: Niveau → Bereich → Teil → Thema → Fragen. لا يُنشر أي موضوع للمحاكاة إلا عند اختيار «Veröffentlicht».</div>
+  <p class="muted">TELC VOLL → Niveau → Bereich → Teil → Thema. Genau dieselbe Struktur wie beim Lerner, plus volle Verwaltung.</p>
+  <div class="cm-wrap">
+    <aside class="cm-filters card">
+      <label>Niveau<select id="fLevel"><option value="">Alle</option></select></label>
+      <label>Bereich<select id="fSection">
+        <option value="">Alle</option>
+        <option>Lesen</option><option>Hören</option><option>Sprachbausteine</option>
+        <option>Schreiben</option><option>Sprechen</option>
+      </select></label>
+      <label><input type="checkbox" id="fDeleted"> Archivierte anzeigen</label>
+      <button class="btn" id="newTopicBtn" style="width:100%">+ Neues Thema</button>
+      <ul class="cm-list" id="topicList"></ul>
+    </aside>
+    <section class="card cm-form" id="editorPane">
+      <p class="muted">Wähle links ein Thema aus oder erstelle ein neues.</p>
+    </section>
+  </div>
+</main>
+<footer>TELC VOLL — Content Management</footer>
+<script src="/assets/app.js"></script><script src="/assets/admin-guard.js"></script>
+<script>
+logoutLink.onclick=async(e)=>{e.preventDefault();await api('admin-logout',{method:'POST'});location.href='/admin/login.html';};
+
+let currentId = null;
+
+function itemRowHtml(it={}, idx){
+  const opts = (it.options||[]).map((o,oi)=>optRowHtml(o,idx,oi)).join('');
+  return `<div class="item-row" data-item-idx="${idx}">
+    <div class="row2">
+      <div><label>Frage-Nr.</label><input class="f-position" type="number" value="${it.position_no ?? idx+1}"></div>
+      <div><label>Punkte</label><input class="f-points" type="number" step="0.5" value="${it.points ?? 1}"></div>
+    </div>
+    <label>Frage / Prompt</label><textarea class="f-prompt">${esc(it.prompt||'')}</textarea>
+    <label>Richtige Antwort (Schlüssel oder Text)</label><input class="f-correct" value="${esc(it.correct_answer||'')}">
+    <label>Erklärung (bei falscher Antwort)</label><textarea class="f-explain">${esc(it.explanation||'')}</textarea>
+    <label>Antwortoptionen (leer lassen für freie Antwort)</label>
+    <div class="opt-list">${opts}</div>
+    <button type="button" class="btn light addOpt" style="margin-top:6px">+ Option</button>
+    <div class="actions" style="margin-top:8px"><button type="button" class="btn dark removeItem">Frage entfernen</button></div>
+  </div>`;
+}
+function optRowHtml(o={}, itemIdx, optIdx){
+  return `<div class="opt-row" data-opt-idx="${optIdx}">
+    <input type="text" class="o-key" placeholder="A" value="${esc(o.option_key||'')}" style="width:50px">
+    <input type="text" class="o-text" placeholder="Options-Text" value="${esc(o.option_text||'')}">
+    <label style="font-weight:400"><input type="checkbox" class="o-correct" ${o.is_correct?'checked':''}> richtig</label>
+    <button type="button" class="btn dark removeOpt">✕</button>
+  </div>`;
+}
+
+function collectItems(){
+  return [...document.querySelectorAll('.item-row')].map((row) => ({
+    id: row.dataset.id ? parseInt(row.dataset.id,10) : undefined,
+    position_no: parseInt(row.querySelector('.f-position').value || '1', 10),
+    points: parseFloat(row.querySelector('.f-points').value || '1'),
+    prompt: row.querySelector('.f-prompt').value,
+    correct_answer: row.querySelector('.f-correct').value,
+    explanation: row.querySelector('.f-explain').value,
+    options: [...row.querySelectorAll('.opt-row')].map((o) => ({
+      id: o.dataset.id ? parseInt(o.dataset.id,10) : undefined,
+      option_key: o.querySelector('.o-key').value,
+      option_text: o.querySelector('.o-text').value,
+      is_correct: o.querySelector('.o-correct').checked,
+    })),
+  }));
+}
+
+function wireItemEvents(container){
+  container.querySelectorAll('.addOpt').forEach((b) => b.onclick = (e) => {
+    const list = e.target.closest('.item-row').querySelector('.opt-list');
+    list.insertAdjacentHTML('beforeend', optRowHtml({}, 0, list.children.length));
+    wireOptEvents(list);
+  });
+  container.querySelectorAll('.removeItem').forEach((b) => b.onclick = (e) => e.target.closest('.item-row').remove());
+  wireOptEvents(container);
+}
+function wireOptEvents(container){
+  container.querySelectorAll('.removeOpt').forEach((b) => b.onclick = (e) => e.target.closest('.opt-row').remove());
+}
+
+function editorHtml(t={}, items=[]){
+  return `<form id="topicForm">
+    <div class="row3">
+      <div><label>Niveau</label><select class="f-level">
+        <option ${t.level==='B1'?'selected':''}>B1</option>
+        <option ${!t.level||t.level==='B2'?'selected':''}>B2</option>
+        <option ${t.level==='C1'?'selected':''}>C1</option>
+      </select></div>
+      <div><label>Bereich</label><select class="f-section">
+        ${['Lesen','Hören','Sprachbausteine','Schreiben','Sprechen'].map(s=>`<option ${t.section===s?'selected':''}>${s}</option>`).join('')}
+      </select></div>
+      <div><label>Teil</label><select class="f-teil"><option value="">Teil wählen</option>${[1,2,3].map(n=>`<option value="Teil ${n}" ${t.teil===`Teil ${n}`?"selected":""}>Teil ${n}</option>`).join('')}</select></div>
+    </div>
+    <label>Titel</label><input class="f-title" value="${esc(t.title||'')}" required>
+    <div class="row2">
+      <div><label>Aufgabentyp</label><input class="f-tasktype" value="${esc(t.task_type||'custom')}"></div>
+      <div><label>Status</label><select class="f-status">
+        <option value="draft" ${t.status!=='published'?'selected':''}>Entwurf</option>
+        <option value="published" ${t.status==='published'?'selected':''}>Veröffentlicht</option>
+      </select></div>
+    </div>
+    <label>Inhalt (Deutsch)</label><textarea class="f-body">${esc(t.body||'')}</textarea>
+    <label>Übersetzung (Arabisch)</label><textarea class="f-translation">${esc(t.translation||'')}</textarea>
+    <label>Anweisungen</label><textarea class="f-instructions">${esc(t.instructions||'')}</textarea>
+    <label>Vokabular</label><textarea class="f-vocabulary">${esc(t.vocabulary||'')}</textarea>
+    <div class="row3">
+      <div><label>Audio-URL</label><input class="f-audio" value="${esc(t.audio_url||'')}"></div>
+      <div><label>Bild-URL</label><input class="f-image" value="${esc(t.image_url||'')}"></div>
+      <div><label>Zeitlimit (Sek.)</label><input type="number" class="f-time" value="${t.time_limit_seconds||0}"></div>
+    </div>
+    <div class="row2">
+      <div><label>Schwierigkeit</label><input class="f-difficulty" value="${esc(t.difficulty||'')}"></div>
+      <div><label>Tags</label><input class="f-tags" value="${esc(t.tags||'')}" placeholder="Komma-getrennt"></div>
+    </div>
+    <label>Zugriff</label><select class="f-access">
+      <option value="code_required" ${t.access_mode!=='free'?'selected':''}>Code erforderlich</option>
+      <option value="free" ${t.access_mode==='free'?'selected':''}>Frei zugänglich</option>
+    </select>
+
+    <h3 style="margin-top:24px">Fragen</h3>
+    <div id="itemsContainer">${items.map((it,i)=>itemRowHtml(it,i)).join('')}</div>
+    <button type="button" class="btn light" id="addItemBtn" style="margin-top:10px">+ Frage hinzufügen</button>
+
+    <div class="actions" style="margin-top:22px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn">Speichern</button>
+      ${t.id?`<button type="button" class="btn light" id="dupBtn">Duplizieren</button>
+             <button type="button" class="btn light" id="previewBtn">Vorschau als Schüler</button>
+             <button type="button" class="btn dark" id="delBtn">Löschen</button>`:''}
+    </div>
+    <div id="formMsg"></div>
+  </form>`;
+}
+
+async function loadTopic(id){
+  currentId = id;
+  const { exercise, items } = await api('admin-topic?id=' + id);
+  editorPane.innerHTML = editorHtml(exercise, items);
+  [...document.querySelectorAll('.item-row')].forEach((row,i) => { row.dataset.id = items[i]?.id || ''; });
+  document.querySelectorAll('.opt-row').forEach((row) => {
+    // stash option ids from the loaded items so an update, not a re-insert, happens on save
+  });
+  bindEditorForm(exercise);
+}
+
+function newTopic(){
+  currentId = null;
+  editorPane.innerHTML = editorHtml({}, []);
+  bindEditorForm({});
+}
+
+function bindEditorForm(exercise){
+  const container = document.getElementById('itemsContainer');
+  wireItemEvents(container);
+  document.getElementById('addItemBtn').onclick = () => {
+    container.insertAdjacentHTML('beforeend', itemRowHtml({}, container.children.length));
+    wireItemEvents(container);
+  };
+  document.getElementById('topicForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const f = e.target;
+    const topic = {
+      id: currentId,
+      level: f.querySelector('.f-level').value,
+      section: f.querySelector('.f-section').value,
+      teil: f.querySelector('.f-teil').value,
+      title: f.querySelector('.f-title').value,
+      task_type: f.querySelector('.f-tasktype').value,
+      status: f.querySelector('.f-status').value,
+      body: f.querySelector('.f-body').value,
+      translation: f.querySelector('.f-translation').value,
+      instructions: f.querySelector('.f-instructions').value,
+      vocabulary: f.querySelector('.f-vocabulary').value,
+      audio_url: f.querySelector('.f-audio').value,
+      image_url: f.querySelector('.f-image').value,
+      time_limit_seconds: f.querySelector('.f-time').value,
+      difficulty: f.querySelector('.f-difficulty').value,
+      tags: f.querySelector('.f-tags').value,
+      access_mode: f.querySelector('.f-access').value,
+      items: collectItems(),
+    };
+    try { validateTopic(topic);
+      const r = await api('admin-topic', { method:'POST', body:{ action:'save', topic } });
+      document.getElementById('formMsg').innerHTML = `<div class="alert ok">Gespeichert.</div>`;
+      loadTopics();
+      loadTopic(r.id);
+    } catch (err) {
+      document.getElementById('formMsg').innerHTML = `<div class="alert bad">${esc(err.message)}</div>`;
+    }
+  };
+  if (exercise.id) {
+    document.getElementById('dupBtn').onclick = async () => {
+      const r = await api('admin-topic', { method:'POST', body:{ action:'duplicate', id:exercise.id } });
+      loadTopics(); loadTopic(r.id);
+    };
+    document.getElementById('previewBtn').onclick = () => window.open(`/exercise.html?id=${exercise.id}&preview=1`, '_blank');
+    document.getElementById('delBtn').onclick = async () => {
+      if (!confirm('Dieses Thema wirklich löschen?')) return;
+      await api('admin-topic', { method:'POST', body:{ action:'delete', id:exercise.id } });
+      editorPane.innerHTML = `<p class="muted">Thema archiviert.</p>`;
+      loadTopics();
+    };
+  }
+}
+
+async function loadTopics(){
+  const level = fLevel.value, section = fSection.value, includeDeleted = fDeleted.checked ? '1':'0';
+  const qsStr = new URLSearchParams({ ...(level?{level}:{}) , ...(section?{section}:{}), include_deleted: includeDeleted }).toString();
+  const { topics } = await api('admin-topic?' + qsStr);
+  topicList.innerHTML = topics.map(t => `<li class="${t.status!=='published'?'draft':''}" data-id="${t.id}">
+    <span>${esc(t.level)} · ${esc(t.section)} · ${esc(t.title)}</span>
+    <span class="cm-badge">${t.status==='published'?'●':'○'}</span>
+  </li>`).join('') || '<li class="muted">Keine Themen gefunden.</li>';
+  topicList.querySelectorAll('li[data-id]').forEach((li) => li.onclick = () => loadTopic(li.dataset.id));
+}
+
+(async () => {
+  try {
+    const { levels } = await api('admin-codes');
+    fLevel.innerHTML += (levels||['B1','B2','C1']).map(l=>`<option>${esc(l)}</option>`).join('');
+  } catch {}
+  fLevel.onchange = loadTopics; fSection.onchange = loadTopics; fDeleted.onchange = loadTopics;
+  newTopicBtn.onclick = newTopic;
+  await loadTopics();
+  const qId = qs('id');
+  if (qId) loadTopic(qId); else if (qs('new')) newTopic();
+})();
+</script>
+</body>
+</html>
