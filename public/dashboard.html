@@ -38,13 +38,13 @@ function render(){
   $('content').innerHTML=`
     <section class="hub-head">
       <div><span class="tag">${text('منصة الطالب','Schülerbereich')}</span><h1>${text('تدريب TELC Voll','TELC Voll Training')}</h1><p class="muted">${text('مرحباً '+(state.student?.name||'Student')+' — اختر المستوى والقسم ثم افتح التمرين.','Hallo '+(state.student?.name||'Student')+' — wähle Niveau und Prüfungsteil.')}</p></div>
-      <div class="hub-kpis"><div class="hub-kpi"><strong>${state.exercises.filter(x=>(x.level||'B2')===state.level).length}</strong><span>${text('تمرين','Übungen')}</span></div><div class="hub-kpi days-kpi ${remainingDays<=2?'warning':''}"><strong>${remainingDays}</strong><span>${text('يوم متبقٍ','Tage verbleibend')}</span></div></div>
+      <div class="hub-kpis"><div class="hub-kpi days-kpi ${remainingDays<=2?'warning':''}"><strong>${remainingDays}</strong><span>${text('يوم متبقٍ','Tage verbleibend')}</span></div></div>
     </section>
     <section class="level-switch" aria-label="TELC Voll Niveau">
       ${['B1','B2','C1'].map(l=>`<button class="level-btn ${state.level===l?'active':''} ${!levelAvailable(l)?'empty':''}" data-level="${l}">Telc ${l}</button>`).join('')}
     </section>
     <nav class="section-switch" aria-label="Prüfungsteile">
-      ${SECTION_ORDER.map(s=>`<button class="section-btn ${state.section===s?'active':''}" data-section="${s}"><span>${sectionIcon(s)}</span>${s}</button>`).join('')}
+      ${SECTION_ORDER.map(s=>{const count=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===s).length;return `<button class="section-btn ${state.section===s?'active':''}" data-section="${s}"><span>${sectionIcon(s)}</span><span class="section-btn-copy"><b>${s}</b><small>${count} ${text('تمرين','Übungen')}</small></span></button>`}).join('')}
     </nav>
     <section class="topic-toolbar">
       <div><h2>${SECTION_AR[state.section]}</h2><p class="muted">${text('تمارين '+state.section+' للمستوى '+state.level,'Übungen für '+state.section+' · Niveau '+state.level)}</p></div>
