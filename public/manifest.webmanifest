@@ -6,7 +6,17 @@
   "background_color": "#14201D",
   "theme_color": "#E98232",
   "icons": [
-    {"src":"/assets/icons/TELC_Voll_AppIcon_Light.png","sizes":"512x512","type":"image/png","purpose":"any maskable"},
-    {"src":"/assets/icons/TELC_Voll_AppIcon_Dark.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+    {
+      "src": "/assets/icons/TELC_Voll_AppIcon_Light.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icons/TELC_Voll_AppIcon_Dark.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }

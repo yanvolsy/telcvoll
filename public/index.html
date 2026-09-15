@@ -5,8 +5,10 @@
 <meta name="theme-color" content="#f47b20">
 <title>TELC Voll — منصة تدريب B1 B2 C1</title>
 <link rel="stylesheet" href="/assets/app.css">
-<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-<link rel="alternate icon" href="/assets/icons/TELC_Voll_AppIcon_Light.png" type="image/png">
+<link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
+<link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
+<link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="/manifest.webmanifest">
 </head>
 <body data-i18n-title="hero_tag">
@@ -16,6 +18,7 @@
     <a href="#services" data-i18n="nav_services">الخدمات</a>
     <a href="#plans" data-i18n="nav_plans">الخطط</a>
     <a href="#about" data-i18n="nav_about">عن المنصة</a>
+    <a href="/contact.html">اتصل بنا</a>
     <a class="btn" href="#access" data-i18n="nav_access">الدخول</a>
   </nav>
 </header>
@@ -87,13 +90,13 @@ loginForm.onsubmit = async (e) => {
     const { plans } = await api('public-plans');
     plansGrid.innerHTML = plans.length ? plans.map((p,i) => `
       <article class="landing-plan ${i===1 ? 'featured':''}">
-        ${i===1 ? `<span class="tag">${t('plans_featured')}</span>` : ''}
+        ${i===1 ? `<span class="plan-featured-badge">${t('plans_featured')}</span>` : ''}
         <div class="landing-plan-top"><span class="landing-plan-number">0${i+1}</span><span>${esc(p.duration_days)} ${t('plans_day')}</span></div>
         <h3>${esc(p.name)}</h3>
         <div class="plan-price">${esc(p.duration_days)} <small>${t('plans_day')}</small></div>
         <p>${p.max_attempts ? t('plans_attempts',{n:esc(p.max_attempts)}) : t('plans_attempts_unlimited')}</p>
         <p>${p.ai_enabled ? t('plans_ai_included') : t('plans_basic')}</p>
-        <a class="btn light" href="#access">${t('plans_use_btn')}</a>
+        <a class="btn light" href="/contact.html?plan=${encodeURIComponent(p.name)}">${t('plans_use_btn')}</a>
       </article>`).join('') : `<div class="card"><h3>${t('plans_none_title')}</h3><p class="muted">${t('plans_none_desc')}</p></div>`;
   } catch(e) { plansGrid.innerHTML=`<div class="card"><h3>${t('plans_error_title')}</h3><p class="muted">${t('plans_none_desc')}</p></div>`; }
 })();

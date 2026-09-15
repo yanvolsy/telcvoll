@@ -187,9 +187,25 @@ function getTheme() {
   return localStorage.getItem(THEME_KEY) || 'light';
 }
 
+function applyFavicon(theme = getTheme()) {
+  const lightSvg = '/assets/favicon-light.svg';
+  const darkSvg = '/assets/favicon-dark.svg';
+  let link = document.querySelector('link[data-telc-dynamic-favicon]');
+  if (!link) {
+    link = document.createElement('link');
+    link.rel = 'icon';
+    link.type = 'image/svg+xml';
+    link.dataset.telcDynamicFavicon = '1';
+    document.head.appendChild(link);
+  }
+  link.href = theme === 'dark' ? darkSvg : lightSvg;
+  document.querySelectorAll('link[rel~="icon"][media]').forEach(x => x.disabled = true);
+}
+
 function applyTheme() {
   const theme = getTheme();
   document.documentElement.setAttribute('data-theme', theme);
+  applyFavicon(theme);
   const btn = document.getElementById('themeToggleBtn');
   if (btn) {
     btn.innerHTML = theme === 'dark' ? ICON_SUN : ICON_MOON;
@@ -277,7 +293,8 @@ function initHeaderActions() {
   themeBtn.onclick = () => setTheme(getTheme() === 'dark' ? 'light' : 'dark');
   wrap.appendChild(themeBtn);
 
-  nav.appendChild(wrap);
+  const top = nav.closest('.top');
+  (top || nav).appendChild(wrap);
   updateLangBtnLabel();
   applyTheme();
 }

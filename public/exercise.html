@@ -1,8 +1,10 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1310"><title>تمرين TELC Voll</title><link rel="stylesheet" href="/assets/app.css">
-<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-<link rel="alternate icon" href="/assets/icons/TELC_Voll_AppIcon_Light.png" type="image/png">
+<link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
+<link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
+<link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="/manifest.webmanifest"></head>
 <body>
 <header class="top exercise-topbar">
@@ -233,7 +235,7 @@ async function runWritingAI(answer){
  const btn=document.getElementById('aiWritingCheck'); const box=document.getElementById('writingAiResult');
  if(!answer.trim()){box.hidden=false;box.innerHTML=`<div class="ai-error">${text('اكتب إجابتك أولاً ثم اطلب التصحيح.','Schreibe zuerst deine Antwort und starte dann die Korrektur.')}</div>`;return;}
  btn.disabled=true; const old=btn.textContent; btn.textContent=text('جاري تحليل الإجابة…','Antwort wird analysiert…');
- try{const r=await api('ai-writing-correct',{method:'POST',body:{exercise_id:id,answer}});localStorage.setItem('writing_ai_result_'+id,JSON.stringify(r));renderWritingAIResult(r);}
+ try{const r=await api('ai-writing-correct',{method:'POST',body:{exercise_id:id,answer}});markExerciseCompleted(id);localStorage.setItem('writing_ai_result_'+id,JSON.stringify(r));renderWritingAIResult(r);}
  catch(e){box.hidden=false;box.innerHTML=`<div class="ai-error">${esc(e.message)}</div>`;}
  finally{btn.disabled=false;btn.textContent=old;}
 }
@@ -271,7 +273,7 @@ function bindActions(){
 
 function renderWorkspace(){stopSpeaking();const t=model.exercise.task_type;const isSpb1=model.exercise.section==='Sprachbausteine'&&model.exercise.teil==='Teil 1';const isMatching=(t==='MATCHING')||(model.exercise.section==='Lesen'&&['Teil 1','Teil 3'].includes(model.exercise.teil))||(model.exercise.section==='Hören'&&model.exercise.teil==='Teil 3');if(t==='WRITING')return renderWriting();if(t==='SPEAKING')return renderSpeaking();if(t==='AUDIO_TF')return renderTF();if(isSpb1)return renderSprachbausteine1();if(isMatching)return renderMatching();return renderChoiceQuestions();}
 function renderResult(r){submitted=true;resultData=r;const detailByPrompt=new Map((r.details||[]).map(d=>[String(d.prompt),d]));document.querySelectorAll('.exam-text-card').forEach(card=>{const idn=card.dataset.item;const it=model.items.find(x=>String(x.position_no)===String(idn));const d=r.details?.find(x=>String(x.prompt)===String(it?.prompt));if(d){card.classList.remove('answer-correct','answer-wrong');card.classList.add(d.ok?'answer-correct':'answer-wrong');}});const side=document.querySelector('.exam-side');if(side&&model.exercise.section==='Lesen'&&model.exercise.teil==='Teil 1'){renderMatching();bindActions();}else{const rows=(r.details||[]).map(d=>`<div class="result-row ${d.ok?'ok':'bad'}"><b>${d.ok?text('صحيح','Richtig'):text('خطأ','Falsch')}</b><span>${esc(d.prompt)}</span>${!d.ok?`<small>${text('الحل: ','Lösung: ')}${esc((model.items.find(x=>String(x.prompt)===String(d.prompt))?.options||[]).find(o=>String(o.option_key)===String(d.correct_answer))?.option_text||d.correct_answer||'')}</small>`:''}</div>`).join('');document.getElementById('content').insertAdjacentHTML('afterbegin',`<div class="inline-result-panel ${r.percent>=60?'pass':'fail'}"><strong>${r.score} / ${r.max}</strong><span>${r.percent}% — ${esc(r.result)}</span><div>${rows}</div></div>`);bindActions();}}
-async function submit(){if(submitted)return;if(!model.items.length){if(mockMode){goNextMock();}return;}try{const r=await api('exercise-submit',{method:'POST',body:{exercise_id:id,answers}});localStorage.setItem('last_exercise_result_'+id,JSON.stringify(r));if(mockMode){const s=getMockSession();if(s){s.results=s.results||[];s.results.push({id,title:model.exercise.title,section:model.exercise.section,teil:model.exercise.teil,score:r.score,max:r.max,percent:r.percent,result:r.result});s.index=(s.ids||[]).findIndex(x=>String(x)===String(id));localStorage.setItem('telc_self_test',JSON.stringify(s));}goNextMock();return;}renderResult(r);}catch(e){document.getElementById('content').insertAdjacentHTML('beforeend',`<div class="alert bad">${esc(e.message)}</div>`);}}
+async function submit(){if(submitted)return;if(!model.items.length){if(mockMode){goNextMock();}return;}try{const r=await api('exercise-submit',{method:'POST',body:{exercise_id:id,answers}});localStorage.setItem('last_exercise_result_'+id,JSON.stringify(r));markExerciseCompleted(id);if(mockMode){const s=getMockSession();if(s){s.results=s.results||[];s.results.push({id,title:model.exercise.title,section:model.exercise.section,teil:model.exercise.teil,score:r.score,max:r.max,percent:r.percent,result:r.result});s.index=(s.ids||[]).findIndex(x=>String(x)===String(id));localStorage.setItem('telc_self_test',JSON.stringify(s));}goNextMock();return;}renderResult(r);}catch(e){document.getElementById('content').insertAdjacentHTML('beforeend',`<div class="alert bad">${esc(e.message)}</div>`);}}
 (async()=>{try{const d=await api('exercise-get?id='+encodeURIComponent(id));model=d;document.body.classList.toggle('mock-mode',mockMode);document.getElementById('sessionLevel').textContent='TELC Voll '+(d.exercise.level||'B2');document.getElementById('sessionTitle').textContent=mockMode?text('محاكاة الامتحان','Prüfungssimulation'):d.exercise.title;renderWorkspace();bindActions();if(mockMode)startMockTimer();}catch(e){document.getElementById('content').innerHTML=`<div class="alert bad">${esc(e.message)}</div>`;}})();
 logoutLink.onclick=async e=>{e.preventDefault();await api('auth-logout',{method:'POST'});location.href='/';};
 </script></body></html>

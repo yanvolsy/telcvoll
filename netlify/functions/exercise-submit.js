@@ -14,9 +14,10 @@ exports.handler = async (event) => {
   if (!id) return json(400, { error: 'Missing exercise_id' });
 
   const pool = db();
+  await pool.query("ALTER TABLE exercises ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP NULL");
   const client = await pool.connect();
   try {
-    const exRes = await client.query("SELECT * FROM exercises WHERE id=$1 AND status='published'", [id]);
+    const exRes = await client.query("SELECT * FROM exercises WHERE id=$1 AND status='published' AND deleted_at IS NULL", [id]);
     const exercise = exRes.rows[0];
     if (!exercise) return json(404, { error: 'Not found' });
 

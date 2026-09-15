@@ -11,11 +11,17 @@ exports.handler = async (event) => {
   // remains available for normal deployment; this guard prevents old databases
   // from breaking the student area before that migration is run.
   await pool.query("ALTER TABLE exercises ADD COLUMN IF NOT EXISTS level VARCHAR(20) NOT NULL DEFAULT 'B2'");
+  await pool.query("ALTER TABLE exercises ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP NULL");
   await pool.query("UPDATE exercises SET level='B2' WHERE level IS NULL OR TRIM(level)=''");
 
   const meRes = await pool.query('SELECT id,name,email FROM students WHERE id=$1', [student.student_id]);
+  const accessRes = await pool.query(`
+    SELECT c.id AS code_id, c.expires_at, p.name AS plan_name, p.plan_key, p.duration_days
+    FROM access_codes c JOIN plans p ON p.id=c.plan_id
+    WHERE c.id=$1
+  `, [student.code_id]);
   const exRes = await pool.query(
-    `SELECT * FROM exercises WHERE status='published'
+    `SELECT * FROM exercises WHERE status='published' AND deleted_at IS NULL
      ORDER BY level,
        CASE section
          WHEN 'Lesen' THEN 1 WHEN 'Hören' THEN 2 WHEN 'Sprachbausteine' THEN 3
@@ -29,5 +35,6 @@ exports.handler = async (event) => {
     exercises: exRes.rows,
     exams: examRes.rows,
     ai_enabled: student.ai_enabled,
+    subscription: accessRes.rows[0] || null,
   });
 };
