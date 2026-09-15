@@ -9,8 +9,8 @@
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
 <link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
-<link id="app-manifest" rel="manifest" href="/manifest-light.webmanifest">
-<script src="/assets/pwa-theme.js" defer></script></head>
+<link rel="manifest" href="/manifest.webmanifest">
+</head>
 <body data-i18n-title="hero_tag">
 <header class="top landing-top">
   <a class="brand" href="/" aria-label="TELC Voll"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
@@ -90,7 +90,7 @@ loginForm.onsubmit = async (e) => {
     const { plans } = await api('public-plans');
     plansGrid.innerHTML = plans.length ? plans.map((p,i) => `
       <article class="landing-plan ${i===1 ? 'featured':''}">
-        ${i===1 ? `<span class="tag">${t('plans_featured')}</span>` : ''}
+        ${i===1 ? `<span class="plan-featured-badge">${t('plans_featured')}</span>` : ''}
         <div class="landing-plan-top"><span class="landing-plan-number">0${i+1}</span><span>${esc(p.duration_days)} ${t('plans_day')}</span></div>
         <h3>${esc(p.name)}</h3>
         <div class="plan-price">${esc(p.duration_days)} <small>${t('plans_day')}</small></div>
