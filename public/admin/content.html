@@ -4,10 +4,8 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Content Management — TELC VOLL</title>
 <link rel="stylesheet" href="/assets/app.css">
-<link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
-<link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
-<link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
-<link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="/assets/icons/TELC_Voll_AppIcon_Light.png" type="image/png">
 <link rel="manifest" href="/manifest.webmanifest">
 <style>
   .cm-wrap{display:grid;grid-template-columns:280px 1fr;gap:20px;align-items:start}
@@ -39,7 +37,7 @@
   </nav>
 </header>
 <main class="wrap">
-  <h1>Content Management</h1><div class="alert ok" style="margin-bottom:15px">نظام المحتوى: Niveau → Bereich → Teil → Thema → Fragen. لا يُنشر أي موضوع للمحاكاة إلا عند اختيار «Veröffentlicht».</div>
+  <h1>Content Management</h1>
   <p class="muted">TELC VOLL → Niveau → Bereich → Teil → Thema. Genau dieselbe Struktur wie beim Lerner, plus volle Verwaltung.</p>
   <div class="cm-wrap">
     <aside class="cm-filters card">
@@ -131,7 +129,7 @@ function editorHtml(t={}, items=[]){
       <div><label>Bereich</label><select class="f-section">
         ${['Lesen','Hören','Sprachbausteine','Schreiben','Sprechen'].map(s=>`<option ${t.section===s?'selected':''}>${s}</option>`).join('')}
       </select></div>
-      <div><label>Teil</label><select class="f-teil"><option value="">Teil wählen</option>${[1,2,3].map(n=>`<option value="Teil ${n}" ${t.teil===`Teil ${n}`?"selected":""}>Teil ${n}</option>`).join('')}</select></div>
+      <div><label>Teil</label><input class="f-teil" value="${esc(t.teil||'')}" placeholder="z.B. Teil 1"></div>
     </div>
     <label>Titel</label><input class="f-title" value="${esc(t.title||'')}" required>
     <div class="row2">
@@ -220,7 +218,7 @@ function bindEditorForm(exercise){
       access_mode: f.querySelector('.f-access').value,
       items: collectItems(),
     };
-    try { validateTopic(topic);
+    try {
       const r = await api('admin-topic', { method:'POST', body:{ action:'save', topic } });
       document.getElementById('formMsg').innerHTML = `<div class="alert ok">Gespeichert.</div>`;
       loadTopics();

@@ -9,7 +9,7 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'POST') {
     let body;
     try { body = JSON.parse(event.body || '{}'); } catch { return json(400, { error: 'Bad request' }); }
-    for (const k of ['site_name', 'logo_text', 'default_passing_percent', 'contact_accounts_json']) {
+    for (const k of ['site_name', 'logo_text', 'default_passing_percent']) {
       await pool.query(
         `INSERT INTO settings(key,value) VALUES($1,$2)
          ON CONFLICT (key) DO UPDATE SET value=EXCLUDED.value`,

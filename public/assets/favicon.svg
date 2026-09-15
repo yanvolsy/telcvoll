@@ -1,5 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-<style>.bg{fill:#F7F9F8}.dot{fill:#E98232}@media(prefers-color-scheme:dark){.bg{fill:#14201D}}</style>
-<rect class="bg" width="512" height="512" rx="100"/>
-<circle class="dot" cx="256" cy="256" r="94"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><style>.bg{fill:#f7f9f8}.dot{fill:#e98232}@media(prefers-color-scheme:dark){.bg{fill:#14201d}.dot{fill:#fff}}</style><rect class="bg" x="16" y="16" width="480" height="480" rx="100"/><circle class="dot" cx="256" cy="243" r="94"/></svg>

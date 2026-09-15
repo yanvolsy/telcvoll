@@ -4,17 +4,15 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0d1310"><title>لوحة الطالب</title>
 <link rel="stylesheet" href="/assets/app.css">
-<link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
-<link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
-<link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
-<link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="/assets/icons/TELC_Voll_AppIcon_Light.png" type="image/png">
 <link rel="manifest" href="/manifest.webmanifest">
 </head>
 <body>
 <header class="top">
   <a class="brand" href="/dashboard.html"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
   <nav>
-    <a href="/self-test.html" id="mockExamNav">امتحان تجريبي</a><a href="/telc-chat.html" id="telcChatNav" data-i18n="nav_speaking">مساعد TELC</a><a href="#" id="logoutLink" data-i18n="nav_logout">خروج</a>
+    <a href="/summaries.html" data-i18n="nav_summaries">الملخصات</a><a href="/telc-chat.html" id="telcChatNav" data-i18n="nav_speaking">مساعد TELC</a><a href="#" id="logoutLink" data-i18n="nav_logout">خروج</a>
   </nav>
 </header>
 <main class="student-hub" id="content"><div class="student-loading">جارٍ التحميل…</div></main>
@@ -23,19 +21,12 @@
 const SECTION_ORDER=['Lesen','Hören','Sprachbausteine','Schreiben','Sprechen'];
 const TEIL_ORDER={Lesen:['Teil 1','Teil 2','Teil 3'],Hören:['Teil 1','Teil 2','Teil 3'],Sprachbausteine:['Teil 1','Teil 2'],Schreiben:['Teil 1'],Sprechen:['Teil 1','Teil 2','Teil 3']};
 const SECTION_AR={Lesen:'Lesen',Hören:'Hören',Sprachbausteine:'Sprachbausteine',Schreiben:'Schreiben',Sprechen:'Sprechen'};
-let state={level:'B2',section:'Lesen',exercises:[],student:null,subscription:null};
-let remainingDays=0;
-let shuffleEnabled=true;
-let shuffleOrderKey='';
-let shuffleOrder=[];
-function calcRemainingDays(){const raw=state.subscription?.expires_at;if(!raw)return 0;const ms=new Date(raw).getTime()-Date.now();return Math.max(0,Math.ceil(ms/86400000));}
+let state={level:'B2',section:'Lesen',exercises:[],student:null};
 const $=id=>document.getElementById(id);
 function lang(){return getLang();}
 function text(ar,de){return lang()==='ar'?ar:de;}
 function exerciseDuration(x){return Number(x.settings_json?.duration_seconds||x.duration_seconds||90)||90;}
 function sectionIcon(s){return ({Lesen:'◫',Hören:'◉',Sprachbausteine:'⌘',Schreiben:'✎',Sprechen:'◌'})[s]||'•';}
-function sectionLabel(s){return ({Lesen:'Lesen',Hören:'Hören',Sprachbausteine:'Sprachbausteine',Schreiben:'Schreiben',Sprechen:'Sprechen'})[s]||s;}
-function taskTypeLabel(type){const map={MATCHING:{ar:'مطابقة',de:'Zuordnung'},MCQ:{ar:'اختيار من متعدد',de:'Multiple Choice'},AUDIO_TF:{ar:'صحيح / خطأ',de:'Richtig / Falsch'},WRITING:{ar:'كتابة',de:'Schreiben'},SPEAKING:{ar:'تحدث',de:'Sprechen'}};const x=map[type];return x?text(x.ar,x.de):type;}
 function levelAvailable(level){return state.exercises.some(x=>(x.level||'B2')===level);}
 function render(){
   const list=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===state.section);
@@ -43,17 +34,17 @@ function render(){
   $('content').innerHTML=`
     <section class="hub-head">
       <div><span class="tag">${text('منصة الطالب','Schülerbereich')}</span><h1>${text('تدريب TELC Voll','TELC Voll Training')}</h1><p class="muted">${text('مرحباً '+(state.student?.name||'Student')+' — اختر المستوى والقسم ثم افتح التمرين.','Hallo '+(state.student?.name||'Student')+' — wähle Niveau und Prüfungsteil.')}</p></div>
-      <div class="hub-kpis"><div class="hub-kpi days-kpi ${remainingDays<=2?'warning':''}"><strong>${remainingDays}</strong><span>${text('يوم متبقٍ','Tage verbleibend')}</span></div></div>
+      <div class="hub-kpi"><strong>${state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===state.section).length}</strong><span>${text('تمرين','Übungen')}</span></div>
     </section>
     <section class="level-switch" aria-label="TELC Voll Niveau">
       ${['B1','B2','C1'].map(l=>`<button class="level-btn ${state.level===l?'active':''} ${!levelAvailable(l)?'empty':''}" data-level="${l}">Telc ${l}</button>`).join('')}
     </section>
     <nav class="section-switch" aria-label="Prüfungsteile">
-      ${SECTION_ORDER.map(s=>{const count=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===s).length;return `<button class="section-btn ${state.section===s?'active':''}" data-section="${s}"><span>${sectionIcon(s)}</span><span class="section-btn-copy"><b>${s}</b><small>${count} ${text('تمرين','Übungen')}</small></span></button>`}).join('')}
+      ${SECTION_ORDER.map(s=>`<button class="section-btn ${state.section===s?'active':''}" data-section="${s}"><span>${sectionIcon(s)}</span>${s}</button>`).join('')}
     </nav>
     <section class="topic-toolbar">
-      <div class="topic-title-block"><div class="topic-title-line"><span class="topic-title-icon">${sectionIcon(state.section)}</span><h2>${sectionLabel(state.section)}</h2><span class="topic-title-level">${state.level}</span></div><p class="muted">${text('تمارين '+state.section+' للمستوى '+state.level,'Übungen für '+state.section+' · Niveau '+state.level)}</p></div>
-      <div class="topic-tools"><input id="search" placeholder="${text('ابحث عن الموضوع…','Thema suchen…')}"/><select id="teilFilter" aria-label="Teil auswählen">${(TEIL_ORDER[state.section]||[]).map((t,i)=>`<option value="${t}" ${i===0?'selected':''}>${t}</option>`).join('')}</select><button id="shuffleToggle" class="shuffle-toggle" type="button" aria-pressed="${shuffleEnabled?'true':'false'}" title="${shuffleEnabled?text('الخلط مفعّل — اضغط لإيقافه','Shuffle aktiv — klicken zum Ausschalten'):text('الترتيب العادي — اضغط لتفعيل الخلط','Normale Reihenfolge — klicken zum Aktivieren')}"><span class="shuffle-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h4.5c3.8 0 4.7 5 8.5 5H21"/><path d="m18 8 3-1-3-1"/><path d="M3 17h4.5c3.8 0 4.7-5 8.5-5H21"/><path d="m18 16 3 1-3 1"/></svg></span><span class="shuffle-label">${shuffleEnabled?text('خلط','Mischen'):text('ترتيب','Reihenfolge')}</span></button></div>
+      <div><h2>${SECTION_AR[state.section]}</h2><p class="muted">${text('تمارين '+state.section+' للمستوى '+state.level,'Übungen für '+state.section+' · Niveau '+state.level)}</p></div>
+      <div class="topic-tools"><input id="search" placeholder="${text('ابحث عن الموضوع…','Thema suchen…')}"/><select id="teilFilter">${(TEIL_ORDER[state.section]||[]).map((t,i)=>`<option value="${t}" ${i===0?'selected':''}>${t}</option>`).join('')}</select></div>
     </section>
     <div id="topicGrid" class="topic-grid"></div>
 
@@ -72,39 +63,15 @@ function render(){
   document.querySelectorAll('[data-level]').forEach(b=>b.onclick=()=>{state.level=b.dataset.level;state.section='Lesen';render();});
   document.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>{state.section=b.dataset.section;render();});
   const nav=$('telcChatNav'); if(nav) nav.href='/telc-chat.html';
-  $('search').oninput=renderTopics; $('teilFilter').onchange=renderTopics;
-  const shuffleBtn=$('shuffleToggle'); if(shuffleBtn) shuffleBtn.onclick=()=>{shuffleEnabled=!shuffleEnabled; shuffleOrderKey=''; shuffleOrder=[]; updateShuffleButton(); renderTopics();};
-  renderTopics();
-}
-function shuffleArray(items){
-  const a=[...items];
-  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
-  return a;
-}
-function updateShuffleButton(){
-  const b=$('shuffleToggle'); if(!b)return;
-  b.classList.toggle('is-active',shuffleEnabled);
-  b.setAttribute('aria-pressed',shuffleEnabled?'true':'false');
-  b.title=shuffleEnabled?text('الخلط مفعّل — اضغط لإيقافه','Shuffle aktiv — klicken zum Ausschalten'):text('الترتيب العادي — اضغط لتفعيل الخلط','Normale Reihenfolge — klicken zum Aktivieren');
-  const label=b.querySelector('.shuffle-label'); if(label) label.textContent=shuffleEnabled?text('خلط','Mischen'):text('ترتيب','Reihenfolge');
+  $('search').oninput=renderTopics; $('teilFilter').onchange=renderTopics; renderTopics();
 }
 function renderTopics(){
   const q=($('search')?.value||'').trim().toLowerCase(); const teil=$('teilFilter')?.value || (TEIL_ORDER[state.section]||[])[0] || '';
-  const base=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===state.section);
-  const orderKey=state.level+'|'+state.section;
-  if(orderKey!==shuffleOrderKey || !shuffleOrder.length || shuffleOrder.length!==base.length){
-    shuffleOrderKey=orderKey;
-    shuffleOrder=shuffleEnabled?shuffleArray(base):base.slice();
-  }else if(!shuffleEnabled){
-    shuffleOrder=base.slice();
-  }
-  let list=shuffleOrder.slice();
-  if(teil) list=list.filter(x=>x.teil===teil);
-  if(q) list=list.filter(x=>(x.title+' '+(x.body||'')).toLowerCase().includes(q));
-  updateShuffleButton();
-  $('topicGrid').innerHTML=list.length?list.map((x,i)=>`<article class="topic-card"><div class="topic-card-head"><span class="topic-index">${String(i+1).padStart(2,'0')}</span><span class="tag">Telc ${esc(x.level||'B2')}</span></div><h3 class="topic-card-title"><span class="topic-status-dot ${isExerciseCompleted(x.id)?'is-done':'is-new'}" title="${isExerciseCompleted(x.id)?text('تم التدريب على هذا الموضوع من قبل','Bereits trainiert'):text('لم يتم التدريب على هذا الموضوع بعد','Noch nicht trainiert')}" aria-label="${isExerciseCompleted(x.id)?text('تم التدريب من قبل','Bereits trainiert'):text('لم يتم التدريب بعد','Noch nicht trainiert')}"></span><span>${esc(x.title)}</span></h3><div class="topic-meta"><span>${esc(x.teil)}</span><span>${esc(taskTypeLabel(x.task_type))}</span><span>${exerciseDuration(x)} ${text('دقيقة','Min.')}</span></div><a class="btn light" href="/exercise.html?id=${x.id}">${text('فتح التمرين','Übung öffnen')} →</a></article>`).join(''):`<div class="empty-panel"><h3>${text('لا توجد تمارين منشورة هنا','Keine veröffentlichten Übungen')}</h3><p class="muted">${text('يمكن للمشرف إضافة الموضوع من لوحة الإدارة.','Der Administrator kann Aufgaben im Adminbereich hinzufügen.')}</p></div>`;
+  let list=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===state.section);
+  if(teil) list=list.filter(x=>x.teil===teil); if(q) list=list.filter(x=>(x.title+' '+(x.body||'')).toLowerCase().includes(q));
+  $('topicGrid').innerHTML=list.length?list.map((x,i)=>`<article class="topic-card"><div class="topic-card-head"><span class="topic-index">${String(i+1).padStart(2,'0')}</span><span class="tag">Telc ${esc(x.level||'B2')}</span></div><h3>${esc(x.title)}</h3><div class="topic-meta"><span>${esc(x.teil)}</span><span>${esc(x.task_type)}</span><span>${exerciseDuration(x)} min</span></div><a class="btn light" href="/exercise.html?id=${x.id}">${text('فتح التمرين','Übung öffnen')} →</a></article>`).join(''):`<div class="empty-panel"><h3>${text('لا توجد تمارين منشورة هنا','Keine veröffentlichten Übungen')}</h3><p class="muted">${text('يمكن للمشرف إضافة الموضوع من لوحة الإدارة.','Der Administrator kann Aufgaben im Adminbereich hinzufügen.')}</p></div>`;
 }
 logoutLink.onclick=async e=>{e.preventDefault();await api('auth-logout',{method:'POST'});location.href='/';};
-(async()=>{try{const d=await api('me');state.exercises=d.exercises||[];state.student=d.student;state.subscription=d.subscription||null;remainingDays=calcRemainingDays();const urlLevel=qs('level');if(['B1','B2','C1'].includes(urlLevel))state.level=urlLevel;render();}catch(e){location.href='/?error=session';}})();
+(async()=>{try{const d=await api('me');state.exercises=d.exercises||[];state.student=d.student;const urlLevel=qs('level');if(['B1','B2','C1'].includes(urlLevel))state.level=urlLevel;render();}catch(e){location.href='/?error=session';}})();
 document.addEventListener('langchange',render);
 </script></body></html>

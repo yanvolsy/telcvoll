@@ -5,10 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>الإعدادات</title>
 <link rel="stylesheet" href="/assets/app.css">
-<link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
-<link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
-<link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
-<link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="/assets/icons/TELC_Voll_AppIcon_Light.png" type="image/png">
 <link rel="manifest" href="/manifest.webmanifest">
 </head>
 <body>
@@ -27,21 +25,6 @@
     </form>
     <div id="msg"></div>
   </div>
-  <div class="panel" style="margin-top:18px">
-    <h2>حسابات التواصل</h2>
-    <p class="muted">هذه الحسابات تظهر في صفحة «اتصل بنا». لا تظهر إلا الحسابات المفعّلة.</p>
-    <div id="contactsList"></div>
-    <form id="contactForm" style="margin-top:16px">
-      <input type="hidden" name="id">
-      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
-        <input name="label" placeholder="المنصة: WhatsApp / Telegram / Email" required>
-        <input name="value" placeholder="رقم الهاتف أو اسم المستخدم أو البريد" required>
-      </div>
-      <input name="url" placeholder="الرابط المباشر للحساب (اختياري)">
-      <label style="display:flex;align-items:center;gap:8px;margin:10px 0"><input type="checkbox" name="active" checked> الحساب ظاهر للطلاب</label>
-      <div class="actions"><button class="btn" type="submit">حفظ الحساب</button><button class="btn light" type="button" id="cancelContact">إلغاء</button></div>
-    </form>
-  </div>
 </main>
 <footer class="admin-footer">TELC Voll — لوحة إدارة المنصة</footer>
 <script src="/assets/i18n.js"></script>
@@ -49,36 +32,26 @@
 <script>
 logoutLink.onclick = async (e) => { e.preventDefault(); await api('admin-logout', { method: 'POST' }); location.href = '/admin/login.html'; };
 
-let contactAccounts = [];
-function renderContacts(){
-  contactsList.innerHTML = contactAccounts.length ? contactAccounts.map((a,i)=>`<div class="card" style="margin:8px 0;display:flex;justify-content:space-between;gap:10px;align-items:center">
-    <div><b>${esc(a.label)}</b><div class="muted">${esc(a.value)} ${a.active===false?' · معطّل':' · نشط'}</div></div>
-    <div class="actions"><button type="button" class="btn light" data-edit-contact="${i}">تعديل</button><button type="button" class="btn dark" data-del-contact="${i}">حذف</button></div>
-  </div>`).join('') : '<div class="empty">لا توجد حسابات تواصل.</div>';
-}
-function resetContact(){contactForm.reset();contactForm.id.value='';contactForm.active.checked=true;}
-contactsList.onclick = async e => {
-  const ed=e.target.closest('[data-edit-contact]');
-  if(ed){const a=contactAccounts[Number(ed.dataset.editContact)];contactForm.id.value=a.id||'';contactForm.label.value=a.label||'';contactForm.value.value=a.value||'';contactForm.url.value=a.url||'';contactForm.active.checked=a.active!==false;return;}
-  const del=e.target.closest('[data-del-contact]');
-  if(del){contactAccounts.splice(Number(del.dataset.delContact),1);await saveSettings();renderContacts();resetContact();}
-};
-cancelContact.onclick=resetContact;
-async function saveSettings(){
-  await api('admin-settings',{method:'POST',body:{site_name:f.site_name.value,logo_text:f.logo_text.value,default_passing_percent:f.default_passing_percent.value,contact_accounts_json:JSON.stringify(contactAccounts)}});
-}
 (async () => {
   try {
     const { settings } = await api('admin-settings');
     f.site_name.value = settings.site_name || '';
     f.logo_text.value = settings.logo_text || '';
     f.default_passing_percent.value = settings.default_passing_percent || 60;
-    try{contactAccounts=JSON.parse(settings.contact_accounts_json||'[]');if(!Array.isArray(contactAccounts))contactAccounts=[];}catch{contactAccounts=[];}
-    renderContacts();
-  } catch (err) { location.href = '/admin/login.html'; }
+  } catch (err) {
+    location.href = '/admin/login.html';
+  }
 })();
-f.onsubmit = async (e) => { e.preventDefault(); await saveSettings(); msg.innerHTML = '<div class="alert ok">تم الحفظ.</div>'; };
-contactForm.onsubmit=async e=>{e.preventDefault();const fd=new FormData(contactForm);const obj={id:fd.get('id')||crypto.randomUUID(),label:String(fd.get('label')||'').trim(),value:String(fd.get('value')||'').trim(),url:String(fd.get('url')||'').trim(),active:fd.get('active')==='on'};if(!obj.label||!obj.value)return;const idx=contactAccounts.findIndex(a=>a.id===obj.id);if(idx>=0)contactAccounts[idx]=obj;else contactAccounts.push(obj);await saveSettings();renderContacts();resetContact();msg.innerHTML='<div class="alert ok">تم حفظ حساب التواصل.</div>';};
+
+f.onsubmit = async (e) => {
+  e.preventDefault();
+  const fd = new FormData(f);
+  await api('admin-settings', { method: 'POST', body: {
+    site_name: fd.get('site_name'), logo_text: fd.get('logo_text'),
+    default_passing_percent: fd.get('default_passing_percent'),
+  }});
+  msg.innerHTML = '<div class="alert ok">تم الحفظ.</div>';
+};
 </script>
 </body>
 </html>

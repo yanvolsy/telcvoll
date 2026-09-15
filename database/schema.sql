@@ -25,11 +25,6 @@ CREATE TABLE IF NOT EXISTS plans(
   active BOOLEAN DEFAULT TRUE
 );
 
--- Optional free 2-day Trial plan. Admin can generate normal access codes for it.
-INSERT INTO plans(plan_key,name,duration_days,max_attempts,ai_enabled,active)
-VALUES('trial','Trial',2,0,TRUE,TRUE)
-ON CONFLICT(plan_key) DO NOTHING;
-
 CREATE TABLE IF NOT EXISTS access_codes(
   id BIGSERIAL PRIMARY KEY,
   code VARCHAR(80) UNIQUE NOT NULL,
