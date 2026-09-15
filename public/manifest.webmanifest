@@ -18,34 +18,5 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ],
-  "description": "منصة تدريب TELC Voll لمستويات B1 وB2 وC1",
-  "lang": "ar",
-  "dir": "rtl",
-  "categories": [
-    "education",
-    "productivity"
-  ],
-  "shortcuts": [
-    {
-      "name": "لوحة الطالب",
-      "url": "/dashboard.html",
-      "icons": [
-        {
-          "src": "/assets/icons/TELC_Voll_AppIcon_Light.png",
-          "sizes": "512x512"
-        }
-      ]
-    },
-    {
-      "name": "محاكاة الامتحان",
-      "url": "/self-test.html",
-      "icons": [
-        {
-          "src": "/assets/icons/TELC_Voll_AppIcon_Light.png",
-          "sizes": "512x512"
-        }
-      ]
-    }
   ]
 }

@@ -39,11 +39,3 @@ function startTimer(el, seconds, onEnd) {
   };
   tick();
 }
-
-
-// PWA + browser notifications
-window.telcInstallPrompt = null;
-window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); window.telcInstallPrompt = e; document.dispatchEvent(new Event('telcinstallavailable')); });
-window.telcInstallApp = async function(){ if(!window.telcInstallPrompt) return false; window.telcInstallPrompt.prompt(); const r=await window.telcInstallPrompt.userChoice; window.telcInstallPrompt=null; return r.outcome==='accepted'; };
-window.telcEnableNotifications = async function(){ if(!('Notification' in window)) return 'unsupported'; const p=await Notification.requestPermission(); return p; };
-if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));

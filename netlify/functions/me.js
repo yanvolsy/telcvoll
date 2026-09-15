@@ -13,10 +13,7 @@ exports.handler = async (event) => {
   await pool.query("ALTER TABLE exercises ADD COLUMN IF NOT EXISTS level VARCHAR(20) NOT NULL DEFAULT 'B2'");
   await pool.query("UPDATE exercises SET level='B2' WHERE level IS NULL OR TRIM(level)=''");
 
-  const meRes = await pool.query(
-    `SELECT s.id,s.name,s.email,c.id AS code_id,c.code,c.expires_at,p.name AS plan_name,p.duration_days
-     FROM students s LEFT JOIN access_codes c ON c.id=$2 LEFT JOIN plans p ON p.id=c.plan_id
-     WHERE s.id=$1`, [student.student_id, student.code_id]);
+  const meRes = await pool.query('SELECT id,name,email FROM students WHERE id=$1', [student.student_id]);
   const exRes = await pool.query(
     `SELECT * FROM exercises WHERE status='published' AND deleted_at IS NULL
      ORDER BY level,
