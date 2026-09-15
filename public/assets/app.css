@@ -508,3 +508,56 @@ html[dir="rtl"] .topic-tools select{background-position:calc(0% + 17px) 19px,cal
   .topic-tools{padding:5px;border:1px solid var(--line);border-radius:16px;background:var(--white);box-shadow:0 7px 22px rgba(16,35,30,.05)}
   .topic-tools input,.topic-tools select{border:0;box-shadow:none;background-color:transparent}
 }
+
+/* Dashboard topic toolbar — polished section title, Teil selector and shuffle control */
+.topic-toolbar{display:grid;grid-template-columns:minmax(250px,1fr) minmax(520px,auto);align-items:center;gap:24px;margin-bottom:22px}
+.topic-title-block{min-width:0}
+.topic-title-line{display:flex;align-items:center;gap:10px;min-height:46px}
+.topic-title-line h2{font-size:30px;line-height:1.15;margin:0;letter-spacing:-.035em}
+.topic-title-icon{width:42px;height:42px;border-radius:14px;display:inline-grid;place-items:center;background:var(--green-soft);color:var(--green);border:1px solid color-mix(in srgb,var(--green) 24%,var(--line));font-size:20px;font-weight:900;box-shadow:0 7px 18px rgba(16,35,30,.06)}
+.topic-title-level{display:inline-flex;align-items:center;height:28px;padding:0 9px;border-radius:999px;background:var(--white);border:1px solid var(--line);color:var(--green-dark);font-size:11px;font-weight:900;letter-spacing:.04em}
+.topic-title-block>p{margin:5px 0 0;font-size:12px}
+.topic-tools{display:grid;grid-template-columns:minmax(220px,1fr) minmax(125px,150px) 92px;gap:9px;align-items:center;min-width:0}
+.topic-tools input,.topic-tools select{height:50px;border-radius:15px}
+.shuffle-toggle{height:50px;border:1px solid var(--line);border-radius:15px;background:var(--white);color:var(--muted);display:flex;align-items:center;justify-content:center;gap:7px;padding:0 10px;font:inherit;font-weight:900;cursor:pointer;transition:transform .16s ease,background .16s ease,border-color .16s ease,color .16s ease,box-shadow .16s ease}
+.shuffle-toggle:hover{transform:translateY(-1px);border-color:var(--green);color:var(--green);box-shadow:0 8px 20px rgba(16,35,30,.08)}
+.shuffle-toggle.is-active{background:var(--green-soft);border-color:var(--green);color:var(--green-dark);box-shadow:0 8px 20px rgba(244,123,32,.10)}
+.shuffle-icon{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:var(--green-soft);color:var(--green);font-size:21px;font-weight:950;line-height:1}
+.shuffle-toggle.is-active .shuffle-icon{background:var(--green);color:#fff}
+.shuffle-label{font-size:11px;white-space:nowrap}
+@media(max-width:1050px){
+  .topic-toolbar{grid-template-columns:1fr;gap:13px}
+  .topic-tools{grid-template-columns:minmax(0,1fr) minmax(120px,150px) 92px}
+}
+@media(max-width:720px){
+  .topic-title-line h2{font-size:26px}
+  .topic-title-icon{width:38px;height:38px;border-radius:12px}
+  .topic-tools{grid-template-columns:minmax(0,1fr) minmax(105px,125px) 58px;gap:7px}
+  .topic-tools input,.topic-tools select,.shuffle-toggle{height:46px;border-radius:13px}
+  .shuffle-toggle{width:58px;padding:0}
+  .shuffle-label{display:none}
+  .shuffle-icon{width:32px;height:32px;border-radius:10px;font-size:22px}
+}
+
+/* Exercise history marker: cookie-only, subtle and consistent with TELC Voll. */
+.topic-card-title{display:flex;align-items:center;gap:9px;min-width:0}
+.topic-card-title>span:last-child{min-width:0}
+.topic-status-dot{width:9px;height:9px;min-width:9px;border-radius:50%;display:inline-block;border:1px solid var(--exercise-accent);transition:opacity .18s ease,transform .18s ease,box-shadow .18s ease}
+.topic-status-dot.is-new{background:var(--exercise-accent);opacity:1;box-shadow:0 0 0 3px var(--exercise-accent-soft)}
+.topic-status-dot.is-done{background:var(--exercise-accent);opacity:.28;box-shadow:none}
+.topic-status-dot:hover{transform:scale(1.15)}
+
+/* Compact shuffle icon — icon only, never a large button. */
+.topic-tools{grid-template-columns:minmax(220px,1fr) minmax(125px,150px) 46px}
+.shuffle-toggle{width:46px;height:46px;padding:0;border-radius:13px;gap:0}
+.shuffle-label{display:none!important}
+.shuffle-icon{width:28px;height:28px;border-radius:9px;font-size:18px}
+.shuffle-icon svg{width:17px;height:17px}
+@media(max-width:1050px){.topic-tools{grid-template-columns:minmax(0,1fr) minmax(120px,150px) 46px}}
+@media(max-width:720px){
+  .topic-tools{grid-template-columns:minmax(0,1fr) minmax(105px,125px) 44px;gap:7px}
+  .topic-tools input,.topic-tools select,.shuffle-toggle{height:44px;border-radius:12px}
+  .shuffle-toggle{width:44px}
+  .shuffle-icon{width:27px;height:27px}
+  .shuffle-icon svg{width:16px;height:16px}
+}

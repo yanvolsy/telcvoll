@@ -30,6 +30,41 @@ document.addEventListener('click', (e) => {
   }
 });
 
+
+
+// Local exercise completion marker — cookie only, no database dependency.
+const TELC_COMPLETED_COOKIE = 'telc_completed_v1';
+const TELC_COMPLETED_MAX = 180;
+function telcExerciseHash(value) {
+  // Compact deterministic 64-bit FNV-1a hash for keeping the cookie small.
+  let h = 1469598103934665603n;
+  for (const ch of String(value ?? '')) {
+    h ^= BigInt(ch.codePointAt(0));
+    h = BigInt.asUintN(64, h * 1099511628211n);
+  }
+  return h.toString(16).padStart(16, '0');
+}
+function getCompletedExerciseHashes() {
+  try {
+    const m = document.cookie.match(/(?:^|;\s*)telc_completed_v1=([^;]*)/);
+    if (!m) return new Set();
+    return new Set(decodeURIComponent(m[1]).split(',').filter(Boolean));
+  } catch { return new Set(); }
+}
+function isExerciseCompleted(exerciseId) {
+  return getCompletedExerciseHashes().has(telcExerciseHash(exerciseId));
+}
+function markExerciseCompleted(exerciseId) {
+  if (!exerciseId) return;
+  const set = getCompletedExerciseHashes();
+  const hash = telcExerciseHash(exerciseId);
+  set.delete(hash);
+  set.add(hash);
+  const values = [...set].slice(-TELC_COMPLETED_MAX);
+  const secure = location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `${TELC_COMPLETED_COOKIE}=${encodeURIComponent(values.join(','))}; Max-Age=31536000; Path=/; SameSite=Lax${secure}`;
+}
+
 function startTimer(el, seconds, onEnd) {
   const end = Date.now() + seconds * 1000;
   const tick = () => {
