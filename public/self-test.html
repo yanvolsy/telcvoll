@@ -3,7 +3,7 @@
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
 <link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
-<link rel="manifest" href="/manifest.webmanifest"></head><body><header class="top"><a class="brand" href="/dashboard.html">TELC Voll</a><nav><a href="/dashboard.html">الرئيسية</a><a href="#" id="logoutLink">خروج</a></nav></header><main class="self-test-page" id="content"><div class="student-loading">جارٍ التحميل…</div></main><script src="/assets/i18n.js"></script><script src="/assets/app.js"></script><script>
+<link id="app-manifest" rel="manifest" href="/manifest-light.webmanifest"><script src="/assets/pwa-theme.js" defer></script></head><body><header class="top"><a class="brand" href="/dashboard.html">TELC Voll</a><nav><a href="/dashboard.html">الرئيسية</a><a href="#" id="logoutLink">خروج</a></nav></header><main class="self-test-page" id="content"><div class="student-loading">جارٍ التحميل…</div></main><script src="/assets/i18n.js"></script><script src="/assets/app.js"></script><script>
 const LEVELS=['B1','B2','C1'];
 let exercises=[],level=['B1','B2','C1'].includes(qs('level'))?qs('level'):'B2';
 const txt=(a,d)=>getLang()==='ar'?a:d;
@@ -18,7 +18,7 @@ function render(){
     <div class="self-test-grid mock-rules">
       <article><span class="self-icon">↝</span><h2>${txt('اختيار عشوائي','Zufällige Auswahl')}</h2><p>${txt('لا تظهر قائمة بالمواضيع ولا يمكنك اختيار موضوع أو قسم.','Keine Themenliste und keine Auswahl einzelner Themen oder Bereiche.')}</p></article>
       <article><span class="self-icon">◷</span><h2>${txt('وقت الامتحان','Prüfungszeit')}</h2><p>${txt('يبدأ المؤقت عند بدء المحاكاة ويستمر أثناء الانتقال بين المهام.','Die Prüfungszeit startet beim Beginn und läuft beim Wechsel zwischen Aufgaben weiter.')}</p></article>
-      <article><span class="self-icon">✓</span><h2>${txt('تجربة امتحان','Prüfungserlebnis')}</h2><p>${txt('أسماء المواضيع والترجمات وأدوات التعلم مخفية أثناء المحاكاة.','Themennamen, Übersetzungen und Lernwerkzeuge bleiben während der Simulation verborgen.')}</p></article>
+      <article><span class="self-icon">✓</span><h2>${txt('محاكاة كاملة','Vollständige Simulation')}</h2><p>${txt('لا تختار موضوعاً أو قسماً؛ يتم اختيار المهام المنشورة تلقائياً من المستوى المحدد.','Du wählst weder Thema noch Prüfungsteil; die veröffentlichten Aufgaben werden automatisch aus dem gewählten Niveau ausgewählt.')}</p></article>
     </div>
     <button class="btn self-test-btn" id="startBtn">${txt('بدء امتحان Telc','Telc-Prüfung starten')} ←</button>
   </section>`;
@@ -31,15 +31,15 @@ function start(){
   // One random published exercise for every available TELC Teil in the selected level.
   for(const section of Object.keys(groups)){
     for(const teil of groups[section]){
-      const pool=exercises.filter(x=>(x.level||'B2')===level && x.section===section && x.teil===teil && x.status==='published');
+      const pool=exercises.filter(x=>(x.level||'B2')===level && x.section===section && x.teil===teil && x.status!=='draft');
       if(pool.length)picks.push(pool[Math.floor(Math.random()*pool.length)]);
     }
   }
   if(!picks.length){alert(txt('لا توجد تمارين منشورة لهذا المستوى.','Keine veröffentlichten Übungen für dieses Niveau.'));return;}
   const defaults={Lesen:2700,Hören:1800,Sprachbausteine:900,Schreiben:1800,Sprechen:900};
-  const totalSeconds=Math.max(60,picks.reduce((sum,x)=>{const settings=x.settings_json&&typeof x.settings_json==='object'?x.settings_json:{};return sum+(Number(settings.duration_seconds||x.duration_seconds||0)||defaults[x.section]||900);},0));
+  const totalSeconds=Math.max(60,picks.reduce((sum,x)=>sum+(Number(x.settings_json?.duration_seconds||x.duration_seconds||0)||defaults[x.section]||900),0));
   const now=Date.now();
-  const session={id:(window.crypto&&typeof window.crypto.randomUUID==='function'?window.crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)),level,ids:picks.map(x=>x.id),index:0,results:[],startedAt:now,endAt:now+totalSeconds*1000,totalSeconds,mock:true,tasks:picks.map(x=>({id:x.id,section:x.section,teil:x.teil,task_type:x.task_type})),answersByExercise:{},spoken:{status:'not_started'} };
+  const session={id:crypto.randomUUID?crypto.randomUUID():Date.now().toString(36),level,ids:picks.map(x=>x.id),index:0,results:[],startedAt:now,endAt:now+totalSeconds*1000,totalSeconds,mock:true,tasks:picks.map(x=>({id:x.id,section:x.section,teil:x.teil,task_type:x.task_type})),answersByExercise:{},spoken:{status:'not_started'} };
   localStorage.setItem('telc_self_test',JSON.stringify(session));
   location.href='/exercise.html?id='+encodeURIComponent(picks[0].id)+'&session='+encodeURIComponent(session.id)+'&mock=1';
 }

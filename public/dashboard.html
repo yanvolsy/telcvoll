@@ -8,13 +8,13 @@
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
 <link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
-<link rel="manifest" href="/manifest.webmanifest">
-</head>
+<link id="app-manifest" rel="manifest" href="/manifest-light.webmanifest">
+<script src="/assets/pwa-theme.js" defer></script></head>
 <body>
 <header class="top">
   <a class="brand" href="/dashboard.html"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
   <nav>
-    <a href="/self-test.html" data-i18n="nav_mock_exam">امتحان تجريبي</a><a href="/telc-chat.html" id="telcChatNav" data-i18n="nav_speaking">مساعد TELC</a><a href="#" id="logoutLink" data-i18n="nav_logout">خروج</a>
+    <a href="/self-test.html" id="mockExamNav">امتحان تجريبي</a><a href="/telc-chat.html" id="telcChatNav" data-i18n="nav_speaking">مساعد TELC</a><a href="#" id="logoutLink" data-i18n="nav_logout">خروج</a>
   </nav>
 </header>
 <main class="student-hub" id="content"><div class="student-loading">جارٍ التحميل…</div></main>
@@ -23,7 +23,9 @@
 const SECTION_ORDER=['Lesen','Hören','Sprachbausteine','Schreiben','Sprechen'];
 const TEIL_ORDER={Lesen:['Teil 1','Teil 2','Teil 3'],Hören:['Teil 1','Teil 2','Teil 3'],Sprachbausteine:['Teil 1','Teil 2'],Schreiben:['Teil 1'],Sprechen:['Teil 1','Teil 2','Teil 3']};
 const SECTION_AR={Lesen:'Lesen',Hören:'Hören',Sprachbausteine:'Sprachbausteine',Schreiben:'Schreiben',Sprechen:'Sprechen'};
-let state={level:'B2',section:'Lesen',exercises:[],student:null};
+let state={level:'B2',section:'Lesen',exercises:[],student:null,subscription:null};
+let remainingDays=0;
+function calcRemainingDays(){const raw=state.subscription?.expires_at;if(!raw)return 0;const ms=new Date(raw).getTime()-Date.now();return Math.max(0,Math.ceil(ms/86400000));}
 const $=id=>document.getElementById(id);
 function lang(){return getLang();}
 function text(ar,de){return lang()==='ar'?ar:de;}
@@ -36,7 +38,7 @@ function render(){
   $('content').innerHTML=`
     <section class="hub-head">
       <div><span class="tag">${text('منصة الطالب','Schülerbereich')}</span><h1>${text('تدريب TELC Voll','TELC Voll Training')}</h1><p class="muted">${text('مرحباً '+(state.student?.name||'Student')+' — اختر المستوى والقسم ثم افتح التمرين.','Hallo '+(state.student?.name||'Student')+' — wähle Niveau und Prüfungsteil.')}</p></div>
-      <div class="hub-kpi"><strong>${state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===state.section).length}</strong><span>${text('تمرين','Übungen')}</span></div>
+      <div class="hub-kpis"><div class="hub-kpi"><strong>${state.exercises.filter(x=>(x.level||'B2')===state.level).length}</strong><span>${text('تمرين','Übungen')}</span></div><div class="hub-kpi days-kpi ${remainingDays<=2?'warning':''}"><strong>${remainingDays}</strong><span>${text('يوم متبقٍ','Tage verbleibend')}</span></div></div>
     </section>
     <section class="level-switch" aria-label="TELC Voll Niveau">
       ${['B1','B2','C1'].map(l=>`<button class="level-btn ${state.level===l?'active':''} ${!levelAvailable(l)?'empty':''}" data-level="${l}">Telc ${l}</button>`).join('')}
@@ -74,6 +76,6 @@ function renderTopics(){
   $('topicGrid').innerHTML=list.length?list.map((x,i)=>`<article class="topic-card"><div class="topic-card-head"><span class="topic-index">${String(i+1).padStart(2,'0')}</span><span class="tag">Telc ${esc(x.level||'B2')}</span></div><h3>${esc(x.title)}</h3><div class="topic-meta"><span>${esc(x.teil)}</span><span>${esc(x.task_type)}</span><span>${exerciseDuration(x)} min</span></div><a class="btn light" href="/exercise.html?id=${x.id}">${text('فتح التمرين','Übung öffnen')} →</a></article>`).join(''):`<div class="empty-panel"><h3>${text('لا توجد تمارين منشورة هنا','Keine veröffentlichten Übungen')}</h3><p class="muted">${text('يمكن للمشرف إضافة الموضوع من لوحة الإدارة.','Der Administrator kann Aufgaben im Adminbereich hinzufügen.')}</p></div>`;
 }
 logoutLink.onclick=async e=>{e.preventDefault();await api('auth-logout',{method:'POST'});location.href='/';};
-(async()=>{try{const d=await api('me');state.exercises=d.exercises||[];state.student=d.student;const urlLevel=qs('level');if(['B1','B2','C1'].includes(urlLevel))state.level=urlLevel;render();}catch(e){location.href='/?error=session';}})();
+(async()=>{try{const d=await api('me');state.exercises=d.exercises||[];state.student=d.student;state.subscription=d.subscription||null;remainingDays=calcRemainingDays();const urlLevel=qs('level');if(['B1','B2','C1'].includes(urlLevel))state.level=urlLevel;render();}catch(e){location.href='/?error=session';}})();
 document.addEventListener('langchange',render);
 </script></body></html>

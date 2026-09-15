@@ -6,11 +6,11 @@
   "theme_color": "#E98232",
   "icons": [
     {
-      "src": "/assets/icons/TELC_Voll_AppIcon_Light.png",
+      "src": "/assets/icons/TELC_Voll_AppIcon_Dark.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
   ],
-  "background_color": "#FFFFFF"
+  "background_color": "#14201D"
 }

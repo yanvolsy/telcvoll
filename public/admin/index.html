@@ -10,7 +10,7 @@
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
 <link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
-<link rel="manifest" href="/manifest.webmanifest">
+<link id="app-manifest" rel="manifest" href="/manifest-light.webmanifest">
 <style>
 /* Admin dashboard: same visual language as the student platform, with management-focused density. */
 .admin-dashboard{min-height:calc(100vh - 74px);padding:34px clamp(18px,4vw,56px) 70px;max-width:1480px;margin:auto}
@@ -37,7 +37,7 @@
 @media(max-width:1100px){.admin-overview{grid-template-columns:repeat(3,1fr)}.admin-tools-grid{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:700px){.admin-dashboard{padding:20px 13px 55px}.admin-dashboard-head{align-items:flex-start;flex-direction:column}.admin-dashboard-head h1{font-size:42px}.admin-head-side{width:100%;justify-content:flex-start}.admin-overview{grid-template-columns:1fr 1fr}.admin-tools-grid{grid-template-columns:1fr}.admin-stat strong{font-size:28px}}
 </style>
-</head>
+<script src="/assets/pwa-theme.js" defer></script></head>
 <body class="admin-shell">
 <header class="top admin-nav">
   <a class="brand" href="/admin/index.html" aria-label="TELC Voll"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
