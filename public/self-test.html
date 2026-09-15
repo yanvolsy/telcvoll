@@ -31,15 +31,15 @@ function start(){
   // One random published exercise for every available TELC Teil in the selected level.
   for(const section of Object.keys(groups)){
     for(const teil of groups[section]){
-      const pool=exercises.filter(x=>(x.level||'B2')===level && x.section===section && x.teil===teil && x.status!=='draft');
+      const pool=exercises.filter(x=>(x.level||'B2')===level && x.section===section && x.teil===teil && x.status==='published');
       if(pool.length)picks.push(pool[Math.floor(Math.random()*pool.length)]);
     }
   }
   if(!picks.length){alert(txt('لا توجد تمارين منشورة لهذا المستوى.','Keine veröffentlichten Übungen für dieses Niveau.'));return;}
   const defaults={Lesen:2700,Hören:1800,Sprachbausteine:900,Schreiben:1800,Sprechen:900};
-  const totalSeconds=Math.max(60,picks.reduce((sum,x)=>sum+(Number(x.settings_json?.duration_seconds||x.duration_seconds||0)||defaults[x.section]||900),0));
+  const totalSeconds=Math.max(60,picks.reduce((sum,x)=>{const settings=x.settings_json&&typeof x.settings_json==='object'?x.settings_json:{};return sum+(Number(settings.duration_seconds||x.duration_seconds||0)||defaults[x.section]||900);},0));
   const now=Date.now();
-  const session={id:crypto.randomUUID?crypto.randomUUID():Date.now().toString(36),level,ids:picks.map(x=>x.id),index:0,results:[],startedAt:now,endAt:now+totalSeconds*1000,totalSeconds,mock:true,tasks:picks.map(x=>({id:x.id,section:x.section,teil:x.teil,task_type:x.task_type})),answersByExercise:{},spoken:{status:'not_started'} };
+  const session={id:(window.crypto&&typeof window.crypto.randomUUID==='function'?window.crypto.randomUUID():Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)),level,ids:picks.map(x=>x.id),index:0,results:[],startedAt:now,endAt:now+totalSeconds*1000,totalSeconds,mock:true,tasks:picks.map(x=>({id:x.id,section:x.section,teil:x.teil,task_type:x.task_type})),answersByExercise:{},spoken:{status:'not_started'} };
   localStorage.setItem('telc_self_test',JSON.stringify(session));
   location.href='/exercise.html?id='+encodeURIComponent(picks[0].id)+'&session='+encodeURIComponent(session.id)+'&mock=1';
 }

@@ -7,6 +7,7 @@ exports.handler = async (event) => {
   if (!student) return json(401, { error: 'unauthenticated' });
 
   const pool = db();
+  await pool.query("ALTER TABLE exercises ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ");
   // Safe migration for already-installed databases. The standalone SQL migration
   // remains available for normal deployment; this guard prevents old databases
   // from breaking the student area before that migration is run.

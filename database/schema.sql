@@ -80,7 +80,8 @@ CREATE TABLE IF NOT EXISTS exercises(
   settings_json JSONB,
   status VARCHAR(20) DEFAULT 'draft',
   created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+  updated_at TIMESTAMP DEFAULT NOW(),
+  deleted_at TIMESTAMPTZ
 );
 CREATE INDEX IF NOT EXISTS idx_exercises_lookup ON exercises(section, teil, status);
 ALTER TABLE exercises ADD COLUMN IF NOT EXISTS parent_exercise_id BIGINT REFERENCES exercises(id) ON DELETE CASCADE;
