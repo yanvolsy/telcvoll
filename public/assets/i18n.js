@@ -293,7 +293,8 @@ function initHeaderActions() {
   themeBtn.onclick = () => setTheme(getTheme() === 'dark' ? 'light' : 'dark');
   wrap.appendChild(themeBtn);
 
-  nav.appendChild(wrap);
+  const top = nav.closest('.top');
+  (top || nav).appendChild(wrap);
   updateLangBtnLabel();
   applyTheme();
 }
