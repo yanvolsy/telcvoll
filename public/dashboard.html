@@ -64,7 +64,7 @@ function render(){
     </nav>
     <section class="topic-toolbar">
       <div class="topic-title-block"><div class="topic-title-line"><span class="topic-title-icon">${sectionIcon(state.section)}</span><h2>${sectionLabel(state.section)}</h2><span class="topic-title-level">${state.level}</span></div><p class="muted">${text('تمارين '+state.section+' للمستوى '+state.level,'Übungen für '+state.section+' · Niveau '+state.level)}</p></div>
-      <div class="topic-tools"><input id="search" placeholder="${text('ابحث عن الموضوع…','Thema suchen…')}"/><select id="teilFilter" aria-label="Teil auswählen">${(TEIL_ORDER[state.section]||[]).map((t,i)=>`<option value="${t}" ${i===0?'selected':''}>${t}</option>`).join('')}</select><button id="shuffleToggle" class="shuffle-toggle" type="button" aria-pressed="${shuffleEnabled?'true':'false'}" title="${shuffleEnabled?text('الخلط مفعّل — اضغط لإيقافه','Shuffle aktiv — klicken zum Ausschalten'):text('الترتيب العادي — اضغط لتفعيل الخلط','Normale Reihenfolge — klicken zum Aktivieren')}"><span class="shuffle-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h4.5c3.8 0 4.7 5 8.5 5H21"/><path d="m18 8 3-1-3-1"/><path d="M3 17h4.5c3.8 0 4.7-5 8.5-5H21"/><path d="m18 16 3 1-3 1"/></svg></span><span class="shuffle-label">${shuffleEnabled?text('خلط','Mischen'):text('ترتيب','Reihenfolge')}</span></button></div>
+      <div class="topic-tools"><input id="search" placeholder="${text('ابحث عن الموضوع…','Thema suchen…')}"/><div class="teil-select" id="teilSelect"><button class="teil-select-trigger" id="teilTrigger" type="button" aria-haspopup="listbox" aria-expanded="false"><span class="teil-select-value" id="teilValue">${(TEIL_ORDER[state.section]||[])[0]||''}</span><span class="teil-select-chevron" aria-hidden="true">⌄</span></button><div class="teil-select-menu" id="teilMenu" role="listbox">${(TEIL_ORDER[state.section]||[]).map((t,i)=>`<button type="button" class="teil-option ${i===0?'is-selected':''}" role="option" aria-selected="${i===0?'true':'false'}" data-value="${esc(t)}"><span>${esc(t)}</span>${i===0?'<span class="teil-check">✓</span>':''}</button>`).join('')}</div></div><button id="shuffleToggle" class="shuffle-toggle" type="button" aria-pressed="${shuffleEnabled?'true':'false'}" title="${shuffleEnabled?text('الخلط مفعّل — اضغط لإيقافه','Shuffle aktiv — klicken zum Ausschalten'):text('الترتيب العادي — اضغط لتفعيل الخلط','Normale Reihenfolge — klicken zum Aktivieren')}"><span class="shuffle-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h4.5c3.8 0 4.7 5 8.5 5H21"/><path d="m18 8 3-1-3-1"/><path d="M3 17h4.5c3.8 0 4.7-5 8.5-5H21"/><path d="m18 16 3 1-3 1"/></svg></span><span class="shuffle-label">${shuffleEnabled?text('خلط','Mischen'):text('ترتيب','Reihenfolge')}</span></button></div>
     </section>
     <div id="topicGrid" class="topic-grid"></div>
 
@@ -83,7 +83,7 @@ function render(){
   document.querySelectorAll('[data-level]').forEach(b=>b.onclick=()=>{state.level=b.dataset.level;state.section='Lesen';render();});
   document.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>{state.section=b.dataset.section;render();});
   const nav=$('telcChatNav'); if(nav) nav.href='/telc-chat.html';
-  $('search').oninput=renderTopics; $('teilFilter').onchange=renderTopics;
+  $('search').oninput=renderTopics; setupTeilSelect();
   const shuffleBtn=$('shuffleToggle'); if(shuffleBtn) shuffleBtn.onclick=()=>{shuffleEnabled=!shuffleEnabled; shuffleOrderKey=''; shuffleOrder=[]; updateShuffleButton(); renderTopics();};
   renderTopics();
 }
@@ -99,8 +99,30 @@ function updateShuffleButton(){
   b.title=shuffleEnabled?text('الخلط مفعّل — اضغط لإيقافه','Shuffle aktiv — klicken zum Ausschalten'):text('الترتيب العادي — اضغط لتفعيل الخلط','Normale Reihenfolge — klicken zum Aktivieren');
   const label=b.querySelector('.shuffle-label'); if(label) label.textContent=shuffleEnabled?text('خلط','Mischen'):text('ترتيب','Reihenfolge');
 }
+function setupTeilSelect(){
+  const wrap=$('teilSelect'), trigger=$('teilTrigger'), menu=$('teilMenu');
+  if(!wrap||!trigger||!menu)return;
+  const close=()=>{wrap.classList.remove('is-open');trigger.setAttribute('aria-expanded','false');};
+  trigger.onclick=e=>{e.stopPropagation();const open=wrap.classList.toggle('is-open');trigger.setAttribute('aria-expanded',open?'true':'false');};
+  menu.querySelectorAll('.teil-option').forEach(option=>option.onclick=e=>{
+    e.stopPropagation();
+    const value=option.dataset.value||'';
+    const valueEl=$('teilValue'); if(valueEl)valueEl.textContent=value;
+    menu.querySelectorAll('.teil-option').forEach(o=>{o.classList.remove('is-selected');o.setAttribute('aria-selected','false');const c=o.querySelector('.teil-check');if(c)c.remove();});
+    option.classList.add('is-selected'); option.setAttribute('aria-selected','true');
+    const check=document.createElement('span');check.className='teil-check';check.textContent='✓';option.appendChild(check);
+    close(); renderTopics();
+  });
+  if(!window.__telcTeilOutsideHandler){
+    window.__telcTeilOutsideHandler=true;
+    document.addEventListener('click',e=>{document.querySelectorAll('.teil-select.is-open').forEach(el=>{if(!el.contains(e.target)){el.classList.remove('is-open');const t=el.querySelector('.teil-select-trigger');if(t)t.setAttribute('aria-expanded','false');}});});
+  }
+  trigger.addEventListener('keydown',e=>{if(e.key==='Escape')close();});
+}
+function selectedTeil(){return $('teilValue')?.textContent || (TEIL_ORDER[state.section]||[])[0] || '';}
+
 function renderTopics(){
-  const q=($('search')?.value||'').trim().toLowerCase(); const teil=$('teilFilter')?.value || (TEIL_ORDER[state.section]||[])[0] || '';
+  const q=($('search')?.value||'').trim().toLowerCase(); const teil=selectedTeil();
   const base=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===state.section);
   const orderKey=state.level+'|'+state.section;
   if(orderKey!==shuffleOrderKey || !shuffleOrder.length || shuffleOrder.length!==base.length){
