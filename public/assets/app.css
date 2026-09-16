@@ -613,3 +613,12 @@ html[dir="rtl"] .teil-select-chevron{margin-inline-start:auto}
   .teil-select-trigger{height:44px;border-radius:12px;padding:0 11px}
   .teil-select-menu{border-radius:13px}
 }
+
+/* Exercise pages: keep language/theme controls on the right side of the top bar. */
+.exercise-topbar{position:sticky;position:relative;}
+.exercise-topbar>.header-actions{position:absolute;right:24px;top:50%;transform:translateY(-50%);display:flex;align-items:center;gap:8px;margin:0!important;z-index:2;}
+.exercise-topbar>.back-link{position:absolute;left:24px;top:50%;transform:translateY(-50%);z-index:2;}
+@media(max-width:700px){
+  .exercise-topbar>.header-actions{right:10px;gap:6px;}
+  .exercise-topbar>.back-link{left:10px;}
+}
