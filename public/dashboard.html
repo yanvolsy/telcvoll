@@ -14,7 +14,7 @@
 <header class="top">
   <a class="brand" href="/dashboard.html"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
   <nav>
-    <a href="/self-test.html" id="mockExamNav">امتحان تجريبي</a><a href="/telc-chat.html" id="telcChatNav" data-i18n="nav_speaking">مساعد TELC</a><a href="#" id="logoutLink" data-i18n="nav_logout">خروج</a>
+    <a href="/self-test.html" id="mockExamNav" data-i18n="nav_mock">امتحان تجريبي</a><a href="/telc-chat.html" id="telcChatNav" data-i18n="nav_speaking">مساعد TELC</a><a href="#" id="logoutLink" data-i18n="nav_logout">خروج</a>
   </nav>
 </header>
 <main class="student-hub" id="content"><div class="student-loading">جارٍ التحميل…</div></main>
@@ -37,13 +37,24 @@ function sectionIcon(s){return ({Lesen:'◫',Hören:'◉',Sprachbausteine:'⌘',
 function sectionLabel(s){return ({Lesen:'Lesen',Hören:'Hören',Sprachbausteine:'Sprachbausteine',Schreiben:'Schreiben',Sprechen:'Sprechen'})[s]||s;}
 function taskTypeLabel(type){const map={MATCHING:{ar:'مطابقة',de:'Zuordnung'},MCQ:{ar:'اختيار من متعدد',de:'Multiple Choice'},AUDIO_TF:{ar:'صحيح / خطأ',de:'Richtig / Falsch'},WRITING:{ar:'كتابة',de:'Schreiben'},SPEAKING:{ar:'تحدث',de:'Sprechen'}};const x=map[type];return x?text(x.ar,x.de):type;}
 function levelAvailable(level){return state.exercises.some(x=>(x.level||'B2')===level);}
+function levelExercises(level=state.level){return state.exercises.filter(x=>(x.level||'B2')===level);}
+function totalCountForLevel(){return levelExercises().length;}
+function completedCountForLevel(){return levelExercises().filter(x=>isExerciseCompleted(x.id)).length;}
+function levelProgressPercent(){const total=totalCountForLevel();return total?Math.round((completedCountForLevel()/total)*100):0;}
 function render(){
   const list=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===state.section);
   const has=levelAvailable(state.level);
   $('content').innerHTML=`
     <section class="hub-head">
       <div><span class="tag">${text('منصة الطالب','Schülerbereich')}</span><h1>${text('تدريب TELC Voll','TELC Voll Training')}</h1><p class="muted">${text('مرحباً '+(state.student?.name||'Student')+' — اختر المستوى والقسم ثم افتح التمرين.','Hallo '+(state.student?.name||'Student')+' — wähle Niveau und Prüfungsteil.')}</p></div>
-      <div class="hub-kpis"><div class="hub-kpi days-kpi ${remainingDays<=2?'warning':''}"><strong>${remainingDays}</strong><span>${text('يوم متبقٍ','Tage verbleibend')}</span></div></div>
+      <div class="hub-kpis">
+        <div class="hub-kpi days-kpi ${remainingDays<=2?'warning':''}"><strong>${remainingDays}</strong><span>${text('يوم متبقٍ','Tage verbleibend')}</span></div>
+        <div class="hub-progress-card" aria-label="${text('تقدم الطالب','Lernfortschritt')}">
+          <div class="hub-progress-top"><span>${text('تقدمك','Dein Fortschritt')}</span><strong>${levelProgressPercent()}%</strong></div>
+          <div class="hub-progress-bar"><i style="width:${levelProgressPercent()}%"></i></div>
+          <div class="hub-progress-bottom"><span>${completedCountForLevel()} / ${totalCountForLevel()} ${text('تمرين','Übungen')}</span><span>${text('المستوى','Niveau')} ${state.level}</span></div>
+        </div>
+      </div>
     </section>
     <section class="level-switch" aria-label="TELC Voll Niveau">
       ${['B1','B2','C1'].map(l=>`<button class="level-btn ${state.level===l?'active':''} ${!levelAvailable(l)?'empty':''}" data-level="${l}">Telc ${l}</button>`).join('')}

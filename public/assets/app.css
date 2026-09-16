@@ -561,3 +561,27 @@ html[dir="rtl"] .topic-tools select{background-position:calc(0% + 17px) 19px,cal
   .shuffle-icon{width:27px;height:27px}
   .shuffle-icon svg{width:16px;height:16px}
 }
+
+/* Final student dashboard refinements: progress card and exercise header separation. */
+.mobile-login{display:none}
+.hub-kpis{align-items:stretch;gap:12px}
+.hub-progress-card{width:min(330px,38vw);min-width:280px;border:1px solid var(--line);border-radius:20px;background:var(--white);padding:17px 18px;box-shadow:var(--shadow);display:flex;flex-direction:column;justify-content:center;gap:10px;text-align:start}
+.hub-progress-top,.hub-progress-bottom{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.hub-progress-top span{font-size:13px;font-weight:900;color:var(--ink)}
+.hub-progress-top strong{font-size:23px;line-height:1;color:var(--green)}
+.hub-progress-bar{height:10px;border-radius:999px;background:var(--green-soft);overflow:hidden}
+.hub-progress-bar i{display:block;height:100%;border-radius:inherit;background:var(--green);transition:width .3s ease}
+.hub-progress-bottom{font-size:11px;color:var(--muted);font-weight:750}
+.exercise-topbar{display:grid;grid-template-columns:52px minmax(0,1fr) 52px;align-items:center;gap:14px;position:sticky}
+.exercise-topbar .back-link{grid-column:1;position:static;margin:0;width:40px;height:40px;justify-self:start;flex:none}
+.exercise-session{grid-column:2;position:static;transform:none;display:flex;justify-content:center;align-items:center;gap:10px;min-width:0;font-size:9px}
+.exercise-session strong{position:static;display:block;max-width:min(42vw,520px);font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.exercise-header-actions{grid-column:3;justify-self:end;margin:0}
+@media(max-width:700px){
+  .hub-progress-card{width:100%;min-width:0}
+  .exercise-topbar{grid-template-columns:46px minmax(0,1fr) 46px;gap:8px;padding-inline:10px}
+  .exercise-session{display:none}
+}
+@media(min-width:701px){
+  .exercise-topbar{direction:ltr}
+}
