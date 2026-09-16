@@ -294,7 +294,7 @@ function initHeaderActions() {
   wrap.appendChild(themeBtn);
 
   const top = nav.closest('.top');
-  (top || nav).appendChild(wrap);
+  if (top?.classList.contains('exercise-topbar')) { nav.appendChild(wrap); } else { (top || nav).appendChild(wrap); }
   updateLangBtnLabel();
   applyTheme();
 }
