@@ -99,15 +99,16 @@ exports.handler=async(event)=>{
   const context=`LEVEL: ${ex.level||''}\nTEIL: ${ex.teil||''}\nTHEMA: ${ex.title||''}\nTASK:\n${ex.body||''}`;
   let prompt;
   if(mode==='model'){
-    prompt=`Create a high-quality TELC German speaking model-answer practice for training only. Use ONLY the supplied topic and Teil. The student writes their answer, while the AI demonstrates what a strong candidate could say and how a realistic partner could react. Stay in German inside the dialogue. Make it practical, natural, B2 level unless the supplied level differs. Include a short dialogue with 5-7 turns, including at least two ideal student turns and realistic partner questions/reactions. Then generate 4-6 follow-up questions for independent practice, PLUS 3-5 realistic questions a TELC partner might ask. IMPORTANT: every item in the questions array must be QUESTIONS ONLY. Never include answers, sample answers, answer hints, explanations, or answer keys in the questions array. The student must answer these questions themselves. Plus 5-8 useful Redemittel.
+    prompt=`Create a high-quality TELC German speaking training model based ONLY on the supplied topic, task and Teil. Follow the structure and level of detail typical of the provided TELC-style examples. Do not invent a different topic and do not claim this is an official telc answer.
 ${context}
-Rules by Teil:
-- Teil 1: model a short presentation/position followed by partner reactions and follow-up questions about the topic.
-- Teil 2: model opinion + arguments + counterargument + partner questions.
-- Teil 3: model joint planning with concrete decisions about time/place/cost/tasks/priorities and a final agreement.
-Do not invent a different topic. Do not claim this is an official telc answer. Return ONLY JSON in this exact shape:
-{"title":"","note":"","dialogue":[{"speaker":"jerry|partner|student","text":""}],"questions":[""],"redemittel":[""]}
-The dialogue may contain model answers, but the questions array must contain questions only. Do not append answers after questions, do not format questions as Q/A pairs, and do not reveal a solution to any question.`;
+The output must be useful as a model for a learner, not just a generic conversation.
+For Teil 2, organize the model around the topic points in a natural order. When the topic supports it, cover: Inhalt, Meinung, Erfahrung, Vorteile and Nachteile. Turn these points into a realistic dialogue between a strong student and Partner/Jerry, with natural partner reactions and follow-up questions. The student turns should demonstrate what a good B2 candidate could say.
+For Teil 3, model a realistic joint planning conversation. Cover the concrete planning points contained in the supplied task (for example time, place, participants, cost, tasks, priorities, materials, alternatives). The partner should react, make counter-suggestions, ask questions, negotiate, and the dialogue should finish with a clear common agreement. Do not force points that are not relevant to the supplied task.
+For Teil 1, model a short structured presentation/opinion with a natural partner reaction and one or two follow-up questions.
+Generate 5-7 dialogue turns, including at least two strong student turns and realistic Partner/Jerry reactions. Generate 4-6 independent practice questions, QUESTIONS ONLY: no answers, no hints, no explanations, no answer keys. Generate 5-8 useful Redemittel.
+Return ONLY JSON in this exact shape:
+{"title":"","note":"","dialogue":[{"speaker":"jerry|partner|student","text":""}],"structure":{"inhalt":[],"meinung":[],"erfahrung":[],"vorteile":[],"nachteile":[],"planung":[]},"questions":[""],"redemittel":[""]}
+Use empty arrays for structure fields that do not fit the Teil. The questions array must contain questions only. Keep the dialogue in German. Keep the note short. Make the dialogue and structure consistent with each other.`;
   } else if(mode==='evaluate'){
     prompt=`Evaluate a TELC speaking practice session for training only. Do not claim an official telc score.
 ${context}

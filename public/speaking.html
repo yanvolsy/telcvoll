@@ -20,7 +20,7 @@
 .spk-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}.typing-fallback{margin-top:10px}.typing-fallback summary{cursor:pointer;opacity:.7;font-size:13px}.typing-fallback .spk-row textarea{min-height:70px;flex:1;min-width:240px;direction:ltr;text-align:left}
 .spk-phases{display:flex;gap:8px;flex-wrap:wrap}.phase.active{outline:2px solid currentColor}
 .eval-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.eval-item{padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:12px}.eval-score{font-size:20px;font-weight:700}
-@keyframes micPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}@keyframes voiceBar{from{height:5px}to{height:17px}}
+@keyframes micPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}@keyframes voiceBar{from{height:5px}to{height:17px}}.speaking-model-head-actions{display:flex;align-items:center;gap:10px;justify-content:flex-end}.speaking-model-head-actions small{max-width:340px}.speaking-model-dialogue{direction:ltr}.speaking-model-line{direction:ltr;text-align:left}.speaking-model-section{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--white)}.speaking-model-section h4{margin:0 0 8px;font-size:14px}.speaking-model-list{margin:0;padding-inline-start:20px;line-height:1.8}.speaking-model-q{display:flex;align-items:flex-start;gap:9px;padding:9px 0;border-bottom:1px solid var(--line);direction:ltr;text-align:left}.speaking-model-q:last-child{border-bottom:0}.speaking-model-q button,.speaking-model-speak{flex:0 0 auto}.speaking-model-empty{padding:14px;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}
 @media(max-width:650px){.eval-grid{grid-template-columns:1fr}.bubble{max-width:94%}.spk-chat{max-height:42vh}.voice-mic{width:70px;height:70px}}
 </style>
 </head>
@@ -34,6 +34,13 @@
 <div class="spk-phases" id="phases"></div>
 <span class="tag" id="level"></span><h1 id="title"></h1>
 <div class="question"><strong id="teilLabel"></strong><div class="spk-task" id="task"></div></div>
+<div class="speaking-model-box" id="modelBox">
+  <div class="speaking-model-head">
+    <div><span class="tag">AI</span><h3>الإجابة النموذجية</h3></div>
+    <div class="speaking-model-head-actions"><small>نموذج تدريبي مبني على موضوعك، مع حوار وأسئلة مشابهة لطريقة التدريب.</small><button class="btn speaking-model-btn" id="modelBtn" type="button">🧠 توليد الإجابة النموذجية</button></div>
+  </div>
+  <div id="modelContent" hidden></div>
+</div>
 <div class="spk-chat" id="chat"></div>
 <div class="voice-panel" id="voicePanel">
   <div class="voice-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
@@ -49,7 +56,7 @@
 <script src="/assets/app.js"></script>
 <script>
 const id=new URLSearchParams(location.search).get('id');
-const $=x=>document.getElementById(x); let ex=null, history=[], transcript=[], recognition=null, busy=false, voiceRunning=false, speakingNow=false, turnToken=0;
+const $=x=>document.getElementById(x); let ex=null, history=[], transcript=[], recognition=null, busy=false, voiceRunning=false, speakingNow=false, turnToken=0, modelBusy=false;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function addBubble(who,text){const d=document.createElement('div');d.className='bubble '+who;d.textContent=text;$('chat').appendChild(d);$('chat').scrollTop=$('chat').scrollHeight}
 function currentTeil(){return String(ex?.teil||'Teil 1').match(/Teil\s*[123]/i)?.[0]||'Teil 1'}
@@ -57,6 +64,29 @@ function speak(text,done){if(!('speechSynthesis'in window)){done?.();return} spe
 function setVoiceStatus(text){$('voiceStatus').textContent=text}
 function setPhase(t){const u=new URLSearchParams(location.search); if(t===currentTeil())return; u.set('teil',t); location.href='/speaking.html?id='+encodeURIComponent(id)+'&teil='+encodeURIComponent(t)}
 function renderPhases(){const selected=currentTeil(); $('phases').innerHTML=['Teil 1','Teil 2','Teil 3'].map(t=>`<button class="btn phase ${t===selected?'active':''}" data-t="${t}">${t}</button>`).join('');document.querySelectorAll('.phase').forEach(b=>b.onclick=()=>setPhase(b.dataset.t))}
+function modelSpeak(text){if(String(text||'').trim())speak(text)}
+function modelSection(title,items){if(!Array.isArray(items)||!items.length)return '';return `<div class="speaking-model-section"><h4>${esc(title)}</h4><ul class="speaking-model-list">${items.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`}
+function renderModel(out){
+ const c=$('modelContent');
+ const dialogue=Array.isArray(out.dialogue)?out.dialogue:[];
+ const questions=Array.isArray(out.questions)?out.questions:[];
+ const phrases=Array.isArray(out.redemittel)?out.redemittel:[];
+ let html=`<div class="speaking-model-head" style="margin-top:4px"><div><span class="tag">${esc(currentTeil())}</span><h3>${esc(out.title||'Modellantwort')}</h3></div><small>${esc(out.note||'Trainingsbeispiel – keine offizielle telc Musterlösung.')}</small></div>`;
+ if(dialogue.length){html+=`<div class="speaking-model-dialogue">${dialogue.map(x=>`<div class="speaking-model-line model-${esc(x.speaker||'partner')}"><div><b>${esc(x.speaker==='student'?'Schüler':x.speaker==='partner'?'Partner':'Jerry')}</b><p>${esc(x.text||'')}</p></div><button class="icon-btn speaking-model-speak" type="button" aria-label="Anhören" data-speak="${esc(x.text||'')}">🔊</button></div>`).join('')}</div>`}
+ if(out.structure&&typeof out.structure==='object'){
+   const st=out.structure;
+   html+=modelSection('Inhalt',st.inhalt);
+   html+=modelSection('Meinung',st.meinung);
+   html+=modelSection('Erfahrung',st.erfahrung);
+   html+=modelSection('Vorteile',st.vorteile);
+   html+=modelSection('Nachteile',st.nachteile);
+   html+=modelSection('Planung / Vereinbarung',st.planung);
+ }
+ if(questions.length){html+=`<div class="speaking-model-questions"><div class="speaking-model-questions-head"><h4>أسئلة للتدرب — بدون إجابات</h4><small>أسئلة فقط، أجب عنها بنفسك.</small></div>${questions.map((q,i)=>`<div class="speaking-model-q"><span>${i+1}.</span><div style="flex:1">${esc(q)}</div><button class="icon-btn speaking-model-speak" type="button" data-speak="${esc(q)}">🔊</button></div>`).join('')}</div>`}
+ if(phrases.length){html+=`<div class="speaking-model-phrases"><h4>Redemittel</h4><div>${phrases.map(x=>`<span>${esc(x)}</span>`).join('')}</div></div>`}
+ c.innerHTML=html;c.hidden=false;c.querySelectorAll('[data-speak]').forEach(b=>b.onclick=()=>modelSpeak(b.dataset.speak));
+}
+async function generateModel(){if(modelBusy)return;modelBusy=true;$('modelBtn').disabled=true;$('modelBtn').textContent='⏳ جارٍ التوليد…';$('modelContent').hidden=false;$('modelContent').innerHTML='<div class="speaking-model-empty">جارٍ إنشاء نموذج مناسب لهذا الموضوع…</div>';try{const r=await api('ai-speaking-session',{method:'POST',body:{id,mode:'model',teil:currentTeil()}});if(r.error)throw new Error(r.error);renderModel(r)}catch(e){$('modelContent').innerHTML=`<div class="alert bad">${esc(e?.message||'حدث خطأ أثناء توليد الإجابة النموذجية.')}</div>`}finally{modelBusy=false;$('modelBtn').disabled=false;$('modelBtn').textContent='🧠 توليد الإجابة النموذجية'}}
 async function load(){try{
  const wanted=new URLSearchParams(location.search).get('teil');
  let data=await api('exercise-get?id='+encodeURIComponent(id));
@@ -84,6 +114,7 @@ $('send').onclick=()=>send($('input').value,false);$('input').addEventListener('
 $('mic').onclick=()=>{if(!getRecognition()){setVoiceStatus('هذا المتصفح لا يدعم المحادثة الصوتية. استخدم Chrome على الكمبيوتر.');return} if(voiceRunning){voiceRunning=false;turnToken++;speechSynthesis?.cancel();recognition?.stop();$('voicePanel').classList.remove('active');$('mic').classList.remove('listening');$('mic').disabled=false;$('stop').disabled=true;setVoiceStatus('تم إيقاف المحادثة الصوتية. اضغط الميكروفون للمتابعة.')}else{voiceRunning=true;setVoiceStatus('جارٍ تشغيل المحادثة الصوتية…');startListening()}};
 $('stop').onclick=()=>{voiceRunning=false;turnToken++;speechSynthesis?.cancel();if(recognition)try{recognition.stop()}catch{}$('voicePanel').classList.remove('active');$('mic').classList.remove('listening');$('mic').disabled=false;$('stop').disabled=true;setVoiceStatus('تم إيقاف المحادثة. يمكنك المتابعة بالضغط على الميكروفون.')};
 $('finish').onclick=async()=>{if(busy||!transcript.length)return;voiceRunning=false;turnToken++;speechSynthesis?.cancel();if(recognition)try{recognition.stop()}catch{}$('mic').disabled=true;$('stop').disabled=true;busy=true;$('finish').disabled=true;setVoiceStatus('جارٍ تقييم المحادثة…');try{const r=await api('ai-speaking-session',{method:'POST',body:{id,mode:'evaluate',transcript:transcript.join('\n'),teil:currentTeil()}});$('eval').hidden=false;$('eval').innerHTML='<h2>Jerry · Bewertung</h2><p><b>Gesamt: '+esc(r.total)+' / 25</b></p><div class="eval-grid">'+(r.criteria||[]).map(c=>`<div class="eval-item"><b>${esc(c.label)}</b><div class="eval-score">${esc(c.score)} / ${esc(c.max||5)}</div><div>${esc(c.comment)}</div></div>`).join('')+'</div><hr><h3>Stärken</h3><ul>'+(r.strengths||[]).map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul><h3>Prioritäten</h3><ul>'+(r.priorities||[]).map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul><p>'+esc(r.summary_de||'')+'</p><p>'+esc(r.summary_ar||'')+'</p>';$('eval').scrollIntoView({behavior:'smooth'})}catch(e){setVoiceStatus('حدث خطأ أثناء التقييم: '+(e?.message||'AI'))}finally{busy=false;$('finish').disabled=false}};
+$('modelBtn').onclick=generateModel;
 $('logout').onclick=async e=>{e.preventDefault();await api('auth-logout',{method:'POST'});location.href='/'};
 load();
 </script></body></html>
