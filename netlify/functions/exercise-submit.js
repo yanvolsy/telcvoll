@@ -68,8 +68,10 @@ exports.handler = async (event) => {
         prompt: it.prompt,
         given,
         ok,
-        correct_answer: ok ? undefined : it.correct_answer,
-        explanation: ok ? undefined : it.explanation,
+        // The model solution is revealed only after submission, so the
+        // correct answer can safely be returned for every item here.
+        correct_answer: it.correct_answer,
+        explanation: it.explanation,
       })),
     });
   } catch (e) {
