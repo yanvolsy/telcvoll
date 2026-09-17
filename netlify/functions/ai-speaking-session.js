@@ -9,18 +9,71 @@ function cleanJson(text) {
   if(a>=0 && b>a) s=s.slice(a,b+1);
   return JSON.parse(s);
 }
-async function callAI(prompt) {
-  const url=process.env.AI_API_URL, key=process.env.AI_API_KEY;
-  if(!url||!key) throw new Error('AI provider is not configured.');
+async function extractProviderText(resp) {
+  const raw = await resp.text();
+  let j = {};
+  try { j = JSON.parse(raw); } catch {}
+  const text = j?.choices?.[0]?.message?.content
+    || j?.choices?.[0]?.text
+    || j?.content?.[0]?.text
+    || j?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('')
+    || '';
+  if (!resp.ok) throw new Error(text || j?.error?.message || `AI provider error (${resp.status})`);
+  return text || raw;
+}
+
+async function callConfiguredAI(url,key,model,system,prompt) {
+  if(!url||!key) throw new Error('Configured AI provider is unavailable.');
   const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${key}`},
-    body:JSON.stringify({model:process.env.AI_MODEL,messages:[
-      {role:'system',content:'You are a realistic TELC German speaking partner and fair examiner.'},
+    body:JSON.stringify({model,messages:[
+      {role:'system',content:system},
+      {role:'user',content:prompt}
+    ],temperature:0.25})});
+  return extractProviderText(r);
+}
+
+async function callGemini(key,model,system,prompt) {
+  if(!key) throw new Error('GEMINI_API_KEY is not configured');
+  const url=`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model||'gemini-2.5-flash')}:generateContent?key=${encodeURIComponent(key)}`;
+  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    systemInstruction:{parts:[{text:system}]},
+    contents:[{role:'user',parts:[{text:prompt}]}],
+    generationConfig:{temperature:0.25}
+  })});
+  return extractProviderText(r);
+}
+
+async function callGroq(key,model,system,prompt) {
+  if(!key) throw new Error('GROQ_API_KEY is not configured');
+  const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${key}`},
+    body:JSON.stringify({model:model||'openai/gpt-oss-120b',temperature:0.25,messages:[
+      {role:'system',content:system},
       {role:'user',content:prompt}
     ]})});
-  const raw=await r.text(); let j={}; try{j=JSON.parse(raw)}catch{}
-  const t=j?.choices?.[0]?.message?.content || j?.content?.[0]?.text || '';
-  if(!r.ok) throw new Error(t || `AI provider error (${r.status})`);
-  return t;
+  return extractProviderText(r);
+}
+
+async function callAI(prompt) {
+  const system='You are a realistic TELC German speaking partner and fair examiner. Always follow the requested JSON output exactly.';
+  const configuredUrl=process.env.AI_API_URL;
+  const configuredKey=process.env.AI_API_KEY;
+  const geminiKey=process.env.GEMINI_API_KEY;
+  const groqKey=process.env.GROQ_API_KEY;
+  let firstError='';
+
+  if(configuredUrl&&configuredKey){
+    try{return await callConfiguredAI(configuredUrl,configuredKey,process.env.AI_MODEL,system,prompt)}
+    catch(e){firstError=e.message||String(e)}
+  }
+  if(geminiKey){
+    try{return await callGemini(geminiKey,process.env.GEMINI_SPEAKING_MODEL||process.env.GEMINI_CHAT_MODEL||process.env.GEMINI_WRITING_MODEL||'gemini-2.5-flash',system,prompt)}
+    catch(e){firstError=firstError?`${firstError} | ${e.message||e}`:(e.message||String(e))}
+  }
+  if(groqKey){
+    try{return await callGroq(groqKey,process.env.GROQ_SPEAKING_MODEL||process.env.GROQ_CHAT_MODEL||process.env.GROQ_WRITING_MODEL||'openai/gpt-oss-120b',system,prompt)}
+    catch(e){firstError=firstError?`${firstError} | ${e.message||e}`:(e.message||String(e))}
+  }
+  throw new Error(firstError || 'AI provider is not configured. Set AI_API_URL + AI_API_KEY, GEMINI_API_KEY, or GROQ_API_KEY in Netlify environment variables.');
 }
 exports.handler=async(event)=>{
   if(event.httpMethod!=='POST') return json(405,{error:'Method not allowed.'});
