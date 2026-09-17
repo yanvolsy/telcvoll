@@ -1,19 +1,6 @@
-<!doctype html>
-<html lang="ar" dir="rtl">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1310"><title>تمرين TELC Voll</title><link rel="stylesheet" href="/assets/app.css">
-<link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
-<link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
-<link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
-<link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
-<link rel="manifest" href="/manifest.webmanifest"></head>
-<body>
-<header class="top exercise-topbar">
-  <a class="back-link" id="exerciseBack" href="/dashboard.html" aria-label="العودة">←</a>
-  <nav class="exercise-header-actions" aria-label="إعدادات الصفحة"></nav>
-</header>
-<main id="content" class="exercise-page"><div class="student-loading">جارٍ التحميل…</div></main>
-<script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
-<script>
+
+
+
 const id=qs('id'); const duration=Number(qs('duration')||0); const sessionId=qs('session'); const mockMode=qs('mock')==='1' && !!sessionId; let model=null; let answers={}; let activeItem=null; let submitted=false; let resultData=null;
 let matchingOrder=null; let headingOrder=null; let optionOrders={}; let showModelAnswers=false; let titleRevealed=false; const translationCache=new Map();
 const text=(ar,de)=>getLang()==='ar'?ar:de;
@@ -337,4 +324,3 @@ function renderResult(r){const st=captureExerciseScroll();submitted=true;resultD
 async function submit(){if(submitted)return;if(!model.items.length){if(mockMode){goNextMock();}return;}try{const r=await api('exercise-submit',{method:'POST',body:{exercise_id:id,answers}});localStorage.setItem('last_exercise_result_'+id,JSON.stringify(r));markExerciseCompleted(id);if(mockMode){const s=getMockSession();if(s){s.results=s.results||[];s.results.push({id,title:model.exercise.title,section:model.exercise.section,teil:model.exercise.teil,score:r.score,max:r.max,percent:r.percent,result:r.result});s.index=(s.ids||[]).findIndex(x=>String(x)===String(id));localStorage.setItem('telc_self_test',JSON.stringify(s));}goNextMock();return;}renderResult(r);}catch(e){document.getElementById('content').insertAdjacentHTML('beforeend',`<div class="alert bad">${esc(e.message)}</div>`);}}
 (async()=>{try{const d=await api('exercise-get?id='+encodeURIComponent(id));model=d;document.body.classList.toggle('mock-mode',mockMode);renderWorkspace();bindActions();if(mockMode)startMockTimer();}catch(e){document.getElementById('content').innerHTML=`<div class="alert bad">${esc(e.message)}</div>`;}})();
 
-</script></body></html>

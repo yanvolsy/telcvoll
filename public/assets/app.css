@@ -616,6 +616,22 @@ html[dir="rtl"] .topic-tools select{background-position:calc(0% + 17px) 19px,cal
 @media(max-width:900px){.speaking-layout{grid-template-columns:1fr}.speaking-simulator{order:2}.speaking-task-panel{order:1}.exercise-topbar{grid-template-columns:48px 1fr 120px!important;padding:0 12px!important}.exercise-topbar .exercise-header-actions .icon-btn{width:38px;height:38px}}
 @media(max-width:650px){.teil-tabs{width:100%;overflow:auto}.teil-tab{flex:1;padding:9px 12px}.topic-tools{grid-template-columns:1fr!important}.speaking-exercise-shell{padding:18px 12px 100px}.speaking-task-panel{padding:18px}.speaking-simulator{padding:0 12px 14px}.speaking-sim-head{margin-inline:-12px}.speaking-chat{height:260px}.speaking-input-row{grid-template-columns:1fr}.speaking-controls{flex-wrap:wrap}.speaking-eval-grid{grid-template-columns:1fr}.exercise-topbar{grid-template-columns:46px 1fr 100px!important}.exercise-topbar .exercise-header-actions .icon-btn{width:36px;height:36px}}
 
+
+/* Shared answer-system polish for all Lesen / Hören / Sprachbausteine parts */
+.side-question.result-correct{border-color:#2d9b68!important;background:rgba(45,155,104,.07)!important}
+.side-question.result-wrong{border-color:#c94a43!important;background:rgba(201,74,67,.06)!important}
+.side-option.result-correct{border-color:#2d9b68!important;background:rgba(45,155,104,.10)!important;box-shadow:inset 3px 0 0 #2d9b68}
+.side-option.result-wrong{border-color:#c94a43!important;background:rgba(201,74,67,.09)!important;box-shadow:inset 3px 0 0 #c94a43}
+.side-option.model-correct{border-color:#2d9b68!important;background:rgba(45,155,104,.10)!important;box-shadow:inset 3px 0 0 #2d9b68}
+.word-card.result-correct{border-color:#2d9b68!important;background:rgba(45,155,104,.10)!important}
+.word-card.result-wrong{border-color:#c94a43!important;background:rgba(201,74,67,.09)!important}
+.word-card.model-correct{border-color:#2d9b68!important;background:rgba(45,155,104,.10)!important;box-shadow:inset 3px 0 0 #2d9b68}
+.inline-answer.result-correct{border-bottom-color:#2d9b68!important;color:#2d9b68!important;background:rgba(45,155,104,.08);border-radius:5px}
+.inline-answer.result-wrong{border-bottom-color:#c94a43!important;color:#c94a43!important;background:rgba(201,74,67,.07);border-radius:5px}
+.inline-answer.model-correct{border-bottom-color:#2d9b68!important;color:#2d9b68!important;background:rgba(45,155,104,.08);border-radius:5px}
+.option-tool-wrap,.spb1-option-wrap,.lesen2-option-wrap{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px}
+.option-tool-wrap .side-option,.spb1-option-wrap .side-option,.lesen2-option-row .side-option{min-width:0}
+
 /* Final answer-system polish: compact result, clear model answers, stable scrolling */
 .inline-result-panel{
   display:flex;align-items:center;justify-content:space-between;gap:20px;

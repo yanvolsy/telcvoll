@@ -43,14 +43,9 @@ function toolRegistry(){const map=new Map(); document.querySelectorAll('[data-co
 function bindTextTools(){const registry=toolRegistry();document.querySelectorAll('[data-translate]').forEach(btn=>btn.onclick=async()=>{const target=document.getElementById(btn.dataset.translate);if(!target)return;if(target.classList.contains('visible')){target.classList.remove('visible');target.textContent='';btn.setAttribute('aria-pressed','false');return;}const source=registry.get(btn.dataset.sourceId)||'';target.classList.add('loading');const out=await translateText(source,'ar');target.classList.remove('loading');target.textContent=out||text('تعذرت الترجمة.','Übersetzung nicht verfügbar.');target.classList.add('visible');btn.setAttribute('aria-pressed','true');});document.querySelectorAll('[data-speak]').forEach(btn=>btn.onclick=()=>{const source=registry.get(btn.dataset.speak)||'';speakGerman(source,btn);});}
 function renderAudio(){return model.exercise.audio_url?`<div class="audio-box"><audio controls preload="metadata" src="${esc(model.exercise.audio_url)}"></audio><span>${text('الملف الصوتي','Audiodatei')}</span></div>`:'';}
 function matchingMeta(){return model.exercise.section==='Lesen'&&model.exercise.teil==='Teil 1'?{title:'ÜBERSCHRIFTEN',sub:'FÜR TEXT',ar:'العناوين'}:model.exercise.section==='Lesen'&&model.exercise.teil==='Teil 3'?{title:'SITUATIONEN',sub:'ZUORDNUNG',ar:'المواقف'}:model.exercise.section==='Hören'&&model.exercise.teil==='Teil 3'?{title:'AUSSAGEN',sub:'ZUORDNUNG',ar:'العبارات'}:{title:'AUSWAHL',sub:'ZUORDNUNG',ar:'الاختيارات'};}
-function captureExerciseScroll(){
- const anchor=document.querySelector('.exam-main .active-item, .exam-main .exam-text-card, .exam-main .tf-row, .exam-side .side-question');
- return {main:document.querySelector('.exam-main')?.scrollTop||0,side:document.querySelector('.exam-side')?.scrollTop||0,workspace:document.querySelector('.exam-workspace')?.scrollTop||0,x:window.scrollX||0,y:window.scrollY||0,anchorTop:anchor?.getBoundingClientRect().top??null};
-}
-function restoreExerciseScroll(state){if(!state)return;const restore=()=>{const m=document.querySelector('.exam-main'),sd=document.querySelector('.exam-side'),ws=document.querySelector('.exam-workspace');if(m)m.scrollTop=state.main;if(sd)sd.scrollTop=state.side;if(ws)ws.scrollTop=state.workspace;window.scrollTo(state.x,state.y);if(state.anchorTop!==null){const anchor=document.querySelector('.exam-main .active-item, .exam-main .exam-text-card, .exam-main .tf-row, .exam-side .side-question');if(anchor){const delta=anchor.getBoundingClientRect().top-state.anchorTop;if(Math.abs(delta)>1)window.scrollTo(state.x,window.scrollY+delta);}}};restore();requestAnimationFrame(restore);requestAnimationFrame(()=>requestAnimationFrame(restore));setTimeout(restore,40);}
-function rerenderExerciseStable(state){renderWorkspace(false);bindActions();restoreExerciseScroll(state);}
-
 function renderMatching(){
+ const scrollState={main:document.querySelector('.exam-main')?.scrollTop||0,side:document.querySelector('.exam-side')?.scrollTop||0,workspace:document.querySelector('.exam-workspace')?.scrollTop||0,x:window.scrollX||0,y:window.scrollY||0};
+ const restoreScroll=()=>{const restore=()=>{const m=document.querySelector('.exam-main'),sd=document.querySelector('.exam-side'),ws=document.querySelector('.exam-workspace');if(m)m.scrollTop=scrollState.main;if(sd)sd.scrollTop=scrollState.side;if(ws)ws.scrollTop=scrollState.workspace;window.scrollTo(scrollState.x,scrollState.y);};restore();requestAnimationFrame(()=>{restore();requestAnimationFrame(restore);});setTimeout(restore,40);};
  const heads=(parseSettings(model.exercise).headings||[]).filter(Boolean);
  const items=model.items||[];
  if(!matchingOrder)matchingOrder=items.map(it=>String(it.position_no));
@@ -94,23 +89,23 @@ function renderMatching(){
    </div>`;
  }).join('');
  const answeredCount=Object.keys(answers).filter(k=>answers[k]).length;
- const resultHtml='';
- document.getElementById('content').innerHTML=layout(main,`<div class="side-title side-title-large"><div><b>ÜBERSCHRIFTEN</b><small>FÜR TEXT</small></div><span>${answeredCount}/${items.length}</span></div><div class="matching-controls"><button type="button" class="side-icon shuffle-all" aria-label="${text('خلط العناوين والفقرات','Überschriften und Texte mischen')}" title="${text('خلط العناوين والفقرات','Überschriften und Texte mischen')}">⤨</button></div><div class="heading-list">${side}</div>`);
+ const resultHtml=resultData?`<div class="side-result ${resultData.percent>=60?'result-pass':'result-fail'}"><strong>${resultData.score}/${resultData.max}</strong><span>${resultData.percent}% — ${esc(resultData.result)}</span></div>`:'';
+ document.getElementById('content').innerHTML=layout(main,`<div class="side-result-slot">${resultHtml}</div><div class="side-title side-title-large"><div><b>ÜBERSCHRIFTEN</b><small>FÜR TEXT</small></div><span>${answeredCount}/${items.length}</span></div><div class="matching-controls"><button type="button" class="side-icon shuffle-all" aria-label="${text('خلط العناوين والفقرات','Überschriften und Texte mischen')}" title="${text('خلط العناوين والفقرات','Überschriften und Texte mischen')}">⤨</button></div><div class="heading-list">${side}</div>`);
  document.querySelectorAll('[data-item]').forEach(c=>{
    c.onmousedown=e=>{if(e.target.closest('select,.text-tools,.mini-tool,.clear-selection'))return;e.preventDefault();};
    c.onclick=e=>{if(e.target.closest('select,.text-tools,.mini-tool,.clear-selection'))return;activeItem=String(c.dataset.item);document.querySelectorAll('[data-item]').forEach(x=>x.classList.toggle('active-item',String(x.dataset.item)===activeItem));};
  });
  document.querySelectorAll('[data-paragraph-select]').forEach(sel=>sel.onchange=e=>{
-   e.stopPropagation(); const st=captureExerciseScroll();
+   e.stopPropagation();
    const n=String(sel.dataset.paragraphSelect), chosen=String(sel.value||'');
    activeItem=n;
    if(!chosen){delete answers[n];}else{Object.keys(answers).forEach(k=>{if(k!==n&&answers[k]===chosen)delete answers[k];});answers[n]=chosen;}
-   renderMatching();restoreExerciseScroll(st);bindActions();
+   renderMatching();restoreScroll();bindActions();
  });
- document.querySelectorAll('[data-clear]').forEach(b=>b.onclick=e=>{e.stopPropagation();const st=captureExerciseScroll();delete answers[String(b.dataset.clear)];activeItem=String(b.dataset.clear);renderMatching();restoreExerciseScroll(st);bindActions();});
- document.querySelectorAll('[data-choice]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=e=>{e.preventDefault();if(b.disabled||!activeItem)return;const st=captureExerciseScroll();const chosen=b.dataset.choice;Object.keys(answers).forEach(k=>{if(k!==String(activeItem)&&answers[k]===chosen)delete answers[k];});answers[String(activeItem)]=chosen;renderMatching();restoreExerciseScroll(st);bindActions();};});
+ document.querySelectorAll('[data-clear]').forEach(b=>b.onclick=e=>{e.stopPropagation();delete answers[String(b.dataset.clear)];activeItem=String(b.dataset.clear);renderMatching();restoreScroll();bindActions();});
+ document.querySelectorAll('[data-choice]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=e=>{e.preventDefault();if(b.disabled||!activeItem)return;const chosen=b.dataset.choice;Object.keys(answers).forEach(k=>{if(k!==String(activeItem)&&answers[k]===chosen)delete answers[k];});answers[String(activeItem)]=chosen;renderMatching();restoreScroll();bindActions();};});
  const sh=document.querySelector('.shuffle-all');
- if(sh)sh.onclick=e=>{e.stopPropagation();const st=captureExerciseScroll();matchingOrder=shuffle(matchingOrder);headingOrder=shuffle(headingOrder);activeItem=null;renderMatching();restoreExerciseScroll(st);bindActions();};
+ if(sh)sh.onclick=e=>{e.stopPropagation();matchingOrder=shuffle(matchingOrder);headingOrder=shuffle(headingOrder);activeItem=null;renderMatching();restoreScroll();bindActions();};
  bindTextTools();
 }
 function renderSprachbausteine1(){
@@ -132,7 +127,7 @@ function renderSprachbausteine1(){
  }).join('');
  document.getElementById('content').innerHTML=layout(main,side,'spb1');
  document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>selectAnswer(b.dataset.q,b.dataset.o));
- const sh=document.querySelector('.shuffle-spb1'); if(sh)sh.onclick=e=>{e.preventDefault();e.stopPropagation();const st=captureExerciseScroll();items.forEach(it=>{const n=String(it.position_no);optionOrders[n]=shuffle((it.options||[]).slice(0,3).map(o=>o.option_key));});rerenderExerciseStable(st);};
+ const sh=document.querySelector('.shuffle-spb1'); if(sh)sh.onclick=e=>{e.preventDefault();e.stopPropagation();items.forEach(it=>{const n=String(it.position_no);optionOrders[n]=shuffle((it.options||[]).slice(0,3).map(o=>o.option_key));});renderWorkspace(false);bindActions();};
  bindTextTools();
 }
 
@@ -175,45 +170,19 @@ function renderChoiceQuestions(){
    if(sh)sh.onclick=e=>{
      e.preventDefault(); e.stopPropagation();
      items.forEach(it=>{const n=String(it.position_no); optionOrders[n]=shuffle((it.options||[]).slice(0,3).map(o=>o.option_key));});
-     const st=captureExerciseScroll();
-     rerenderExerciseStable(st);
+     renderWorkspace(false); bindActions();
    };
  }
  bindTextTools();
 }
 
-function renderBody(body){
- let html=escBody(body||'');
- (model.items||[]).forEach(i=>{
-   const n=String(i.position_no);
-   const val=answerValue(n);
-   const detail=resultData?.details?.find(d=>String(d.prompt)===String(i.prompt));
-   const correct=String(detail?.correct_answer||'');
-   const displayVal=showModelAnswers&&correct?correct:val;
-   const resultClass=detail&&val?(detail.ok?'result-correct':'result-wrong'):'';
-   const modelClass=showModelAnswers&&correct?'model-correct':'';
-   const isSpb1=model.exercise.section==='Sprachbausteine'&&model.exercise.teil==='Teil 1';
-   const isSpb2=model.exercise.section==='Sprachbausteine'&&model.exercise.teil==='Teil 2';
-   const examNo=isSpb1?Number(n)+20:isSpb2?Number(n)+30:Number(n);
-   let re;
-   if(isSpb1){
-     const correctText=String(i.correctText||i.prompt||'').trim();
-     re=correctText
-       ?new RegExp('\\('+examNo+'\\)|\\['+examNo+'\\]|\\{'+examNo+'\\}|\\['+escapeRegExp(correctText)+'\\]','g')
-       :new RegExp('\\('+examNo+'\\)|\\['+examNo+'\\]|\\{'+examNo+'\\}','g');
-   }else{
-     re=new RegExp('\\('+n+'\\)|\\['+n+'\\]|\\{'+n+'\\}','g');
-   }
-   const shown=displayVal?esc(labelFor(n,displayVal)):'('+examNo+')';
-   html=html.replace(re,'<span class="inline-answer '+(displayVal?'filled ':'')+resultClass+' '+modelClass+'">'+shown+'</span>');
- });
- return html;
-}
-function escapeRegExp(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}function selectAnswer(n,val){
- const scrollState=captureExerciseScroll();
+function renderBody(body){let html=escBody(body||'');(model.items||[]).forEach(i=>{const n=String(i.position_no);const val=answerValue(n);const isSpb1=model.exercise.section==='Sprachbausteine'&&model.exercise.teil==='Teil 1';const isSpb2=model.exercise.section==='Sprachbausteine'&&model.exercise.teil==='Teil 2';const examNo=isSpb1?Number(n)+20:isSpb2?Number(n)+30:Number(n);let re;if(isSpb1){const correctText=String(i.correctText||i.prompt||'').trim();re=correctText?new RegExp('\\('+examNo+'\\)|\\['+examNo+'\\]|\\{'+examNo+'\\}|\\['+escapeRegExp(correctText)+'\\]','g'):new RegExp('\\('+examNo+'\\)|\\['+examNo+'\\]|\\{'+examNo+'\\}','g');}else{re=new RegExp('\\('+n+'\\)|\\['+n+'\\]|\\{'+n+'\\}','g');}html=html.replace(re,`<span class="inline-answer ${val?'filled':''}">${val?esc(labelFor(n,val)):'('+examNo+')'}</span>`);});return html;}function escapeRegExp(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}function selectAnswer(n,val){
+ const scrollState={main:document.querySelector('.exam-main')?.scrollTop||0,side:document.querySelector('.exam-side')?.scrollTop||0,workspace:document.querySelector('.exam-workspace')?.scrollTop||0,x:window.scrollX||0,y:window.scrollY||0};
+ const restore=()=>{const m=document.querySelector('.exam-main'),sd=document.querySelector('.exam-side'),ws=document.querySelector('.exam-workspace');if(m)m.scrollTop=scrollState.main;if(sd)sd.scrollTop=scrollState.side;if(ws)ws.scrollTop=scrollState.workspace;window.scrollTo(scrollState.x,scrollState.y);};
  activeItem=String(n);answers[String(n)]=val;
  submitted=false; resultData=null; showModelAnswers=false;
- rerenderExerciseStable(scrollState);
+ renderWorkspace(false); bindActions();
+ restore(); requestAnimationFrame(restore); requestAnimationFrame(()=>requestAnimationFrame(restore)); setTimeout(restore,30);
 }
 function sharedOptions(){const map=new Map();(model.items||[]).forEach(it=>(it.options||[]).forEach(o=>{if(o.option_text&&!map.has(o.option_key))map.set(o.option_key,o.option_text);}));return [...map.entries()];}
 function renderTF(){const main=`${renderAudio()}<div class="tf-list">${model.items.map(it=>{const qid='tf-main-'+it.position_no;return `<article class="tf-row"><div class="item-number">${it.position_no}</div><div class="tf-text"><div class="question-text-tools">${textTools(it.prompt||'',qid)}<div id="${qid}" data-content-id="${qid}" data-source="${esc(it.prompt||'')}">${escBody(it.prompt)}</div>${translationBox(qid+'-translation')}</div></div><div class="tf-actions"><button class="side-option ${answerValue(it.position_no)==='Richtig'?'selected':''} ${(()=>{const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));return d&&answerValue(it.position_no)==='Richtig'?(d.ok?'result-correct':'result-wrong'):''})()} ${(()=>{const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));return showModelAnswers&&String(d?.correct_answer||'')==='Richtig'?'model-correct':''})()}" data-q="${it.position_no}" data-o="Richtig">Richtig</button><button class="side-option ${answerValue(it.position_no)==='Falsch'?'selected':''} ${(()=>{const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));return d&&answerValue(it.position_no)==='Falsch'?(d.ok?'result-correct':'result-wrong'):''})()} ${(()=>{const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));return showModelAnswers&&String(d?.correct_answer||'')==='Falsch'?'model-correct':''})()}" data-q="${it.position_no}" data-o="Falsch">Falsch</button></div></article>`;}).join('')}</div>`;const side=`<div class="side-title"><b>RICHTIG / FALSCH</b><span>${Object.keys(answers).length}/${model.items.length}</span></div>${model.items.map(it=>{const qid='tf-side-'+it.position_no;return `<div class="side-question compact"><div class="question-text-tools">${textTools(it.prompt||'',qid)}<div id="${qid}" data-content-id="${qid}" data-source="${esc(it.prompt||'')}">${esc(it.prompt||'')}</div>${translationBox(qid+'-translation')}</div><div class="side-options"><button class="side-option ${answerValue(it.position_no)==='Richtig'?'selected':''} ${(()=>{const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));return d&&answerValue(it.position_no)==='Richtig'?(d.ok?'result-correct':'result-wrong'):''})()} ${(()=>{const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));return showModelAnswers&&String(d?.correct_answer||'')==='Richtig'?'model-correct':''})()}" data-q="${it.position_no}" data-o="Richtig">Richtig</button><button class="side-option ${answerValue(it.position_no)==='Falsch'?'selected':''} ${(()=>{const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));return d&&answerValue(it.position_no)==='Falsch'?(d.ok?'result-correct':'result-wrong'):''})()} ${(()=>{const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));return showModelAnswers&&String(d?.correct_answer||'')==='Falsch'?'model-correct':''})()}" data-q="${it.position_no}" data-o="Falsch">Falsch</button></div></div>`;}).join('')}`;document.getElementById('content').innerHTML=layout(main,side);document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>selectAnswer(b.dataset.q,b.dataset.o));bindTextTools();}
@@ -319,13 +288,13 @@ function bindActions(){
  if(b)b.onclick=submit;
  const mb=document.getElementById('modelBtn');
  if(mb)mb.onclick=async()=>{
-   const st=captureExerciseScroll();
    try{
      if(!submitted)await submit();
      if(!resultData)return;
      showModelAnswers=true;
-     rerenderExerciseStable(st);
-   }catch(e){document.getElementById('content').insertAdjacentHTML('beforeend',`<div class="alert bad">${esc(e.message)}</div>`);restoreExerciseScroll(st);}
+     renderWorkspace(false);
+     bindActions();
+   }catch(e){document.getElementById('content').insertAdjacentHTML('beforeend',`<div class="alert bad">${esc(e.message)}</div>`);}
  };
  const tr=document.getElementById('titleReveal');
  if(tr)tr.onclick=()=>{titleRevealed=!titleRevealed;const h=document.getElementById('thema-title');if(h)h.classList.toggle('thema-title-hidden',!titleRevealed);tr.setAttribute('aria-label',text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen'));};
@@ -333,7 +302,7 @@ function bindActions(){
 }
 
 function renderWorkspace(){stopSpeaking();const t=model.exercise.task_type;const isSpb1=model.exercise.section==='Sprachbausteine'&&model.exercise.teil==='Teil 1';const isMatching=(t==='MATCHING')||(model.exercise.section==='Lesen'&&['Teil 1','Teil 3'].includes(model.exercise.teil))||(model.exercise.section==='Hören'&&model.exercise.teil==='Teil 3');if(t==='WRITING')return renderWriting();if(t==='SPEAKING')return renderSpeaking();if(t==='AUDIO_TF')return renderTF();if(isSpb1)return renderSprachbausteine1();if(isMatching)return renderMatching();return renderChoiceQuestions();}
-function renderResult(r){const st=captureExerciseScroll();submitted=true;resultData=r;rerenderExerciseStable(st);}
+function renderResult(r){submitted=true;resultData=r;renderWorkspace(false);bindActions();}
 async function submit(){if(submitted)return;if(!model.items.length){if(mockMode){goNextMock();}return;}try{const r=await api('exercise-submit',{method:'POST',body:{exercise_id:id,answers}});localStorage.setItem('last_exercise_result_'+id,JSON.stringify(r));markExerciseCompleted(id);if(mockMode){const s=getMockSession();if(s){s.results=s.results||[];s.results.push({id,title:model.exercise.title,section:model.exercise.section,teil:model.exercise.teil,score:r.score,max:r.max,percent:r.percent,result:r.result});s.index=(s.ids||[]).findIndex(x=>String(x)===String(id));localStorage.setItem('telc_self_test',JSON.stringify(s));}goNextMock();return;}renderResult(r);}catch(e){document.getElementById('content').insertAdjacentHTML('beforeend',`<div class="alert bad">${esc(e.message)}</div>`);}}
 (async()=>{try{const d=await api('exercise-get?id='+encodeURIComponent(id));model=d;document.body.classList.toggle('mock-mode',mockMode);renderWorkspace();bindActions();if(mockMode)startMockTimer();}catch(e){document.getElementById('content').innerHTML=`<div class="alert bad">${esc(e.message)}</div>`;}})();
 
