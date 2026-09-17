@@ -38,13 +38,14 @@ function sectionIcon(s){return ({Lesen:'◫',Hören:'◉',Sprachbausteine:'⌘',
 function sectionLabel(s){return ({Lesen:'Lesen',Hören:'Hören',Sprachbausteine:'Sprachbausteine',Schreiben:'Schreiben',Sprechen:'Sprechen'})[s]||s;}
 function taskTypeLabel(type){const map={MATCHING:{ar:'مطابقة',de:'Zuordnung'},MCQ:{ar:'اختيار من متعدد',de:'Multiple Choice'},AUDIO_TF:{ar:'صحيح / خطأ',de:'Richtig / Falsch'},WRITING:{ar:'كتابة',de:'Schreiben'},SPEAKING:{ar:'تحدث',de:'Sprechen'}};const x=map[type];return x?text(x.ar,x.de):type;}
 function levelAvailable(level){return state.exercises.some(x=>(x.level||'B2')===level);}
+function availableTeileFor(section, level=state.level){const order=TEIL_ORDER[section]||[];const present=new Set(state.exercises.filter(x=>(x.level||'B2')===level&&x.section===section).map(x=>String(x.teil||'').trim()).filter(Boolean));return order.filter(t=>present.has(t)).concat([...present].filter(t=>!order.includes(t)).sort((a,b)=>a.localeCompare(b,'de',{numeric:true})));}
 function levelExercises(level=state.level){return state.exercises.filter(x=>(x.level||'B2')===level);}
 function totalCountForLevel(){return levelExercises().length;}
 function completedCountForLevel(){return levelExercises().filter(x=>isExerciseCompleted(x.id)).length;}
 function levelProgressPercent(){const total=totalCountForLevel();return total?Math.round((completedCountForLevel()/total)*100):0;}
 function render(){
   const list=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===state.section);
-  const availableTeile=TEIL_ORDER[state.section]||[];
+  const availableTeile=availableTeileFor(state.section);
   if(!availableTeile.includes(selectedTeil)) selectedTeil=availableTeile[0]||'';
   const has=levelAvailable(state.level);
   $('content').innerHTML=`
@@ -83,8 +84,8 @@ function render(){
       </div>
       <a class="btn self-test-btn" href="/self-test.html?level=${encodeURIComponent(state.level)}">${text('ابدأ امتحان عشوائي','Zufällige Prüfung starten')} <span>←</span></a>
     </section>`;
-  document.querySelectorAll('[data-level]').forEach(b=>b.onclick=()=>{state.level=b.dataset.level;state.section='Lesen';selectedTeil='Teil 1';render();});
-  document.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>{state.section=b.dataset.section;selectedTeil=(TEIL_ORDER[state.section]||[])[0]||'';render();});
+  document.querySelectorAll('[data-level]').forEach(b=>b.onclick=()=>{state.level=b.dataset.level;state.section='Lesen';selectedTeil=availableTeileFor('Lesen',state.level)[0]||'';render();});
+  document.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>{state.section=b.dataset.section;selectedTeil=availableTeileFor(state.section)[0]||'';render();});
   document.querySelectorAll('[data-teil]').forEach(b=>b.onclick=()=>{selectedTeil=b.dataset.teil;renderTopics();});
   const nav=$('telcChatNav'); if(nav) nav.href='/telc-chat.html';
   $('search').oninput=renderTopics;
@@ -125,7 +126,7 @@ document.addEventListener('click',e=>{const a=e.target.closest('a[href*="/exerci
 
 logoutLink.onclick=async e=>{e.preventDefault();await api('auth-logout',{method:'POST'});location.href='/';};
 (async()=>{try{const d=await api('me');state.exercises=d.exercises||[];state.student=d.student;state.subscription=d.subscription||null;remainingDays=calcRemainingDays();const urlLevel=qs('level');if(['B1','B2','C1'].includes(urlLevel))state.level=urlLevel;
-try{const saved=JSON.parse(sessionStorage.getItem('telc_dashboard_return')||'null');if(saved){if(['B1','B2','C1'].includes(saved.level))state.level=saved.level;if(SECTION_ORDER.includes(saved.section))state.section=saved.section;if((TEIL_ORDER[state.section]||[]).includes(saved.teil))selectedTeil=saved.teil;window.__telcRestoreSearch=saved.search||'';window.__telcRestoreScroll=Number(saved.scrollY)||0;sessionStorage.removeItem('telc_dashboard_return');}}catch{}
+try{const saved=JSON.parse(sessionStorage.getItem('telc_dashboard_return')||'null');if(saved){if(['B1','B2','C1'].includes(saved.level))state.level=saved.level;if(SECTION_ORDER.includes(saved.section))state.section=saved.section;if(availableTeileFor(state.section).includes(saved.teil))selectedTeil=saved.teil;window.__telcRestoreSearch=saved.search||'';window.__telcRestoreScroll=Number(saved.scrollY)||0;sessionStorage.removeItem('telc_dashboard_return');}}catch{}
 render();if(window.__telcRestoreSearch&&$('search'))$('search').value=window.__telcRestoreSearch;renderTopics();setTimeout(()=>{if(window.__telcRestoreScroll)window.scrollTo(0,window.__telcRestoreScroll);},80);}catch(e){location.href='/?error=session';}})();
 document.addEventListener('langchange',render);
 </script></body></html>
