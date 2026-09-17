@@ -1,4 +1,4 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>اختبر نفسك</title><link rel="stylesheet" href="/assets/app.css">
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>الامتحان التجريبي — TELC Voll</title><link rel="stylesheet" href="/assets/app.css">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
@@ -7,18 +7,18 @@
 const LEVELS=['B1','B2','C1'];
 let exercises=[],level=['B1','B2','C1'].includes(qs('level'))?qs('level'):'B2';
 const txt=(a,d)=>getLang()==='ar'?a:d;
-const groups={Lesen:['Teil 1','Teil 2','Teil 3'],Hören:['Teil 1','Teil 2','Teil 3'],Sprachbausteine:['Teil 1','Teil 2'],Schreiben:['Teil 1'],Sprechen:['Teil 1','Teil 2','Teil 3']};
+const groups={Lesen:['Teil 1','Teil 2','Teil 3'],Hören:['Teil 1','Teil 2','Teil 3'],Sprachbausteine:['Teil 1','Teil 2'],Schreiben:['Teil 1']};
 
 function render(){
   document.getElementById('content').innerHTML=`<section class="self-test-shell mock-start-shell">
     <span class="tag">${txt('امتحان تجريبي','Probeprüfung')}</span>
     <h1>${txt('اختر مستوى الامتحان','Prüfungsniveau wählen')}</h1>
-    <p class="muted">${txt('اختر B1 أو B2 أو C1 فقط. بعد البدء يختار الموقع التمارين عشوائياً من المحتوى المنشور ويبدأ المؤقت تلقائياً.','Wähle nur B1, B2 oder C1. Danach wählt die Plattform die veröffentlichten Aufgaben zufällig aus und startet die Prüfungszeit automatisch.')}</p>
+    <p class="muted">${txt('اختر B1 أو B2 أو C1 فقط. بعد البدء يختار الموقع التمارين عشوائياً من المحتوى المنشور ويبدأ مؤقت واحد للامتحان الكتابي كاملاً.','Wähle nur B1, B2 oder C1. Danach wählt die Plattform die veröffentlichten Aufgaben zufällig aus und startet eine einzige Gesamtzeit für die komplette schriftliche Simulation.')}</p>
     <div class="self-levels">${LEVELS.map(l=>`<button class="level-btn ${level===l?'active':''}" data-level="${l}">Telc ${l}</button>`).join('')}</div>
     <div class="self-test-grid mock-rules">
       <article><span class="self-icon">↝</span><h2>${txt('اختيار عشوائي','Zufällige Auswahl')}</h2><p>${txt('لا تظهر قائمة بالمواضيع ولا يمكنك اختيار موضوع أو قسم.','Keine Themenliste und keine Auswahl einzelner Themen oder Bereiche.')}</p></article>
-      <article><span class="self-icon">◷</span><h2>${txt('وقت الامتحان','Prüfungszeit')}</h2><p>${txt('يبدأ المؤقت عند بدء المحاكاة ويستمر أثناء الانتقال بين المهام.','Die Prüfungszeit startet beim Beginn und läuft beim Wechsel zwischen Aufgaben weiter.')}</p></article>
-      <article><span class="self-icon">✓</span><h2>${txt('تجربة امتحان','Prüfungserlebnis')}</h2><p>${txt('أسماء المواضيع والترجمات وأدوات التعلم مخفية أثناء المحاكاة.','Themennamen, Übersetzungen und Lernwerkzeuge bleiben während der Simulation verborgen.')}</p></article>
+      <article><span class="self-icon">◷</span><h2>${txt('مؤقت واحد','Ein Gesamt-Timer')}</h2><p>${txt('مؤقت واحد للامتحان الكتابي كاملاً ويظهر دائماً في الأعلى بجانب أقسام الامتحان.','Ein einziger Timer läuft für die gesamte schriftliche Prüfung und bleibt oben neben den Prüfungsteilen sichtbar.')}</p></article>
+      <article><span class="self-icon">✓</span><h2>${txt('امتحان كتابي فقط','Nur schriftliche Prüfung')}</h2><p>${txt('تشمل المحاكاة Lesen وHören وSprachbausteine وSchreiben فقط، ولا تشمل Sprechen.','Die Simulation umfasst nur Lesen, Hören, Sprachbausteine und Schreiben; Sprechen ist nicht enthalten.')}</p></article>
     </div>
     <button class="btn self-test-btn" id="startBtn">${txt('بدء امتحان Telc','Telc-Prüfung starten')} ←</button>
   </section>`;
@@ -28,20 +28,20 @@ function render(){
 
 function start(){
   const picks=[];
-  // One random published exercise for every available TELC Teil in the selected level.
   for(const section of Object.keys(groups)){
     for(const teil of groups[section]){
-      const pool=exercises.filter(x=>(x.level||'B2')===level && x.section===section && x.teil===teil && x.status!=='draft');
+      const pool=exercises.filter(x=>(x.level||'B2')===level && x.section===section && x.teil===teil && x.status==='published');
       if(pool.length)picks.push(pool[Math.floor(Math.random()*pool.length)]);
     }
   }
-  if(!picks.length){alert(txt('لا توجد تمارين منشورة لهذا المستوى.','Keine veröffentlichten Übungen für dieses Niveau.'));return;}
-  const defaults={Lesen:2700,Hören:1800,Sprachbausteine:900,Schreiben:1800,Sprechen:900};
-  const totalSeconds=Math.max(60,picks.reduce((sum,x)=>sum+(Number(x.settings_json?.duration_seconds||x.duration_seconds||0)||defaults[x.section]||900),0));
+  const bySection=picks.reduce((m,x)=>{(m[x.section] ||= []).push(x);return m;},{});
+  const required=['Lesen','Hören','Sprachbausteine','Schreiben'];
+  const missing=required.filter(s=>!bySection[s]?.length);
+  if(missing.length){alert(txt('لا يمكن بدء المحاكاة: لا توجد تمارين منشورة لبعض الأقسام: '+missing.join('، '),'Die Simulation kann nicht gestartet werden. Veröffentlichten Aufgaben fehlen für: '+missing.join(', ')));return;}
   const now=Date.now();
-  const session={id:crypto.randomUUID?crypto.randomUUID():Date.now().toString(36),level,ids:picks.map(x=>x.id),index:0,results:[],startedAt:now,endAt:now+totalSeconds*1000,totalSeconds,mock:true,tasks:picks.map(x=>({id:x.id,section:x.section,teil:x.teil,task_type:x.task_type})),answersByExercise:{},spoken:{status:'not_started'} };
-  localStorage.setItem('telc_self_test',JSON.stringify(session));
-  location.href='/exercise.html?id='+encodeURIComponent(picks[0].id)+'&session='+encodeURIComponent(session.id)+'&mock=1';
+  const session={id:crypto.randomUUID?crypto.randomUUID():Date.now().toString(36),level,startedAt:now,examDurationSeconds:8400,examEndsAt:now+8400*1000,mock:true,tasks:picks.map(x=>({id:x.id,section:x.section,teil:x.teil,title:x.title,task_type:x.task_type})),answersByExercise:{},writingByExercise:{},currentSection:'Lesen'};
+  localStorage.setItem('telc_mock_exam',JSON.stringify(session));
+  location.href='/mock-exam.html?session='+encodeURIComponent(session.id);
 }
 (async()=>{try{const d=await api('me');exercises=d.exercises||[];render();}catch(e){location.href='/?error=session';}})();
 logoutLink.onclick=async e=>{e.preventDefault();await api('auth-logout',{method:'POST'});location.href='/';};

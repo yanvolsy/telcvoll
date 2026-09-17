@@ -2,9 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#080808">
-<title data-i18n="sum_page_title">الملخصات</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الملخصات</title>
 <link rel="stylesheet" href="/assets/app.css">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
@@ -13,47 +12,53 @@
 <link rel="manifest" href="/manifest.webmanifest">
 </head>
 <body>
-<header class="top">
-  <a class="brand" href="/dashboard.html">TELC Voll</a>
-  <nav>
-    <a href="/dashboard.html" data-i18n="nav_home">الرئيسية</a>
-    <a href="/errors.html" data-i18n="nav_errors">أخطائي</a>
-    <a href="/summaries.html" data-i18n="nav_summaries">الملخصات</a>
-    <a href="/speaking.html">Sprechen AI</a>
-    <a href="#" id="logoutLink" data-i18n="nav_logout">خروج</a>
-  </nav>
+<header class="top admin-nav">
+  <a class="brand" href="/admin/index.html" aria-label="TELC Voll"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
+  <nav><a href="/admin/index.html">الرئيسية</a><a href="#" id="logoutLink">خروج</a></nav>
 </header>
 <main class="wrap">
-  <h1 data-i18n="sum_page_title">الملخصات</h1>
-  <div class="grid" id="list"><p class="muted" data-i18n="loading">جارٍ التحميل…</p></div>
+  <div class="panel">
+    <h1>الملخصات</h1>
+    <form id="f">
+      <select name="section">
+        <option>Lesen</option><option>Hören</option><option>Sprachbausteine</option><option>Schreiben</option><option>Sprechen</option>
+      </select>
+      <input name="teil" placeholder="Teil 1">
+      <input name="title" placeholder="العنوان">
+      <textarea name="body" placeholder="الملخص"></textarea>
+      <textarea name="keywords" placeholder="الكلمات المهمة"></textarea>
+      <textarea name="strategy" placeholder="الاستراتيجية"></textarea>
+      <textarea name="errors" placeholder="الأخطاء الشائعة"></textarea>
+      <button class="btn">نشر</button>
+    </form>
+  </div>
+  <div class="grid" id="list" style="margin-top:18px"></div>
 </main>
-<footer data-i18n="footer">TELC Voll</footer>
+<footer class="admin-footer">TELC Voll — لوحة إدارة المنصة</footer>
 <script src="/assets/i18n.js"></script>
-<script src="/assets/app.js"></script>
+<script src="/assets/app.js"></script><script src="/assets/admin-guard.js"></script>
 <script>
-logoutLink.onclick = async (e) => {
+logoutLink.onclick = async (e) => { e.preventDefault(); await api('admin-logout', { method: 'POST' }); location.href = '/admin/login.html'; };
+
+f.onsubmit = async (e) => {
   e.preventDefault();
-  await api('auth-logout', { method: 'POST' });
-  location.href = '/';
+  const fd = new FormData(f);
+  await api('admin-summaries', { method: 'POST', body: {
+    section: fd.get('section'), teil: fd.get('teil'), title: fd.get('title'),
+    body: fd.get('body'), keywords: fd.get('keywords'), strategy: fd.get('strategy'), errors: fd.get('errors'),
+  }});
+  f.reset();
+  load();
 };
 
-(async () => {
-  try {
-    const { summaries } = await api('summaries-list');
-    list.innerHTML = summaries.map((r) => `
-      <article class="card">
-        <span class="tag">${esc(r.section)} · ${esc(r.teil)}</span>
-        <h2>${esc(r.title)}</h2>
-        <p>${esc(r.body).replace(/\n/g, '<br>')}</p>
-        ${r.keywords ? `<p><b>${t('sum_keywords')}</b> ${esc(r.keywords)}</p>` : ''}
-        ${r.strategy ? `<p><b>${t('sum_strategy')}</b> ${esc(r.strategy).replace(/\n/g, '<br>')}</p>` : ''}
-        ${r.common_errors ? `<p><b>${t('sum_errors')}</b> ${esc(r.common_errors).replace(/\n/g, '<br>')}</p>` : ''}
-      </article>`).join('') || `<div class="card">${t('sum_none')}</div>`;
-  } catch (err) {
-    location.href = '/?error=session';
-  }
-})();
-document.addEventListener('langchange', () => location.reload());
+async function load() {
+  const { summaries } = await api('admin-summaries');
+  list.innerHTML = summaries.map((r) => `
+    <div class="card"><span class="tag">${esc(r.section)} · ${esc(r.teil)}</span><h3>${esc(r.title)}</h3></div>`
+  ).join('');
+}
+
+load().catch(() => location.href = '/admin/login.html');
 </script>
 </body>
 </html>

@@ -14,6 +14,7 @@ exports.handler = async (event) => {
   if (!id) return json(400, { error: 'Missing exercise_id' });
 
   const pool = db();
+  await pool.query("ALTER TABLE exercises ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP NULL");
   const client = await pool.connect();
   try {
     const exRes = await client.query("SELECT * FROM exercises WHERE id=$1 AND status='published' AND deleted_at IS NULL", [id]);
@@ -67,8 +68,10 @@ exports.handler = async (event) => {
         prompt: it.prompt,
         given,
         ok,
-        correct_answer: ok ? undefined : it.correct_answer,
-        explanation: ok ? undefined : it.explanation,
+        // The model solution is revealed only after submission, so the
+        // correct answer can safely be returned for every item here.
+        correct_answer: it.correct_answer,
+        explanation: it.explanation,
       })),
     });
   } catch (e) {

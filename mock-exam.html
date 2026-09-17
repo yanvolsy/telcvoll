@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>الامتحان التجريبي — TELC Voll</title>
+<link rel="stylesheet" href="/assets/app.css">
+<link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="/manifest.webmanifest">
+<style>
+.mock-root{max-width:1260px;margin:0 auto;padding:18px 22px 120px}
+.mock-top{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 96%,transparent);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);padding:10px 0}
+.mock-top-inner{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px}
+.mock-brand{font-weight:950;color:var(--ink);text-decoration:none;white-space:nowrap}
+.mock-status{display:flex;align-items:center;gap:8px;justify-content:flex-end}
+.mock-timer{font-variant-numeric:tabular-nums;font-weight:950;font-size:21px;padding:9px 14px;border-radius:14px;background:var(--exercise-accent-soft);color:var(--exercise-accent);min-width:108px;text-align:center;border:1px solid color-mix(in srgb,var(--exercise-accent) 22%,var(--line))}
+.mock-timer.danger{background:#fff0ee;color:#b7372d;border-color:#e6a39d}
+.mock-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.mock-tab{border:1px solid var(--line);background:var(--white);color:var(--ink);border-radius:13px;padding:10px 9px;cursor:pointer;font:inherit;font-weight:900;box-shadow:var(--shadow);min-width:0}
+.mock-tab small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+.mock-tab.active{border-color:var(--exercise-accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--exercise-accent) 16%,transparent);background:var(--exercise-accent-soft)}
+.mock-tab:disabled{opacity:.45;cursor:not-allowed}
+.mock-progress{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:12px 0}
+.mock-progress-bar{height:7px;background:var(--line);border-radius:999px;overflow:hidden;flex:1}
+.mock-progress-bar i{display:block;height:100%;background:var(--exercise-accent);border-radius:inherit;transition:width .2s}
+.mock-card{background:var(--white);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:30px}
+.mock-section-label{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.mock-section-label .tag{font-weight:900}
+.mock-task-count{color:var(--muted);font-size:13px}
+.mock-task-body{margin-top:22px;font-size:18px;line-height:2}
+.mock-audio{padding:14px;border:1px solid var(--line);background:var(--bg);border-radius:15px;margin:18px 0}
+.mock-audio audio{width:100%}
+.mock-item{border:1px solid var(--line);border-radius:17px;padding:17px;margin:14px 0;background:var(--bg)}
+.mock-item-prompt{font-weight:800;line-height:1.7;margin-bottom:12px}
+.mock-options{display:grid;gap:9px}
+.mock-option{display:flex;align-items:flex-start;gap:10px;width:100%;border:1px solid var(--line);background:var(--white);color:var(--ink);border-radius:13px;padding:13px;text-align:start;cursor:pointer;font:inherit}
+.mock-option:hover{border-color:var(--exercise-accent)}
+.mock-option.selected{border-color:var(--exercise-accent);background:var(--exercise-accent-soft);box-shadow:0 0 0 2px color-mix(in srgb,var(--exercise-accent) 12%,transparent)}
+.mock-option-key{font-weight:950;color:var(--exercise-accent);min-width:26px}
+.mock-select{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--white);font:inherit}
+.mock-writing-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.mock-writing-box{border:1px solid var(--line);border-radius:18px;padding:18px;background:var(--bg)}
+.mock-writing-box h3{margin-top:0}
+.mock-writing-editor textarea{width:100%;min-height:390px;resize:vertical;border:1px solid var(--line);border-radius:15px;padding:16px;background:var(--white);font:inherit;line-height:1.8}
+.mock-editor-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-top:7px}
+.mock-actions{position:fixed;bottom:0;left:0;right:0;z-index:60;background:color-mix(in srgb,var(--bg) 96%,transparent);backdrop-filter:blur(15px);border-top:1px solid var(--line);padding:12px 20px}
+.mock-actions-inner{max-width:1260px;margin:auto;display:flex;justify-content:space-between;gap:10px}
+.mock-error{margin-top:15px}
+.mock-finish{max-width:720px;margin:80px auto;text-align:center}
+.mock-finish .spinner{width:44px;height:44px;border:4px solid var(--line);border-top-color:var(--exercise-accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 18px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:900px){.mock-top-inner{grid-template-columns:auto 1fr}.mock-status{grid-column:2;grid-row:1}.mock-tabs{grid-column:1/-1;grid-row:2}.mock-writing-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.mock-root{padding:12px 12px 110px}.mock-top-inner{gap:8px}.mock-brand{font-size:13px}.mock-status{gap:5px}.mock-status .muted{display:none}.mock-timer{font-size:18px;min-width:96px;padding:8px 10px}.mock-tabs{grid-template-columns:repeat(2,1fr)}.mock-card{padding:18px}.mock-task-body{font-size:16px}.mock-actions{padding:9px 10px}.mock-actions-inner .btn{font-size:12px;padding:10px 12px}}
+</style>
+</head>
+<body>
+<header class="mock-top">
+  <div class="mock-root" style="padding:0 22px">
+    <div class="mock-top-inner">
+      <a class="back-link" href="/dashboard.html" aria-label="العودة">←</a>
+      <a class="mock-brand" href="/dashboard.html">TELC Voll · Prüfungssimulation</a>
+      <div class="mock-status"><span class="muted">الوقت المتبقي للامتحان</span><strong id="examTimer" class="mock-timer">--:--</strong></div>
+      <nav id="mockTabs" class="mock-tabs" aria-label="أقسام الامتحان"></nav>
+    </div>
+  </div>
+</header>
+<main id="app" class="mock-root"><div class="student-loading">جارٍ تحميل الامتحان…</div></main>
+<script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
+<script>
+const sessionId=qs('session');
+const SECTION_ORDER=['Lesen','Hören','Sprachbausteine','Schreiben'];
+const SECTION_LABEL={Lesen:'Lesen',Hören:'Hören',Sprachbausteine:'Sprachbausteine',Schreiben:'Schreiben'};
+const state={session:null,models:{},currentIndex:0,timerHandle:null,finishing:false};
+const app=document.getElementById('app');
+const text=(ar,de)=>getLang()==='ar'?ar:de;
+function escBody(v){return esc(v).replace(/\n/g,'<br>')}
+function getSession(){try{const s=JSON.parse(localStorage.getItem('telc_mock_exam')||'null');return s&&s.id===sessionId?s:null}catch{return null}}
+function saveSession(){state.session.currentIndex=state.currentIndex;localStorage.setItem('telc_mock_exam',JSON.stringify(state.session))}
+function currentTask(){return state.session?.tasks?.[state.currentIndex]}
+function currentSection(){return currentTask()?.section||'Lesen'}
+function sectionIndexes(section){return state.session.tasks.map((x,i)=>x.section===section?i:-1).filter(i=>i>=0)}
+function remaining(){return Math.max(0,Math.ceil((Number(state.session.examEndsAt||0)-Date.now())/1000))}
+function formatTime(n){return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0')}
+function tick(){
+  const n=remaining();
+  const el=document.getElementById('examTimer');
+  if(el){el.textContent=formatTime(n);el.classList.toggle('danger',n<=300)}
+  if(n<=0){finishExam();return}
+  state.timerHandle=setTimeout(tick,500);
+}
+function sectionFirstIndex(section){const i=state.session.tasks.findIndex(x=>x.section===section);return i<0?0:i}
+function jumpToSection(section){const i=sectionFirstIndex(section);if(i<0)return;persistCurrent();state.currentIndex=i;render()}
+function renderTabs(){
+  document.getElementById('mockTabs').innerHTML=SECTION_ORDER.map(s=>{const inds=sectionIndexes(s);const exists=inds.length>0;return `<button class="mock-tab ${currentSection()===s?'active':''}" data-section="${s}" ${exists?'':'disabled'}>${SECTION_LABEL[s]}<small>${exists?inds.length+' Aufgabe':'nicht verfügbar'}</small></button>`}).join('');
+  document.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>jumpToSection(b.dataset.section));
+}
+function baseShell(inner){
+  const sec=currentSection();const inds=sectionIndexes(sec);const local=Math.max(0,inds.indexOf(state.currentIndex));const total=inds.length;const pct=total?((local+1)/total)*100:0;
+  return `<div class="mock-progress"><strong>${esc(SECTION_LABEL[sec])}</strong><span class="muted">${local+1} / ${total}</span><div class="mock-progress-bar"><i style="width:${pct}%"></i></div></div><div class="mock-card">${inner}</div>`;
+}
+function itemAnswer(id){return state.session.answersByExercise?.[String(id)]||{}}
+function renderChoice(model){
+  window.__mockAnswers={...itemAnswer(model.exercise.id)};
+  const items=model.items||[];const isMatching=model.exercise.task_type==='MATCHING';
+  let html=`<div class="mock-section-label"><span class="tag">Telc ${esc(model.exercise.level||state.session.level)}</span><span class="mock-task-count">${esc(model.exercise.teil)}</span></div><div class="mock-task-body">${escBody(model.exercise.body||'')}</div>`;
+  if(model.exercise.audio_url)html+=`<div class="mock-audio"><audio controls preload="metadata" src="${esc(model.exercise.audio_url)}"></audio></div>`;
+  html+=items.map(it=>{const val=window.__mockAnswers[String(it.position_no)]||window.__mockAnswers[String(it.id)]||'';const opts=(it.options&&it.options.length?it.options:[{option_key:'Richtig',option_text:'Richtig'},{option_key:'Falsch',option_text:'Falsch'}]);if(isMatching){return `<article class="mock-item"><div class="mock-item-prompt">${esc(it.prompt)}</div><select class="mock-select" data-answer-q="${esc(it.position_no)}"><option value="">— ${text('اختر الإجابة','Antwort wählen')} —</option>${opts.map(o=>`<option value="${esc(o.option_key)}" ${String(val)===String(o.option_key)?'selected':''}>${esc(o.option_text)}</option>`).join('')}</select></article>`}return `<article class="mock-item"><div class="mock-item-prompt">${esc(it.prompt)}</div><div class="mock-options">${opts.map(o=>`<button type="button" class="mock-option ${String(val)===String(o.option_key)?'selected':''}" data-answer-q="${esc(it.position_no)}" data-answer="${esc(o.option_key)}"><span class="mock-option-key">${esc(o.option_key)}</span><span>${esc(o.option_text)}</span></button>`).join('')}</div></article>`}).join('');
+  return baseShell(html);
+}
+function renderWriting(model){
+  const settings=model.exercise.settings_json&&typeof model.exercise.settings_json==='object'?model.exercise.settings_json:{};const answer=state.session.writingByExercise?.[String(model.exercise.id)]||'';
+  return baseShell(`<div class="mock-section-label"><span class="tag">Telc ${esc(model.exercise.level||state.session.level)}</span><span class="mock-task-count">Schreiben · ${esc(model.exercise.teil)}</span></div><div class="mock-writing-grid"><div><div class="mock-writing-box"><h3>Situation</h3><div class="mock-task-body">${escBody(settings.situation_text||model.exercise.body||'')}</div></div>${settings.task_text?`<div class="mock-writing-box" style="margin-top:14px"><h3>Aufgabe</h3><div class="mock-task-body">${escBody(settings.task_text)}</div></div>`:''}</div><div class="mock-writing-box mock-writing-editor"><h3>${text('إجابتك','Deine Antwort')}</h3><textarea id="writingAnswer" placeholder="${text('اكتب إجابتك بالألمانية هنا…','Schreibe deine Antwort auf Deutsch…')}">${esc(answer)}</textarea><div class="mock-editor-meta"><span id="writingWords">0 Wörter</span><span>150+ Wörter empfohlen</span></div></div></div>`);
+}
+function bind(){
+  document.querySelectorAll('[data-answer-q]').forEach(el=>el.onchange=el.onclick=()=>{const q=el.dataset.answerQ;window.__mockAnswers=window.__mockAnswers||{};window.__mockAnswers[q]=el.dataset.answer||el.value||'';state.session.answersByExercise[String(currentTask().id)]={...window.__mockAnswers};saveSession();if(el.tagName==='BUTTON')document.querySelectorAll(`[data-answer-q="${CSS.escape(q)}"]`).forEach(x=>x.classList?.toggle('selected',x.dataset.answer===el.dataset.answer));});
+  const ta=document.getElementById('writingAnswer');if(ta){const update=()=>{document.getElementById('writingWords').textContent=(ta.value.trim()?ta.value.trim().split(/\s+/).length:0)+' Wörter';state.session.writingByExercise[String(currentTask().id)]=ta.value;saveSession()};ta.oninput=update;update();}
+  document.getElementById('prevBtn').onclick=prev;document.getElementById('nextBtn').onclick=next;
+}
+function persistCurrent(){
+  const task=currentTask();if(!task)return;
+  const m=state.models[task.id];if(!m)return;
+  state.session.answersByExercise=state.session.answersByExercise||{};state.session.writingByExercise=state.session.writingByExercise||{};
+  if(window.__mockAnswers)state.session.answersByExercise[String(m.exercise.id)]={...window.__mockAnswers};
+  const ta=document.getElementById('writingAnswer');if(ta)state.session.writingByExercise[String(m.exercise.id)]=ta.value;
+  saveSession();
+}
+function next(){
+  persistCurrent();
+  if(state.currentIndex<state.session.tasks.length-1){state.currentIndex++;render();return}
+  finishExam();
+}
+function prev(){persistCurrent();if(state.currentIndex>0){state.currentIndex--;render()}}
+async function loadModel(id){if(state.models[id])return state.models[id];const m=await api('exercise-get?id='+encodeURIComponent(id));state.models[id]=m;return m}
+async function render(){
+  clearTimeout(state.timerHandle);renderTabs();const task=currentTask();if(!task)return finishExam();
+  tick();const model=await loadModel(task.id);let inner=model.exercise.section==='Schreiben'||model.exercise.task_type==='WRITING'?renderWriting(model):renderChoice(model);
+  app.innerHTML=inner+`<div class="mock-error" id="mockError"></div>`;
+  const last=state.currentIndex===state.session.tasks.length-1;
+  document.querySelector('.mock-actions')?.remove();
+  document.body.insertAdjacentHTML('beforeend',`<div class="mock-actions"><div class="mock-actions-inner"><button id="prevBtn" class="btn light" ${state.currentIndex===0?'disabled':''}>← ${text('السابق','Zurück')}</button><button id="nextBtn" class="btn dark">${last?text('حفظ الإجابة وإنهاء الامتحان','Antwort speichern und Prüfung beenden'):text('التالي','Weiter')} →</button></div></div>`);
+  bind();
+}
+async function finishExam(){
+  if(state.finishing)return;state.finishing=true;persistCurrent();clearTimeout(state.timerHandle);document.querySelector('.mock-actions')?.remove();
+  app.innerHTML='<div class="mock-finish"><div class="spinner"></div><h2>جارٍ تصحيح الامتحان…</h2><p class="muted">يتم الآن مقارنة الإجابات وحساب النتائج وتقييم Schreiben فقط بعد إنهاء الامتحان.</p></div>';
+  try{
+    const tasks=state.session.tasks.map(t=>({id:t.id,section:t.section,teil:t.teil,answers:state.session.answersByExercise?.[String(t.id)]||{}}));
+    const objective=await api('mock-submit',{method:'POST',body:{level:state.session.level,tasks}});
+    const result={level:state.session.level,sections:{...(objective.sections||{})},finishedAt:Date.now(),writing:null,totalMax:225};
+    const w=state.session.tasks.find(t=>t.section==='Schreiben');
+    if(w){const answer=state.session.writingByExercise?.[String(w.id)]||'';if(answer.trim()){try{const r=await api('ai-writing-correct',{method:'POST',body:{exercise_id:w.id,answer}});result.writing={score:Number(r.overall_score||0),max:45,percent:Number(r.max_score?((r.overall_score||0)/r.max_score*100):0),criteria:r.criteria||[],summary_ar:r.summary_ar||'',summary_de:r.summary_de||''};}catch(e){result.writing={score:0,max:45,percent:0,error:e.message}}}else result.writing={score:0,max:45,percent:0,error:'empty'};result.sections.Schreiben={score:result.writing.score,max:45,percent:result.writing.percent};}
+    localStorage.setItem('telc_mock_result',JSON.stringify(result));localStorage.removeItem('telc_mock_exam');location.href='/self-test-result.html?mock=1';
+  }catch(e){state.finishing=false;app.innerHTML=`<div class="alert bad">${esc(e.message||'حدث خطأ أثناء التصحيح')}</div><div style="text-align:center;margin-top:15px"><button class="btn" onclick="location.reload()">إعادة المحاولة</button></div>`}
+}
+(async()=>{state.session=getSession();if(!state.session){location.href='/dashboard.html';return}state.session.tasks=(state.session.tasks||[]).filter(t=>SECTION_ORDER.includes(t.section));if(!state.session.tasks.length){location.href='/self-test.html';return}state.currentIndex=Math.min(Number(state.session.currentIndex)||0,state.session.tasks.length-1);if(Number(state.session.examDurationSeconds)!==8400||!Number(state.session.examEndsAt)){state.session.examDurationSeconds=8400;state.session.examEndsAt=Number(state.session.startedAt||Date.now())+8400*1000;saveSession()}await render()})();
+</script>
+</body></html>

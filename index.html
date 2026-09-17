@@ -1,106 +1,122 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#f47b20">
-<title>TELC Voll — منصة تدريب B1 B2 C1</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0d1310">
+<title>TELC Voll — لوحة الإدارة</title>
 <link rel="stylesheet" href="/assets/app.css">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
 <link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="/manifest.webmanifest">
+<style>
+/* Admin dashboard: same visual language as the student platform, with management-focused density. */
+.admin-dashboard{min-height:calc(100vh - 74px);padding:34px clamp(18px,4vw,56px) 70px;max-width:1480px;margin:auto}
+.admin-dashboard-head{display:flex;align-items:flex-end;justify-content:space-between;gap:28px;padding:28px 0 24px}
+.admin-dashboard-head h1{font-size:clamp(38px,5vw,66px);line-height:1.02;letter-spacing:-.055em;margin:9px 0 10px}
+.admin-dashboard-head p{margin:0;max-width:760px;font-size:15px}
+.admin-head-side{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.admin-overview{display:grid;grid-template-columns:repeat(5,1fr);gap:13px;margin:4px 0 28px}
+.admin-stat{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:17px 18px;box-shadow:var(--shadow);min-width:0;position:relative;overflow:hidden}
+.admin-stat:before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--green)}
+.admin-stat .stat-label{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--muted);font-size:12px;font-weight:800}
+.admin-stat .stat-icon{width:30px;height:30px;display:grid;place-items:center;border-radius:9px;background:var(--green-soft);color:var(--green);font-weight:950}
+.admin-stat strong{display:block;font-size:32px;line-height:1;margin-top:15px;letter-spacing:-.04em}
+.admin-section-head{display:flex;align-items:end;justify-content:space-between;gap:15px;margin:34px 0 13px}
+.admin-section-head h2{margin:0;font-size:25px;letter-spacing:-.03em}
+.admin-section-head p{margin:0;color:var(--muted);font-size:12px}
+.admin-tools-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.admin-tool{display:flex;flex-direction:column;min-height:190px;padding:20px;background:var(--white);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);text-decoration:none;transition:transform .18s,border-color .18s,box-shadow .18s}
+.admin-tool:hover{transform:translateY(-2px);border-color:var(--green);box-shadow:0 18px 40px rgba(16,35,30,.11)}
+.admin-tool-icon{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:var(--green-soft);color:var(--green);font-size:19px;font-weight:950;margin-bottom:15px}
+.admin-tool h3{margin:0 0 6px;font-size:18px}.admin-tool p{margin:0;color:var(--muted);font-size:12px;line-height:1.7}
+.admin-tool .tool-link{margin-top:auto;padding-top:17px;color:var(--green);font-size:12px;font-weight:900}
+.admin-footer{padding:22px 4vw;color:var(--muted);font-size:11px;text-align:center;border-top:1px solid var(--line)}
+@media(max-width:1100px){.admin-overview{grid-template-columns:repeat(3,1fr)}.admin-tools-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.admin-dashboard{padding:20px 13px 55px}.admin-dashboard-head{align-items:flex-start;flex-direction:column}.admin-dashboard-head h1{font-size:42px}.admin-head-side{width:100%;justify-content:flex-start}.admin-overview{grid-template-columns:1fr 1fr}.admin-tools-grid{grid-template-columns:1fr}.admin-stat strong{font-size:28px}}
+</style>
 </head>
-<body data-i18n-title="hero_tag">
-<header class="top landing-top">
-  <a class="brand" href="/" aria-label="TELC Voll"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
+<body class="admin-shell">
+<header class="top admin-nav">
+  <a class="brand" href="/admin/index.html" aria-label="TELC Voll"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
   <nav>
-    <a href="#services" data-i18n="nav_services">الخدمات</a>
-    <a href="#plans" data-i18n="nav_plans">الخطط</a>
-    <a href="#about" data-i18n="nav_about">عن المنصة</a>
-    <a href="/contact.html">اتصل بنا</a>
-    <a class="btn" href="#access" data-i18n="nav_access">الدخول</a>
+    <a href="/admin/index.html" class="admin-home-link">الرئيسية</a>
+    <a href="#" id="logoutLink">خروج</a>
   </nav>
 </header>
 
-<main class="landing-page">
-  <section class="landing-hero">
-    <div class="landing-hero-copy">
-      <div class="landing-kicker"><span class="landing-kicker-dot"></span><span data-i18n="hero_tag">منصة تدريب TELC Voll</span></div>
-      <h1 data-i18n="hero_title">تدرّب بذكاء.<br><span>ادخل الامتحان بثقة.</span></h1>
-      <p data-i18n="hero_desc">منصة تدريب احترافية لمحاكاة امتحان TELC Voll والتدرب على Lesen وHören وSprachbausteine وSchreiben وSprechen.</p>
-      <div class="landing-levels" aria-label="مستويات TELC Voll">
-        <span>B1</span><span class="active">B2</span><span>C1</span>
-      </div>
-      <div class="actions landing-actions">
-        <a class="btn" href="#access" data-i18n="hero_cta1">ابدأ باستخدام رمز الدخول</a>
-        <a class="btn light" href="#services" data-i18n="hero_cta2">اكتشف المنصة</a>
-      </div>
-      <div class="landing-proof"><span>✓ B1</span><span>✓ B2</span><span>✓ C1</span><span>✓ 5 مهارات</span></div>
+<main class="admin-dashboard">
+  <section class="admin-dashboard-head">
+    <div>
+      <span class="tag" id="eyebrow">لوحة المشرف</span>
+      <h1 id="pageTitle">إدارة المنصة</h1>
+      <p class="muted" id="pageDesc">إدارة المحتوى والطلاب والامتحانات والخطط والإحصائيات من مكان واحد.</p>
     </div>
-    <div class="landing-hero-visual">
-      <div class="landing-orbit landing-orbit-one"></div><div class="landing-orbit landing-orbit-two"></div>
-      <div class="landing-image-frame"><img src="/assets/hero-exam.svg" data-i18n-alt="hero_img_alt" alt="طلاب يستعدون لامتحان TELC Voll"></div>
-      <div class="landing-floating-card landing-floating-top"><strong>5</strong><span>مهارات الامتحان</span></div>
-      <div class="landing-floating-card landing-floating-bottom"><strong> B1 · B2 · C1 </strong><span>TELC Voll</span></div>
+
+  </section>
+
+  <section class="admin-overview" id="stats" aria-label="Overview">
+    <div class="admin-stat"><div class="stat-label"><span>الطلاب</span><span class="stat-icon">◉</span></div><strong>—</strong></div>
+    <div class="admin-stat"><div class="stat-label"><span>التمارين</span><span class="stat-icon">✦</span></div><strong>—</strong></div>
+    <div class="admin-stat"><div class="stat-label"><span>رموز الدخول</span><span class="stat-icon">⌁</span></div><strong>—</strong></div>
+    <div class="admin-stat"><div class="stat-label"><span>الامتحانات</span><span class="stat-icon">▣</span></div><strong>—</strong></div>
+    <div class="admin-stat"><div class="stat-label"><span>المحاولات</span><span class="stat-icon">↗</span></div><strong>—</strong></div>
+  </section>
+
+  <section>
+    <div class="admin-section-head">
+      <div><h2 id="manageTitle">إدارة المنصة</h2><p id="manageDesc">الوصول السريع إلى كل أدوات الإدارة الأساسية.</p></div>
+    </div>
+    <div class="admin-tools-grid">
+      <a class="admin-tool" href="/admin/questions.html">
+        <span class="admin-tool-icon">✦</span><h3>إدارة التمارين</h3><p>إنشاء، تعديل، نشر وتعطيل تمارين Lesen وHören وSprachbausteine وSchreiben وSprechen.</p><span class="tool-link">فتح إدارة التمارين ←</span>
+      </a>
+      <a class="admin-tool" href="/admin/plans.html">
+        <span class="admin-tool-icon">◈</span><h3>إدارة الخطط</h3><p>إنشاء الخطط وتعديل المدة والمحاولات وميزات الوصول وحالة كل خطة.</p><span class="tool-link">فتح إدارة الخطط ←</span>
+      </a>
+      <a class="admin-tool" href="/admin/codes.html">
+        <span class="admin-tool-icon">⌁</span><h3>إدارة الأكواد</h3><p>إنشاء رموز الدخول ونسخها وتعطيلها واستبدالها ومتابعة استخدامها.</p><span class="tool-link">فتح إدارة الأكواد ←</span>
+      </a>
+      <a class="admin-tool" href="/admin/exams.html">
+        <span class="admin-tool-icon">▣</span><h3>إدارة الامتحان التجريبي</h3><p>تحديد أقسام الامتحان والوقت والتمارين التي تظهر في المحاكاة.</p><span class="tool-link">فتح إدارة الامتحان ←</span>
+      </a>
+      <a class="admin-tool" href="/admin/summaries.html">
+        <span class="admin-tool-icon">≡</span><h3>إدارة الملخصات</h3><p>إضافة وتنظيم الملخصات والاستراتيجيات والكلمات المهمة للطلاب.</p><span class="tool-link">فتح إدارة الملخصات ←</span>
+      </a>
+      <a class="admin-tool" href="/admin/students.html">
+        <span class="admin-tool-icon">◉</span><h3>الطلاب والإحصائيات</h3><p>إدارة الطلاب ومتابعة المحاولات والنتائج وتحليل أداء الأقسام والـ Teil.</p><span class="tool-link">فتح الطلاب والإحصائيات ←</span>
+      </a>
+      <a class="admin-tool" href="/admin/settings.html">
+        <span class="admin-tool-icon">⚙</span><h3>الإعدادات</h3><p>إدارة اسم المنصة والشعار ونسبة النجاح والإعدادات الأساسية.</p><span class="tool-link">فتح الإعدادات ←</span>
+      </a>
     </div>
   </section>
 
-  <section id="services" class="landing-section landing-services">
-    <div class="landing-heading-row"><div><span class="tag" data-i18n="nav_services">الخدمات</span><h2 data-i18n="services_title">كل ما تحتاجه للنجاح في مكان واحد</h2></div><p data-i18n="services_desc">أدوات عملية، واجهة واضحة، وتجربة تدريب قريبة من الامتحان الحقيقي.</p></div>
-    <div class="landing-service-grid">
-      <article class="landing-service"><span>01</span><div><h3 data-i18n="feature1_title">محاكاة الامتحان</h3><p data-i18n="feature1_desc">اختبارات منظمة بوقت ونتيجة واضحة بعد التصحيح.</p></div></article>
-      <article class="landing-service"><span>02</span><div><h3 data-i18n="feature2_title">التدريب حسب المهارة</h3><p data-i18n="feature2_desc">تدرب على Lesen وHören وSprachbausteine وSchreiben وSprechen.</p></div></article>
-      <article class="landing-service"><span>03</span><div><h3 data-i18n="feature4_title">Sprechen AI</h3><p data-i18n="feature4_desc">تدرّب على التحدث واحصل على تحليل ذكي لإجابتك.</p></div></article>
-      <article class="landing-service"><span>04</span><div><h3 data-i18n="feature6_title">متابعة التقدم</h3><p data-i18n="feature6_desc">تابع نتائجك وتطورك عبر لوحة الطالب.</p></div></article>
-      <article class="landing-service"><span>05</span><div><h3 data-i18n="feature5_title">الملخصات والاستراتيجيات</h3><p data-i18n="feature5_desc">كلمات مهمة واستراتيجيات وأخطاء شائعة تساعدك على المراجعة.</p></div></article>
-    </div>
-  </section>
 
-  <section class="landing-showcase">
-    <div class="landing-showcase-image"><img class="visual" src="/assets/dashboard-preview.svg" alt="واجهة منصة TELC Voll"></div>
-    <div class="landing-showcase-copy"><span class="tag" data-i18n="studentexp_tag">تجربة الطالب</span><h2 data-i18n="studentexp_title">واجهة صُممت لتبقى مركز تركيزك</h2><p class="muted" data-i18n="studentexp_desc">انتقل بين المستويات والمهارات والتمارين بسهولة، وواصل من حيث توقفت دون تعقيد.</p><div class="landing-mini-grid"><div><b>B1</b><span>Grundlagen</span></div><div class="featured"><b>B2</b><span>Prüfung</span></div><div><b>C1</b><span>Fortgeschritten</span></div></div></div>
-  </section>
-
-  <section id="plans" class="landing-section landing-plans">
-    <div class="landing-heading-row"><div><span class="tag" data-i18n="nav_plans">الخطط</span><h2 data-i18n="plans_title">خطتك تبدأ من هنا</h2></div><p data-i18n="plans_desc">اختر الخطة المناسبة لك؛ الأسعار والمحتوى يحددهما المشرف.</p></div>
-    <div id="plansGrid" class="landing-plan-grid"><div class="card"><p class="muted" data-i18n="plans_loading">جارٍ تحميل الخطط…</p></div></div>
-  </section>
-
-  <section id="access" class="landing-access">
-    <div class="landing-access-copy"><span class="tag" data-i18n="access_tag">دخول الطالب</span><h2 data-i18n="access_title">جاهز للبدء؟</h2><p class="muted" data-i18n="access_desc">أدخل رمز الوصول الذي حصلت عليه من المشرف.</p></div>
-    <form id="loginForm" class="landing-access-form"><input name="code" required placeholder="Tv-xxxxxx" autocomplete="one-time-code"><button class="btn" data-i18n="access_btn">دخول إلى المنصة</button></form>
-    <div id="msg"></div>
-  </section>
-
-  <section id="about" class="landing-about"><span class="tag" data-i18n="nav_about">عن المنصة</span><h2 data-i18n="about_title">TELC Voll — منصة تدريب مستقلة</h2><p class="muted" data-i18n="about_desc">منصة مخصصة للتدريب والتحضير لمستويات B1 وB2 وC1، وليست الموقع الرسمي لـ telc ولا تمثل جهة الامتحان الرسمية.</p></section>
 </main>
-<footer data-i18n="footer">TELC Voll — منصة تدريب B1 · B2 · C1</footer>
+<footer class="admin-footer">TELC Voll — لوحة إدارة المنصة · B1 · B2 · C1</footer>
+
 <script src="/assets/i18n.js"></script>
-<script src="/assets/app.js"></script>
+<script src="/assets/app.js"></script><script src="/assets/admin-guard.js"></script>
 <script>
-loginForm.onsubmit = async (e) => {
-  e.preventDefault(); msg.innerHTML = '';
-  const fd = new FormData(loginForm);
-  try { await api('auth-login', { method:'POST', body:{ code:fd.get('code') }}); location.href='/dashboard.html'; }
-  catch(err) { msg.innerHTML=`<div class="alert bad">${t('access_error')}</div>`; }
+const ADMIN_TEXT={
+ ar:{eyebrow:'لوحة المشرف',title:'إدارة المنصة',desc:'إدارة المحتوى والطلاب والخطط والأكواد والامتحان التجريبي من مكان واحد.',manage:'إدارة المنصة',manageDesc:'الوصول السريع إلى الأدوات الأساسية لإدارة TELC Voll.',home:'الرئيسية',logout:'خروج',stats:['الطلاب','التمارين','رموز الدخول','الامتحانات','المحاولات'],tools:[['إدارة التمارين','إنشاء وتعديل ونشر وإدارة جميع التمارين.','فتح إدارة التمارين ←'],['إدارة الخطط','إنشاء الخطط وتعديل المدة والمحاولات وحالة الوصول.','فتح إدارة الخطط ←'],['إدارة الأكواد','إنشاء رموز الدخول ومتابعة استخدامها.','فتح إدارة الأكواد ←'],['إدارة الامتحان التجريبي','تحديد أقسام ووقت وتمارين المحاكاة.','فتح إدارة الامتحان ←'],['إدارة الملخصات','تنظيم الملخصات والاستراتيجيات والكلمات المهمة.','فتح إدارة الملخصات ←'],['الطلاب والإحصائيات','إدارة الطلاب ومتابعة النتائج وتحليل الأداء.','فتح الطلاب والإحصائيات ←'],['الإعدادات','إدارة اسم المنصة والشعار والإعدادات الأساسية.','فتح الإعدادات ←']]},
+ de:{eyebrow:'Adminbereich',title:'Plattform verwalten',desc:'Inhalte, Schüler, Pläne, Codes und die Probeprüfung an einem Ort verwalten.',manage:'Verwaltung',manageDesc:'Schneller Zugriff auf die wichtigsten TELC-Voll-Werkzeuge.',home:'Startseite',logout:'Abmelden',stats:['Schüler','Übungen','Zugangscodes','Prüfungen','Versuche'],tools:[['Übungen verwalten','Alle Übungen erstellen, bearbeiten und veröffentlichen.','Übungen öffnen →'],['Pläne verwalten','Pläne, Dauer, Versuche und Zugriff verwalten.','Pläne öffnen →'],['Zugangscodes verwalten','Codes erstellen und ihre Nutzung verwalten.','Codes öffnen →'],['Probeprüfung verwalten','Bereiche, Zeiten und Aufgaben der Simulation festlegen.','Probeprüfung öffnen →'],['Zusammenfassungen verwalten','Zusammenfassungen, Strategien und wichtige Wörter pflegen.','Zusammenfassungen öffnen →'],['Schüler & Statistiken','Schüler, Ergebnisse und Leistung analysieren.','Schüler & Statistiken öffnen →'],['Einstellungen','Plattformname und Grundeinstellungen verwalten.','Einstellungen öffnen →']]}
 };
-(async () => {
-  try {
-    const { plans } = await api('public-plans');
-    plansGrid.innerHTML = plans.length ? plans.map((p,i) => `
-      <article class="landing-plan ${i===1 ? 'featured':''}">
-        ${i===1 ? `<span class="tag">${t('plans_featured')}</span>` : ''}
-        <div class="landing-plan-top"><span class="landing-plan-number">0${i+1}</span><span>${esc(p.duration_days)} ${t('plans_day')}</span></div>
-        <h3>${esc(p.name)}</h3>
-        <div class="plan-price">${esc(p.duration_days)} <small>${t('plans_day')}</small></div>
-        <p>${p.max_attempts ? t('plans_attempts',{n:esc(p.max_attempts)}) : t('plans_attempts_unlimited')}</p>
-        <p>${p.ai_enabled ? t('plans_ai_included') : t('plans_basic')}</p>
-        <a class="btn light" href="/contact.html?plan=${encodeURIComponent(p.name)}">${t('plans_use_btn')}</a>
-      </article>`).join('') : `<div class="card"><h3>${t('plans_none_title')}</h3><p class="muted">${t('plans_none_desc')}</p></div>`;
-  } catch(e) { plansGrid.innerHTML=`<div class="card"><h3>${t('plans_error_title')}</h3><p class="muted">${t('plans_none_desc')}</p></div>`; }
-})();
-document.addEventListener('langchange', () => location.reload());
+const toolLinks=['/admin/questions.html','/admin/plans.html','/admin/codes.html','/admin/exams.html','/admin/summaries.html','/admin/students.html','/admin/settings.html'];
+function renderAdminLang(){
+ const L=ADMIN_TEXT[getLang()]||ADMIN_TEXT.ar;
+ document.getElementById('eyebrow').textContent=L.eyebrow;document.getElementById('pageTitle').textContent=L.title;document.getElementById('pageDesc').textContent=L.desc;
+ document.getElementById('manageTitle').textContent=L.manage;document.getElementById('manageDesc').textContent=L.manageDesc;
+ document.querySelector('.admin-home-link').textContent=L.home;document.getElementById('logoutLink').textContent=L.logout;
+ document.querySelectorAll('.admin-stat .stat-label span:first-child').forEach((el,i)=>el.textContent=L.stats[i]);
+ document.querySelectorAll('.admin-tool').forEach((el,i)=>{el.querySelector('h3').textContent=L.tools[i][0];el.querySelector('p').textContent=L.tools[i][1];el.querySelector('.tool-link').textContent=L.tools[i][2];});
+
+}
+document.getElementById('logoutLink').onclick=async(e)=>{e.preventDefault();await api('admin-logout',{method:'POST'});location.href='/admin/login.html';};
+(async()=>{try{const {stats}=await api('admin-stats');const map={students:0,exercises:1,access_codes:2,exams:3,attempts:4};document.querySelectorAll('.admin-stat strong').forEach((el,i)=>{const key=Object.keys(map).find(k=>map[k]===i);el.textContent=Number(stats?.[key]||0).toLocaleString(getLang()==='ar'?'ar-DZ':'de-DE');});}catch(e){location.href='/admin/login.html';}})();
+document.addEventListener('langchange',renderAdminLang);renderAdminLang();
 </script>
-</body>
-</html>
+</body></html>

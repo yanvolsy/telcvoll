@@ -9,60 +9,66 @@
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
 <link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="/manifest.webmanifest">
-<style>
-.account-status{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;margin:18px 0;padding:16px 18px;border:1px solid var(--line);border-radius:18px;background:var(--white);box-shadow:var(--shadow)}.expiry-count{font-size:30px;font-weight:900;color:var(--exercise-accent)}.expiry-count.expiring{color:#d66b16}.expiry-count.expired{color:#c33}.notify-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.notification-box{position:relative}.notification-panel{position:absolute;z-index:20;top:48px;right:0;width:min(380px,90vw);background:var(--white);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:12px}.notification-item{padding:12px;border-bottom:1px solid var(--line)}.notification-item:last-child{border-bottom:0}.notification-item.unread{background:var(--exercise-accent-soft)}.install-btn{display:none}@media(max-width:650px){.account-status{grid-template-columns:1fr}.notification-panel{right:auto;left:0}}
-</style></head>
+</head>
 <body>
 <header class="top">
   <a class="brand" href="/dashboard.html"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
   <nav>
-    <a href="/summaries.html" data-i18n="nav_summaries">الملخصات</a><a href="/telc-chat.html" id="telcChatNav" data-i18n="nav_speaking">مساعد TELC</a><a href="#" id="logoutLink" data-i18n="nav_logout">خروج</a>
+    <a href="/self-test.html" id="mockExamNav" data-i18n="nav_mock">امتحان تجريبي</a><a href="/telc-chat.html" id="telcChatNav" data-i18n="nav_speaking">مساعد TELC</a><a href="#" id="logoutLink" data-i18n="nav_logout">خروج</a>
   </nav>
 </header>
-<section id="accountStatus" class="account-status wrap" hidden></section>
-<div id="notificationArea" class="wrap" style="position:relative;z-index:30"></div>
 <main class="student-hub" id="content"><div class="student-loading">جارٍ التحميل…</div></main>
 <script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
 <script>
 const SECTION_ORDER=['Lesen','Hören','Sprachbausteine','Schreiben','Sprechen'];
 const TEIL_ORDER={Lesen:['Teil 1','Teil 2','Teil 3'],Hören:['Teil 1','Teil 2','Teil 3'],Sprachbausteine:['Teil 1','Teil 2'],Schreiben:['Teil 1'],Sprechen:['Teil 1','Teil 2','Teil 3']};
 const SECTION_AR={Lesen:'Lesen',Hören:'Hören',Sprachbausteine:'Sprachbausteine',Schreiben:'Schreiben',Sprechen:'Sprechen'};
-let state={level:'B2',section:'Lesen',exercises:[],student:null};
+let state={level:'B2',section:'Lesen',exercises:[],student:null,subscription:null};
+let remainingDays=0;
+let shuffleEnabled=true;
+let shuffleOrderKey='';
+let shuffleOrder=[];
+let selectedTeil='';
+function calcRemainingDays(){const raw=state.subscription?.expires_at;if(!raw)return 0;const ms=new Date(raw).getTime()-Date.now();return Math.max(0,Math.ceil(ms/86400000));}
 const $=id=>document.getElementById(id);
 function lang(){return getLang();}
 function text(ar,de){return lang()==='ar'?ar:de;}
 function exerciseDuration(x){return Number(x.settings_json?.duration_seconds||x.duration_seconds||90)||90;}
 function sectionIcon(s){return ({Lesen:'◫',Hören:'◉',Sprachbausteine:'⌘',Schreiben:'✎',Sprechen:'◌'})[s]||'•';}
+function sectionLabel(s){return ({Lesen:'Lesen',Hören:'Hören',Sprachbausteine:'Sprachbausteine',Schreiben:'Schreiben',Sprechen:'Sprechen'})[s]||s;}
+function taskTypeLabel(type){const map={MATCHING:{ar:'مطابقة',de:'Zuordnung'},MCQ:{ar:'اختيار من متعدد',de:'Multiple Choice'},AUDIO_TF:{ar:'صحيح / خطأ',de:'Richtig / Falsch'},WRITING:{ar:'كتابة',de:'Schreiben'},SPEAKING:{ar:'تحدث',de:'Sprechen'}};const x=map[type];return x?text(x.ar,x.de):type;}
 function levelAvailable(level){return state.exercises.some(x=>(x.level||'B2')===level);}
-function renderAccountStatus(){
- const s=state.student; if(!s||!s.expires_at){$('accountStatus').hidden=true;return;}
- const ms=new Date(s.expires_at).getTime()-Date.now(); const days=Math.ceil(ms/86400000); const expired=ms<=0; const cls=expired?'expired':(days<=2?'expiring':'');
- const label=expired?text('انتهت الصلاحية','Abgelaufen'):text('متبقي','verbleibend');
- $('accountStatus').hidden=false; $('accountStatus').innerHTML=`<div><strong>${text('اشتراكك الحالي','Dein aktueller Zugang')}</strong><div class="muted">${esc(s.plan_name||'')} · ${text('ينتهي','läuft ab')} ${new Date(s.expires_at).toLocaleDateString(lang()==='ar'?'ar-DZ':'de-DE')}</div></div><div style="text-align:center"><div class="expiry-count ${cls}">${expired?'0':days}</div><small>${label} ${expired?'':text('يوم','Tage')}</small></div><div class="notify-bar"><button class="btn light" id="notifyBtn">${text('تفعيل الإشعارات','Benachrichtigungen aktivieren')}</button><button class="btn light install-btn" id="installBtn">${text('إضافة كتطبيق','Als App installieren')}</button><a class="btn" href="/contact.html?plan=${encodeURIComponent(s.plan_name||'')}">${text('تجديد الكود','Zugang verlängern')}</a></div>`;
- $('notifyBtn').onclick=async()=>{const r=await telcEnableNotifications();$('notifyBtn').textContent=r==='granted'?text('الإشعارات مفعّلة ✓','Benachrichtigungen aktiv ✓'):text('لم يتم السماح بالإشعارات','Benachrichtigungen nicht aktiviert');};
- const showInstall=()=>{if(window.telcInstallPrompt){$('installBtn').style.display='inline-flex';$('installBtn').onclick=()=>telcInstallApp();}}; showInstall(); document.addEventListener('telcinstallavailable',showInstall,{once:true});
-}
-async function loadNotifications(){ try{const d=await api('notifications'); const items=d.notifications||[]; const unread=d.unread||0; const area=$('notificationArea'); area.innerHTML=`<div style="display:flex;justify-content:flex-start;margin-top:10px"><button id="notifToggle" class="btn light">🔔 ${text('الإشعارات','Benachrichtigungen')} ${unread?`(${unread})`:''}</button><div id="notifPanel" class="notification-panel" hidden><div style="display:flex;justify-content:space-between;gap:10px"><strong>${text('الإشعارات','Benachrichtigungen')}</strong><button id="markAll" class="btn light">${text('قراءة الكل','Alle lesen')}</button></div>${items.length?items.map(n=>`<div class="notification-item ${n.read_at?'':'unread'}" data-notif-id="${n.id}"><strong>${esc(n.title)}</strong><div>${esc(n.message)}</div><small class="muted">${new Date(n.created_at).toLocaleString(lang()==='ar'?'ar-DZ':'de-DE')}</small></div>`).join(''):`<p class="muted">${text('لا توجد إشعارات جديدة.','Keine Benachrichtigungen.')}</p>`}</div></div>`;
- $('notifToggle').onclick=()=>{$('notifPanel').hidden=!$('notifPanel').hidden;}; $('markAll').onclick=async()=>{await api('notifications-read',{method:'POST',body:{all:true}});loadNotifications();}; document.querySelectorAll('[data-notif-id]').forEach(x=>x.onclick=async()=>{await api('notifications-read',{method:'POST',body:{id:x.dataset.notifId}});x.classList.remove('unread');});
- if(unread && 'Notification' in window && Notification.permission==='granted' && !sessionStorage.getItem('telc-notified')){const n=items.find(x=>!x.read_at);if(n){new Notification(n.title,{body:n.message,icon:'/assets/icons/TELC_Voll_AppIcon_Light.png'});sessionStorage.setItem('telc-notified','1');}}
- }catch(e){} }
-
+function availableTeileFor(section, level=state.level){const order=TEIL_ORDER[section]||[];const present=new Set(state.exercises.filter(x=>(x.level||'B2')===level&&x.section===section).map(x=>String(x.teil||'').trim()).filter(Boolean));return order.filter(t=>present.has(t)).concat([...present].filter(t=>!order.includes(t)).sort((a,b)=>a.localeCompare(b,'de',{numeric:true})));}
+function levelExercises(level=state.level){return state.exercises.filter(x=>(x.level||'B2')===level);}
+function totalCountForLevel(){return levelExercises().length;}
+function completedCountForLevel(){return levelExercises().filter(x=>isExerciseCompleted(x.id)).length;}
+function levelProgressPercent(){const total=totalCountForLevel();return total?Math.round((completedCountForLevel()/total)*100):0;}
+function render(){
   const list=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===state.section);
+  const availableTeile=availableTeileFor(state.section);
+  if(!availableTeile.includes(selectedTeil)) selectedTeil=availableTeile[0]||'';
   const has=levelAvailable(state.level);
   $('content').innerHTML=`
     <section class="hub-head">
       <div><span class="tag">${text('منصة الطالب','Schülerbereich')}</span><h1>${text('تدريب TELC Voll','TELC Voll Training')}</h1><p class="muted">${text('مرحباً '+(state.student?.name||'Student')+' — اختر المستوى والقسم ثم افتح التمرين.','Hallo '+(state.student?.name||'Student')+' — wähle Niveau und Prüfungsteil.')}</p></div>
-      <div class="hub-kpi"><strong>${state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===state.section).length}</strong><span>${text('تمرين','Übungen')}</span></div>
+      <div class="hub-kpis">
+        <div class="hub-kpi days-kpi ${remainingDays<=2?'warning':''}"><strong>${remainingDays}</strong><span>${text('يوم متبقٍ','Tage verbleibend')}</span></div>
+        <div class="hub-progress-card" aria-label="${text('تقدم الطالب','Lernfortschritt')}">
+          <div class="hub-progress-top"><span>${text('تقدمك','Dein Fortschritt')}</span><strong>${levelProgressPercent()}%</strong></div>
+          <div class="hub-progress-bar"><i style="width:${levelProgressPercent()}%"></i></div>
+          <div class="hub-progress-bottom"><span>${completedCountForLevel()} / ${totalCountForLevel()} ${text('تمرين','Übungen')}</span><span>${text('المستوى','Niveau')} ${state.level}</span></div>
+        </div>
+      </div>
     </section>
     <section class="level-switch" aria-label="TELC Voll Niveau">
       ${['B1','B2','C1'].map(l=>`<button class="level-btn ${state.level===l?'active':''} ${!levelAvailable(l)?'empty':''}" data-level="${l}">Telc ${l}</button>`).join('')}
     </section>
     <nav class="section-switch" aria-label="Prüfungsteile">
-      ${SECTION_ORDER.map(s=>`<button class="section-btn ${state.section===s?'active':''}" data-section="${s}"><span>${sectionIcon(s)}</span>${s}</button>`).join('')}
+      ${SECTION_ORDER.map(s=>{const count=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===s).length;return `<button class="section-btn ${state.section===s?'active':''}" data-section="${s}"><span>${sectionIcon(s)}</span><span class="section-btn-copy"><b>${s}</b><small>${count} ${text('تمرين','Übungen')}</small></span></button>`}).join('')}
     </nav>
     <section class="topic-toolbar">
-      <div><h2>${SECTION_AR[state.section]}</h2><p class="muted">${text('تمارين '+state.section+' للمستوى '+state.level,'Übungen für '+state.section+' · Niveau '+state.level)}</p></div>
-      <div class="topic-tools"><input id="search" placeholder="${text('ابحث عن الموضوع…','Thema suchen…')}"/><select id="teilFilter">${(TEIL_ORDER[state.section]||[]).map((t,i)=>`<option value="${t}" ${i===0?'selected':''}>${t}</option>`).join('')}</select></div>
+      <div class="topic-title-block"><div class="topic-title-line"><span class="topic-title-icon">${sectionIcon(state.section)}</span><h2>${sectionLabel(state.section)}</h2><span class="topic-title-level">${state.level}</span></div><p class="muted">${text('تمارين '+state.section+' للمستوى '+state.level,'Übungen für '+state.section+' · Niveau '+state.level)}</p></div>
+      <div class="topic-tools"><input id="search" placeholder="${text('ابحث عن الموضوع…','Thema suchen…')}"/><div class="teil-tabs" role="tablist" aria-label="Teil auswählen">${availableTeile.map(t=>`<button type="button" class="teil-tab ${selectedTeil===t?'active':''}" data-teil="${t}">${t}</button>`).join('')}</div><button id="shuffleToggle" class="shuffle-toggle" type="button" aria-pressed="${shuffleEnabled?'true':'false'}" title="${shuffleEnabled?text('الخلط مفعّل — اضغط لإيقافه','Shuffle aktiv — klicken zum Ausschalten'):text('الترتيب العادي — اضغط لتفعيل الخلط','Normale Reihenfolge — klicken zum Aktivieren')}"><span class="shuffle-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h4.5c3.8 0 4.7 5 8.5 5H21"/><path d="m18 8 3-1-3-1"/><path d="M3 17h4.5c3.8 0 4.7 5 8.5 5H21"/><path d="m18 16 3 1-3 1"/></svg></span><span class="shuffle-label">${shuffleEnabled?text('خلط','Mischen'):text('ترتيب','Reihenfolge')}</span></button></div>
     </section>
     <div id="topicGrid" class="topic-grid"></div>
 
@@ -78,18 +84,49 @@ async function loadNotifications(){ try{const d=await api('notifications'); cons
       </div>
       <a class="btn self-test-btn" href="/self-test.html?level=${encodeURIComponent(state.level)}">${text('ابدأ امتحان عشوائي','Zufällige Prüfung starten')} <span>←</span></a>
     </section>`;
-  document.querySelectorAll('[data-level]').forEach(b=>b.onclick=()=>{state.level=b.dataset.level;state.section='Lesen';render();});
-  document.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>{state.section=b.dataset.section;render();});
+  document.querySelectorAll('[data-level]').forEach(b=>b.onclick=()=>{state.level=b.dataset.level;state.section='Lesen';selectedTeil=availableTeileFor('Lesen',state.level)[0]||'';render();});
+  document.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>{state.section=b.dataset.section;selectedTeil=availableTeileFor(state.section)[0]||'';render();});
+  document.querySelectorAll('[data-teil]').forEach(b=>b.onclick=()=>{selectedTeil=b.dataset.teil;renderTopics();});
   const nav=$('telcChatNav'); if(nav) nav.href='/telc-chat.html';
-  $('search').oninput=renderTopics; $('teilFilter').onchange=renderTopics; renderTopics();
+  $('search').oninput=renderTopics;
+  const shuffleBtn=$('shuffleToggle'); if(shuffleBtn) shuffleBtn.onclick=()=>{shuffleEnabled=!shuffleEnabled; shuffleOrderKey=''; shuffleOrder=[]; updateShuffleButton(); renderTopics();};
+  renderTopics();
+}
+function shuffleArray(items){
+  const a=[...items];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+function updateShuffleButton(){
+  const b=$('shuffleToggle'); if(!b)return;
+  b.classList.toggle('is-active',shuffleEnabled);
+  b.setAttribute('aria-pressed',shuffleEnabled?'true':'false');
+  b.title=shuffleEnabled?text('الخلط مفعّل — اضغط لإيقافه','Shuffle aktiv — klicken zum Ausschalten'):text('الترتيب العادي — اضغط لتفعيل الخلط','Normale Reihenfolge — klicken zum Aktivieren');
+  const label=b.querySelector('.shuffle-label'); if(label) label.textContent=shuffleEnabled?text('خلط','Mischen'):text('ترتيب','Reihenfolge');
 }
 function renderTopics(){
-  const q=($('search')?.value||'').trim().toLowerCase(); const teil=$('teilFilter')?.value || (TEIL_ORDER[state.section]||[])[0] || '';
-  let list=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===state.section);
-  if(teil) list=list.filter(x=>x.teil===teil); if(q) list=list.filter(x=>(x.title+' '+(x.body||'')).toLowerCase().includes(q));
-  $('topicGrid').innerHTML=list.length?list.map((x,i)=>`<article class="topic-card"><div class="topic-card-head"><span class="topic-index">${String(i+1).padStart(2,'0')}</span><span class="tag">Telc ${esc(x.level||'B2')}</span></div><h3>${esc(x.title)}</h3><div class="topic-meta"><span>${esc(x.teil)}</span><span>${esc(x.task_type)}</span><span>${exerciseDuration(x)} min</span></div><a class="btn light" href="/exercise.html?id=${x.id}">${text('فتح التمرين','Übung öffnen')} →</a></article>`).join(''):`<div class="empty-panel"><h3>${text('لا توجد تمارين منشورة هنا','Keine veröffentlichten Übungen')}</h3><p class="muted">${text('يمكن للمشرف إضافة الموضوع من لوحة الإدارة.','Der Administrator kann Aufgaben im Adminbereich hinzufügen.')}</p></div>`;
+  const q=($('search')?.value||'').trim().toLowerCase(); const teil=selectedTeil || (TEIL_ORDER[state.section]||[])[0] || '';
+  const base=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===state.section);
+  const orderKey=state.level+'|'+state.section;
+  if(orderKey!==shuffleOrderKey || !shuffleOrder.length || shuffleOrder.length!==base.length){
+    shuffleOrderKey=orderKey;
+    shuffleOrder=shuffleEnabled?shuffleArray(base):base.slice();
+  }else if(!shuffleEnabled){
+    shuffleOrder=base.slice();
+  }
+  let list=shuffleOrder.slice();
+  if(teil) list=list.filter(x=>x.teil===teil);
+  if(q) list=list.filter(x=>(x.title+' '+(x.body||'')).toLowerCase().includes(q));
+  updateShuffleButton();
+  document.querySelectorAll('.teil-tab').forEach(b=>b.classList.toggle('active',b.dataset.teil===selectedTeil));
+  $('topicGrid').innerHTML=list.length?list.map((x,i)=>`<article class="topic-card"><div class="topic-card-head"><span class="topic-index">${String(i+1).padStart(2,'0')}</span><span class="tag">Telc ${esc(x.level||'B2')}</span></div><h3 class="topic-card-title"><span class="topic-status-dot ${isExerciseCompleted(x.id)?'is-done':'is-new'}" title="${isExerciseCompleted(x.id)?text('تم التدريب على هذا الموضوع من قبل','Bereits trainiert'):text('لم يتم التدريب على هذا الموضوع بعد','Noch nicht trainiert')}" aria-label="${isExerciseCompleted(x.id)?text('تم التدريب من قبل','Bereits trainiert'):text('لم يتم التدريب بعد','Noch nicht trainiert')}"></span><span>${esc(x.title)}</span></h3><div class="topic-meta"><span>${esc(x.teil)}</span><span>${esc(taskTypeLabel(x.task_type))}</span><span>${exerciseDuration(x)} ${text('دقيقة','Min.')}</span></div><a class="btn light" href="/exercise.html?id=${x.id}">${text('فتح التمرين','Übung öffnen')} →</a></article>`).join(''):`<div class="empty-panel"><h3>${text('لا توجد تمارين منشورة هنا','Keine veröffentlichten Übungen')}</h3><p class="muted">${text('يمكن للمشرف إضافة الموضوع من لوحة الإدارة.','Der Administrator kann Aufgaben im Adminbereich hinzufügen.')}</p></div>`;
 }
+
+document.addEventListener('click',e=>{const a=e.target.closest('a[href*="/exercise.html"]');if(!a)return;try{sessionStorage.setItem('telc_dashboard_return',JSON.stringify({level:state.level,section:state.section,teil:selectedTeil,search:$('search')?.value||'',scrollY:window.scrollY}));}catch{}});
+
 logoutLink.onclick=async e=>{e.preventDefault();await api('auth-logout',{method:'POST'});location.href='/';};
-(async()=>{try{const d=await api('me');state.exercises=d.exercises||[];state.student=d.student;const urlLevel=qs('level');if(['B1','B2','C1'].includes(urlLevel))state.level=urlLevel;renderAccountStatus(); render(); loadNotifications();}catch(e){location.href='/?error=session';}})();
+(async()=>{try{const d=await api('me');state.exercises=d.exercises||[];state.student=d.student;state.subscription=d.subscription||null;remainingDays=calcRemainingDays();const urlLevel=qs('level');if(['B1','B2','C1'].includes(urlLevel))state.level=urlLevel;
+try{const saved=JSON.parse(sessionStorage.getItem('telc_dashboard_return')||'null');if(saved){if(['B1','B2','C1'].includes(saved.level))state.level=saved.level;if(SECTION_ORDER.includes(saved.section))state.section=saved.section;if(availableTeileFor(state.section).includes(saved.teil))selectedTeil=saved.teil;window.__telcRestoreSearch=saved.search||'';window.__telcRestoreScroll=Number(saved.scrollY)||0;sessionStorage.removeItem('telc_dashboard_return');}}catch{}
+render();if(window.__telcRestoreSearch&&$('search'))$('search').value=window.__telcRestoreSearch;renderTopics();setTimeout(()=>{if(window.__telcRestoreScroll)window.scrollTo(0,window.__telcRestoreScroll);},80);}catch(e){location.href='/?error=session';}})();
 document.addEventListener('langchange',render);
 </script></body></html>

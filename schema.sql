@@ -25,6 +25,11 @@ CREATE TABLE IF NOT EXISTS plans(
   active BOOLEAN DEFAULT TRUE
 );
 
+-- Optional free 2-day Trial plan. Admin can generate normal access codes for it.
+INSERT INTO plans(plan_key,name,duration_days,max_attempts,ai_enabled,active)
+VALUES('trial','Trial',2,0,TRUE,TRUE)
+ON CONFLICT(plan_key) DO NOTHING;
+
 CREATE TABLE IF NOT EXISTS access_codes(
   id BIGSERIAL PRIMARY KEY,
   code VARCHAR(80) UNIQUE NOT NULL,
@@ -172,18 +177,6 @@ CREATE TABLE IF NOT EXISTS ai_logs(
   output_text TEXT,
   created_at TIMESTAMP DEFAULT NOW()
 );
-
-CREATE TABLE IF NOT EXISTS notifications(
-  id BIGSERIAL PRIMARY KEY,
-  student_id BIGINT NOT NULL REFERENCES students(id) ON DELETE CASCADE,
-  type VARCHAR(50) NOT NULL,
-  title VARCHAR(255) NOT NULL,
-  message TEXT NOT NULL,
-  read_at TIMESTAMP NULL,
-  created_at TIMESTAMP DEFAULT NOW(),
-  UNIQUE(student_id, type)
-);
-CREATE INDEX IF NOT EXISTS idx_notifications_student ON notifications(student_id, created_at DESC);
 
 CREATE TABLE IF NOT EXISTS rate_limits(
   rkey VARCHAR(190) PRIMARY KEY,

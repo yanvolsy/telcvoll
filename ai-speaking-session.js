@@ -45,7 +45,16 @@ exports.handler=async(event)=>{
   }
   const context=`LEVEL: ${ex.level||''}\nTEIL: ${ex.teil||''}\nTHEMA: ${ex.title||''}\nTASK:\n${ex.body||''}`;
   let prompt;
-  if(mode==='evaluate'){
+  if(mode==='model'){
+    prompt=`Create a high-quality TELC German speaking model-answer practice for training only. Use ONLY the supplied topic and Teil. The student writes their answer, while the AI demonstrates what a strong candidate could say and how a realistic partner could react. Stay in German inside the dialogue. Make it practical, natural, B2 level unless the supplied level differs. Include a short dialogue with 5-7 turns, including at least two ideal student turns and realistic partner questions/reactions. Then generate 4-6 follow-up questions the student can answer alone, plus 5-8 useful Redemittel.
+${context}
+Rules by Teil:
+- Teil 1: model a short presentation/position followed by partner reactions and follow-up questions about the topic.
+- Teil 2: model opinion + arguments + counterargument + partner questions.
+- Teil 3: model joint planning with concrete decisions about time/place/cost/tasks/priorities and a final agreement.
+Do not invent a different topic. Do not claim this is an official telc answer. Return ONLY JSON in this exact shape:
+{"title":"","note":"","dialogue":[{"speaker":"jerry|partner|student","text":""}],"questions":[""],"redemittel":[""]}`;
+  } else if(mode==='evaluate'){
     prompt=`Evaluate a TELC speaking practice session for training only. Do not claim an official telc score.
 ${context}
 TRANSCRIPT:

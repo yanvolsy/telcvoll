@@ -10,10 +10,11 @@ exports.handler = async (event) => {
   if (!id) return json(400, { error: 'Missing id' });
 
   const pool = db();
-  await pool.query("ALTER TABLE exercises ADD COLUMN IF NOT EXISTS level VARCHAR(20) NOT NULL DEFAULT 'B2'");
-  const exRes = await pool.query("SELECT * FROM exercises WHERE id=$1 AND status='published' AND deleted_at IS NULL", [id]);
+  // Keep exercise loading read-only and fast: schema migrations must not run on every page view.
+  // We filter deleted exercises in application code so older databases without deleted_at also remain compatible.
+  const exRes = await pool.query("SELECT * FROM exercises WHERE id=$1 AND status='published'", [id]);
   const exercise = exRes.rows[0];
-  if (!exercise) return json(404, { error: 'Exercise not found' });
+  if (!exercise || exercise.deleted_at) return json(404, { error: 'Exercise not found' });
 
   const itemsRes = await pool.query('SELECT * FROM items WHERE exercise_id=$1 ORDER BY position_no', [id]);
   const items = [];

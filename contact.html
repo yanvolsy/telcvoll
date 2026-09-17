@@ -1,17 +1,90 @@
 <!doctype html>
-<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#14201D"><title>اتصل بنا — TELC Voll</title><link rel="stylesheet" href="/assets/app.css"><link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml"><link rel="manifest" href="/manifest.webmanifest"><style>
-.contact-shell{max-width:900px;margin:auto}.contact-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:20px 0}.contact-account{display:block;text-decoration:none;color:inherit;padding:20px;border:1px solid var(--line);border-radius:18px;background:var(--white);box-shadow:var(--shadow);transition:.2s}.contact-account:hover{transform:translateY(-2px);border-color:var(--exercise-accent)}.contact-account strong{font-size:19px}.contact-account small{display:block;color:var(--muted);margin-top:5px}.contact-form{display:grid;gap:12px}.contact-form input,.contact-form select,.contact-form textarea{width:100%}.contact-form textarea{min-height:120px}.contact-direct{display:block;margin-top:8px;color:var(--exercise-accent);font-weight:800;font-size:13px}.selected-contact{padding:10px 14px;border-radius:12px;background:var(--exercise-accent-soft);color:var(--exercise-accent);font-weight:800}@media(max-width:650px){.contact-grid{grid-template-columns:1fr}}</style></head><body><header class="top"><a class="brand" href="/">TELC Voll</a><nav><a href="/#plans">الخطط</a><a href="/contact.html">اتصل بنا</a></nav></header><main class="wrap contact-shell"><section class="panel"><span class="tag">TELC Voll</span><h1>اتصل بنا</h1><p class="muted">اختر وسيلة التواصل المناسبة، ثم املأ بيانات الطلب.</p><div id="accounts" class="contact-grid"><div class="card">جارٍ تحميل حسابات التواصل…</div></div><div id="formWrap" hidden><div class="selected-contact" id="selectedContact"></div><form id="contactForm" class="contact-form" style="margin-top:14px"><input name="name" placeholder="الاسم الكامل" required><select name="plan" id="planSelect" required><option value="">اختر الخطة</option></select><input name="country" placeholder="البلد" required><input name="contact" placeholder="رقمك أو بريدك الإلكتروني" required><textarea name="message" placeholder="رسالة إضافية (اختياري)"></textarea><button class="btn" type="submit">إرسال الطلب</button></form><div id="formMsg"></div></div></section></main><footer>TELC Voll — منصة تدريب B1 · B2 · C1</footer><script src="/assets/i18n.js"></script><script src="/assets/app.js"></script><script>
-let accounts=[];let chosen=null;const escv=s=>esc(s);const params=new URLSearchParams(location.search);
-async function load(){const [c,p]=await Promise.all([api('public-contact'),api('public-plans')]);accounts=c.accounts||[];accountsEl.innerHTML=accounts.length?accounts.map((a,i)=>`<button type="button" class="contact-account" data-account="${i}"><strong>${escv(a.label)}</strong><small>${escv(a.value)}</small><span class="contact-direct">فتح الحساب مباشرة ↗</span></button>`).join(''):'<div class="card">لا توجد وسائل تواصل مضافة حالياً.</div>';planSelect.innerHTML='<option value="">اختر الخطة</option>'+(p.plans||[]).map(x=>`<option value="${escv(x.name)}">${escv(x.name)} — ${escv(x.duration_days)} يوم</option>`).join('');const wanted=params.get('plan');if(wanted){const opt=[...planSelect.options].find(o=>o.value===wanted||o.textContent.startsWith(wanted));if(opt)planSelect.value=opt.value;}}
-function accountUrl(a){
- const raw=String(a.url||a.value||'').trim();
- if(/^https?:\/\//i.test(raw)) return raw;
- const label=String(a.label||'').toLowerCase(); const value=String(a.value||'').trim();
- if(label.includes('whatsapp')||label.includes('واتساب')) { const num=value.replace(/[^0-9]/g,''); return num ? 'https://wa.me/'+num : ''; }
- if(label.includes('telegram')||label.includes('تلغرام')) { const u=value.replace(/^@/,'').replace(/^https?:\/\/(t\.me\/)?/i,'').replace(/\/$/,''); return u ? 'https://t.me/'+u : ''; }
- if(label.includes('email')||label.includes('mail')||label.includes('بريد')) return value ? 'mailto:'+value : '';
- return '';
-}
-accountsEl.onclick=e=>{const b=e.target.closest('[data-account]');if(!b)return;chosen=accounts[Number(b.dataset.account)];const direct=accountUrl(chosen);if(e.target.closest('.contact-direct')&&direct){window.open(direct,'_blank','noopener');return;}selectedContact.textContent='وسيلة التواصل المختارة: '+chosen.label+' — '+chosen.value;formWrap.hidden=false;formWrap.scrollIntoView({behavior:'smooth',block:'start'});};
-contactForm.onsubmit=e=>{e.preventDefault();if(!chosen)return;const fd=new FormData(contactForm);const subject='TELC Voll — طلب خطة '+fd.get('plan');const body=`الاسم: ${fd.get('name')}\nالخطة: ${fd.get('plan')}\nالبلد: ${fd.get('country')}\nوسيلة التواصل: ${fd.get('contact')}\nالرسالة: ${fd.get('message')||'-'}`;let url=accountUrl(chosen); if(url && !/^mailto:/i.test(url) && !/[?&]text=/i.test(url)) url += (url.includes('?')?'&':'?')+'text='+encodeURIComponent(body); if(/^mailto:/i.test(url)) url += '?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);if(url){window.open(url,'_blank','noopener');formMsg.innerHTML='<div class="alert ok">تم تجهيز الرسالة. أكمل الإرسال في وسيلة التواصل.</div>';}else formMsg.innerHTML='<div class="alert bad">لم يتم إعداد رابط مباشر لهذا الحساب.</div>';};load().catch(e=>accountsEl.innerHTML='<div class="alert bad">تعذر تحميل وسائل التواصل.</div>');
-</script></body></html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14201D">
+<meta name="description" content="تواصل مع TELC Voll عبر Facebook وMessenger والبريد الإلكتروني.">
+<title>تواصل معنا — TELC Voll</title>
+<link rel="stylesheet" href="/assets/app.css">
+<link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<style>
+.contact-page{max-width:1120px;margin:0 auto;padding:54px 22px 76px}
+.contact-hero{position:relative;overflow:hidden;border:1px solid var(--line);border-radius:30px;padding:52px 54px;background:linear-gradient(135deg,var(--white),var(--exercise-accent-soft));box-shadow:var(--shadow);text-align:center}
+.contact-hero:before,.contact-hero:after{content:"";position:absolute;border-radius:999px;pointer-events:none}
+.contact-hero:before{width:260px;height:260px;left:-100px;top:-120px;background:rgba(255,126,24,.08)}
+.contact-hero:after{width:190px;height:190px;right:-80px;bottom:-90px;background:rgba(20,32,29,.05)}
+.contact-badge{position:relative;display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:var(--white);border:1px solid rgba(255,126,24,.22);color:var(--exercise-accent);font-weight:900;font-size:13px}
+.contact-hero h1{position:relative;margin:18px 0 10px;font-size:clamp(34px,5vw,58px);letter-spacing:-1.5px}
+.contact-hero p{position:relative;margin:0 auto;max-width:650px;color:var(--muted);font-size:17px;line-height:1.9}
+.contact-logo{position:relative;margin:0 auto 20px;width:66px;height:66px;border-radius:21px;background:var(--exercise-accent);color:#fff;display:grid;place-items:center;font-size:24px;font-weight:950;box-shadow:0 14px 30px rgba(255,126,24,.24)}
+.contact-grid-new{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:24px}
+.contact-card-new{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;text-decoration:none;color:inherit;min-height:250px;padding:30px 22px 26px;border:1px solid var(--line);border-radius:24px;background:var(--white);box-shadow:var(--shadow);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.contact-card-new:hover{transform:translateY(-5px);border-color:var(--exercise-accent);box-shadow:0 18px 45px rgba(20,32,29,.10)}
+.contact-card-icon{width:68px;height:68px;border-radius:21px;display:grid;place-items:center;background:var(--exercise-accent-soft);color:var(--exercise-accent);margin-bottom:18px}
+.contact-card-icon svg{width:34px;height:34px;fill:currentColor}
+.contact-card-new h2{margin:0 0 7px;font-size:22px}
+.contact-card-new .handle{direction:ltr;unicode-bidi:plaintext;font-weight:850;font-size:16px}
+.contact-card-new p{margin:12px 0 20px;color:var(--muted);line-height:1.7;font-size:14px}
+.contact-action{margin-top:auto;display:inline-flex;align-items:center;gap:8px;padding:9px 15px;border-radius:999px;background:var(--exercise-accent-soft);color:var(--exercise-accent);font-weight:900;font-size:13px}
+.contact-email{direction:ltr;unicode-bidi:plaintext}
+.contact-note{margin-top:24px;padding:18px 22px;border:1px solid var(--line);border-radius:20px;background:var(--white);text-align:center;color:var(--muted);line-height:1.8}
+.contact-note strong{color:var(--text)}
+@media(max-width:800px){.contact-grid-new{grid-template-columns:1fr}.contact-hero{padding:38px 24px}.contact-card-new{min-height:220px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/">TELC Voll</a>
+  <nav><a href="/#plans" data-i18n="nav_plans">الخطط</a><a href="/contact.html" data-i18n="nav_contact">اتصل بنا</a></nav>
+</header>
+
+<main class="contact-page">
+  <section class="contact-hero">
+    <div class="contact-logo">TV</div>
+    <span class="contact-badge">TELC Voll · Support</span>
+    <h1>تواصل معنا</h1>
+    <p>للاستفسارات، المساعدة، الخطط أو أي مشكلة في المنصة، اختر وسيلة التواصل المناسبة لك وسنتابع معك مباشرة.</p>
+  </section>
+
+  <section class="contact-grid-new" aria-label="وسائل التواصل">
+    <a class="contact-card-new" href="https://www.facebook.com/TELCVoll" target="_blank" rel="noopener noreferrer">
+      <span class="contact-card-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M13.4 21v-8h2.7l.4-3.1h-3.1V8c0-.9.25-1.5 1.55-1.5h1.65V3.72c-.29-.04-1.29-.12-2.47-.12-2.45 0-4.13 1.5-4.13 4.25v2.05H7.2V13H10v8h3.4Z"/></svg>
+      </span>
+      <h2>Facebook</h2>
+      <div class="handle">TELC Voll</div>
+      <p>تابع صفحة TELC Voll وتواصل معنا عبر فيسبوك.</p>
+      <span class="contact-action">فتح Facebook <span>↗</span></span>
+    </a>
+
+    <a class="contact-card-new" href="https://m.me/TELCVoll" target="_blank" rel="noopener noreferrer">
+      <span class="contact-card-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 3C6.48 3 2 6.9 2 11.72c0 2.75 1.42 5.2 3.66 6.74V22l3.32-1.82c.95.27 1.96.41 3.02.41 5.52 0 10-3.9 10-8.87C22 6.9 17.52 3 12 3Zm.56 12.06-2.55-2.71-5 2.71 5.51-5.84 2.55 2.71 4.99-2.71-5.5 5.84Z"/></svg>
+      </span>
+      <h2>Messenger</h2>
+      <div class="handle">TELC Voll</div>
+      <p>أرسل لنا رسالة مباشرة عبر Messenger للحصول على المساعدة.</p>
+      <span class="contact-action">فتح Messenger <span>↗</span></span>
+    </a>
+
+    <a class="contact-card-new" href="mailto:telcvoll@gmail.com?subject=TELC%20Voll%20-%20استفسار">
+      <span class="contact-card-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M3 5h18a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Zm0 3v.2l9 5.7 9-5.7V8l-9 5.7L3 8Z"/></svg>
+      </span>
+      <h2>البريد الإلكتروني</h2>
+      <div class="handle contact-email">telcvoll@gmail.com</div>
+      <p>للاستفسارات الرسمية، المشاكل التقنية وطلبات المساعدة.</p>
+      <span class="contact-action">إرسال بريد إلكتروني <span>↗</span></span>
+    </a>
+  </section>
+
+  <div class="contact-note">📩 <strong>هل لديك سؤال؟</strong> اكتب لنا عبر Messenger أو أرسل بريدك إلى <span class="contact-email">telcvoll@gmail.com</span>.</div>
+</main>
+
+<footer>TELC Voll — منصة تدريب B1 · B2 · C1</footer>
+<script src="/assets/i18n.js"></script>
+<script src="/assets/app.js"></script>
+</body>
+</html>

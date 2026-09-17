@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#080808">
-<title data-i18n="err_page_title">أخطائي</title>
+<title data-i18n="sum_page_title">الملخصات</title>
 <link rel="stylesheet" href="/assets/app.css">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
@@ -24,7 +24,7 @@
   </nav>
 </header>
 <main class="wrap">
-  <h1 data-i18n="err_page_title">أخطائي</h1>
+  <h1 data-i18n="sum_page_title">الملخصات</h1>
   <div class="grid" id="list"><p class="muted" data-i18n="loading">جارٍ التحميل…</p></div>
 </main>
 <footer data-i18n="footer">TELC Voll</footer>
@@ -39,15 +39,16 @@ logoutLink.onclick = async (e) => {
 
 (async () => {
   try {
-    const { errors } = await api('errors-list');
-    list.innerHTML = errors.map((r) => `
-      <div class="card">
+    const { summaries } = await api('summaries-list');
+    list.innerHTML = summaries.map((r) => `
+      <article class="card">
         <span class="tag">${esc(r.section)} · ${esc(r.teil)}</span>
-        <h3>${esc(r.prompt)}</h3>
-        <p>${t('err_your_answer')} ${esc(r.wrong_answer)}</p>
-        <p>${t('err_correct')} <b>${esc(r.correct_answer)}</b></p>
-        <span class="tag">${t('err_count',{n:r.error_count})}</span>
-      </div>`).join('') || `<div class="card">${t('err_none')}</div>`;
+        <h2>${esc(r.title)}</h2>
+        <p>${esc(r.body).replace(/\n/g, '<br>')}</p>
+        ${r.keywords ? `<p><b>${t('sum_keywords')}</b> ${esc(r.keywords)}</p>` : ''}
+        ${r.strategy ? `<p><b>${t('sum_strategy')}</b> ${esc(r.strategy).replace(/\n/g, '<br>')}</p>` : ''}
+        ${r.common_errors ? `<p><b>${t('sum_errors')}</b> ${esc(r.common_errors).replace(/\n/g, '<br>')}</p>` : ''}
+      </article>`).join('') || `<div class="card">${t('sum_none')}</div>`;
   } catch (err) {
     location.href = '/?error=session';
   }
