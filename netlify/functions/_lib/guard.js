@@ -20,10 +20,6 @@ async function requireStudent(event, options = {}) {
     'UPDATE sessions SET last_seen_at=NOW() WHERE token=$1 AND active=TRUE',
     [payload.session_token]
   );
-  if (!options.allowIncompleteProfile) {
-    const p = await pool.query('SELECT profile_completed FROM students WHERE id=$1', [payload.student_id]);
-    if (!p.rows[0] || p.rows[0].profile_completed !== true) return null;
-  }
   return payload;
 }
 

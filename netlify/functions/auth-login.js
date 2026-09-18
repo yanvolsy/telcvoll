@@ -53,8 +53,13 @@ exports.handler = async (event) => {
     );
     await client.query('COMMIT');
 
-    const profileRes = await client.query('SELECT profile_completed FROM students WHERE id=$1', [studentId]);
-    const profileCompleted = profileRes.rows[0]?.profile_completed === true;
+    let profileCompleted = true;
+    try {
+      const profileRes = await client.query('SELECT profile_completed FROM students WHERE id=$1', [studentId]);
+      if (profileRes.rows[0] && profileRes.rows[0].profile_completed !== undefined) {
+        profileCompleted = profileRes.rows[0].profile_completed === true;
+      }
+    } catch (_) {}
 
     const jwtToken = sign({
       student_id: studentId,
@@ -67,7 +72,7 @@ exports.handler = async (event) => {
       'Set-Cookie': setCookie('student_token', jwtToken, 60 * 60 * 24 * 30),
     });
   } catch (e) {
-    await client.query('ROLLBACK');
+    try { await client.query('ROLLBACK'); } catch (_) {}
     return json(500, { error: e.message });
   } finally {
     client.release();

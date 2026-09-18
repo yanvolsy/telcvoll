@@ -12,7 +12,18 @@ exports.handler = async (event) => {
   // from breaking the student area before that migration is run.
   await pool.query("UPDATE exercises SET level='B2' WHERE level IS NULL OR TRIM(level)=''");
 
-  const meRes = await pool.query('SELECT id,name,email,first_name,last_name,phone,country,profile_completed,profile_updated_at FROM students WHERE id=$1', [student.student_id]);
+  let studentData = null;
+  try {
+    const meRes = await pool.query('SELECT id,name,email,first_name,last_name,phone,country,profile_completed,profile_updated_at FROM students WHERE id=$1', [student.student_id]);
+    studentData = meRes.rows[0] || null;
+  } catch (_) {
+    try {
+      const meRes = await pool.query('SELECT id,name,email FROM students WHERE id=$1', [student.student_id]);
+      studentData = meRes.rows[0] || null;
+    } catch (e) {
+      studentData = { id: student.student_id, name: 'Student', email: '' };
+    }
+  }
   const accessRes = await pool.query(`
     SELECT c.id AS code_id, c.expires_at, p.name AS plan_name, p.plan_key, p.duration_days
     FROM access_codes c JOIN plans p ON p.id=c.plan_id
@@ -40,7 +51,7 @@ exports.handler = async (event) => {
   } catch (_) {}
 
   return json(200, {
-    student: meRes.rows[0] || null,
+    student: studentData,
     exercises: exRes.rows,
     exams: examRes.rows,
     attempts,
