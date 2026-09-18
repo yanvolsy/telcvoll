@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#080808"><title>TELC Voll · Sprechen</title>
+<meta name="theme-color" content="#FF7A2F"><title>TELC Voll · Sprechen</title>
 <link rel="stylesheet" href="/assets/app.css?v=20260918-cairo-local-v2">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
@@ -23,14 +23,23 @@
 @keyframes micPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}@keyframes voiceBar{from{height:5px}to{height:17px}}.speaking-model-head-actions{display:flex;align-items:center;gap:10px;justify-content:flex-end}.speaking-model-head-actions small{max-width:340px}.speaking-model-dialogue{direction:ltr}.speaking-model-line{direction:ltr;text-align:left}.speaking-model-section{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--white)}.speaking-model-section h4{margin:0 0 8px;font-size:14px}.speaking-model-list{margin:0;padding-inline-start:20px;line-height:1.8}.speaking-model-q{display:flex;align-items:flex-start;gap:9px;padding:9px 0;border-bottom:1px solid var(--line);direction:ltr;text-align:left}.speaking-model-q:last-child{border-bottom:0}.speaking-model-q button,.speaking-model-speak{flex:0 0 auto}.speaking-model-empty{padding:14px;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}
 @media(max-width:650px){.eval-grid{grid-template-columns:1fr}.bubble{max-width:94%}.spk-chat{max-height:42vh}.voice-mic{width:70px;height:70px}}
 </style>
-<style><!-- TELC Voll: unified homepage typography -->
-html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
-html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}</style>
+
 </head>
 <body>
-<header class="top"><a class="brand" href="/dashboard.html">TELC Voll</a><nav>
-<a href="/dashboard.html">الرئيسية</a><a href="/errors.html">أخطائي</a><a href="/summaries.html">الملخصات</a><a href="#" id="logout">خروج</a>
-</nav></header>
+<header class="top">
+  <a class="brand" href="/dashboard.html" aria-label="TELC Voll">
+    <span class="brand-mark">
+      <span class="brand-dot"></span>
+      <span class="brand-wrapper">
+        <span class="brand-name"><span class="brand-telc">TELC</span><span class="brand-voll">Voll</span></span>
+        <span class="brand-tagline">Lernen • Üben • Bestehen</span>
+      </span>
+    </span>
+  </a>
+  <nav>
+    <a href="/dashboard.html">الرئيسية</a><a href="/errors.html">أخطائي</a><a href="/summaries.html">الملخصات</a><a href="#" id="logout">خروج</a>
+  </nav>
+</header>
 <main class="wrap spk-shell"><div class="panel">
 <div id="loading">جارٍ تحميل موضوع Sprechen…</div>
 <div id="app" hidden>
