@@ -99,16 +99,35 @@ exports.handler=async(event)=>{
   const context=`LEVEL: ${ex.level||''}\nTEIL: ${ex.teil||''}\nTHEMA: ${ex.title||''}\nTASK:\n${ex.body||''}`;
   let prompt;
   if(mode==='model'){
-    prompt=`Create a high-quality TELC German speaking training model based ONLY on the supplied topic, task and Teil. Follow the structure and level of detail typical of the provided TELC-style examples. Do not invent a different topic and do not claim this is an official telc answer.
+    prompt=`Create a high-quality TELC B2 Sprechen training model based ONLY on the supplied topic, task and Teil. The supplied topic is the source of truth. Do not invent a different topic and do not claim this is an official telc answer.
 ${context}
-The output must be useful as a model for a learner, not just a generic conversation.
-For Teil 2, organize the model around the topic points in a natural order. When the topic supports it, cover: Inhalt, Meinung, Erfahrung, Vorteile and Nachteile. Turn these points into a realistic dialogue between a strong student and Partner/Jerry, with natural partner reactions and follow-up questions. The student turns should demonstrate what a good B2 candidate could say.
-For Teil 3, model a realistic joint planning conversation. Cover the concrete planning points contained in the supplied task (for example time, place, participants, cost, tasks, priorities, materials, alternatives). The partner should react, make counter-suggestions, ask questions, negotiate, and the dialogue should finish with a clear common agreement. Do not force points that are not relevant to the supplied task.
-For Teil 1, model a short structured presentation/opinion with a natural partner reaction and one or two follow-up questions.
-Generate 5-7 dialogue turns, including at least two strong student turns and realistic Partner/Jerry reactions. Generate 4-6 independent practice questions, QUESTIONS ONLY: no answers, no hints, no explanations, no answer keys. Generate 5-8 useful Redemittel.
+
+IMPORTANT FOR TEIL 2 — FOLLOW THIS ROLE DISTRIBUTION EXACTLY:
+- Meinung 1 is the STUDENT'S opinion. The student gives their own clear position and a reason.
+- Meinung 2 is the PARTNER'S opinion. The partner gives an independent opinion, which may agree, disagree, or add a different perspective. It is NOT another opinion that the student must memorize.
+- Erfahrung 1 is the STUDENT'S personal experience/example.
+- Erfahrung 2 is the PARTNER'S personal experience/example.
+- Vorteile und Nachteile are discussed by BOTH speakers. They should exchange arguments, react to each other, ask follow-up questions, and possibly agree/disagree.
+- The dialogue must feel like a real two-person B2 discussion, not a monologue and not a list of prepared answers.
+- Use the actual points contained in the supplied topic. Do not force sections that are absent from the topic.
+
+For Teil 2, build the model dialogue in a natural progression:
+1) Student introduces the topic briefly and gives Meinung 1.
+2) Partner reacts and gives Meinung 2.
+3) Student gives Erfahrung 1.
+4) Partner gives Erfahrung 2.
+5) Both discuss the concrete Vorteile und Nachteile from the topic, with reactions, questions, agreement/disagreement and short reasons.
+6) Finish naturally with a brief conclusion or shared view when appropriate.
+
+For Teil 3, model a realistic joint planning conversation based only on the concrete planning points in the task. Both speakers make proposals, react, negotiate and finish with a clear agreement.
+For Teil 1, model a short structured presentation followed by a natural partner reaction and follow-up questions.
+
+Generate 8-12 dialogue turns for Teil 2 so that all required roles are clearly demonstrated. Use only speaker values student and partner for Teil 2. Add a phase to every dialogue line using one of: inhalt, meinung1, meinung2, erfahrung1, erfahrung2, vorteile, nachteile, abschluss. For Teil 3 use planung and for Teil 1 use inhalt/meinung/abschluss as appropriate.
+Generate 5-7 independent practice questions, QUESTIONS ONLY: no answers, no hints, no explanations, no answer keys. Generate 5-8 useful Redemittel suitable for the actual topic and Teil.
+
 Return ONLY JSON in this exact shape:
-{"title":"","note":"","dialogue":[{"speaker":"jerry|partner|student","text":""}],"structure":{"inhalt":[],"meinung":[],"erfahrung":[],"vorteile":[],"nachteile":[],"planung":[]},"questions":[""],"redemittel":[""]}
-Use empty arrays for structure fields that do not fit the Teil. The questions array must contain questions only. Keep the dialogue in German. Keep the note short. Make the dialogue and structure consistent with each other.`;
+{"title":"","note":"","dialogue":[{"speaker":"student|partner","phase":"","text":""}],"structure":{"inhalt":[],"meinung1":[],"meinung2":[],"erfahrung1":[],"erfahrung2":[],"vorteile":[],"nachteile":[],"planung":[]},"questions":[""],"redemittel":[""]}
+Use empty arrays for structure fields that do not fit the Teil. For Teil 2, the structure fields must reflect the source topic and must clearly distinguish student vs partner roles. Keep the dialogue in German. Keep the note short. Make the dialogue, structure and questions consistent with each other.`;
   } else if(mode==='evaluate'){
     prompt=`Evaluate a TELC speaking practice session for training only. Do not claim an official telc score.
 ${context}
@@ -118,17 +137,26 @@ Return ONLY JSON:
 {"criteria":[{"key":"ausdruck","label":"Ausdrucksfähigkeit","score":0,"max":5,"comment":""},{"key":"aufgabe","label":"Aufgabenbewältigung","score":0,"max":5,"comment":""},{"key":"richtigkeit","label":"Formale Richtigkeit","score":0,"max":5,"comment":""},{"key":"aussprache","label":"Aussprache und Intonation","score":0,"max":5,"comment":"Aus dem Transkript nicht zuverlässig beurteilbar."},{"key":"interaktion","label":"Interaktion","score":0,"max":5,"comment":""}],"total":0,"strengths":[],"priorities":[],"summary_de":"","summary_ar":""}
 Score 0-5 for each. For pronunciation explicitly say it cannot reliably be assessed from text transcript and do not pretend to hear audio. Keep feedback specific to this topic and Teil.`;
   } else {
-    prompt=`Act as the exam PARTNER for a TELC German speaking simulation. Stay in German. Be natural, concise, and interactive. Never become the examiner.
+    prompt=`Act as the exam PARTNER (not Jerry) for a realistic TELC German speaking simulation. Stay in German. Be natural, concise, and interactive. The student is the candidate and you are the independent conversation partner. Never become the examiner and never write the student's answer for them.
 ${context}
 Student transcript:
 ${transcript}
 Conversation history:
 ${JSON.stringify(history)}
+
+STRICT TEIL 2 ROLE RULES:
+- The student's first substantive contribution should be treated as MEINUNG 1: their own opinion and reason.
+- Your response must then provide MEINUNG 2: your own independent partner opinion, not a repetition of the student's opinion. You may agree, disagree, or add a different perspective, but give a reason.
+- After the student gives an experience/example, provide ERFAHRUNG 2 as the partner's own relevant experience/example. Do not invent a personal experience that would be impossible for an AI; phrase it as a plausible partner perspective/example rather than claiming real-world personal memories.
+- Then guide the conversation into the concrete Vorteile und Nachteile in the supplied topic. Both sides should exchange arguments, react, ask short follow-up questions and sometimes disagree.
+- Do not dump all advantages and disadvantages in one message. Discuss them step by step across turns.
+- Ask only ONE main question or request at a time.
+- Follow the actual topic points; do not invent unrelated categories.
+
 Rules by Teil:
-- Teil 1: react to the presentation/experience and ask one relevant follow-up question.
-- Teil 2: state a clear position, react to the student's argument, and ask a useful counter-question.
-- Teil 3: actively plan/negotiate; introduce or react to concrete points such as time, place, cost, tasks, priorities.
-Do not invent a different topic. Ask only one main question/request at a time.
+- Teil 1: react to the presentation and ask one relevant follow-up question.
+- Teil 2: follow the role sequence above and keep the conversation natural.
+- Teil 3: actively plan/negotiate; introduce or react to concrete planning points such as time, place, cost, tasks and priorities, and work toward agreement.
 Return ONLY JSON: {"reply":"","short_note":"","continue":true}`;
   }
   try{
