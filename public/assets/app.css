@@ -857,3 +857,41 @@ html,body,body *{font-family:"Cairo",sans-serif!important}
 
 /* TELC Voll: bundled Cairo font is the authoritative UI font. */
 html,body,body *{font-family:"Cairo",sans-serif!important}
+
+/* V10 — student heading hierarchy + mirrored toolbar on language change */
+.student-welcome-title{margin:0 0 8px!important;line-height:1.12!important}
+.student-platform-tag{display:inline-flex!important;margin:0 0 7px!important;color:var(--exercise-accent)!important;background:var(--exercise-accent-soft)!important;border-color:color-mix(in srgb,var(--exercise-accent) 22%,var(--line))!important}
+.student-welcome-instruction{margin:0!important}
+
+/* Arabic: shuffle right → Teil center → search left. German mirrors it. */
+.topic-toolbar#topicToolbar{direction:rtl!important;grid-template-columns:56px minmax(300px,1fr) 320px!important;}
+.topic-toolbar#topicToolbar .shuffle-toggle{grid-column:1!important;grid-row:1!important;justify-self:start!important}
+.topic-toolbar#topicToolbar .teil-tabs{grid-column:2!important;grid-row:1!important;justify-self:center!important;direction:rtl!important}
+.topic-toolbar#topicToolbar .topic-search-wrap{grid-column:3!important;grid-row:1!important;justify-self:end!important;direction:rtl!important}
+.topic-toolbar#topicToolbar .topic-search-input{direction:rtl!important;text-align:right!important}
+
+.topic-toolbar#topicToolbar[dir="ltr"]{direction:ltr!important;grid-template-columns:320px minmax(300px,1fr) 56px!important;}
+.topic-toolbar#topicToolbar[dir="ltr"] .topic-search-wrap{grid-column:1!important;justify-self:start!important;direction:ltr!important}
+.topic-toolbar#topicToolbar[dir="ltr"] .topic-search-input{direction:ltr!important;text-align:left!important}
+.topic-toolbar#topicToolbar[dir="ltr"] .teil-tabs{grid-column:2!important;direction:ltr!important}
+.topic-toolbar#topicToolbar[dir="ltr"] .shuffle-toggle{grid-column:3!important;justify-self:end!important}
+
+@media(max-width:1050px){
+  .topic-toolbar#topicToolbar{grid-template-columns:52px minmax(240px,1fr) 280px!important}
+  .topic-toolbar#topicToolbar[dir="ltr"]{grid-template-columns:280px minmax(240px,1fr) 52px!important}
+  .topic-toolbar#topicToolbar .topic-search-wrap{width:280px!important}
+  .topic-toolbar#topicToolbar .topic-search-input{width:280px!important}
+}
+@media(max-width:700px){
+  .topic-toolbar#topicToolbar,
+  .topic-toolbar#topicToolbar[dir="ltr"]{display:grid!important;grid-template-columns:52px minmax(0,1fr)!important;grid-template-rows:auto auto!important;direction:rtl!important}
+  .topic-toolbar#topicToolbar .shuffle-toggle{grid-column:1!important;grid-row:1!important;justify-self:start!important}
+  .topic-toolbar#topicToolbar .teil-tabs{grid-column:2!important;grid-row:1!important;width:100%!important;direction:rtl!important}
+  .topic-toolbar#topicToolbar .topic-search-wrap{grid-column:1 / -1!important;grid-row:2!important;width:100%!important;max-width:none!important;justify-self:stretch!important}
+  .topic-toolbar#topicToolbar .topic-search-input{width:100%!important;max-width:none!important;height:44px!important}
+  .topic-toolbar#topicToolbar[dir="ltr"]{direction:ltr!important}
+  .topic-toolbar#topicToolbar[dir="ltr"] .shuffle-toggle{grid-column:1!important;grid-row:1!important;justify-self:start!important}
+  .topic-toolbar#topicToolbar[dir="ltr"] .teil-tabs{grid-column:2!important;grid-row:1!important;direction:ltr!important}
+  .topic-toolbar#topicToolbar[dir="ltr"] .topic-search-wrap{grid-column:1 / -1!important;grid-row:2!important}
+  .topic-toolbar#topicToolbar[dir="ltr"] .topic-search-input{direction:ltr!important;text-align:left!important}
+}
