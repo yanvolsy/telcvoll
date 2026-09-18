@@ -1,4 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap&v=20260918');
+@font-face{font-family:"Cairo";src:url("/assets/fonts/Cairo-Regular.ttf") format("truetype");font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:"Cairo";src:url("/assets/fonts/Cairo-Medium.ttf") format("truetype");font-weight:500;font-style:normal;font-display:swap;}
+@font-face{font-family:"Cairo";src:url("/assets/fonts/Cairo-SemiBold.ttf") format("truetype");font-weight:600;font-style:normal;font-display:swap;}
+@font-face{font-family:"Cairo";src:url("/assets/fonts/Cairo-Bold.ttf") format("truetype");font-weight:700;font-style:normal;font-display:swap;}
+@font-face{font-family:"Cairo";src:url("/assets/fonts/Cairo-ExtraBold.ttf") format("truetype");font-weight:800;font-style:normal;font-display:swap;}
+@font-face{font-family:"Cairo";src:url("/assets/fonts/Cairo-Black.ttf") format("truetype");font-weight:900;font-style:normal;font-display:swap;}
 
 :root{
   --green:#f47b20;--green-dark:#c85f0b;--green-soft:#fff1e5;
@@ -848,4 +853,7 @@ html[dir="rtl"] .topic-tools select{background-position:calc(0% + 17px) 19px,cal
 }
 
 /* TELC Voll — unified brand typography: Cairo everywhere */
-html,body,body *{font-family:"Cairo","Segoe UI",Arial,sans-serif!important}
+html,body,body *{font-family:"Cairo",sans-serif!important}
+
+/* TELC Voll: bundled Cairo font is the authoritative UI font. */
+html,body,body *{font-family:"Cairo",sans-serif!important}
