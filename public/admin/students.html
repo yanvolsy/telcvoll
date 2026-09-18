@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>الطلاب والإحصائيات | TELC Voll</title><link rel="stylesheet" href="/assets/app.css">
+<title>الطلاب والإحصائيات | TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260918-cairo">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
@@ -11,7 +11,10 @@
 <style>
 .students-page{max-width:1220px}.student-head{display:flex;justify-content:space-between;align-items:end;gap:18px;margin-bottom:22px}.student-head h1{font-size:clamp(32px,4vw,48px);margin:8px 0 5px}.student-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}.student-stat{background:var(--white);border:1px solid var(--line);border-radius:17px;padding:17px;box-shadow:var(--shadow)}.student-stat small{color:var(--muted);font-weight:800}.student-stat strong{display:block;font-size:29px;margin-top:5px}.section-block{margin-top:22px}.section-block h2{margin-bottom:12px}.table-wrap{background:var(--white);border:1px solid var(--line);border-radius:18px;overflow:auto;box-shadow:var(--shadow)}.table{margin:0;min-width:720px}.table th{background:#7a3708;color:#fff}.performance td,.performance th{text-align:right}.empty-row{text-align:center;padding:30px;color:var(--muted)}
 @media(max-width:850px){.student-stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.student-head{display:block}.student-head .btn{margin-top:12px}.student-stats{grid-template-columns:1fr 1fr}}
-</style></head>
+</style><style><!-- TELC Voll: unified homepage typography -->
+html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
+html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}</style>
+</head>
 <body class="admin-shell">
 <header class="top admin-nav"><a class="brand" href="/admin/index.html" aria-label="TELC Voll"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a><nav><a href="/admin/index.html">الرئيسية</a><a href="#" id="logoutLink">خروج</a></nav></header>
 <main class="wrap students-page">

@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>إدارة الخطط | TELC Voll</title><link rel="stylesheet" href="/assets/app.css">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>إدارة الخطط | TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260918-cairo">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
@@ -50,7 +50,10 @@
 
 .plans-page{max-width:1180px} .plans-toolbar{display:flex;justify-content:space-between;align-items:end;gap:15px;margin-bottom:20px} .plans-toolbar h1{margin:8px 0 4px;font-size:clamp(32px,4vw,48px)} .plans-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px} .plan-item{min-height:220px} .plan-actions{margin-top:auto} .empty{background:var(--white);border:1px solid var(--line);border-radius:18px}
 @media(max-width:1000px){.plans-grid{grid-template-columns:repeat(2,minmax(0,1fr))}} @media(max-width:650px){.plans-grid{grid-template-columns:1fr} .plans-toolbar{display:block} .plans-toolbar .hero-actions{margin-top:14px}}
-</style></head>
+</style><style><!-- TELC Voll: unified homepage typography -->
+html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
+html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}</style>
+</head>
 <body class="admin-shell">
 <header class="top admin-nav"><a class="brand" href="/admin/index.html" aria-label="TELC Voll"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a><nav><a href="/admin/index.html">الرئيسية</a><a href="#" id="logoutLink">خروج</a></nav></header>
 <main class="wrap plans-page">
