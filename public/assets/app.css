@@ -802,3 +802,46 @@ html[dir="rtl"] .topic-tools select{background-position:calc(0% + 17px) 19px,cal
 .topic-search-popover[hidden]{display:none}
 .topic-search-popover input{width:100%;height:42px!important;border:0!important;box-shadow:none!important;background:transparent!important;margin:0!important;outline:none!important}
 @media(max-width:650px){.topic-search-wrap{justify-content:stretch}.topic-search-toggle{width:46px!important}.topic-search-popover{left:auto;right:0;width:min(280px,calc(100vw - 32px))}}
+
+
+/* Final dashboard search — plain input, no search button/icon */
+.topic-toolbar .topic-search-wrap{
+  grid-column:1!important;
+  grid-row:1!important;
+  width:320px!important;
+  max-width:100%!important;
+  min-width:0!important;
+  justify-self:start!important;
+  display:block!important;
+  position:relative!important;
+}
+.topic-toolbar .topic-search-input{
+  display:block!important;
+  width:320px!important;
+  max-width:100%!important;
+  height:48px!important;
+  box-sizing:border-box!important;
+  margin:0!important;
+  padding:0 15px!important;
+  border:1px solid var(--line)!important;
+  border-radius:14px!important;
+  background:var(--white)!important;
+  color:var(--ink)!important;
+  font:inherit!important;
+  font-size:13px!important;
+  text-align:right!important;
+  direction:rtl!important;
+  outline:none!important;
+  box-shadow:0 6px 18px rgba(16,35,30,.05)!important;
+}
+.topic-toolbar .topic-search-input::placeholder{color:var(--muted)!important;opacity:.9}
+.topic-toolbar .topic-search-input:focus{
+  border-color:var(--exercise-accent)!important;
+  box-shadow:0 0 0 3px var(--exercise-accent-soft),0 7px 20px rgba(16,35,30,.06)!important;
+}
+.topic-toolbar .topic-search-input::-webkit-search-cancel-button{display:none}
+@media(max-width:1050px){.topic-toolbar .topic-search-wrap{width:280px!important}.topic-toolbar .topic-search-input{width:280px!important}}
+@media(max-width:700px){
+  .topic-toolbar .topic-search-wrap{grid-column:1 / -1!important;grid-row:2!important;width:100%!important;max-width:none!important}
+  .topic-toolbar .topic-search-input{width:100%!important;max-width:none!important;height:44px!important}
+}

@@ -70,8 +70,7 @@ function render(){
       <button id="shuffleToggle" class="shuffle-toggle" type="button" aria-pressed="${shuffleEnabled?'true':'false'}" title="${shuffleEnabled?text('الخلط مفعّل — اضغط لإيقافه','Shuffle aktiv — klicken zum Ausschalten'):text('الترتيب العادي — اضغط لتفعيل الخلط','Normale Reihenfolge — klicken zum Aktivieren')}"><span class="shuffle-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h4.5c3.8 0 4.7 5 8.5 5H21"/><path d="m18 8 3-1-3-1"/><path d="M3 17h4.5c3.8 0 4.7 5 8.5 5H21"/><path d="m18 16 3 1-3 1"/></svg></span><span class="shuffle-label">${shuffleEnabled?text('خلط','Mischen'):text('ترتيب','Reihenfolge')}</span></button>
       <div class="teil-tabs" role="tablist" aria-label="Teil auswählen">${availableTeile.map(t=>`<button type="button" class="teil-tab ${selectedTeil===t?'active':''}" data-teil="${t}">${t}</button>`).join('')}</div>
       <div class="topic-search-wrap">
-        <button id="searchToggle" class="topic-search-toggle" type="button" aria-expanded="false" aria-controls="topicSearchPopover" title="${text('بحث عن موضوع','Thema suchen')}" aria-label="${text('بحث عن موضوع','Thema suchen')}"><span class="topic-search-icon" aria-hidden="true">⌕</span></button>
-        <div id="topicSearchPopover" class="topic-search-popover" hidden><span class="topic-search-icon" aria-hidden="true">⌕</span><input id="search" placeholder="${text('ابحث عن الموضوع…','Thema suchen…')}" autocomplete="off"/></div>
+        <input id="search" class="topic-search-input" type="search" placeholder="${text('ابحث عن الموضوع…','Thema suchen…')}" autocomplete="off" aria-label="${text('ابحث عن الموضوع','Thema suchen')}"/>
       </div>
     </section>
     <div id="topicGrid" class="topic-grid"></div>
@@ -92,33 +91,7 @@ function render(){
   document.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>{state.section=b.dataset.section;selectedTeil=availableTeileFor(state.section)[0]||'';render();});
   document.querySelectorAll('[data-teil]').forEach(b=>b.onclick=()=>{selectedTeil=b.dataset.teil;renderTopics();});
   const nav=$('telcChatNav'); if(nav) nav.href='/telc-chat.html';
-  // Search UI — JS-only polish: clean icon, stable open/close behavior, and no overlap with topic cards.
-  const searchInput=$('search');
-  const searchToggle=$('searchToggle');
-  const searchPopover=$('topicSearchPopover');
-  const searchWrap=searchToggle?.closest('.topic-search-wrap');
-  const toolbar=searchToggle?.closest('.topic-toolbar');
-  const searchIconSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.6"></circle><path d="m16 16 4.4 4.4"></path></svg>';
-  document.querySelectorAll('.topic-search-icon').forEach(icon=>{icon.innerHTML=searchIconSvg;icon.style.display='grid';icon.style.placeItems='center';});
-  const closeTopicSearch=()=>{
-    if(!searchPopover)return;
-    searchPopover.setAttribute('hidden','');
-    searchToggle?.setAttribute('aria-expanded','false');
-    if(toolbar) toolbar.style.marginBottom='24px';
-  };
-  const openTopicSearch=()=>{
-    if(!searchPopover)return;
-    searchPopover.removeAttribute('hidden');
-    searchToggle?.setAttribute('aria-expanded','true');
-    if(toolbar) toolbar.style.marginBottom='82px';
-    requestAnimationFrame(()=>searchInput?.focus());
-  };
-  if(searchInput) searchInput.oninput=renderTopics;
-  if(searchToggle) searchToggle.onclick=e=>{e.stopPropagation();if(searchPopover?.hasAttribute('hidden'))openTopicSearch();else closeTopicSearch();};
-  if(searchWrap) searchWrap.onclick=e=>e.stopPropagation();
-  document.removeEventListener('click',window.__telcSearchOutside);
-  window.__telcSearchOutside=e=>{if(!searchWrap?.contains(e.target))closeTopicSearch();};
-  document.addEventListener('click',window.__telcSearchOutside);
+  $('search').oninput=renderTopics;
   const shuffleBtn=$('shuffleToggle'); if(shuffleBtn) shuffleBtn.onclick=()=>{shuffleEnabled=!shuffleEnabled; shuffleOrderKey=''; shuffleOrder=[]; updateShuffleButton(); renderTopics();};
   renderTopics();
 }
