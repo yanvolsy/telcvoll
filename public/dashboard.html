@@ -50,7 +50,7 @@ function render(){
   const has=levelAvailable(state.level);
   $('content').innerHTML=`
     <section class="hub-head">
-      <div><span class="tag">${text('منصة الطالب','Schülerbereich')}</span><h1>${text('منصة الطالب','Student Platform')}</h1><p class="muted">${text('مرحباً '+(state.student?.name||'Student')+' — اختر المستوى والقسم ثم افتح التمرين.','Hallo '+(state.student?.name||'Student')+' — wähle Niveau und Prüfungsteil.')}</p></div>
+      <div><h1>${text('منصة الطالب','Student Platform')}</h1><p class="muted">${text('مرحباً '+(state.student?.name||'Student')+' — اختر المستوى والقسم ثم افتح التمرين.','Hallo '+(state.student?.name||'Student')+' — wähle Niveau und Prüfungsteil.')}</p></div>
       <div class="hub-kpis">
         <div class="hub-kpi days-kpi ${remainingDays<=2?'warning':''}"><strong>${remainingDays}</strong><span>${text('يوم متبقٍ','Tage verbleibend')}</span></div>
         <div class="hub-progress-card" aria-label="${text('تقدم الطالب','Lernfortschritt')}">
@@ -66,7 +66,7 @@ function render(){
     <nav class="section-switch" aria-label="Prüfungsteile">
       ${SECTION_ORDER.map(s=>{const count=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===s).length;return `<button class="section-btn ${state.section===s?'active':''}" data-section="${s}"><span>${sectionIcon(s)}</span><span class="section-btn-copy"><b>${s}</b><small>${count} ${text('تمرين','Übungen')}</small></span></button>`}).join('')}
     </nav>
-    <section class="topic-toolbar">
+    <section class="topic-toolbar" id="topicToolbar">
       <button id="shuffleToggle" class="shuffle-toggle" type="button" aria-pressed="${shuffleEnabled?'true':'false'}" title="${shuffleEnabled?text('الخلط مفعّل — اضغط لإيقافه','Shuffle aktiv — klicken zum Ausschalten'):text('الترتيب العادي — اضغط لتفعيل الخلط','Normale Reihenfolge — klicken zum Aktivieren')}"><span class="shuffle-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h4.5c3.8 0 4.7 5 8.5 5H21"/><path d="m18 8 3-1-3-1"/><path d="M3 17h4.5c3.8 0 4.7 5 8.5 5H21"/><path d="m18 16 3 1-3 1"/></svg></span><span class="shuffle-label">${shuffleEnabled?text('خلط','Mischen'):text('ترتيب','Reihenfolge')}</span></button>
       <div class="teil-tabs" role="tablist" aria-label="Teil auswählen">${availableTeile.map(t=>`<button type="button" class="teil-tab ${selectedTeil===t?'active':''}" data-teil="${t}">${t}</button>`).join('')}</div>
       <div class="topic-search-wrap">
@@ -121,6 +121,16 @@ function renderTopics(){
   if(teil) list=list.filter(x=>x.teil===teil);
   if(q) list=list.filter(x=>(x.title+' '+(x.body||'')).toLowerCase().includes(q));
   updateShuffleButton();
+  const toolbar=$('topicToolbar');
+  if(toolbar) toolbar.setAttribute('data-lang', lang());
+  const searchInput=$('search');
+  if(searchInput){
+    const isDe=lang()==='de';
+    searchInput.dir=isDe?'ltr':'rtl';
+    searchInput.style.textAlign=isDe?'left':'right';
+    searchInput.placeholder=isDe?'Thema suchen…':'ابحث عن الموضوع…';
+    searchInput.setAttribute('aria-label',isDe?'Thema suchen':'ابحث عن الموضوع');
+  }
   document.querySelectorAll('.teil-tab').forEach(b=>b.classList.toggle('active',b.dataset.teil===selectedTeil));
   $('topicGrid').innerHTML=list.length?list.map((x,i)=>`<article class="topic-card"><div class="topic-card-head"><span class="topic-index">${String(i+1).padStart(2,'0')}</span><span class="tag">Telc ${esc(x.level||'B2')}</span></div><h3 class="topic-card-title"><span class="topic-status-dot ${isExerciseCompleted(x.id)?'is-done':'is-new'}" title="${isExerciseCompleted(x.id)?text('تم التدريب على هذا الموضوع من قبل','Bereits trainiert'):text('لم يتم التدريب على هذا الموضوع بعد','Noch nicht trainiert')}" aria-label="${isExerciseCompleted(x.id)?text('تم التدريب من قبل','Bereits trainiert'):text('لم يتم التدريب بعد','Noch nicht trainiert')}"></span><span>${esc(x.title)}</span></h3><div class="topic-meta"><span>${esc(x.teil)}</span><span>${esc(taskTypeLabel(x.task_type))}</span><span>${exerciseDuration(x)} ${text('دقيقة','Min.')}</span></div><a class="btn light" href="/exercise.html?id=${x.id}">${text('فتح التمرين','Übung öffnen')} →</a></article>`).join(''):`<div class="empty-panel"><h3>${text('لا توجد تمارين منشورة هنا','Keine veröffentlichten Übungen')}</h3><p class="muted">${text('يمكن للمشرف إضافة الموضوع من لوحة الإدارة.','Der Administrator kann Aufgaben im Adminbereich hinzufügen.')}</p></div>`;
 }
