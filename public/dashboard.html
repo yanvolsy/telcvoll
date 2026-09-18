@@ -43,8 +43,6 @@ function levelExercises(level=state.level){return state.exercises.filter(x=>(x.l
 function totalCountForLevel(){return levelExercises().length;}
 function completedCountForLevel(){return levelExercises().filter(x=>isExerciseCompleted(x.id)).length;}
 function levelProgressPercent(){const total=totalCountForLevel();return total?Math.round((completedCountForLevel()/total)*100):0;}
-function sectionStats(){return SECTION_ORDER.map(section=>{const all=levelExercises().filter(x=>x.section===section),done=all.filter(x=>isExerciseCompleted(x.id)).length;return {section,total:all.length,done,pct:all.length?Math.round(done/all.length*100):0};});}
-function recentExercises(){return levelExercises().filter(x=>isExerciseCompleted(x.id)).slice(-5).reverse();}
 function render(){
   const list=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===state.section);
   const availableTeile=availableTeileFor(state.section);
@@ -62,7 +60,6 @@ function render(){
         </div>
       </div>
     </section>
-    <section class="section-progress-grid" aria-label="${text('تقدم الأقسام','Fortschritt je Prüfungsteil')}">${sectionStats().map(x=>`<div class="section-progress-card"><div><b>${x.section}</b><span>${x.done}/${x.total}</span></div><div class="section-progress-track"><i style="width:${x.pct}%"></i></div><small>${x.pct}%</small></div>`).join('')}</section>
     <section class="level-switch" aria-label="TELC Voll Niveau">
       ${['B1','B2','C1'].map(l=>`<button class="level-btn ${state.level===l?'active':''} ${!levelAvailable(l)?'empty':''}" data-level="${l}">Telc ${l}</button>`).join('')}
     </section>
@@ -77,7 +74,6 @@ function render(){
         <div id="topicSearchPopover" class="topic-search-popover" hidden><span class="topic-search-icon" aria-hidden="true">⌕</span><input id="search" placeholder="${text('ابحث عن الموضوع…','Thema suchen…')}" autocomplete="off"/></div>
       </div>
     </section>
-    <section class="recent-exercises-panel"><div class="recent-head"><h2>${text('آخر التمارين','Zuletzt trainiert')}</h2><span>${completedCountForLevel()} ${text('منجز','abgeschlossen')}</span></div><div class="recent-list">${recentExercises().length?recentExercises().map(x=>`<a href="/exercise.html?id=${x.id}"><b>${esc(x.title)}</b><small>${esc(x.section)} · ${esc(x.teil)}</small></a>`).join(''):`<span class="muted">${text('لم تبدأ أي تمرين بعد.','Noch keine Übung abgeschlossen.')}</span>`}</div></section>
     <div id="topicGrid" class="topic-grid"></div>
 
     <a id="telcStudyFloat" class="telc-study-float" href="/telc-chat.html" aria-label="مساعد TELC" title="مساعد TELC">✦ <span data-i18n="chat_float_label">مساعد TELC</span></a>

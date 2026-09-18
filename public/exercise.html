@@ -104,11 +104,11 @@ function renderMatching(){
    e.stopPropagation(); const st=captureExerciseScroll();
    const n=String(sel.dataset.paragraphSelect), chosen=String(sel.value||'');
    activeItem=n;
-   if(!chosen){delete answers[n];}else{Object.keys(answers).forEach(k=>{if(k!==n&&answers[k]===chosen)delete answers[k];});answers[n]=chosen;}telcSaveDraft(id,{type:'answers',answers});
+   if(!chosen){delete answers[n];}else{Object.keys(answers).forEach(k=>{if(k!==n&&answers[k]===chosen)delete answers[k];});answers[n]=chosen;}
    renderMatching();restoreExerciseScroll(st);bindActions();
  });
- document.querySelectorAll('[data-clear]').forEach(b=>b.onclick=e=>{e.stopPropagation();const st=captureExerciseScroll();delete answers[String(b.dataset.clear)];telcSaveDraft(id,{type:'answers',answers});activeItem=String(b.dataset.clear);renderMatching();restoreExerciseScroll(st);bindActions();});
- document.querySelectorAll('[data-choice]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=e=>{e.preventDefault();if(b.disabled||!activeItem)return;const st=captureExerciseScroll();const chosen=b.dataset.choice;Object.keys(answers).forEach(k=>{if(k!==String(activeItem)&&answers[k]===chosen)delete answers[k];});answers[String(activeItem)]=chosen;telcSaveDraft(id,{type:'answers',answers});renderMatching();restoreExerciseScroll(st);bindActions();};});
+ document.querySelectorAll('[data-clear]').forEach(b=>b.onclick=e=>{e.stopPropagation();const st=captureExerciseScroll();delete answers[String(b.dataset.clear)];activeItem=String(b.dataset.clear);renderMatching();restoreExerciseScroll(st);bindActions();});
+ document.querySelectorAll('[data-choice]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=e=>{e.preventDefault();if(b.disabled||!activeItem)return;const st=captureExerciseScroll();const chosen=b.dataset.choice;Object.keys(answers).forEach(k=>{if(k!==String(activeItem)&&answers[k]===chosen)delete answers[k];});answers[String(activeItem)]=chosen;renderMatching();restoreExerciseScroll(st);bindActions();};});
  const sh=document.querySelector('.shuffle-all');
  if(sh)sh.onclick=e=>{e.stopPropagation();const st=captureExerciseScroll();matchingOrder=shuffle(matchingOrder);headingOrder=shuffle(headingOrder);activeItem=null;renderMatching();restoreExerciseScroll(st);bindActions();};
  bindTextTools();
@@ -212,7 +212,6 @@ function renderBody(body){
 function escapeRegExp(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}function selectAnswer(n,val){
  const scrollState=captureExerciseScroll();
  activeItem=String(n);answers[String(n)]=val;
- telcSaveDraft(id,{type:'answers',answers});
  submitted=false; resultData=null; showModelAnswers=false;
  rerenderExerciseStable(scrollState);
 }
@@ -241,8 +240,8 @@ function renderWriting(){
    <div id="writingAiResult" class="writing-ai-result" hidden></div>
  </div>`;
  const ta=document.getElementById('writingAnswer');
- const savedWriting=telcLoadDraft(id);ta.value=savedWriting?.type==='writing'?String(savedWriting.text||''):(localStorage.getItem('writing_'+id)||'');
- const update=()=>{document.getElementById('wordCount').textContent=(ta.value.trim()?ta.value.trim().split(/\s+/).length:0)+' '+text('كلمة','Wörter');localStorage.setItem('writing_'+id,ta.value);telcSaveDraft(id,{type:'writing',text:ta.value});};
+ ta.value=localStorage.getItem('writing_'+id)||'';
+ const update=()=>{document.getElementById('wordCount').textContent=(ta.value.trim()?ta.value.trim().split(/\s+/).length:0)+' '+text('كلمة','Wörter');localStorage.setItem('writing_'+id,ta.value);};
  ta.oninput=update; update();
  document.querySelectorAll('[data-char]').forEach(b=>b.onclick=()=>{const a=ta.selectionStart,c=ta.selectionEnd;ta.setRangeText(b.dataset.char,a,c,'end');ta.focus();update();});
  document.getElementById('aiWritingCheck').onclick=()=>runWritingAI(ta.value);
@@ -273,7 +272,7 @@ async function runWritingAI(answer){
  const btn=document.getElementById('aiWritingCheck'); const box=document.getElementById('writingAiResult');
  if(!answer.trim()){box.hidden=false;box.innerHTML=`<div class="ai-error">${text('اكتب إجابتك أولاً ثم اطلب التصحيح.','Schreibe zuerst deine Antwort und starte dann die Korrektur.')}</div>`;return;}
  btn.disabled=true; const old=btn.textContent; btn.textContent=text('جاري تحليل الإجابة…','Antwort wird analysiert…');
- try{const r=await api('ai-writing-correct',{method:'POST',body:{exercise_id:id,answer}});markExerciseCompleted(id);localStorage.setItem('writing_ai_result_'+id,JSON.stringify(r));telcClearDraft(id);renderWritingAIResult(r);}
+ try{const r=await api('ai-writing-correct',{method:'POST',body:{exercise_id:id,answer}});markExerciseCompleted(id);localStorage.setItem('writing_ai_result_'+id,JSON.stringify(r));renderWritingAIResult(r);}
  catch(e){box.hidden=false;box.innerHTML=`<div class="ai-error">${esc(e.message)}</div>`;}
  finally{btn.disabled=false;btn.textContent=old;}
 }
@@ -339,7 +338,7 @@ function bindActions(){
 
 function renderWorkspace(){stopSpeaking();const t=model.exercise.task_type;const isSpb1=model.exercise.section==='Sprachbausteine'&&model.exercise.teil==='Teil 1';const isMatching=(t==='MATCHING')||(model.exercise.section==='Lesen'&&['Teil 1','Teil 3'].includes(model.exercise.teil))||(model.exercise.section==='Hören'&&model.exercise.teil==='Teil 3');if(t==='WRITING')return renderWriting();if(t==='SPEAKING')return renderSpeaking();if(t==='AUDIO_TF')return renderTF();if(isSpb1)return renderSprachbausteine1();if(isMatching)return renderMatching();return renderChoiceQuestions();}
 function renderResult(r){const st=captureExerciseScroll();submitted=true;resultData=r;rerenderExerciseStable(st);}
-async function submit(){if(submitted)return;if(!model.items.length){if(mockMode){goNextMock();}return;}try{const r=await api('exercise-submit',{method:'POST',body:{exercise_id:id,answers}});localStorage.setItem('last_exercise_result_'+id,JSON.stringify(r));telcClearDraft(id);markExerciseCompleted(id);if(mockMode){const s=getMockSession();if(s){s.results=s.results||[];s.results.push({id,title:model.exercise.title,section:model.exercise.section,teil:model.exercise.teil,score:r.score,max:r.max,percent:r.percent,result:r.result});s.index=(s.ids||[]).findIndex(x=>String(x)===String(id));localStorage.setItem('telc_self_test',JSON.stringify(s));}goNextMock();return;}renderResult(r);}catch(e){document.getElementById('content').insertAdjacentHTML('beforeend',`<div class="alert bad">${esc(e.message)}</div>`);}}
-(async()=>{try{const d=await api('exercise-get?id='+encodeURIComponent(id));model=d;document.body.classList.toggle('mock-mode',mockMode);renderWorkspace();bindActions();if(mockMode)startMockTimer();}catch(e){document.getElementById('content').innerHTML=`<div class="alert bad friendly-error"><strong>${esc(e.message||'تعذر فتح التمرين.')}</strong><p>${text('تحقق من الاتصال ثم حاول مرة أخرى.','Prüfen Sie die Verbindung und versuchen Sie es مرة أخرى.')}</p><a class="btn light" href="/dashboard.html">${text('العودة إلى لوحة الطالب','Zurück zum Dashboard')}</a></div>`;}})();
+async function submit(){if(submitted)return;if(!model.items.length){if(mockMode){goNextMock();}return;}try{const r=await api('exercise-submit',{method:'POST',body:{exercise_id:id,answers}});localStorage.setItem('last_exercise_result_'+id,JSON.stringify(r));markExerciseCompleted(id);if(mockMode){const s=getMockSession();if(s){s.results=s.results||[];s.results.push({id,title:model.exercise.title,section:model.exercise.section,teil:model.exercise.teil,score:r.score,max:r.max,percent:r.percent,result:r.result});s.index=(s.ids||[]).findIndex(x=>String(x)===String(id));localStorage.setItem('telc_self_test',JSON.stringify(s));}goNextMock();return;}renderResult(r);}catch(e){document.getElementById('content').insertAdjacentHTML('beforeend',`<div class="alert bad">${esc(e.message)}</div>`);}}
+(async()=>{try{const d=await api('exercise-get?id='+encodeURIComponent(id));model=d;document.body.classList.toggle('mock-mode',mockMode);renderWorkspace();bindActions();if(mockMode)startMockTimer();}catch(e){document.getElementById('content').innerHTML=`<div class="alert bad">${esc(e.message)}</div>`;}})();
 
 </script></body></html>

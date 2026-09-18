@@ -62,10 +62,29 @@ async function callGroq(key,model,system,prompt) {
   return extractProviderText(r);
 }
 
-async function callAI(prompt){ return askAI({feature:'speaking',system:'You are a realistic TELC German speaking partner and fair examiner. Always follow the requested JSON output exactly.',prompt,maxTokens:1600});}
+async function callAI(prompt) {
+  const system='You are a realistic TELC German speaking partner and fair examiner. Always follow the requested JSON output exactly.';
+  const configuredUrl=process.env.AI_API_URL;
+  const configuredKey=process.env.AI_API_KEY;
+  const geminiKey=process.env.GEMINI_API_KEY;
+  const groqKey=process.env.GROQ_API_KEY;
+  let firstError='';
+
+  if(configuredUrl&&configuredKey){
+    try{return await callConfiguredAI(configuredUrl,configuredKey,process.env.AI_MODEL,system,prompt)}
+    catch(e){firstError=e.message||String(e)}
+  }
+  if(geminiKey){
+    try{return await callGemini(geminiKey,process.env.GEMINI_SPEAKING_MODEL||process.env.GEMINI_CHAT_MODEL||process.env.GEMINI_WRITING_MODEL||'gemini-2.5-flash',system,prompt)}
+    catch(e){firstError=firstError?`${firstError} | ${e.message||e}`:(e.message||String(e))}
+  }
+  if(groqKey){
+    try{return await callGroq(groqKey,process.env.GROQ_SPEAKING_MODEL||process.env.GROQ_CHAT_MODEL||process.env.GROQ_WRITING_MODEL||'openai/gpt-oss-120b',system,prompt)}
+    catch(e){firstError=firstError?`${firstError} | ${e.message||e}`:(e.message||String(e))}
+  }
+  throw new Error(firstError || 'AI provider is not configured. Set AI_API_URL + AI_API_KEY, GEMINI_API_KEY, or GROQ_API_KEY in Netlify environment variables.');
+}
 exports.handler=async(event)=>{
-  if(!requireSameOrigin(event)) return json(403,{error:'Cross-origin request blocked.'});
-  if(!requestSize(event)) return json(413,{error:'Request too large.'});
   if(event.httpMethod!=='POST') return json(405,{error:'Method not allowed.'});
   const student=await requireStudent(event);
   if(!student) return json(401,{error:'unauthenticated'});
@@ -171,5 +190,5 @@ Return ONLY JSON: {"reply":"","short_note":"","continue":true}`;
     await db().query('INSERT INTO ai_logs(student_id,kind,input_text,output_text) VALUES($1,$2,$3,$4)',
       [student.student_id,'speaking',JSON.stringify({exercise_id:id,mode,transcript}),JSON.stringify(out)]);
     return json(200,out);
-  }catch(e){ await logAiError('speaking',e?.message||e,student.student_id); return json(503,{error:'AI is temporarily unavailable. Please try again.'}); }
+  }catch(e){ return json(502,{error:e.message}); }
 };

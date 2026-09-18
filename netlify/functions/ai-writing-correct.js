@@ -121,6 +121,47 @@ JSON-SCHEMA:
 }`;
 }
 
+async function callGemini(prompt) {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) throw new Error('GEMINI_API_KEY is not configured');
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent?key=${encodeURIComponent(key)}`;
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.1, responseMimeType: 'application/json' }
+    })
+  });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data?.error?.message || `Gemini HTTP ${r.status}`);
+  const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('') || '';
+  return normalize(cleanJson(text), 'AI');
+}
+
+async function callGroq(prompt) {
+  const key = process.env.GROQ_API_KEY;
+  if (!key) throw new Error('GROQ_API_KEY is not configured');
+  const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+    body: JSON.stringify({
+      model: GROQ_MODEL,
+      temperature: 0.1,
+      messages: [
+        { role: 'system', content: 'Return only valid JSON. You are a TELC German writing evaluator. Never claim to provide an official telc grade.' },
+        { role: 'user', content: prompt }
+      ],
+      response_format: { type: 'json_object' },
+      max_completion_tokens: 5000
+    })
+  });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data?.error?.message || `Groq HTTP ${r.status}`);
+  const text = data?.choices?.[0]?.message?.content || '';
+  return normalize(cleanJson(text), 'AI');
+}
+
 exports.handler = async (event) => {
   if (!requireSameOrigin(event)) return json(403, { error: 'Cross-origin request blocked.' });
   if (!requestSize(event)) return json(413, { error: 'Request too large.' });
@@ -155,18 +196,19 @@ exports.handler = async (event) => {
     });
 
     let result;
+    let firstError = '';
     try {
-      const raw = await askAI({feature:'writing',system:'Return only valid JSON. You are a TELC German writing evaluator. Never claim to provide an official telc grade.',prompt,maxTokens:1800});
-      result = normalize(sharedCleanJson(raw), 'AI');
+      result = await callGemini(prompt);
     } catch (e) {
-      await logAiError('writing',e?.message||e,student.student_id);
-      return json(503, { error: 'AI correction failed. Please try again later.' });
+      firstError = e.message;
+      try { result = await callGroq(prompt); }
+      catch (e2) { console.error('AI writing provider failed', firstError, e2); return json(502, { error: 'AI correction failed. Please try again later.' }); }
     }
 
     // Save the AI writing attempt so the student's progress counts it as completed.
     const score = clamp(result.overall_score, 0, 45);
     result.overall_score = score;
-    const resultLabel = score >= 27 ? 'KI-Feedback bestanden' : 'KI-Feedback weiterüben';
+    const resultLabel = score >= 60 ? 'KI-Feedback bestanden' : 'KI-Feedback weiterüben';
     const attemptRes = await client.query(
       `INSERT INTO attempts(student_id,exercise_id,score,max_score,percent,finished_at,result)
        VALUES($1,$2,$3,45,$4,NOW(),$5) RETURNING id`,
