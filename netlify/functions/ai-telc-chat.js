@@ -1,6 +1,7 @@
 const { db } = require('./_lib/db');
 const { json } = require('./_lib/auth');
 const { requireStudent } = require('./_lib/guard');
+const { requireSameOrigin, requestSize } = require('./_lib/request');
 const { rateLimit } = require('./_lib/ratelimit');
 
 const FALLBACK_AR = 'ابقَ في موضوع TELC من فضلك. اسألني عن امتحان TELC أو التحضير له.';
@@ -82,6 +83,8 @@ async function callGroq(key, model, system, messages) {
 }
 
 exports.handler = async (event) => {
+  if (!requireSameOrigin(event)) return json(403, { error: 'Cross-origin request blocked.' });
+  if (!requestSize(event)) return json(413, { error: 'Request too large.' });
   if (event.httpMethod !== 'POST') return json(405,{error:'Method not allowed.'});
   const student = await requireStudent(event);
   if (!student) return json(401,{error:'unauthenticated'});

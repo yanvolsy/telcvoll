@@ -87,6 +87,14 @@ CREATE TABLE IF NOT EXISTS exercises(
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
+ALTER TABLE exercises ADD COLUMN IF NOT EXISTS instructions TEXT;
+ALTER TABLE exercises ADD COLUMN IF NOT EXISTS vocabulary TEXT;
+ALTER TABLE exercises ADD COLUMN IF NOT EXISTS difficulty VARCHAR(40);
+ALTER TABLE exercises ADD COLUMN IF NOT EXISTS tags TEXT;
+ALTER TABLE exercises ADD COLUMN IF NOT EXISTS image_url TEXT;
+ALTER TABLE exercises ADD COLUMN IF NOT EXISTS time_limit_seconds INT DEFAULT 0;
+ALTER TABLE exercises ADD COLUMN IF NOT EXISTS access_mode VARCHAR(30) DEFAULT 'code_required';
+ALTER TABLE exercises ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP NULL;
 CREATE INDEX IF NOT EXISTS idx_exercises_lookup ON exercises(section, teil, status);
 ALTER TABLE exercises ADD COLUMN IF NOT EXISTS parent_exercise_id BIGINT REFERENCES exercises(id) ON DELETE CASCADE;
 ALTER TABLE exercises ADD COLUMN IF NOT EXISTS revision_no INTEGER NOT NULL DEFAULT 0;
@@ -197,3 +205,9 @@ INSERT INTO settings(key,value) VALUES
 ('default_passing_percent','60'),
 ('installed','0')
 ON CONFLICT (key) DO NOTHING;
+
+CREATE INDEX IF NOT EXISTS idx_sessions_student_active ON sessions(student_id, active);
+CREATE INDEX IF NOT EXISTS idx_attempts_student_finished ON attempts(student_id, finished_at DESC);
+CREATE INDEX IF NOT EXISTS idx_errors_student_seen ON student_errors(student_id, last_seen_at DESC);
+CREATE INDEX IF NOT EXISTS idx_ai_logs_student_created ON ai_logs(student_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_codes_student ON access_codes(student_id);

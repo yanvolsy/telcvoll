@@ -2,10 +2,13 @@ const bcrypt = require('bcryptjs');
 const { db } = require('./_lib/db');
 const { json, clientIp } = require('./_lib/auth');
 const { rateLimit } = require('./_lib/ratelimit');
+const { requireSameOrigin, requestSize } = require('./_lib/request');
 
 // One-time setup: creates the admin account. Protected by SETUP_KEY env var
 // (since there's no filesystem lock in serverless — we lock via the `settings` table instead).
 exports.handler = async (event) => {
+  if (!requireSameOrigin(event)) return json(403, { error: 'Cross-origin request blocked.' });
+  if (!requestSize(event)) return json(413, { error: 'Request too large.' });
   if (event.httpMethod !== 'POST') return json(405, { error: 'Method not allowed' });
 
   const setupKey = process.env.SETUP_KEY;
@@ -47,6 +50,6 @@ exports.handler = async (event) => {
 
     return json(200, { ok: true, message: 'Installation complete. Admin account ready.' });
   } catch (e) {
-    return json(500, { error: e.message });
+    console.error('install failed', e); return json(500, { error: 'Installation failed.' });
   }
 };

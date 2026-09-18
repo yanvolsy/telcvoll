@@ -1,9 +1,12 @@
 const { db } = require('./_lib/db');
 const { json } = require('./_lib/auth');
 const { requireStudent } = require('./_lib/guard');
+const { requireSameOrigin, requestSize } = require('./_lib/request');
 const { rateLimit } = require('./_lib/ratelimit');
 
 exports.handler = async (event) => {
+  if (!requireSameOrigin(event)) return json(403, { error: 'Cross-origin request blocked.' });
+  if (!requestSize(event)) return json(413, { error: 'Request too large.' });
   if (event.httpMethod !== 'POST') return json(405, { error: 'Method not allowed.' });
   const student = await requireStudent(event);
   if (!student) return json(401, { error: 'unauthenticated' });
@@ -53,6 +56,6 @@ exports.handler = async (event) => {
 
     return { statusCode: resp.status, headers: { 'Content-Type': 'application/json; charset=utf-8' }, body: raw };
   } catch (e) {
-    return json(502, { error: e.message });
+    console.error('AI proxy failed', e); return json(502, { error: 'AI service temporarily unavailable.' });
   }
 };

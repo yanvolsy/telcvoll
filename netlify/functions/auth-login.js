@@ -2,8 +2,11 @@ const crypto = require('crypto');
 const { db } = require('./_lib/db');
 const { sign, setCookie, clientIp, json } = require('./_lib/auth');
 const { rateLimit } = require('./_lib/ratelimit');
+const { requireSameOrigin, requestSize } = require('./_lib/request');
 
 exports.handler = async (event) => {
+  if (!requireSameOrigin(event)) return json(403, { error: 'Cross-origin request blocked.' });
+  if (!requestSize(event)) return json(413, { error: 'Request too large.' });
   if (event.httpMethod !== 'POST') return json(405, { error: 'Method not allowed' });
 
   const ip = clientIp(event);

@@ -43,6 +43,8 @@ function levelExercises(level=state.level){return state.exercises.filter(x=>(x.l
 function totalCountForLevel(){return levelExercises().length;}
 function completedCountForLevel(){return levelExercises().filter(x=>isExerciseCompleted(x.id)).length;}
 function levelProgressPercent(){const total=totalCountForLevel();return total?Math.round((completedCountForLevel()/total)*100):0;}
+function sectionStats(){return SECTION_ORDER.map(section=>{const all=levelExercises().filter(x=>x.section===section),done=all.filter(x=>isExerciseCompleted(x.id)).length;return {section,total:all.length,done,pct:all.length?Math.round(done/all.length*100):0};});}
+function recentExercises(){return levelExercises().filter(x=>isExerciseCompleted(x.id)).slice(-5).reverse();}
 function render(){
   const list=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===state.section);
   const availableTeile=availableTeileFor(state.section);
@@ -60,6 +62,7 @@ function render(){
         </div>
       </div>
     </section>
+    <section class="section-progress-grid" aria-label="${text('تقدم الأقسام','Fortschritt je Prüfungsteil')}">${sectionStats().map(x=>`<div class="section-progress-card"><div><b>${x.section}</b><span>${x.done}/${x.total}</span></div><div class="section-progress-track"><i style="width:${x.pct}%"></i></div><small>${x.pct}%</small></div>`).join('')}</section>
     <section class="level-switch" aria-label="TELC Voll Niveau">
       ${['B1','B2','C1'].map(l=>`<button class="level-btn ${state.level===l?'active':''} ${!levelAvailable(l)?'empty':''}" data-level="${l}">Telc ${l}</button>`).join('')}
     </section>
@@ -69,8 +72,12 @@ function render(){
     <section class="topic-toolbar">
       <button id="shuffleToggle" class="shuffle-toggle" type="button" aria-pressed="${shuffleEnabled?'true':'false'}" title="${shuffleEnabled?text('الخلط مفعّل — اضغط لإيقافه','Shuffle aktiv — klicken zum Ausschalten'):text('الترتيب العادي — اضغط لتفعيل الخلط','Normale Reihenfolge — klicken zum Aktivieren')}"><span class="shuffle-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h4.5c3.8 0 4.7 5 8.5 5H21"/><path d="m18 8 3-1-3-1"/><path d="M3 17h4.5c3.8 0 4.7 5 8.5 5H21"/><path d="m18 16 3 1-3 1"/></svg></span><span class="shuffle-label">${shuffleEnabled?text('خلط','Mischen'):text('ترتيب','Reihenfolge')}</span></button>
       <div class="teil-tabs" role="tablist" aria-label="Teil auswählen">${availableTeile.map(t=>`<button type="button" class="teil-tab ${selectedTeil===t?'active':''}" data-teil="${t}">${t}</button>`).join('')}</div>
-      <div class="topic-search"><span class="topic-search-icon" aria-hidden="true">⌕</span><input id="search" placeholder="${text('ابحث عن الموضوع…','Thema suchen…')}"/></div>
+      <div class="topic-search-wrap">
+        <button id="searchToggle" class="topic-search-toggle" type="button" aria-expanded="false" aria-controls="topicSearchPopover" title="${text('بحث عن موضوع','Thema suchen')}" aria-label="${text('بحث عن موضوع','Thema suchen')}"><span class="topic-search-icon" aria-hidden="true">⌕</span></button>
+        <div id="topicSearchPopover" class="topic-search-popover" hidden><span class="topic-search-icon" aria-hidden="true">⌕</span><input id="search" placeholder="${text('ابحث عن الموضوع…','Thema suchen…')}" autocomplete="off"/></div>
+      </div>
     </section>
+    <section class="recent-exercises-panel"><div class="recent-head"><h2>${text('آخر التمارين','Zuletzt trainiert')}</h2><span>${completedCountForLevel()} ${text('منجز','abgeschlossen')}</span></div><div class="recent-list">${recentExercises().length?recentExercises().map(x=>`<a href="/exercise.html?id=${x.id}"><b>${esc(x.title)}</b><small>${esc(x.section)} · ${esc(x.teil)}</small></a>`).join(''):`<span class="muted">${text('لم تبدأ أي تمرين بعد.','Noch keine Übung abgeschlossen.')}</span>`}</div></section>
     <div id="topicGrid" class="topic-grid"></div>
 
     <a id="telcStudyFloat" class="telc-study-float" href="/telc-chat.html" aria-label="مساعد TELC" title="مساعد TELC">✦ <span data-i18n="chat_float_label">مساعد TELC</span></a>
@@ -90,6 +97,8 @@ function render(){
   document.querySelectorAll('[data-teil]').forEach(b=>b.onclick=()=>{selectedTeil=b.dataset.teil;renderTopics();});
   const nav=$('telcChatNav'); if(nav) nav.href='/telc-chat.html';
   $('search').oninput=renderTopics;
+  $('searchToggle').onclick=()=>{const pop=$('topicSearchPopover'); const open=pop.hasAttribute('hidden'); if(open){pop.removeAttribute('hidden'); $('searchToggle').setAttribute('aria-expanded','true'); setTimeout(()=>$('search')?.focus(),0);}else{pop.setAttribute('hidden',''); $('searchToggle').setAttribute('aria-expanded','false');}};
+  document.addEventListener('click',e=>{const wrap=e.target.closest('.topic-search-wrap'); if(!wrap){const pop=$('topicSearchPopover'); if(pop && !pop.hasAttribute('hidden')){pop.setAttribute('hidden',''); $('searchToggle')?.setAttribute('aria-expanded','false');}}});
   const shuffleBtn=$('shuffleToggle'); if(shuffleBtn) shuffleBtn.onclick=()=>{shuffleEnabled=!shuffleEnabled; shuffleOrderKey=''; shuffleOrder=[]; updateShuffleButton(); renderTopics();};
   renderTopics();
 }

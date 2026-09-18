@@ -1,6 +1,7 @@
 const { db } = require('./_lib/db');
 const { json } = require('./_lib/auth');
 const { requireAdmin } = require('./_lib/guard');
+const { requireSameOrigin, requestSize } = require('./_lib/request');
 
 // Backs the "Bearbeiten / Duplizieren / Löschen / Veröffentlichen" admin
 // toolbar injected into the learner-facing pages, plus the Content
@@ -58,6 +59,8 @@ async function replaceItems(client, exerciseId, items) {
 }
 
 exports.handler = async (event) => {
+  if (!requireSameOrigin(event)) return json(403, { error: 'Cross-origin request blocked.' });
+  if (!requestSize(event)) return json(413, { error: 'Request too large.' });
   if (!requireAdmin(event)) return json(401, { error: 'unauthenticated' });
   const pool = db();
 
@@ -204,7 +207,7 @@ exports.handler = async (event) => {
   } catch (e) {
     await client.query('ROLLBACK').catch(() => {});
     console.error(e);
-    return json(500, { error: e.message });
+    return json(500, { error: 'تعذر إتمام العملية.' });
   } finally {
     client.release();
   }

@@ -1,16 +1,21 @@
 const { db } = require('./_lib/db');
 const { json } = require('./_lib/auth');
 const { requireStudent } = require('./_lib/guard');
+const { requireSameOrigin, requestSize } = require('./_lib/request');
+const { rateLimit } = require('./_lib/ratelimit');
 
 const MAX_BY_SECTION = { Lesen:75, Sprachbausteine:30, Hören:75 };
 
 exports.handler = async (event) => {
+  if (!requireSameOrigin(event)) return json(403, { error: 'Cross-origin request blocked.' });
+  if (!requestSize(event)) return json(413, { error: 'Request too large.' });
   if(event.httpMethod!=='POST') return json(405,{error:'Method not allowed'});
   const student=await requireStudent(event); if(!student) return json(401,{error:'unauthenticated'});
+  if (!(await rateLimit('mock_submit', 20, 3600, String(student.student_id)))) return json(429,{error:'Too many exam submissions. Please try again later.'});
   let body={}; try{body=JSON.parse(event.body||'{}')}catch{return json(400,{error:'Bad request'});}
   const tasks=Array.isArray(body.tasks)?body.tasks:[];
   if(!tasks.length) return json(400,{error:'No exam tasks'});
-  const pool=db(); await pool.query("ALTER TABLE exercises ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP NULL"); const client=await pool.connect();
+  const pool=db();
   try{
     const sectionRaw={}; const details=[];
     for(const task of tasks){
@@ -36,5 +41,5 @@ exports.handler = async (event) => {
       sections[section]={score,max,percent:max?Math.round(score/max*10000)/100:0,tasks:v.tasks};
     }
     return json(200,{level:body.level||'',sections,details});
-  }catch(e){return json(500,{error:e.message});}finally{client.release();}
+  }catch(e){console.error('mock-submit failed',e);return json(500,{error:'تعذر إنهاء المحاكاة.'});}finally{client.release();}
 };

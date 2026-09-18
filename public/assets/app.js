@@ -8,7 +8,10 @@ async function api(path, options = {}) {
   });
   let data = {};
   try { data = await res.json(); } catch { /* no json body */ }
-  if (!res.ok) throw Object.assign(new Error(data.error || res.statusText), { status: res.status, data });
+  if (!res.ok) {
+    const friendly = options.admin ? (data.error || res.statusText) : ({401:'انتهت الجلسة. يرجى تسجيل الدخول من جديد.',403:'هذا الطلب غير مسموح به.',404:'العنصر المطلوب غير موجود.',413:'الطلب كبير جداً.',429:'تم تجاوز الحد المسموح مؤقتاً. حاول لاحقاً.',500:'حدث خطأ مؤقت. حاول مرة أخرى.'}[res.status] || 'تعذر تنفيذ الطلب. حاول مرة أخرى.');
+    throw Object.assign(new Error(friendly), { status: res.status, data });
+  }
   return data;
 }
 
@@ -146,3 +149,8 @@ function initMobileHeader() {
 }
 
 document.addEventListener('DOMContentLoaded', initMobileHeader);
+
+function telcDraftKey(exerciseId){return 'telc_draft_v2_'+String(exerciseId||'');}
+function telcSaveDraft(exerciseId,payload){if(!exerciseId)return;try{localStorage.setItem(telcDraftKey(exerciseId),JSON.stringify({savedAt:Date.now(),...payload}));}catch{}}
+function telcLoadDraft(exerciseId){try{const x=JSON.parse(localStorage.getItem(telcDraftKey(exerciseId))||'null');return x&&typeof x==='object'?x:null;}catch{return null;}}
+function telcClearDraft(exerciseId){try{localStorage.removeItem(telcDraftKey(exerciseId));}catch{}}

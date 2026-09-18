@@ -10,8 +10,6 @@ exports.handler = async (event) => {
   // Safe migration for already-installed databases. The standalone SQL migration
   // remains available for normal deployment; this guard prevents old databases
   // from breaking the student area before that migration is run.
-  await pool.query("ALTER TABLE exercises ADD COLUMN IF NOT EXISTS level VARCHAR(20) NOT NULL DEFAULT 'B2'");
-  await pool.query("ALTER TABLE exercises ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP NULL");
   await pool.query("UPDATE exercises SET level='B2' WHERE level IS NULL OR TRIM(level)=''");
 
   const meRes = await pool.query('SELECT id,name,email FROM students WHERE id=$1', [student.student_id]);

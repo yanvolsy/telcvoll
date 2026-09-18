@@ -125,3 +125,15 @@ node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 
 ## AI Schreiben
 Set Netlify environment variables `GEMINI_API_KEY` and/or `GROQ_API_KEY`. Optional model variables: `GEMINI_WRITING_MODEL` (default `gemini-2.5-flash`) and `GROQ_WRITING_MODEL` (default `openai/gpt-oss-120b`). The Schreiben exercise includes an AI training correction endpoint at `/api/ai-writing-correct`; Gemini is primary and Groq is automatic fallback.
+
+
+## Security hardening in this release
+- Admin authentication uses the bcrypt password stored in `admins`; the environment password is only a bootstrap fallback when no admin row exists.
+- Admin session lifetime is reduced to 4 hours and authentication cookies use `HttpOnly`, `Secure`, `SameSite=Strict`.
+- Mutating API requests reject an explicitly cross-origin `Origin` header and enforce a request-size limit.
+- API responses use `Cache-Control: no-store` and additional browser security headers.
+- Database DDL is kept out of normal student request paths; run `database/schema.sql` once during deployment.
+- Submission endpoints have per-student rate limits and server errors no longer expose raw database/provider messages to the browser.
+
+### Important
+The automatic exercise-state/progress persistence system requested to be excluded is not added by this release. Existing functionality from the V6 base is otherwise preserved.

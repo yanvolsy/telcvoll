@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const { db } = require('./_lib/db');
 const { json } = require('./_lib/auth');
 const { requireAdmin } = require('./_lib/guard');
+const { requireSameOrigin, requestSize } = require('./_lib/request');
 
 function cleanCode(value) {
   return String(value || '').trim().toUpperCase().replace(/\s+/g, '');
@@ -16,6 +17,8 @@ function makeCode() {
 }
 
 exports.handler = async (event) => {
+  if (!requireSameOrigin(event)) return json(403, { error: 'Cross-origin request blocked.' });
+  if (!requestSize(event)) return json(413, { error: 'Request too large.' });
   if (!requireAdmin(event)) return json(401, { error: 'unauthenticated' });
 
   const pool = db();

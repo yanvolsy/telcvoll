@@ -28,7 +28,7 @@ function setCookie(name, value, maxAgeSeconds) {
   return cookie.serialize(name, value, {
     httpOnly: true,
     secure: true,
-    sameSite: 'Lax',
+    sameSite: 'Strict',
     path: '/',
     maxAge: maxAgeSeconds,
   });
@@ -38,7 +38,7 @@ function clearCookie(name) {
   return cookie.serialize(name, '', {
     httpOnly: true,
     secure: true,
-    sameSite: 'Lax',
+    sameSite: 'Strict',
     path: '/',
     maxAge: 0,
   });
@@ -63,7 +63,14 @@ function clientIp(event) {
 function json(statusCode, body, extraHeaders = {}) {
   return {
     statusCode,
-    headers: { 'Content-Type': 'application/json; charset=utf-8', ...extraHeaders },
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'no-store',
+      'X-Content-Type-Options': 'nosniff',
+      'X-Frame-Options': 'SAMEORIGIN',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+      ...extraHeaders
+    },
     body: JSON.stringify(body),
   };
 }
