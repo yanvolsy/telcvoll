@@ -710,3 +710,11 @@ html[dir="rtl"] .topic-tools select{background-position:calc(0% + 17px) 19px,cal
  .topic-toolbar .topic-search{max-width:none!important;width:100%!important}
  .topic-toolbar .topic-search input{height:44px!important}
 }
+/* Toolbar search final alignment: keep compact size and pin it to the left */
+.topic-toolbar .topic-search{width:320px!important;max-width:320px!important;justify-self:start!important;margin-inline-start:0!important;margin-inline-end:auto!important}
+.topic-toolbar .topic-search input{width:320px!important;max-width:100%!important;height:42px!important;box-sizing:border-box!important}
+.topic-toolbar .topic-search-icon{left:10px!important;right:auto!important}
+@media(max-width:700px){
+  .topic-toolbar .topic-search{width:100%!important;max-width:none!important;margin-inline:0!important}
+  .topic-toolbar .topic-search input{width:100%!important;height:44px!important}
+}
