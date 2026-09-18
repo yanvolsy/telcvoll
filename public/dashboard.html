@@ -92,9 +92,33 @@ function render(){
   document.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>{state.section=b.dataset.section;selectedTeil=availableTeileFor(state.section)[0]||'';render();});
   document.querySelectorAll('[data-teil]').forEach(b=>b.onclick=()=>{selectedTeil=b.dataset.teil;renderTopics();});
   const nav=$('telcChatNav'); if(nav) nav.href='/telc-chat.html';
-  $('search').oninput=renderTopics;
-  $('searchToggle').onclick=()=>{const pop=$('topicSearchPopover'); const open=pop.hasAttribute('hidden'); if(open){pop.removeAttribute('hidden'); $('searchToggle').setAttribute('aria-expanded','true'); setTimeout(()=>$('search')?.focus(),0);}else{pop.setAttribute('hidden',''); $('searchToggle').setAttribute('aria-expanded','false');}};
-  document.addEventListener('click',e=>{const wrap=e.target.closest('.topic-search-wrap'); if(!wrap){const pop=$('topicSearchPopover'); if(pop && !pop.hasAttribute('hidden')){pop.setAttribute('hidden',''); $('searchToggle')?.setAttribute('aria-expanded','false');}}});
+  // Search UI — JS-only polish: clean icon, stable open/close behavior, and no overlap with topic cards.
+  const searchInput=$('search');
+  const searchToggle=$('searchToggle');
+  const searchPopover=$('topicSearchPopover');
+  const searchWrap=searchToggle?.closest('.topic-search-wrap');
+  const toolbar=searchToggle?.closest('.topic-toolbar');
+  const searchIconSvg='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.6"></circle><path d="m16 16 4.4 4.4"></path></svg>';
+  document.querySelectorAll('.topic-search-icon').forEach(icon=>{icon.innerHTML=searchIconSvg;icon.style.display='grid';icon.style.placeItems='center';});
+  const closeTopicSearch=()=>{
+    if(!searchPopover)return;
+    searchPopover.setAttribute('hidden','');
+    searchToggle?.setAttribute('aria-expanded','false');
+    if(toolbar) toolbar.style.marginBottom='24px';
+  };
+  const openTopicSearch=()=>{
+    if(!searchPopover)return;
+    searchPopover.removeAttribute('hidden');
+    searchToggle?.setAttribute('aria-expanded','true');
+    if(toolbar) toolbar.style.marginBottom='82px';
+    requestAnimationFrame(()=>searchInput?.focus());
+  };
+  if(searchInput) searchInput.oninput=renderTopics;
+  if(searchToggle) searchToggle.onclick=e=>{e.stopPropagation();if(searchPopover?.hasAttribute('hidden'))openTopicSearch();else closeTopicSearch();};
+  if(searchWrap) searchWrap.onclick=e=>e.stopPropagation();
+  document.removeEventListener('click',window.__telcSearchOutside);
+  window.__telcSearchOutside=e=>{if(!searchWrap?.contains(e.target))closeTopicSearch();};
+  document.addEventListener('click',window.__telcSearchOutside);
   const shuffleBtn=$('shuffleToggle'); if(shuffleBtn) shuffleBtn.onclick=()=>{shuffleEnabled=!shuffleEnabled; shuffleOrderKey=''; shuffleOrder=[]; updateShuffleButton(); renderTopics();};
   renderTopics();
 }
