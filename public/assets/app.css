@@ -700,3 +700,13 @@ html[dir="rtl"] .topic-tools select{background-position:calc(0% + 17px) 19px,cal
   .topic-toolbar .shuffle-toggle{width:48px!important;height:48px!important}
   .topic-toolbar .teil-tabs{min-height:48px!important;height:48px!important}
 }
+
+/* Final compact topic search — no overlap */
+.topic-toolbar .topic-search{max-width:320px!important;justify-self:start!important}
+.topic-toolbar .topic-search-icon{left:10px!important;right:auto!important;inset-inline-start:auto!important;width:24px!important;height:24px!important;border-radius:8px!important;font-size:16px!important}
+.topic-toolbar .topic-search input{height:42px!important;border-radius:13px!important;padding:0 13px 0 42px!important;font-size:13px!important;box-shadow:0 5px 16px rgba(16,35,30,.045)!important}
+.topic-toolbar .topic-search input:focus{outline:2px solid var(--exercise-accent-soft)!important}
+@media(max-width:700px){
+ .topic-toolbar .topic-search{max-width:none!important;width:100%!important}
+ .topic-toolbar .topic-search input{height:44px!important}
+}
