@@ -27,17 +27,9 @@
 </head>
 <body>
 <header class="top">
-  <a class="brand" href="/dashboard.html" aria-label="TELC Voll">
-    <span class="brand-mark">
-      <span class="brand-dot"></span>
-      <span class="brand-wrapper">
-        <span class="brand-name"><span class="brand-telc">TELC</span><span class="brand-voll">Voll</span></span>
-        <span class="brand-tagline">Lernen • Üben • Bestehen</span>
-      </span>
-    </span>
-  </a>
+  <a class="brand" href="/dashboard.html" aria-label="TELC Voll"><span class="brand-dot"></span><span class="brand-name"><span class="brand-telc">TELC</span> <span class="brand-voll">Voll</span></span></a>
   <nav>
-    <a href="/dashboard.html">الرئيسية</a><a href="/errors.html">أخطائي</a><a href="/summaries.html">الملخصات</a><a href="#" id="logout">خروج</a>
+    <a href="/dashboard.html">الرئيسية</a><a href="/errors.html">أخطائي</a><a href="#" id="logout">خروج</a>
   </nav>
 </header>
 <main class="wrap spk-shell"><div class="panel">
@@ -114,8 +106,10 @@ async function load(){try{
      (String(x.title||'').trim().toLowerCase()===String(ex.title||'').trim().toLowerCase() || String(x.body||'').includes(String(ex.title||''))));
    if(same){data=await api('exercise-get',{method:'GET',query:{id:same.id}});ex=data.exercise}
  }
- $('level').textContent=ex.level||'';$('title').textContent=ex.title||'Sprechen';$('teilLabel').textContent=ex.teil||'Teil 1';$('task').textContent=ex.body||'';document.getElementById('teil3Tasks').innerHTML=renderTeil3Tasks();renderPhases();$('chat').innerHTML='';history=[];transcript=[];$('liveTranscript').textContent='اضغط على الميكروفون وابدأ الحديث بالألمانية…';addBubble('jerry',currentTeil()==='Teil 2'?'Bitte besprechen Sie zunächst den Inhalt des Themas. Danach äußern Sie Ihre Meinung und tauschen Sie sich mit Ihrem Gesprächspartner aus.':currentTeil()==='Teil 1'?'Bitte beginnen Sie mit Ihrer Präsentation. Danach reagiert Ihr Gesprächspartner und stellt Ihnen eine Frage.':'Bitte planen Sie die Aufgabe gemeinsam. Machen Sie einen ersten Vorschlag und finden Sie am Ende eine gemeinsame Lösung.'); if(currentTeil()==='Teil 2'){try{const opening=await api('ai-speaking-session',{method:'POST',body:{id,mode:'opening',teil:currentTeil()}});addBubble('partner',opening.reply||'Ich fasse zunächst kurz den Inhalt des Themas zusammen. Wie würden Sie den Inhalt in Ihren eigenen Worten wiedergeben?',true);history.push({role:'partner',content:opening.reply||''})}catch{addBubble('partner','Ich fasse zunächst kurz den Inhalt des Themas zusammen. Wie würden Sie den Inhalt in Ihren eigenen Worten wiedergeben?',true)}}$('app').hidden=false;$('loading').hidden=true;
- }catch(e){$('loading').textContent=e?.message||'Fehler beim Laden.'}}
+ $('level').textContent=ex.level||'';$('title').textContent=ex.title||'Sprechen';$('teilLabel').textContent=ex.teil||'Teil 1';$('task').textContent=ex.body||'';document.getElementById('teil3Tasks').innerHTML=renderTeil3Tasks();renderPhases();$('chat').innerHTML='';history=[];transcript=[];$('liveTranscript').textContent='اضغط على الميكروفون وابدأ الحديث بالألمانية…';addBubble('jerry',currentTeil()==='Teil 2'?'Bitte besprechen Sie zunächst den Inhalt des Themas. Danach äußern Sie Ihre Meinung und tauschen Sie sich mit Ihrem Gesprächspartner aus.':currentTeil()==='Teil 1'?'Bitte beginnen Sie mit Ihrer Präsentation. Danach reagiert Ihr Gesprächspartner und stellt Ihnen eine Frage.':'Bitte planen Sie die Aufgabe gemeinsam. Machen Sie einen ersten Vorschlag und finden Sie am Ende eine gemeinsame Lösung.');
+  const defaultOpenings={'Teil 1':'Hallo! Ich freue mich auf deine Präsentation. Du kannst gerne anfangen, ich höre dir aufmerksam zu.','Teil 2':'Ich fasse zunächst kurz den Inhalt des Themas zusammen. Wie würden Sie den Inhalt in Ihren eigenen Worten wiedergeben?','Teil 3':'Hallo! Schön, dass wir diese Aufgabe zusammen planen. Lass uns am besten gleich mit dem Termin und dem Ort anfangen. Was schlägst du vor?'};
+  try{const opening=await api('ai-speaking-session',{method:'POST',body:{id,mode:'opening',teil:currentTeil()}});const def=defaultOpenings[currentTeil()]||defaultOpenings['Teil 1'];addBubble('partner',opening.reply||def,true);history.push({role:'partner',content:opening.reply||def})}catch{const def=defaultOpenings[currentTeil()]||defaultOpenings['Teil 1'];addBubble('partner',def,true);}$('app').hidden=false;$('loading').hidden=true;
+  }catch(e){$('loading').textContent=e?.message||'Fehler beim Laden.'}}
 function getRecognition(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR)return null; const r=new SR();r.lang='de-DE';r.interimResults=true;r.continuous=false;r.maxAlternatives=1; return r}
 function startListening(){if(!voiceRunning||busy||speakingNow)return; if(!recognition)recognition=getRecognition(); if(!recognition){setVoiceStatus('هذا المتصفح لا يدعم التعرف على الكلام. استخدم Chrome على الكمبيوتر أو خيار الكتابة.');return} $('voicePanel').classList.add('active');$('mic').classList.add('listening');$('mic').disabled=true;$('stop').disabled=false;setVoiceStatus('Jerry يستمع إليك… تحدث الآن بالألمانية');$('liveTranscript').textContent='…';let finalText='';
  recognition.onresult=e=>{let interim='';for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0]?.transcript||'';if(e.results[i].isFinal)finalText+=t+' ';else interim+=t}$('liveTranscript').textContent=(finalText+interim).trim()||'…'};

@@ -79,15 +79,16 @@ html[lang="de"] body,html[lang="en"] body,[lang="de"],[lang="en"],.exam-text,.lo
 code,kbd,samp,pre,.code-pill,.mono,[data-code],.cg-form input[type="text"].code-input{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono",monospace!important}
 .top{min-height:74px;padding:0 4vw;border-bottom:1px solid var(--line);background:rgba(255,255,255,.96);backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:space-between;gap:20px;position:sticky;top:0;z-index:50;direction:ltr}
 html[data-theme="dark"] .top{background:rgba(15,27,26,.94);border-color:var(--line)}
-.brand{font-weight:900;color:inherit;text-decoration:none;font-size:22px;letter-spacing:-.03em;display:inline-flex;align-items:center;gap:10px}
-.brand-mark{display:inline-flex;align-items:center;gap:10px}
-.brand-dot{width:14px;height:14px;border-radius:50%;background:var(--primary);display:inline-block;flex:none;box-shadow:0 0 0 3px var(--primary-soft)}
-.brand-name{font-family:var(--font-latin);font-weight:900;letter-spacing:-0.03em;display:inline-flex;align-items:baseline}
-.brand-name .brand-telc{color:var(--ink);transition:color .2s}
+.brand{font-weight:900;color:var(--primary);text-decoration:none;font-size:24px;letter-spacing:-.025em;display:inline-flex;align-items:center;gap:9px}
+.brand-mark{display:inline-flex;align-items:center;gap:9px}
+.brand-dot{width:12px;height:12px;border-radius:50%;background:var(--primary);display:inline-block;flex:none}
+.brand-name{font-family:var(--font-latin);font-weight:900;letter-spacing:-0.025em;display:inline-flex;align-items:baseline;color:var(--primary)}
+.brand-name .brand-telc{color:var(--primary);transition:color .2s}
 .brand-name .brand-voll{color:var(--primary);margin-inline-start:4px}
-.brand-wrapper{display:inline-flex;flex-direction:column;gap:1px}
-.brand-tagline{display:block;font-size:8px;font-weight:800;letter-spacing:0.18em;color:var(--muted);text-transform:uppercase;font-family:var(--font-latin);line-height:1}
-html[data-theme="dark"] .brand-name .brand-telc{color:#FFFFFF}
+.brand-wrapper{display:inline-flex;align-items:center}
+.brand-tagline{display:none!important}
+html[data-theme="dark"] .brand-name .brand-telc{color:var(--primary)}
+html[data-theme="dark"] .brand{color:var(--primary)}
 .top nav{display:flex;gap:22px;overflow:auto;align-items:center}.top nav a{color:#41514c;text-decoration:none;white-space:nowrap;font-weight:650}.top nav a:hover{color:var(--primary)}
 html[data-theme="dark"] .top nav a{color:#c3d1cc}
 html[data-theme="dark"] .top nav a:hover{color:var(--primary)}
@@ -1143,3 +1144,597 @@ html[data-theme="dark"] .admin-shell .code-pill{background:rgba(255,173,102,.10)
   .admin-shell .code-create-form{grid-template-columns:1fr!important}
   .admin-shell .code-table-wrap,.admin-shell .table-wrap{border-radius:14px}
 }
+
+/* ==========================================================================
+   TELC Voll: Optimized Answer Spaces & Question Areas (Perfect Spacing & Layout)
+   ========================================================================== */
+
+/* 1. Side Question Containers */
+.side-question {
+  border: 1.5px solid var(--line) !important;
+  background: var(--white) !important;
+  border-radius: 14px !important;
+  padding: 16px 18px !important;
+  margin: 0 0 16px 0 !important;
+  box-shadow: 0 2px 8px rgba(15, 27, 26, 0.03) !important;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+html[data-theme="dark"] .side-question {
+  background: var(--surface) !important;
+  border-color: var(--line) !important;
+}
+.side-question.active,
+.side-question:focus-within {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px var(--primary-subtle) !important;
+}
+.side-question > strong {
+  display: inline-flex !important;
+  min-width: 28px !important;
+  height: 28px !important;
+  padding: 0 6px !important;
+  border-radius: 8px !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: var(--primary-soft) !important;
+  color: var(--primary) !important;
+  font-weight: 900 !important;
+  font-size: 13px !important;
+  margin-inline-end: 8px !important;
+  border: none !important;
+}
+.side-question .question-prompt {
+  font-size: 14.5px !important;
+  font-weight: 700 !important;
+  line-height: 1.6 !important;
+  color: var(--ink) !important;
+  margin-bottom: 12px !important;
+}
+
+/* 2. Options List & Individual Option Buttons */
+.side-options {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 9px !important;
+  margin-top: 12px !important;
+}
+.option-tool-wrap,
+.spb1-option-wrap,
+.lesen2-option-wrap {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin: 2px 0 !important;
+}
+.side-option {
+  width: 100% !important;
+  min-height: 46px !important;
+  padding: 11px 16px !important;
+  border-radius: 11px !important;
+  border: 1.5px solid var(--line) !important;
+  background: var(--white) !important;
+  color: var(--ink) !important;
+  font-size: 14.5px !important;
+  font-weight: 600 !important;
+  line-height: 1.45 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  text-align: start !important;
+  cursor: pointer !important;
+  transition: all 0.16s ease !important;
+  box-shadow: 0 1px 3px rgba(15, 27, 26, 0.02) !important;
+}
+html[data-theme="dark"] .side-option {
+  background: var(--surface-subtle) !important;
+  border-color: var(--line) !important;
+  color: var(--ink) !important;
+}
+.side-option:hover {
+  border-color: var(--primary) !important;
+  background: var(--primary-soft) !important;
+  color: var(--ink) !important;
+  transform: translateX(2px);
+}
+.side-option.selected {
+  border-color: var(--primary) !important;
+  background: var(--primary-soft) !important;
+  color: var(--primary-dark) !important;
+  font-weight: 800 !important;
+  box-shadow: 0 0 0 2px rgba(255, 122, 47, 0.22) !important;
+}
+html[data-theme="dark"] .side-option.selected {
+  color: #FFFFFF !important;
+  background: rgba(255, 122, 47, 0.22) !important;
+  border-color: var(--primary) !important;
+}
+
+/* 3. Multiple Choice Cards (Reading / Matching) */
+.choice-card {
+  width: 100% !important;
+  min-height: 54px !important;
+  padding: 12px 16px !important;
+  margin: 0 !important;
+  gap: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  text-align: start !important;
+  border: 1.5px solid var(--line) !important;
+  background: var(--white) !important;
+  color: var(--ink) !important;
+  border-radius: 12px !important;
+  cursor: pointer !important;
+  transition: all 0.16s ease !important;
+  box-shadow: 0 1px 3px rgba(15, 27, 26, 0.02) !important;
+}
+html[data-theme="dark"] .choice-card {
+  background: var(--surface) !important;
+  border-color: var(--line) !important;
+}
+.choice-card > span {
+  width: 32px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  border-radius: 8px !important;
+  background: var(--primary-soft) !important;
+  color: var(--primary) !important;
+  font-weight: 900 !important;
+  font-size: 14px !important;
+  display: grid !important;
+  place-items: center !important;
+  border: none !important;
+  flex: none !important;
+}
+.choice-card b {
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  font-weight: 600 !important;
+  color: var(--ink) !important;
+  flex: 1 !important;
+}
+.choice-card:hover {
+  border-color: var(--primary) !important;
+  background: var(--primary-soft) !important;
+  transform: translateX(2px);
+}
+.choice-card.selected {
+  border-color: var(--primary) !important;
+  background: var(--primary-soft) !important;
+  box-shadow: 0 0 0 2px rgba(255, 122, 47, 0.22) !important;
+}
+.heading-option-wrap {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 10px !important;
+  align-items: center !important;
+  margin: 8px 0 !important;
+}
+
+/* 4. Inline Text Gaps (Sprachbausteine / Cloze Reading) */
+.inline-answer {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 68px !important;
+  height: 32px !important;
+  padding: 0 12px !important;
+  margin: 3px 5px !important;
+  border-radius: 8px !important;
+  border: 1.5px dashed var(--primary) !important;
+  background: rgba(255, 122, 47, 0.08) !important;
+  color: var(--primary) !important;
+  font-weight: 800 !important;
+  font-size: 13.5px !important;
+  vertical-align: middle !important;
+  transition: all 0.16s ease !important;
+}
+.inline-answer.filled {
+  border-style: solid !important;
+  border-color: var(--primary) !important;
+  background: var(--primary-soft) !important;
+  color: var(--primary-dark) !important;
+  font-weight: 850 !important;
+  box-shadow: 0 1px 4px rgba(255, 122, 47, 0.15) !important;
+}
+html[data-theme="dark"] .inline-answer.filled {
+  color: #FFFFFF !important;
+  background: rgba(255, 122, 47, 0.22) !important;
+}
+
+/* 5. Word Bank (Sprachbausteine Teil 2) */
+.word-bank {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 10px !important;
+  margin: 14px 0 !important;
+}
+.word-card {
+  border: 1.5px solid var(--line) !important;
+  background: var(--white) !important;
+  border-radius: 12px !important;
+  padding: 12px 14px !important;
+  min-height: 54px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  cursor: pointer !important;
+  text-align: center !important;
+  transition: all 0.16s ease !important;
+  box-shadow: 0 1px 3px rgba(15, 27, 26, 0.02) !important;
+}
+html[data-theme="dark"] .word-card {
+  background: var(--surface) !important;
+  border-color: var(--line) !important;
+}
+.word-card:hover {
+  border-color: var(--primary) !important;
+  background: var(--primary-soft) !important;
+  transform: translateY(-1px);
+}
+.word-card.used {
+  border-color: var(--line) !important;
+  background: var(--bg) !important;
+  opacity: 0.5 !important;
+}
+.word-card small {
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  color: var(--primary) !important;
+  display: block !important;
+}
+.word-card b {
+  font-size: 14.5px !important;
+  font-weight: 700 !important;
+  color: var(--ink) !important;
+}
+
+/* 6. True / False Rows (Richtig / Falsch) */
+.tf-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  margin-top: 16px !important;
+}
+.tf-row {
+  display: grid !important;
+  grid-template-columns: 38px 1fr auto !important;
+  gap: 16px !important;
+  align-items: center !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 14px !important;
+  padding: 16px 20px !important;
+  margin-bottom: 0 !important;
+  background: var(--white) !important;
+  box-shadow: var(--shadow-sm) !important;
+  transition: border-color 0.16s ease !important;
+}
+html[data-theme="dark"] .tf-row {
+  background: var(--surface) !important;
+  border-color: var(--line) !important;
+}
+.tf-row .item-number {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 10px !important;
+  display: grid !important;
+  place-items: center !important;
+  background: var(--primary-soft) !important;
+  color: var(--primary) !important;
+  font-weight: 900 !important;
+  border: none !important;
+  margin-bottom: 0 !important;
+}
+.tf-text {
+  font-size: 15.5px !important;
+  line-height: 1.6 !important;
+}
+.tf-actions {
+  display: flex !important;
+  gap: 10px !important;
+}
+.tf-actions .side-option {
+  min-width: 95px !important;
+  height: 42px !important;
+  padding: 0 16px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  border-radius: 10px !important;
+  font-weight: 800 !important;
+  font-size: 14px !important;
+}
+
+/* 7. Selected Answer Pill in Reading Text */
+.selected-answer {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  margin: 14px 0 0 0 !important;
+  padding: 11px 16px !important;
+  border-radius: 11px !important;
+  background: var(--primary-soft) !important;
+  border: 1.5px solid rgba(255, 122, 47, 0.25) !important;
+  color: var(--primary-dark) !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+}
+html[data-theme="dark"] .selected-answer {
+  color: #FFFFFF !important;
+  background: rgba(255, 122, 47, 0.2) !important;
+}
+
+/* 8. Exam Text Card (Reading Section Paragraphs) */
+.exam-text-card {
+  border: 1px solid var(--line) !important;
+  background: var(--white) !important;
+  border-radius: 16px !important;
+  padding: 26px 30px !important;
+  margin-bottom: 20px !important;
+  box-shadow: var(--shadow-sm) !important;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease !important;
+}
+html[data-theme="dark"] .exam-text-card {
+  background: var(--surface) !important;
+  border-color: var(--line) !important;
+}
+.exam-text-card.answered {
+  border-color: rgba(255, 122, 47, 0.4) !important;
+}
+.exam-text-card.active-item {
+  border-color: var(--primary) !important;
+  box-shadow: 0 0 0 3px var(--primary-subtle) !important;
+}
+
+/* 9. Writing Editor Spacing */
+.writing-editor textarea {
+  padding: 24px 28px !important;
+  font-size: 16.5px !important;
+  line-height: 1.85 !important;
+}
+
+/* 10. Upgraded TELC Chat Assistant Styles */
+.telc-chat-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 12px 16px;
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+  scrollbar-width: thin;
+}
+.telc-chat-chip {
+  flex: none;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--ink);
+  cursor: pointer;
+  transition: all .16s ease;
+  white-space: nowrap;
+}
+.telc-chat-chip:hover {
+  background: var(--green-soft);
+  border-color: var(--green);
+  color: var(--green-dark);
+  transform: translateY(-1px);
+}
+.telc-chat-bubble {
+  padding: 14px 18px !important;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--white);
+  line-height: 1.85;
+  box-shadow: 0 3px 12px rgba(0,0,0,.04);
+  font-size: 15px;
+}
+.telc-chat-msg.user .telc-chat-bubble {
+  background: var(--green-soft);
+  border-color: color-mix(in srgb, var(--green) 25%, transparent);
+}
+.telc-chat-bubble strong {
+  color: var(--ink);
+  font-weight: 800;
+}
+.chat-h3 {
+  margin: 14px 0 8px;
+  font-size: 17px;
+  color: var(--green-dark);
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 4px;
+}
+.chat-h4 {
+  margin: 12px 0 6px;
+  font-size: 15.5px;
+  color: var(--ink);
+}
+.chat-ul, .chat-ol {
+  margin: 8px 0;
+  padding-inline-start: 22px;
+}
+.chat-li, .chat-oli {
+  margin-bottom: 4px;
+}
+.chat-quote {
+  margin: 10px 0;
+  padding: 8px 14px;
+  border-inline-start: 4px solid var(--green);
+  background: var(--bg);
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+  color: var(--ink);
+}
+.chat-code {
+  margin: 10px 0;
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-family: monospace;
+  font-size: 13.5px;
+  overflow-x: auto;
+  direction: ltr;
+  text-align: left;
+}
+.chat-inline-code {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 13px;
+  direction: ltr;
+  display: inline-block;
+}
+.telc-chat-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  padding-inline-start: 4px;
+}
+.telc-chat-act-btn {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all .15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.telc-chat-act-btn:hover {
+  background: var(--white);
+  color: var(--ink);
+  border-color: var(--green);
+}
+.telc-chat-act-btn.speaking {
+  background: #fff0ee;
+  color: #b7372d;
+  border-color: #e6a39d;
+}
+
+/* 11. Mock Exam Pills & Pre-Submission Review Modal */
+.mock-pills-bar {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 10px 0 16px;
+  padding: 10px 14px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+.mock-pill {
+  padding: 6px 12px;
+  border-radius: 9px;
+  font-size: 12.5px;
+  font-weight: 800;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--ink);
+  cursor: pointer;
+  transition: all .15s ease;
+}
+.mock-pill:hover {
+  border-color: var(--exercise-accent);
+}
+.mock-pill.current {
+  border-color: var(--exercise-accent);
+  background: var(--exercise-accent-soft);
+  color: var(--exercise-accent);
+}
+.mock-pill.answered {
+  border-color: #2d9b68;
+  background: #edf8f2;
+  color: #1f7a4f;
+}
+.mock-pill.answered.current {
+  box-shadow: 0 0 0 2px #2d9b68;
+}
+.mock-review-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 20, 18, .65);
+  backdrop-filter: blur(6px);
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+.mock-review-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  max-width: 580px;
+  width: 100%;
+  padding: 28px;
+  box-shadow: 0 20px 45px rgba(0,0,0,.22);
+}
+.mock-review-card h2 {
+  margin: 0 0 8px;
+  font-size: 24px;
+}
+.mock-review-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 18px 0;
+}
+.mock-review-stat {
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  text-align: center;
+}
+.mock-review-stat small {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.mock-review-stat strong {
+  font-size: 24px;
+  font-weight: 900;
+}
+.mock-review-stat.good strong {
+  color: #2d9b68;
+}
+.mock-review-stat.warn strong {
+  color: #c94a43;
+}
+.mock-review-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 16px 0;
+}
+.mock-review-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--bg);
+  font-size: 14px;
+}
+.mock-review-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 22px;
+}
+
+

@@ -13,16 +13,8 @@
 </head>
 <body>
 <header class="top">
-  <a class="brand" href="/dashboard.html" aria-label="TELC Voll">
-    <span class="brand-mark">
-      <span class="brand-dot"></span>
-      <span class="brand-wrapper">
-        <span class="brand-name"><span class="brand-telc">TELC</span><span class="brand-voll">Voll</span></span>
-        <span class="brand-tagline">Lernen • Üben • Bestehen</span>
-      </span>
-    </span>
-  </a>
-  <nav><a href="/dashboard.html" data-i18n="nav_home_student">منصة الطالب</a><a href="/summaries.html" data-i18n="nav_summaries">الملخصات</a><a href="#" id="logoutLink" data-i18n="nav_logout">خروج</a></nav>
+  <a class="brand" href="/dashboard.html" aria-label="TELC Voll"><span class="brand-dot"></span><span class="brand-name"><span class="brand-telc">TELC</span> <span class="brand-voll">Voll</span></span></a>
+  <nav><a href="/dashboard.html" data-i18n="nav_home_student">منصة الطالب</a><a href="#" id="logoutLink" data-i18n="nav_logout">خروج</a></nav>
 </header>
 <main class="telc-chat-page">
   <section class="telc-chat-shell">
@@ -40,6 +32,14 @@
         <p data-i18n="chat_welcome_desc">أنا هنا لمساعدتك في الدراسة والتحضير لامتحان TELC. اكتب سؤالك وسأجيبك أو أساعدك في إنشاء ما تحتاجه للتدريب.</p>
       </div>
     </div>
+    <div class="telc-chat-chips" id="promptChips">
+      <button type="button" class="telc-chat-chip" data-prompt="صحح لي هذه الجملة وقدم بدائل بمستوى B2 واشرح الأخطاء بالتفصيل: ">✍️ تصحيح جملة وتطويرها</button>
+      <button type="button" class="telc-chat-chip" data-prompt="أعطني أهم Redemittel لـ Sprechen Teil 2 (Diskussion) مع أمثلة عملية">🗣️ عبارات المحادثة Teil 2</button>
+      <button type="button" class="telc-chat-chip" data-prompt="أعطني نموذج رسالة شكوى كاملة (Beschwerdebrief B2) مع تغطية كافة النقاط المطلوبة">📝 نموذج رسالة شكوى B2</button>
+      <button type="button" class="telc-chat-chip" data-prompt="اشرح قاعدة Wechselpräpositionen ومتى نستخدم Dativ ومتى نستخدم Akkusativ بأمثلة واضحة">💡 شرح Dativ و Akkusativ</button>
+      <button type="button" class="telc-chat-chip" data-prompt="ما هي أفضل استراتيجية لحل قسم Sprachbausteine Teil 1 & Teil 2 بدون أخطاء؟">🎯 استراتيجية Sprachbausteine</button>
+      <button type="button" class="telc-chat-chip" data-prompt="كيف يتم توزيع الوقت في الامتحان التجريبي الكامل (ساعتان و20 دقيقة) وما هي علامة النجاح؟">⏱️ تقسيم الوقت والدرجات</button>
+    </div>
     <form id="chatForm" class="telc-chat-form">
       <textarea id="chatInput" rows="2" maxlength="4000" data-i18n-ph="chat_placeholder" placeholder="اكتب سؤالك عن امتحان TELC…" required></textarea>
       <button class="btn" id="sendBtn" type="submit" data-i18n="chat_send">إرسال ↑</button>
@@ -56,13 +56,90 @@ let sending = false;
 function esc(s){
   return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
+
+function renderMarkdown(raw) {
+  let s = esc(raw);
+  s = s.replace(/```([\s\S]*?)```/g, '<pre class="chat-code"><code>$1</code></pre>');
+  s = s.replace(/`([^`]+)`/g, '<code class="chat-inline-code">$1</code>');
+  s = s.replace(/^### (.*$)/gim, '<h4 class="chat-h4">$1</h4>');
+  s = s.replace(/^## (.*$)/gim, '<h3 class="chat-h3">$1</h3>');
+  s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  s = s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  s = s.replace(/^\> (.*$)/gim, '<blockquote class="chat-quote">$1</blockquote>');
+  s = s.replace(/^\s*[-*]\s+(.*$)/gim, '<li class="chat-li">$1</li>');
+  s = s.replace(/(<li class="chat-li">[\s\S]*?<\/li>)/g, '<ul class="chat-ul">$1</ul>');
+  s = s.replace(/<\/ul>\s*<ul class="chat-ul">/g, '');
+  s = s.replace(/^\s*(\d+)\.\s+(.*$)/gim, '<li class="chat-oli" value="$1">$2</li>');
+  s = s.replace(/(<li class="chat-oli"[^>]*>[\s\S]*?<\/li>)/g, '<ol class="chat-ol">$1</ol>');
+  s = s.replace(/<\/ol>\s*<ol class="chat-ol">/g, '');
+  s = s.replace(/\n\n/g, '<br><br>');
+  s = s.replace(/\n/g, '<br>');
+  s = s.replace(/<pre class="chat-code"><code>([\s\S]*?)<\/code><\/pre>/g, (m, c) => '<pre class="chat-code"><code>' + c.replace(/<br>/g, '\n') + '</code></pre>');
+  return s;
+}
+
+function speakGerman(text, btn) {
+  if (!('speechSynthesis' in window)) {
+    alert('القراءة الصوتية غير مدعومة في متصفحك.');
+    return;
+  }
+  if (window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
+    if (btn && btn.classList.contains('speaking')) {
+      btn.classList.remove('speaking');
+      btn.innerHTML = '🔊 استمع';
+      return;
+    }
+  }
+  const clean = text.replace(/<[^>]+>/g, '').replace(/[*_#`]/g, '').trim();
+  const ut = new SpeechSynthesisUtterance(clean);
+  ut.lang = 'de-DE';
+  ut.rate = 0.95;
+  const voices = window.speechSynthesis.getVoices();
+  const deVoice = voices.find(v => v.lang.startsWith('de')) || null;
+  if (deVoice) ut.voice = deVoice;
+
+  if (btn) {
+    btn.classList.add('speaking');
+    btn.innerHTML = '⏹️ إيقاف';
+    ut.onend = () => { btn.classList.remove('speaking'); btn.innerHTML = '🔊 استمع'; };
+    ut.onerror = () => { btn.classList.remove('speaking'); btn.innerHTML = '🔊 استمع'; };
+  }
+  window.speechSynthesis.speak(ut);
+}
+
+async function copyText(text, btn) {
+  try {
+    await navigator.clipboard.writeText(text);
+    const orig = btn.innerHTML;
+    btn.innerHTML = '✓ تم النسخ!';
+    setTimeout(() => { btn.innerHTML = orig; }, 2000);
+  } catch {
+    alert('فشل نسخ النص.');
+  }
+}
+
 function add(role, text){
   const welcome = $('welcome');
   if (welcome) welcome.remove();
   const el = document.createElement('div');
   el.className = 'telc-chat-msg ' + role;
-  el.innerHTML = '<div class="telc-chat-avatar">' + (role === 'assistant' ? 'AI' : 'أنت') + '</div>' +
-    '<div class="telc-chat-bubble">' + esc(text).replace(/\n/g,'<br>') + '</div>';
+  if (role === 'assistant') {
+    const bubbleContent = renderMarkdown(text);
+    el.innerHTML = '<div class="telc-chat-avatar">AI</div>' +
+      '<div><div class="telc-chat-bubble">' + bubbleContent + '</div>' +
+      '<div class="telc-chat-actions">' +
+      '<button type="button" class="telc-chat-act-btn audio-btn" aria-label="استمع بالألمانية">🔊 استمع</button>' +
+      '<button type="button" class="telc-chat-act-btn copy-btn" aria-label="نسخ الإجابة">📋 نسخ</button>' +
+      '</div></div>';
+    const audioBtn = el.querySelector('.audio-btn');
+    const copyBtn = el.querySelector('.copy-btn');
+    if (audioBtn) audioBtn.onclick = () => speakGerman(text, audioBtn);
+    if (copyBtn) copyBtn.onclick = () => copyText(text, copyBtn);
+  } else {
+    el.innerHTML = '<div class="telc-chat-avatar">أنت</div>' +
+      '<div class="telc-chat-bubble">' + esc(text).replace(/\n/g,'<br>') + '</div>';
+  }
   $('chatMessages').appendChild(el);
   $('chatMessages').scrollTop = $('chatMessages').scrollHeight;
 }
@@ -91,6 +168,18 @@ async function sendMessage(message){
   if (!data.answer) throw new Error('لم يرجع المساعد إجابة.');
   return data.answer;
 }
+
+$('promptChips').addEventListener('click', e => {
+  const chip = e.target.closest('.telc-chat-chip');
+  if (!chip) return;
+  const prompt = chip.dataset.prompt;
+  const input = $('chatInput');
+  input.value = prompt;
+  input.style.height = 'auto';
+  input.style.height = Math.min(input.scrollHeight, 180) + 'px';
+  input.focus();
+  input.setSelectionRange(input.value.length, input.value.length);
+});
 
 $('chatForm').addEventListener('submit', async e => {
   e.preventDefault();
