@@ -718,3 +718,77 @@ html[dir="rtl"] .topic-tools select{background-position:calc(0% + 17px) 19px,cal
   .topic-toolbar .topic-search{width:100%!important;max-width:none!important;margin-inline:0!important}
   .topic-toolbar .topic-search input{width:100%!important;height:44px!important}
 }
+
+/* V5 — balanced dashboard toolbar: search left, Teil centered, shuffle right */
+.topic-toolbar{
+  display:grid!important;
+  grid-template-columns:320px minmax(300px,1fr) 56px!important;
+  direction:ltr!important;
+  align-items:center!important;
+  gap:16px!important;
+  width:100%!important;
+  margin:0 0 24px!important;
+}
+.topic-toolbar .topic-search{
+  grid-column:1!important;
+  grid-row:1!important;
+  width:320px!important;
+  max-width:100%!important;
+  justify-self:start!important;
+  direction:rtl!important;
+  position:relative!important;
+}
+.topic-toolbar .topic-search input{
+  width:100%!important;
+  height:50px!important;
+  box-sizing:border-box!important;
+  padding:0 16px 0 54px!important;
+  text-align:right!important;
+  direction:rtl!important;
+  border-radius:15px!important;
+  background:var(--white)!important;
+  border:1px solid var(--line)!important;
+  box-shadow:0 6px 18px rgba(16,35,30,.05)!important;
+}
+.topic-toolbar .topic-search-icon{
+  inset-inline-start:13px!important;
+  width:28px!important;
+  height:28px!important;
+  border-radius:9px!important;
+  font-size:18px!important;
+}
+.topic-toolbar .teil-tabs{
+  grid-column:2!important;
+  grid-row:1!important;
+  justify-self:center!important;
+  width:min(100%,390px)!important;
+  min-height:50px!important;
+  height:50px!important;
+  box-sizing:border-box!important;
+  direction:rtl!important;
+  border-radius:15px!important;
+  padding:4px!important;
+}
+.topic-toolbar .teil-tab{
+  min-height:40px!important;
+  padding:7px 16px!important;
+  border-radius:11px!important;
+}
+.topic-toolbar .shuffle-toggle{
+  grid-column:3!important;
+  grid-row:1!important;
+  justify-self:end!important;
+  width:52px!important;
+  height:52px!important;
+  border-radius:15px!important;
+}
+@media(max-width:1050px){
+  .topic-toolbar{grid-template-columns:280px minmax(240px,1fr) 52px!important;gap:14px!important}
+  .topic-toolbar .topic-search{width:280px!important}
+}
+@media(max-width:700px){
+  .topic-toolbar{display:grid!important;grid-template-columns:52px minmax(0,1fr)!important;grid-template-rows:auto auto!important;direction:ltr!important;gap:10px!important}
+  .topic-toolbar .shuffle-toggle{grid-column:1!important;grid-row:1!important;justify-self:start!important;width:48px!important;height:48px!important}
+  .topic-toolbar .teil-tabs{grid-column:2!important;grid-row:1!important;width:100%!important;min-width:0!important}
+  .topic-toolbar .topic-search{grid-column:1 / -1!important;grid-row:2!important;width:100%!important;max-width:none!important}
+}
