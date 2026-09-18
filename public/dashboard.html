@@ -53,7 +53,7 @@ function render(){
   const has=levelAvailable(state.level);
   $('content').innerHTML=`
     <section class="hub-head">
-      <div><h1 class="student-welcome-title">${text('مرحباً، '+(state.student?.name||'الطالب'),'Hallo, '+(state.student?.name||'Student'))}</h1><span class="tag student-platform-tag">${text('منصة الطالب','Student Platform')}</span><p class="muted student-welcome-instruction">${text('اختر المستوى والقسم ثم افتح التمرين.','Wähle Niveau und Prüfungsteil und öffne dann die Übung.')}</p></div>
+      <div class="hub-title-block"><span class="hub-greeting">${text('مرحباً، '+(state.student?.name||'الطالب'),'Hallo, '+(state.student?.name||'Student'))}</span><h1>${text('منصة الطالب','Student Platform')}</h1><p class="muted">${text('اختر المستوى والقسم ثم افتح التمرين.','Wähle Niveau und Prüfungsteil und öffne anschließend die Übung.')}</p></div>
       <div class="hub-kpis">
         <div class="hub-kpi days-kpi ${remainingDays<=2?'warning':''}"><strong>${remainingDays}</strong><span>${text('يوم متبقٍ','Tage verbleibend')}</span></div>
         <div class="hub-progress-card" aria-label="${text('تقدم الطالب','Lernfortschritt')}">
@@ -69,7 +69,7 @@ function render(){
     <nav class="section-switch" aria-label="Prüfungsteile">
       ${SECTION_ORDER.map(s=>{const count=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===s).length;return `<button class="section-btn ${state.section===s?'active':''}" data-section="${s}"><span>${sectionIcon(s)}</span><span class="section-btn-copy"><b>${s}</b><small>${count} ${text('تمرين','Übungen')}</small></span></button>`}).join('')}
     </nav>
-    <section class="topic-toolbar" id="topicToolbar" dir="rtl">
+    <section class="topic-toolbar">
       <button id="shuffleToggle" class="shuffle-toggle" type="button" aria-pressed="${shuffleEnabled?'true':'false'}" title="${shuffleEnabled?text('الخلط مفعّل — اضغط لإيقافه','Shuffle aktiv — klicken zum Ausschalten'):text('الترتيب العادي — اضغط لتفعيل الخلط','Normale Reihenfolge — klicken zum Aktivieren')}"><span class="shuffle-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h4.5c3.8 0 4.7 5 8.5 5H21"/><path d="m18 8 3-1-3-1"/><path d="M3 17h4.5c3.8 0 4.7 5 8.5 5H21"/><path d="m18 16 3 1-3 1"/></svg></span><span class="shuffle-label">${shuffleEnabled?text('خلط','Mischen'):text('ترتيب','Reihenfolge')}</span></button>
       <div class="teil-tabs" role="tablist" aria-label="Teil auswählen">${availableTeile.map(t=>`<button type="button" class="teil-tab ${selectedTeil===t?'active':''}" data-teil="${t}">${t}</button>`).join('')}</div>
       <div class="topic-search-wrap">
@@ -111,9 +111,7 @@ function updateShuffleButton(){
   const label=b.querySelector('.shuffle-label'); if(label) label.textContent=shuffleEnabled?text('خلط','Mischen'):text('ترتيب','Reihenfolge');
 }
 function renderTopics(){
-  const toolbar=$('topicToolbar'); if(toolbar) toolbar.setAttribute('dir', lang()==='ar'?'rtl':'ltr');
-  const search=$('search'); if(search){search.setAttribute('dir',lang()==='ar'?'rtl':'ltr');search.style.textAlign=lang()==='ar'?'right':'left';}
-  const q=(search?.value||'').trim().toLowerCase(); const teil=selectedTeil || (TEIL_ORDER[state.section]||[])[0] || '';
+  const q=($('search')?.value||'').trim().toLowerCase(); const teil=selectedTeil || (TEIL_ORDER[state.section]||[])[0] || '';
   const base=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===state.section);
   const orderKey=state.level+'|'+state.section;
   if(orderKey!==shuffleOrderKey || !shuffleOrder.length || shuffleOrder.length!==base.length){

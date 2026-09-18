@@ -858,40 +858,38 @@ html,body,body *{font-family:"Cairo",sans-serif!important}
 /* TELC Voll: bundled Cairo font is the authoritative UI font. */
 html,body,body *{font-family:"Cairo",sans-serif!important}
 
-/* V10 — student heading hierarchy + mirrored toolbar on language change */
-.student-welcome-title{margin:0 0 8px!important;line-height:1.12!important}
-.student-platform-tag{display:inline-flex!important;margin:0 0 7px!important;color:var(--exercise-accent)!important;background:var(--exercise-accent-soft)!important;border-color:color-mix(in srgb,var(--exercise-accent) 22%,var(--line))!important}
-.student-welcome-instruction{margin:0!important}
 
-/* Arabic: shuffle right → Teil center → search left. German mirrors it. */
-.topic-toolbar#topicToolbar{direction:rtl!important;grid-template-columns:56px minmax(300px,1fr) 320px!important;}
-.topic-toolbar#topicToolbar .shuffle-toggle{grid-column:1!important;grid-row:1!important;justify-self:start!important}
-.topic-toolbar#topicToolbar .teil-tabs{grid-column:2!important;grid-row:1!important;justify-self:center!important;direction:rtl!important}
-.topic-toolbar#topicToolbar .topic-search-wrap{grid-column:3!important;grid-row:1!important;justify-self:end!important;direction:rtl!important}
-.topic-toolbar#topicToolbar .topic-search-input{direction:rtl!important;text-align:right!important}
+/* V12 — dashboard hero: small student greeting + orange platform title */
+.student-hub .hub-title-block{display:flex;flex-direction:column;align-items:flex-start}
+.student-hub .hub-greeting{display:inline-flex;align-items:center;width:max-content;max-width:100%;padding:7px 14px;border-radius:999px;background:var(--exercise-accent-soft);color:var(--ink);font-size:13px;font-weight:800;line-height:1.4;margin:0 0 10px}
+.student-hub .hub-head h1{color:var(--exercise-accent)!important;margin:0 0 8px}
+.student-hub .hub-title-block>.muted{margin:0}
 
-.topic-toolbar#topicToolbar[dir="ltr"]{direction:ltr!important;grid-template-columns:320px minmax(300px,1fr) 56px!important;}
-.topic-toolbar#topicToolbar[dir="ltr"] .topic-search-wrap{grid-column:1!important;justify-self:start!important;direction:ltr!important}
-.topic-toolbar#topicToolbar[dir="ltr"] .topic-search-input{direction:ltr!important;text-align:left!important}
-.topic-toolbar#topicToolbar[dir="ltr"] .teil-tabs{grid-column:2!important;direction:ltr!important}
-.topic-toolbar#topicToolbar[dir="ltr"] .shuffle-toggle{grid-column:3!important;justify-self:end!important}
+/* V12 — mirror the topic toolbar with the page language.
+   Arabic: shuffle right, Teil center, search left.
+   German: search right, Teil center, shuffle left. */
+html[dir="rtl"] .student-hub .topic-toolbar{direction:ltr!important;grid-template-columns:320px minmax(300px,1fr) 56px!important}
+html[dir="rtl"] .student-hub .topic-toolbar .topic-search-wrap{grid-column:1!important;grid-row:1!important;justify-self:start!important;direction:rtl!important}
+html[dir="rtl"] .student-hub .topic-toolbar .teil-tabs{grid-column:2!important;grid-row:1!important;justify-self:center!important;direction:rtl!important}
+html[dir="rtl"] .student-hub .topic-toolbar .shuffle-toggle{grid-column:3!important;grid-row:1!important;justify-self:end!important}
+
+html[dir="ltr"] .student-hub .topic-toolbar{direction:ltr!important;grid-template-columns:56px minmax(300px,1fr) 320px!important}
+html[dir="ltr"] .student-hub .topic-toolbar .shuffle-toggle{grid-column:1!important;grid-row:1!important;justify-self:start!important}
+html[dir="ltr"] .student-hub .topic-toolbar .teil-tabs{grid-column:2!important;grid-row:1!important;justify-self:center!important;direction:ltr!important}
+html[dir="ltr"] .student-hub .topic-toolbar .topic-search-wrap{grid-column:3!important;grid-row:1!important;justify-self:end!important;direction:ltr!important}
+html[dir="ltr"] .student-hub .topic-toolbar .topic-search-input{text-align:left!important;direction:ltr!important}
 
 @media(max-width:1050px){
-  .topic-toolbar#topicToolbar{grid-template-columns:52px minmax(240px,1fr) 280px!important}
-  .topic-toolbar#topicToolbar[dir="ltr"]{grid-template-columns:280px minmax(240px,1fr) 52px!important}
-  .topic-toolbar#topicToolbar .topic-search-wrap{width:280px!important}
-  .topic-toolbar#topicToolbar .topic-search-input{width:280px!important}
+  html[dir="rtl"] .student-hub .topic-toolbar{grid-template-columns:280px minmax(240px,1fr) 52px!important}
+  html[dir="ltr"] .student-hub .topic-toolbar{grid-template-columns:52px minmax(240px,1fr) 280px!important}
 }
 @media(max-width:700px){
-  .topic-toolbar#topicToolbar,
-  .topic-toolbar#topicToolbar[dir="ltr"]{display:grid!important;grid-template-columns:52px minmax(0,1fr)!important;grid-template-rows:auto auto!important;direction:rtl!important}
-  .topic-toolbar#topicToolbar .shuffle-toggle{grid-column:1!important;grid-row:1!important;justify-self:start!important}
-  .topic-toolbar#topicToolbar .teil-tabs{grid-column:2!important;grid-row:1!important;width:100%!important;direction:rtl!important}
-  .topic-toolbar#topicToolbar .topic-search-wrap{grid-column:1 / -1!important;grid-row:2!important;width:100%!important;max-width:none!important;justify-self:stretch!important}
-  .topic-toolbar#topicToolbar .topic-search-input{width:100%!important;max-width:none!important;height:44px!important}
-  .topic-toolbar#topicToolbar[dir="ltr"]{direction:ltr!important}
-  .topic-toolbar#topicToolbar[dir="ltr"] .shuffle-toggle{grid-column:1!important;grid-row:1!important;justify-self:start!important}
-  .topic-toolbar#topicToolbar[dir="ltr"] .teil-tabs{grid-column:2!important;grid-row:1!important;direction:ltr!important}
-  .topic-toolbar#topicToolbar[dir="ltr"] .topic-search-wrap{grid-column:1 / -1!important;grid-row:2!important}
-  .topic-toolbar#topicToolbar[dir="ltr"] .topic-search-input{direction:ltr!important;text-align:left!important}
+  html[dir="rtl"] .student-hub .topic-toolbar,
+  html[dir="ltr"] .student-hub .topic-toolbar{grid-template-columns:52px minmax(0,1fr)!important;grid-template-rows:auto auto!important;direction:ltr!important}
+  html[dir="rtl"] .student-hub .topic-toolbar .shuffle-toggle,
+  html[dir="ltr"] .student-hub .topic-toolbar .shuffle-toggle{grid-column:1!important;grid-row:1!important}
+  html[dir="rtl"] .student-hub .topic-toolbar .teil-tabs,
+  html[dir="ltr"] .student-hub .topic-toolbar .teil-tabs{grid-column:2!important;grid-row:1!important}
+  html[dir="rtl"] .student-hub .topic-toolbar .topic-search-wrap,
+  html[dir="ltr"] .student-hub .topic-toolbar .topic-search-wrap{grid-column:1 / -1!important;grid-row:2!important;width:100%!important;max-width:none!important;justify-self:stretch!important}
 }
