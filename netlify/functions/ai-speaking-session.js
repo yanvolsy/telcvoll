@@ -7,7 +7,15 @@ function cleanJson(text) {
   let s = String(text || '').trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'').trim();
   const a=s.indexOf('{'), b=s.lastIndexOf('}');
   if(a>=0 && b>a) s=s.slice(a,b+1);
-  return JSON.parse(s);
+  try { return JSON.parse(s); }
+  catch (e) {
+    // Repair the common harmless JSON formatting mistakes produced by chat models.
+    const repaired=s
+      .replace(/,\s*([}\]])/g,'$1')
+      .replace(/}\s*{/g,'},{')
+      .replace(/]\s*\[/g,'],[');
+    return JSON.parse(repaired);
+  }
 }
 async function extractProviderText(resp) {
   const raw = await resp.text();
@@ -38,7 +46,7 @@ async function callGemini(key,model,system,prompt) {
   const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
     systemInstruction:{parts:[{text:system}]},
     contents:[{role:'user',parts:[{text:prompt}]}],
-    generationConfig:{temperature:0.25}
+    generationConfig:{temperature:0.25,responseMimeType:'application/json'}
   })});
   return extractProviderText(r);
 }
@@ -46,7 +54,7 @@ async function callGemini(key,model,system,prompt) {
 async function callGroq(key,model,system,prompt) {
   if(!key) throw new Error('GROQ_API_KEY is not configured');
   const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${key}`},
-    body:JSON.stringify({model:model||'openai/gpt-oss-120b',temperature:0.25,messages:[
+    body:JSON.stringify({model:model||'openai/gpt-oss-120b',temperature:0.25,response_format:{type:'json_object'},messages:[
       {role:'system',content:system},
       {role:'user',content:prompt}
     ]})});
@@ -98,7 +106,11 @@ exports.handler=async(event)=>{
   }
   const context=`LEVEL: ${ex.level||''}\nTEIL: ${ex.teil||''}\nTHEMA: ${ex.title||''}\nTASK:\n${ex.body||''}`;
   let prompt;
-  if(mode==='model'){
+  if(mode==='opening'){
+    prompt=`You are the Partner in a TELC B2 Sprechen Teil 2 training exercise. Speak ONLY German. The examiner Jerry has just instructed the candidates to discuss the topic. Your job is to start the partner side naturally: briefly summarize the core INHALT of the supplied topic in 1-2 sentences, then ask the student to summarize the Inhalt in their own words. Do not give Meinung 1 or Meinung 2 yet. Do not use Arabic. Do not invent information outside the supplied topic.
+${context}
+Return ONLY JSON: {"reply":""}`;
+  } else if(mode==='model'){
     prompt=`Create a high-quality TELC B2 Sprechen training model based ONLY on the supplied topic, task and Teil. The supplied topic is the source of truth. Do not invent a different topic and do not claim this is an official telc answer.
 ${context}
 
@@ -111,13 +123,16 @@ IMPORTANT FOR TEIL 2 — FOLLOW THIS ROLE DISTRIBUTION EXACTLY:
 - The dialogue must feel like a real two-person B2 discussion, not a monologue and not a list of prepared answers.
 - Use the actual points contained in the supplied topic. Do not force sections that are absent from the topic.
 
-For Teil 2, build the model dialogue in a natural progression:
-1) Student introduces the topic briefly and gives Meinung 1.
-2) Partner reacts and gives Meinung 2.
-3) Student gives Erfahrung 1.
-4) Partner gives Erfahrung 2.
-5) Both discuss the concrete Vorteile und Nachteile from the topic, with reactions, questions, agreement/disagreement and short reasons.
-6) Finish naturally with a brief conclusion or shared view when appropriate.
+For Teil 2, build the model dialogue in this exact progression whenever the source contains these elements:
+1) Jerry (examiner) is NOT part of the candidate/partner dialogue. The model dialogue itself contains only student and partner.
+2) The PARTNER first gives a short model for INHALT and then asks the STUDENT to give/summarize the Inhalt.
+3) The STUDENT gives MEINUNG 1 (their own opinion + reason).
+4) The PARTNER gives MEINUNG 2 (the partner's own independent opinion + reason).
+5) The STUDENT gives ERFAHRUNG 1.
+6) The PARTNER gives ERFAHRUNG 2 as a plausible partner example/perspective, without pretending it is a real personal memory.
+7) Both discuss the concrete Vorteile und Nachteile from the source, alternating turns, reacting to each other, asking short follow-up questions, agreeing/disagreeing and giving reasons.
+8) Finish naturally with a short conclusion.
+Do NOT label Meinung 2 as another student answer. It belongs to the partner. Do NOT make the student say Erfahrung 2.
 
 For Teil 3, model a realistic joint planning conversation based only on the concrete planning points in the task. Both speakers make proposals, react, negotiate and finish with a clear agreement.
 For Teil 1, model a short structured presentation followed by a natural partner reaction and follow-up questions.
@@ -143,14 +158,17 @@ Student transcript:
 ${transcript}
 Conversation history:
 ${JSON.stringify(history)}
+Conversation state: If transcript/history is empty, this is the beginning of the exercise. For Teil 2, begin with the INHALT stage: briefly state/introduce the content as the partner and ask the student to summarize the Inhalt. After the student answers, continue through Meinung 1 -> Meinung 2 -> Erfahrung 1 -> Erfahrung 2 -> Vorteile/Nachteile.
 
 STRICT TEIL 2 ROLE RULES:
-- The student's first substantive contribution should be treated as MEINUNG 1: their own opinion and reason.
-- Your response must then provide MEINUNG 2: your own independent partner opinion, not a repetition of the student's opinion. You may agree, disagree, or add a different perspective, but give a reason.
-- After the student gives an experience/example, provide ERFAHRUNG 2 as the partner's own relevant experience/example. Do not invent a personal experience that would be impossible for an AI; phrase it as a plausible partner perspective/example rather than claiming real-world personal memories.
-- Then guide the conversation into the concrete Vorteile und Nachteile in the supplied topic. Both sides should exchange arguments, react, ask short follow-up questions and sometimes disagree.
-- Do not dump all advantages and disadvantages in one message. Discuss them step by step across turns.
-- Ask only ONE main question or request at a time.
+- The first task is INHALT. The partner may briefly model/summarize the content and then ask the student to summarize the Inhalt.
+- The student's own first substantive opinion is MEINUNG 1.
+- The partner's next substantive opinion is MEINUNG 2. It is the PARTNER'S independent opinion, not a second answer for the student.
+- The student's experience is ERFAHRUNG 1.
+- The partner's experience/example is ERFAHRUNG 2. Phrase it as a plausible partner perspective/example, not a claimed real-world memory.
+- Then discuss the concrete Vorteile und Nachteile from the supplied topic step by step.
+- Ask only ONE main question/request at a time.
+- Keep every reply in German. Never use Arabic in the conversation itself.
 - Follow the actual topic points; do not invent unrelated categories.
 
 Rules by Teil:
@@ -160,7 +178,14 @@ Rules by Teil:
 Return ONLY JSON: {"reply":"","short_note":"","continue":true}`;
   }
   try{
-    const raw=await callAI(prompt); const out=cleanJson(raw);
+    let raw=await callAI(prompt);
+    let out;
+    try { out=cleanJson(raw); }
+    catch(parseError) {
+      const repairPrompt=`Return ONLY valid JSON. Repair the following AI output without changing its meaning. Do not add commentary. OUTPUT:\n${String(raw).slice(0,30000)}`;
+      raw=await callAI(repairPrompt);
+      out=cleanJson(raw);
+    }
     await db().query('INSERT INTO ai_logs(student_id,kind,input_text,output_text) VALUES($1,$2,$3,$4)',
       [student.student_id,'speaking',JSON.stringify({exercise_id:id,mode,transcript}),JSON.stringify(out)]);
     return json(200,out);
