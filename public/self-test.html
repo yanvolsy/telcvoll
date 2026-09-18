@@ -1,11 +1,12 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#FF7A2F"><title>الامتحان التجريبي — TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260918-cairo-local-v2">
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>الامتحان التجريبي — TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260918-cairo-local-v2">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
 <link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
-<link rel="manifest" href="/manifest.webmanifest">
-</head><body><header class="top"><a class="brand" href="/dashboard.html" aria-label="TELC Voll"><span class="brand-dot"></span><span class="brand-name"><span class="brand-telc">TELC</span> <span class="brand-voll">Voll</span></span></a><nav><a href="/dashboard.html">الرئيسية</a><a href="#" id="logoutLink">خروج</a></nav></header><main class="self-test-page" id="content"><div class="student-loading">جارٍ التحميل…</div></main><script src="/assets/i18n.js"></script><script src="/assets/app.js"></script><script>
+<link rel="manifest" href="/manifest.webmanifest"><style><!-- TELC Voll: unified homepage typography -->
+html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
+html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}</style>
+</head><body><header class="top"><a class="brand" href="/dashboard.html">TELC Voll</a><nav><a href="/dashboard.html">الرئيسية</a><a href="#" id="logoutLink">خروج</a></nav></header><main class="self-test-page" id="content"><div class="student-loading">جارٍ التحميل…</div></main><script src="/assets/i18n.js"></script><script src="/assets/app.js"></script><script>
 const LEVELS=['B1','B2','C1'];
 let exercises=[],level=['B1','B2','C1'].includes(qs('level'))?qs('level'):'B2';
 const txt=(a,d)=>getLang()==='ar'?a:d;
@@ -19,7 +20,7 @@ function render(){
     <div class="self-levels">${LEVELS.map(l=>`<button class="level-btn ${level===l?'active':''}" data-level="${l}">Telc ${l}</button>`).join('')}</div>
     <div class="self-test-grid mock-rules">
       <article><span class="self-icon">↝</span><h2>${txt('اختيار عشوائي','Zufällige Auswahl')}</h2><p>${txt('لا تظهر قائمة بالمواضيع ولا يمكنك اختيار موضوع أو قسم.','Keine Themenliste und keine Auswahl einzelner Themen oder Bereiche.')}</p></article>
-      <article><span class="self-icon">⏱️</span><h2>${txt('مؤقت رسمي: ساعتان و20 دقيقة','Offizielle Zeit: 2 Std. 20 Min.')}</h2><p>${txt('مؤقت تنازلي موحد (02:20:00 / 140 دقيقة) يغطي كامل أقسام الامتحان التحريري مع إمكانية التنقل والمراجعة.','Einheitlicher Countdown (02:20:00 / 140 Min.) für alle schriftlichen Prüfungsteile mit freier Navigation.')}</p></article>
+      <article><span class="self-icon">◷</span><h2>${txt('مؤقت واحد','Ein Gesamt-Timer')}</h2><p>${txt('مؤقت واحد للامتحان الكتابي كاملاً ويظهر دائماً في الأعلى بجانب أقسام الامتحان.','Ein einziger Timer läuft für die gesamte schriftliche Prüfung und bleibt oben neben den Prüfungsteilen sichtbar.')}</p></article>
       <article><span class="self-icon">✓</span><h2>${txt('امتحان كتابي فقط','Nur schriftliche Prüfung')}</h2><p>${txt('تشمل المحاكاة Lesen وHören وSprachbausteine وSchreiben فقط، ولا تشمل Sprechen.','Die Simulation umfasst nur Lesen, Hören, Sprachbausteine und Schreiben; Sprechen ist nicht enthalten.')}</p></article>
     </div>
     <button class="btn self-test-btn" id="startBtn">${txt('بدء امتحان Telc','Telc-Prüfung starten')} ←</button>
