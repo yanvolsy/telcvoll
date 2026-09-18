@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f47b20"><title>ملفي | TELC Voll</title>
+<link rel="stylesheet" href="/assets/app.css?v=20260918-cairo-local-v2">
+<link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
+<link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
+<link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="/manifest.webmanifest">
+<style>
+html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important}
+.profile-page{max-width:900px;margin:0 auto;padding:42px 24px 90px}.profile-shell{background:var(--white);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);overflow:hidden}.profile-head{padding:28px 30px 22px;border-bottom:1px solid var(--line)}.profile-head h1{font-size:clamp(32px,5vw,52px);margin:9px 0 8px;line-height:1.05}.profile-head p{margin:0;max-width:680px}.profile-form{padding:28px 30px}.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.profile-field{display:flex;flex-direction:column;gap:8px}.profile-field.full{grid-column:1/-1}.profile-field label{font-weight:850}.profile-field input{width:100%;min-height:50px;border-radius:14px}.profile-required{color:var(--exercise-accent)}.profile-plan{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:16px 18px;margin:22px 0;border:1px solid var(--line);border-radius:16px;background:var(--soft)}.profile-plan strong{display:block}.profile-plan small{color:var(--muted)}.profile-levels{display:flex;gap:7px;flex-wrap:wrap}.profile-levels span{padding:6px 10px;border:1px solid var(--line);border-radius:999px;font-weight:900;font-size:12px;background:var(--white)}.profile-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:24px}.profile-save{min-width:180px}.profile-note{font-size:12px;color:var(--muted);line-height:1.7}.profile-status{margin-top:14px}.profile-logout{font-size:13px}
+@media(max-width:680px){.profile-page{padding:24px 13px 70px}.profile-head,.profile-form{padding:22px 18px}.profile-grid{grid-template-columns:1fr}.profile-field.full{grid-column:auto}.profile-actions{display:grid;grid-template-columns:1fr}.profile-save{width:100%}.profile-plan{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="/dashboard.html"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
+  <nav>
+    <a href="/dashboard.html" data-i18n="nav_home_student">منصة الطالب</a>
+    <a href="#" id="logoutLink" data-i18n="nav_logout">خروج</a>
+  </nav>
+</header>
+<main class="profile-page" id="content"><div class="student-loading">جارٍ التحميل…</div></main>
+<script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
+<script>
+const $=id=>document.getElementById(id); let data=null;
+function lang(){return getLang();}
+function text(ar,de){return lang()==='ar'?ar:de;}
+function render(){
+  const s=data.student||{}, sub=data.subscription||{};
+  $('content').innerHTML=`<section class="profile-shell">
+    <div class="profile-head"><span class="tag">${text('الملف الشخصي','Persönliches Profil')}</span><h1>${qs('onboarding')==='1'&&!s.profile_completed?text('أكمل بياناتك','Profil vervollständigen'):text('ملفي الشخصي','Mein Profil')}</h1><p class="muted">${text('أدخل بياناتك الأساسية مرة واحدة. ستُستخدم هذه المعلومات لحفظ حسابك وإظهار بياناتك بشكل صحيح في المنصة ولوحة الإدارة.','Gib deine grundlegenden Daten einmal ein. Sie werden für dein Konto und die Anzeige deiner Daten in der Plattform und im Adminbereich verwendet.')}</p></div>
+    <form id="profileForm" class="profile-form">
+      <div class="profile-grid">
+        <div class="profile-field"><label for="first_name">${text('الاسم','Vorname')} <span class="profile-required">*</span></label><input id="first_name" name="first_name" required maxlength="100" autocomplete="given-name" value="${esc(s.first_name||'')}"></div>
+        <div class="profile-field"><label for="last_name">${text('اللقب','Nachname')} <span class="profile-required">*</span></label><input id="last_name" name="last_name" required maxlength="100" autocomplete="family-name" value="${esc(s.last_name||'')}"></div>
+        <div class="profile-field full"><label for="email">${text('البريد الإلكتروني','E-Mail')} <span class="profile-required">*</span></label><input id="email" name="email" type="email" required maxlength="190" autocomplete="email" value="${esc(s.email||'')}"></div>
+        <div class="profile-field"><label for="phone">${text('رقم الهاتف','Telefon')} <span class="profile-note">(${text('اختياري','optional')})</span></label><input id="phone" name="phone" type="tel" maxlength="40" autocomplete="tel" value="${esc(s.phone||'')}"></div>
+        <div class="profile-field"><label for="country">${text('البلد','Land')} <span class="profile-note">(${text('اختياري','optional')})</span></label><input id="country" name="country" maxlength="100" autocomplete="country-name" value="${esc(s.country||'')}"></div>
+      </div>
+      <div class="profile-plan"><div><strong>${text('صلاحية المنصة','Plattformzugang')}</strong><small>${esc(sub.plan_name||'')} · ${sub.expires_at?new Date(sub.expires_at).toLocaleDateString(lang()==='ar'?'ar-DZ':'de-DE'):''}</small></div><div class="profile-levels"><span>B1</span><span>B2</span><span>C1</span></div></div>
+      <div class="profile-actions"><span class="profile-note">${text('الحقول التي تحمل * مطلوبة. يمكنك تعديل بياناتك لاحقاً من صفحة ملفك.','Felder mit * sind erforderlich. Du kannst dein Profil später jederzeit ändern.')}</span><button class="btn profile-save" type="submit">${text('حفظ ومتابعة','Speichern und weiter')} →</button></div>
+      <div id="profileStatus" class="profile-status"></div>
+    </form>
+  </section>`;
+  $('profileForm').onsubmit=save;
+}
+async function save(e){e.preventDefault();const f=new FormData($('profileForm'));const status=$('profileStatus');status.innerHTML='';const btn=document.querySelector('.profile-save');btn.disabled=true;btn.textContent=text('جارٍ الحفظ…','Wird gespeichert…');try{const r=await api('profile-update',{method:'POST',body:{first_name:f.get('first_name'),last_name:f.get('last_name'),email:f.get('email'),phone:f.get('phone'),country:f.get('country')}});data.student=r.student;status.innerHTML=`<div class="alert ok">${text('تم حفظ بياناتك بنجاح.','Deine Daten wurden erfolgreich gespeichert.')}</div>`;setTimeout(()=>location.href='/dashboard.html',350);}catch(err){const key=err?.data?.error;const msg=key==='invalid_email'?text('يرجى إدخال بريد إلكتروني صحيح.','Bitte gib eine gültige E-Mail-Adresse ein.'):key==='required_fields'?text('يرجى ملء الاسم واللقب والبريد الإلكتروني.','Bitte fülle Vorname, Nachname und E-Mail aus.'):text('تعذر حفظ البيانات حالياً. حاول مرة أخرى.','Die Daten konnten gerade nicht gespeichert werden. Bitte versuche es erneut.');status.innerHTML=`<div class="alert bad">${msg}</div>`;btn.disabled=false;btn.textContent=text('حفظ ومتابعة','Speichern und weiter')+' →';}}
+$('logoutLink').onclick=async e=>{e.preventDefault();await api('auth-logout',{method:'POST'});location.href='/';};
+(async()=>{try{data=await api('me');if(!data.student){location.href='/';return;}render();}catch(e){location.href='/?error=session';}})();
+document.addEventListener('langchange',()=>{if(data)render();});
+</script>
+</body></html>

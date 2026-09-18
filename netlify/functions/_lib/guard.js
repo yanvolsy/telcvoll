@@ -3,7 +3,7 @@ const { studentFromEvent, adminFromEvent } = require('./auth');
 
 // Equivalent of PHP's guard_session(): re-checks the access code is still
 // active/unexpired and the session token still matches (single active device).
-async function requireStudent(event) {
+async function requireStudent(event, options = {}) {
   const payload = studentFromEvent(event);
   if (!payload) return null;
 
@@ -20,6 +20,10 @@ async function requireStudent(event) {
     'UPDATE sessions SET last_seen_at=NOW() WHERE token=$1 AND active=TRUE',
     [payload.session_token]
   );
+  if (!options.allowIncompleteProfile) {
+    const p = await pool.query('SELECT profile_completed FROM students WHERE id=$1', [payload.student_id]);
+    if (!p.rows[0] || p.rows[0].profile_completed !== true) return null;
+  }
   return payload;
 }
 

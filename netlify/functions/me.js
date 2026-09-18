@@ -3,7 +3,7 @@ const { json } = require('./_lib/auth');
 const { requireStudent } = require('./_lib/guard');
 
 exports.handler = async (event) => {
-  const student = await requireStudent(event);
+  const student = await requireStudent(event, { allowIncompleteProfile: true });
   if (!student) return json(401, { error: 'unauthenticated' });
 
   const pool = db();
@@ -12,7 +12,7 @@ exports.handler = async (event) => {
   // from breaking the student area before that migration is run.
   await pool.query("UPDATE exercises SET level='B2' WHERE level IS NULL OR TRIM(level)=''");
 
-  const meRes = await pool.query('SELECT id,name,email FROM students WHERE id=$1', [student.student_id]);
+  const meRes = await pool.query('SELECT id,name,email,first_name,last_name,phone,country,profile_completed,profile_updated_at FROM students WHERE id=$1', [student.student_id]);
   const accessRes = await pool.query(`
     SELECT c.id AS code_id, c.expires_at, p.name AS plan_name, p.plan_key, p.duration_days
     FROM access_codes c JOIN plans p ON p.id=c.plan_id

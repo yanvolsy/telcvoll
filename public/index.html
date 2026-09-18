@@ -85,7 +85,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 loginForm.onsubmit = async (e) => {
   e.preventDefault(); msg.innerHTML = '';
   const fd = new FormData(loginForm);
-  try { await api('auth-login', { method:'POST', body:{ code:fd.get('code') }}); location.href='/dashboard.html'; }
+  try { const result = await api('auth-login', { method:'POST', body:{ code:fd.get('code') }}); location.href = result.profile_completed ? '/dashboard.html' : '/profile.html?onboarding=1'; }
   catch(err) { msg.innerHTML=`<div class="alert bad">${t('access_error')}</div>`; }
 };
 (async () => {

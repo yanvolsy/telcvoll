@@ -4,7 +4,7 @@
 const I18N = {
   ar: {
     nav_home: 'الرئيسية', nav_home_student: 'منصة الطالب', nav_errors: 'أخطائي', nav_summaries: 'الملخصات',
-    nav_speaking: 'مساعد TELC', nav_logout: 'خروج',
+    nav_speaking: 'مساعد TELC', profile_link: 'ملفي', nav_logout: 'خروج',
     nav_services: 'الخدمات', nav_plans: 'الخطط', nav_about: 'عن المنصة', nav_access: 'الدخول', nav_contact: 'اتصل بنا', nav_mock: 'امتحان تجريبي', nav_speaking_ai: 'Sprechen AI',
     footer: 'TELC Voll — منصة تدريب B1 · B2 · C1',
     loading: 'جارٍ التحميل…',
@@ -87,8 +87,8 @@ const I18N = {
     install_password_ph: 'كلمة مرور قوية (8 أحرف على الأقل)', install_btn: 'تثبيت',
   },
   de: {
-    nav_home: 'Startseite', nav_errors: 'Meine Fehler', nav_summaries: 'Zusammenfassungen',
-    nav_speaking: 'Sprechen AI', nav_logout: 'Abmelden',
+    nav_home: 'Startseite', nav_home_student: 'Schülerbereich', nav_errors: 'Meine Fehler', nav_summaries: 'Zusammenfassungen',
+    nav_speaking: 'Sprechen AI', profile_link: 'Mein Profil', nav_logout: 'Abmelden',
     nav_services: 'Leistungen', nav_plans: 'Pläne', nav_about: 'Über uns', nav_access: 'Zugang', nav_contact: 'Kontakt', nav_mock: 'Prüfungssimulation', nav_speaking_ai: 'Sprechen AI',
     footer: 'TELC Voll – Übungsplattform für B1 · B2 · C1',
     loading: 'Wird geladen…',

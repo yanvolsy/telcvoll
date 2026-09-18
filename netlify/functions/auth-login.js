@@ -53,6 +53,9 @@ exports.handler = async (event) => {
     );
     await client.query('COMMIT');
 
+    const profileRes = await client.query('SELECT profile_completed FROM students WHERE id=$1', [studentId]);
+    const profileCompleted = profileRes.rows[0]?.profile_completed === true;
+
     const jwtToken = sign({
       student_id: studentId,
       code_id: c.id,
@@ -60,7 +63,7 @@ exports.handler = async (event) => {
       ai_enabled: !!c.ai_enabled,
     });
 
-    return json(200, { ok: true }, {
+    return json(200, { ok: true, profile_completed: profileCompleted }, {
       'Set-Cookie': setCookie('student_token', jwtToken, 60 * 60 * 24 * 30),
     });
   } catch (e) {

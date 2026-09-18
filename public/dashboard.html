@@ -17,7 +17,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <header class="top">
   <a class="brand" href="/dashboard.html"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
   <nav>
-    <a href="/self-test.html" id="mockExamNav" data-i18n="nav_mock">امتحان تجريبي</a><a href="/telc-chat.html" id="telcChatNav" data-i18n="nav_speaking">مساعد TELC</a><a href="#" id="logoutLink" data-i18n="nav_logout">خروج</a>
+    <a href="/self-test.html" id="mockExamNav" data-i18n="nav_mock">امتحان تجريبي</a><a href="/telc-chat.html" id="telcChatNav" data-i18n="nav_speaking">مساعد TELC</a><a href="/profile.html" id="profileLink" data-i18n="profile_link">ملفي</a><a href="#" id="logoutLink" data-i18n="nav_logout">خروج</a>
   </nav>
 </header>
 <main class="student-hub" id="content"><div class="student-loading">جارٍ التحميل…</div></main>
@@ -131,7 +131,7 @@ function renderTopics(){
 document.addEventListener('click',e=>{const a=e.target.closest('a[href*="/exercise.html"]');if(!a)return;try{sessionStorage.setItem('telc_dashboard_return',JSON.stringify({level:state.level,section:state.section,teil:selectedTeil,search:$('search')?.value||'',scrollY:window.scrollY}));}catch{}});
 
 logoutLink.onclick=async e=>{e.preventDefault();await api('auth-logout',{method:'POST'});location.href='/';};
-(async()=>{try{const d=await api('me');state.exercises=d.exercises||[];state.student=d.student;state.subscription=d.subscription||null;remainingDays=calcRemainingDays();const urlLevel=qs('level');if(['B1','B2','C1'].includes(urlLevel))state.level=urlLevel;
+(async()=>{try{const d=await api('me');if(!d.student?.profile_completed){location.href='/profile.html?onboarding=1';return;}state.exercises=d.exercises||[];state.student=d.student;state.subscription=d.subscription||null;remainingDays=calcRemainingDays();const urlLevel=qs('level');if(['B1','B2','C1'].includes(urlLevel))state.level=urlLevel;
 try{const saved=JSON.parse(sessionStorage.getItem('telc_dashboard_return')||'null');if(saved){if(['B1','B2','C1'].includes(saved.level))state.level=saved.level;if(SECTION_ORDER.includes(saved.section))state.section=saved.section;if(availableTeileFor(state.section).includes(saved.teil))selectedTeil=saved.teil;window.__telcRestoreSearch=saved.search||'';window.__telcRestoreScroll=Number(saved.scrollY)||0;sessionStorage.removeItem('telc_dashboard_return');}}catch{}
 render();if(window.__telcRestoreSearch&&$('search'))$('search').value=window.__telcRestoreSearch;renderTopics();setTimeout(()=>{if(window.__telcRestoreScroll)window.scrollTo(0,window.__telcRestoreScroll);},80);}catch(e){location.href='/?error=session';}})();
 document.addEventListener('langchange',render);
