@@ -50,7 +50,7 @@ function render(){
   const has=levelAvailable(state.level);
   $('content').innerHTML=`
     <section class="hub-head">
-      <div><span class="tag">${text('منصة الطالب','Schülerbereich')}</span><h1>${text('تدريب TELC Voll','TELC Voll Training')}</h1><p class="muted">${text('مرحباً '+(state.student?.name||'Student')+' — اختر المستوى والقسم ثم افتح التمرين.','Hallo '+(state.student?.name||'Student')+' — wähle Niveau und Prüfungsteil.')}</p></div>
+      <div><span class="tag">${text('منصة الطالب','Schülerbereich')}</span><h1>${text('منصة الطالب','Student Platform')}</h1><p class="muted">${text('مرحباً '+(state.student?.name||'Student')+' — اختر المستوى والقسم ثم افتح التمرين.','Hallo '+(state.student?.name||'Student')+' — wähle Niveau und Prüfungsteil.')}</p></div>
       <div class="hub-kpis">
         <div class="hub-kpi days-kpi ${remainingDays<=2?'warning':''}"><strong>${remainingDays}</strong><span>${text('يوم متبقٍ','Tage verbleibend')}</span></div>
         <div class="hub-progress-card" aria-label="${text('تقدم الطالب','Lernfortschritt')}">
