@@ -893,3 +893,73 @@ html[dir="ltr"] .student-hub .topic-toolbar .topic-search-input{text-align:left!
   html[dir="rtl"] .student-hub .topic-toolbar .topic-search-wrap,
   html[dir="ltr"] .student-hub .topic-toolbar .topic-search-wrap{grid-column:1 / -1!important;grid-row:2!important;width:100%!important;max-width:none!important;justify-self:stretch!important}
 }
+
+/* Sprechen Teil 3 — structured TELC-style planning tasks and model dialogue */
+.speaking-tasks-panel{margin-top:16px;border:1px solid var(--line);border-radius:18px;background:var(--white);overflow:hidden;box-shadow:var(--shadow)}
+.speaking-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;background:#eaf5ff;border-bottom:1px solid var(--line)}
+.speaking-section-kicker{font-size:12px;color:#2374b8;font-weight:900;letter-spacing:.02em}.speaking-section-head h2{margin:3px 0 0;font-size:18px}
+.speaking-task-list{padding:4px 16px}.speaking-task-list[hidden]{display:none}.speaking-task-item{display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;padding:13px 0;border-bottom:1px solid var(--line)}.speaking-task-item:last-child{border-bottom:0}
+.speaking-task-number{width:27px;height:27px;border-radius:8px;display:grid;place-items:center;background:#287bc6;color:#fff;font-weight:900;font-size:12px}.speaking-task-item-body{min-width:0}.speaking-task-item-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.speaking-task-item-top b{font-size:14px;line-height:1.65}.speaking-task-item-top .text-tools{flex:none;float:none;margin:0}.speaking-task-item-body .inline-translation{margin-top:6px}
+.speaking-model-tools{display:flex;align-items:center;gap:6px}.speaking-model-translation{margin-top:8px;padding:8px 10px;border-radius:10px;background:var(--bg);color:var(--muted);line-height:1.6;direction:rtl;text-align:right;font-size:13px}.speaking-model-translation[hidden]{display:none}
+.speaking-model-line{position:relative}.speaking-model-line .speaking-model-phase{display:inline-block;margin-bottom:5px;padding:3px 7px;border-radius:999px;background:var(--exercise-accent-soft);color:var(--exercise-accent);font-size:10px;font-weight:900}.speaking-model-line p{white-space:pre-wrap}
+@media(max-width:650px){.speaking-tasks-panel{margin-top:12px}.speaking-section-head{padding:12px}.speaking-task-list{padding:2px 12px}.speaking-task-item{grid-template-columns:30px minmax(0,1fr);gap:8px}.speaking-task-number{width:25px;height:25px}.speaking-task-item-top b{font-size:13px}}
+
+/* TELC Voll Admin UI — unified orange identity, responsive mobile navigation, full light/dark support */
+.admin-shell{min-height:100vh;background:var(--bg)!important;color:var(--ink)}
+.admin-shell .admin-nav{min-height:72px;padding:0 clamp(14px,4vw,56px);background:var(--white)!important;color:var(--ink)!important;border-bottom:1px solid var(--line);box-shadow:0 5px 24px rgba(16,35,30,.05);position:sticky;top:0;z-index:100}
+.admin-shell .admin-nav .brand{color:var(--green)!important;font-size:21px}
+.admin-shell .admin-nav .brand-dot{background:var(--green)!important}
+.admin-shell .admin-nav nav{display:flex;align-items:center;gap:6px;overflow:visible}
+.admin-shell .admin-nav nav>a{color:var(--ink)!important;text-decoration:none;white-space:nowrap;font-weight:800;padding:9px 12px;border-radius:11px;transition:.18s}
+.admin-shell .admin-nav nav>a:hover{background:var(--green-soft);color:var(--green-dark)!important}
+.admin-shell .admin-nav .header-actions{display:inline-flex;align-items:center;gap:7px;margin-inline-start:8px}
+.admin-shell .admin-nav .header-actions .icon-btn{width:38px;height:38px;background:var(--white);color:var(--ink);border:1px solid var(--line)}
+.admin-shell .admin-nav .header-actions .icon-btn:hover{background:var(--green-soft);border-color:var(--green);color:var(--green)}
+.admin-mobile-menu{display:none;position:fixed;top:78px;inset-inline:12px auto;width:min(330px,calc(100vw - 24px));background:var(--white);border:1px solid var(--line);border-radius:18px;box-shadow:0 22px 60px rgba(0,0,0,.18);padding:8px;z-index:150}
+.admin-mobile-menu.open{display:grid;gap:3px}
+.admin-mobile-menu a{display:flex;align-items:center;justify-content:flex-start;min-height:44px;padding:9px 12px;border-radius:11px;text-decoration:none;color:var(--ink);font-weight:800}
+.admin-mobile-menu a:hover{background:var(--green-soft);color:var(--green-dark)}
+.admin-mobile-menu .admin-mobile-divider{height:1px;background:var(--line);margin:4px 0}
+.admin-shell .admin-mobile-toggle{display:none}
+.admin-shell .admin-dashboard,.admin-shell .wrap{position:relative}
+.admin-shell .admin-stat,.admin-shell .admin-tool,.admin-shell .student-stat,.admin-shell .stat,.admin-shell .plan-item,.admin-shell .exam-card,.admin-shell .code-table-wrap,.admin-shell .table-wrap,.admin-shell .panel,.admin-shell .card,.admin-shell .modal,.admin-shell .modal-box{background:var(--white)!important;color:var(--ink)}
+.admin-shell .code-table th,.admin-shell .exercise-table th,.admin-shell .table th{background:var(--green)!important;color:#fff!important}
+.admin-shell .code-table tr:hover td{background:var(--green-soft)!important}
+.admin-shell .field-label,.admin-shell label{color:var(--ink)}
+.admin-shell input,.admin-shell textarea,.admin-shell select{background:var(--white);color:var(--ink);border-color:var(--line)}
+.admin-shell input::placeholder,.admin-shell textarea::placeholder{color:var(--muted);opacity:.9}
+.admin-shell .modal-backdrop,.admin-shell .modal{color:var(--ink)}
+html[data-theme="dark"] .admin-shell .admin-nav{box-shadow:0 5px 24px rgba(0,0,0,.28)}
+html[data-theme="dark"] .admin-shell .code-table-wrap,html[data-theme="dark"] .admin-shell .table-wrap{background:var(--white)!important}
+html[data-theme="dark"] .admin-shell .code-table tr:hover td{background:rgba(255,173,102,.09)!important}
+html[data-theme="dark"] .admin-shell .code-status.disabled{background:#242c29;color:#aebbb6}
+html[data-theme="dark"] .admin-shell .code-status.expired{background:#321b18;color:#f0aaa2}
+html[data-theme="dark"] .admin-shell .remove-btn,html[data-theme="dark"] .admin-shell .btn.red{background:#321b18!important;color:#f0aaa2!important;border-color:#63342e!important}
+html[data-theme="dark"] .admin-shell .section-box{background:rgba(255,173,102,.06)!important}
+html[data-theme="dark"] .admin-shell .item-row{background:#141d19!important;border-color:var(--line)!important}
+html[data-theme="dark"] .admin-shell .code-pill{background:rgba(255,173,102,.10)!important;border-color:#6a4a30!important}
+.admin-login-tools{position:fixed;top:18px;inset-inline-end:18px;display:flex;gap:7px;z-index:20}
+.admin-login-tools .icon-btn{width:40px;height:40px}
+@media(max-width:760px){
+  .admin-shell .admin-nav{padding:0 13px;min-height:64px}
+  .admin-shell .admin-nav nav{display:none}
+  .admin-shell .admin-nav .header-actions{margin-inline-start:auto}
+  .admin-shell .admin-mobile-toggle{display:inline-flex;order:3;width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:var(--white);color:var(--ink);align-items:center;justify-content:center;cursor:pointer;padding:0}
+  .admin-shell .admin-mobile-toggle:hover{border-color:var(--green);background:var(--green-soft);color:var(--green)}
+  .admin-shell .admin-nav .brand{font-size:19px}
+  .admin-shell .admin-nav .header-actions{gap:5px}
+  .admin-shell .admin-nav .header-actions .icon-btn{width:36px;height:36px}
+  .admin-mobile-menu{top:70px}
+  .admin-shell .admin-dashboard-head{padding-top:18px}
+  .admin-shell .admin-section-head{align-items:flex-start;flex-direction:column}
+  .admin-shell .browser-toolbar,.admin-shell .code-toolbar,.admin-shell .code-hero,.admin-shell .exam-head,.admin-shell .student-head{align-items:stretch;flex-direction:column}
+  .admin-shell .browser-filters{grid-template-columns:1fr!important}
+  .admin-shell .context-lock{grid-template-columns:1fr!important}
+  .admin-shell .choice-grid{grid-template-columns:1fr!important}
+  .admin-shell .audio-box{grid-template-columns:1fr!important}
+  .admin-shell .spb-editor-grid{grid-template-columns:1fr!important}
+  .admin-shell .part-row{grid-template-columns:1fr!important;gap:6px}
+  .admin-shell .row3,.admin-shell .row2{grid-template-columns:1fr!important}
+  .admin-shell .code-create-form{grid-template-columns:1fr!important}
+  .admin-shell .code-table-wrap,.admin-shell .table-wrap{border-radius:14px}
+}

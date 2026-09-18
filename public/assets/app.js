@@ -146,3 +146,61 @@ function initMobileHeader() {
 }
 
 document.addEventListener('DOMContentLoaded', initMobileHeader);
+
+// Responsive administration navigation: same TELC Voll identity on desktop/mobile.
+function initAdminHeader() {
+  const top = document.querySelector('.top.admin-nav');
+  if (!top || top.dataset.adminReady === '1') return;
+  top.dataset.adminReady = '1';
+  const nav = top.querySelector('nav');
+  if (!nav) return;
+
+  const menuBtn = document.createElement('button');
+  menuBtn.type = 'button';
+  menuBtn.className = 'admin-mobile-toggle';
+  menuBtn.setAttribute('aria-label', 'فتح قائمة الإدارة');
+  menuBtn.setAttribute('aria-expanded', 'false');
+  menuBtn.innerHTML = '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>';
+
+  const panel = document.createElement('div');
+  panel.className = 'admin-mobile-menu';
+  panel.setAttribute('aria-hidden', 'true');
+  [...nav.children].forEach((node) => {
+    if (node.classList?.contains('header-actions')) return;
+    const clone = node.cloneNode(true);
+    clone.removeAttribute('id');
+    if (node.id === 'logoutLink') clone.addEventListener('click', (e) => { e.preventDefault(); node.click(); closeMenu(); });
+    else clone.addEventListener('click', closeMenu);
+    panel.appendChild(clone);
+  });
+
+  function closeMenu(){ panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); menuBtn.setAttribute('aria-expanded','false'); }
+  function toggleMenu(){ const open=!panel.classList.contains('open'); panel.classList.toggle('open',open); panel.setAttribute('aria-hidden',String(!open)); menuBtn.setAttribute('aria-expanded',String(open)); }
+  menuBtn.addEventListener('click', toggleMenu);
+  document.addEventListener('click',(e)=>{ if(!top.contains(e.target) && !panel.contains(e.target)) closeMenu(); });
+
+  const actions = top.querySelector('.header-actions');
+  top.insertBefore(menuBtn, actions || null);
+  top.appendChild(panel);
+}
+
+document.addEventListener('DOMContentLoaded', initAdminHeader);
+
+function initAdminLoginTools() {
+  if (!document.body?.classList.contains('admin-shell') || document.querySelector('.admin-nav') || document.querySelector('.admin-login-tools')) return;
+  const wrap=document.createElement('div');
+  wrap.className='admin-login-tools';
+  const lang=document.createElement('button');
+  lang.type='button'; lang.className='icon-btn'; lang.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18"></path><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"></path></svg>';
+  lang.title='تغيير اللغة'; lang.setAttribute('aria-label','تغيير اللغة');
+  lang.onclick=()=>{ if(typeof setLang==='function') setLang(getLang()==='ar'?'de':'ar'); };
+  const theme=document.createElement('button');
+  theme.type='button'; theme.className='icon-btn'; theme.id='adminLoginThemeBtn';
+  theme.onclick=()=>{ if(typeof setTheme==='function') setTheme(getTheme()==='dark'?'light':'dark'); };
+  wrap.append(lang,theme); document.body.appendChild(wrap);
+  if(typeof applyTheme==='function') applyTheme();
+}
+
+document.addEventListener('DOMContentLoaded', initAdminLoginTools);
+
+
