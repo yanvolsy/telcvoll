@@ -116,16 +116,16 @@ node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 │   ├── _lib/                  # أدوات مشتركة: db, auth, guard, ratelimit
 │   ├── auth-login.js / auth-logout.js / me.js
 │   ├── exercise-get.js / exercise-submit.js / exam-get.js
-│   ├── summaries-list.js / errors-list.js / ai-proxy.js
+│   ├── errors-list.js / ai-proxy.js
 │   ├── admin-login.js / admin-logout.js / admin-stats.js
 │   ├── admin-codes.js / admin-questions.js / admin-exams.js
-│   ├── admin-students.js / admin-summaries.js / admin-settings.js
+│   ├── admin-students.js / admin-settings.js
 │   ├── admin-statistics.js / install.js
 └── public/                    # كل صفحات الواجهة (بديل ملفات PHP الأمامية)
     ├── index.html, dashboard.html, exercise.html, exam.html
-    ├── summaries.html, errors.html, speaking.html, install.html
+    ├── errors.html, speaking.html, install.html
     ├── assets/app.css, assets/app.js
-    └── admin/ (login, index, codes, questions, exams, students, summaries, settings, statistics).html
+    └── admin/ (login, index, codes, questions, exams, students, settings, statistics).html
 ```
 
 

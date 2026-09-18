@@ -1,11 +1,24 @@
 {
-  "name": "TELC Voll",
+  "name": "TELC Voll — Lernen • Üben • Bestehen",
   "short_name": "TELC Voll",
+  "description": "تدرب بذكاء. ادخل الامتحان بثقة. منصة تدريب شاملة لامتحانات TELC B1 B2 C1.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#14201D",
-  "theme_color": "#E98232",
+  "background_color": "#0F1B1A",
+  "theme_color": "#FF7A2F",
   "icons": [
+    {
+      "src": "/assets/favicon-light.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/assets/favicon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
     {
       "src": "/assets/icons/TELC_Voll_AppIcon_Light.png",
       "sizes": "512x512",

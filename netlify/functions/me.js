@@ -27,11 +27,23 @@ exports.handler = async (event) => {
        teil, id DESC`
   );
   const examRes = await pool.query("SELECT * FROM exams WHERE status='published' ORDER BY id DESC");
+  let attempts = [];
+  try {
+    const attRes = await pool.query(
+      `SELECT DISTINCT ON (exercise_id) exercise_id, score, max_score, percent, result, finished_at
+       FROM attempts
+       WHERE student_id=$1 AND exercise_id IS NOT NULL
+       ORDER BY exercise_id, id DESC`,
+      [student.student_id]
+    );
+    attempts = attRes.rows;
+  } catch (_) {}
 
   return json(200, {
     student: meRes.rows[0] || null,
     exercises: exRes.rows,
     exams: examRes.rows,
+    attempts,
     ai_enabled: student.ai_enabled,
     subscription: accessRes.rows[0] || null,
   });
