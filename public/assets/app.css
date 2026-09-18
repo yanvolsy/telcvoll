@@ -846,16 +846,3 @@ html[dir="rtl"] .topic-tools select{background-position:calc(0% + 17px) 19px,cal
   .topic-toolbar .topic-search-wrap{grid-column:1 / -1!important;grid-row:2!important;width:100%!important;max-width:none!important}
   .topic-toolbar .topic-search-input{width:100%!important;max-width:none!important;height:44px!important}
 }
-
-
-/* Final dashboard language alignment — search / Teil / language switch */
-#topicToolbar[data-lang="de"] .topic-search-input{direction:ltr!important;text-align:left!important;padding-left:15px!important;padding-right:15px!important}
-#topicToolbar[data-lang="ar"] .topic-search-input{direction:rtl!important;text-align:right!important;padding-right:15px!important;padding-left:15px!important}
-#topicToolbar[data-lang="de"] .teil-tabs{direction:ltr!important}
-#topicToolbar[data-lang="ar"] .teil-tabs{direction:rtl!important}
-#topicToolbar[data-lang="de"] .teil-tab{direction:ltr!important}
-#topicToolbar[data-lang="ar"] .teil-tab{direction:rtl!important}
-html[lang="de"] .top .header-actions{direction:ltr}
-html[lang="ar"] .top .header-actions{direction:rtl}
-html[lang="de"] .top .icon-btn:hover{border-color:var(--exercise-accent);color:var(--exercise-accent);background:var(--exercise-accent-soft)}
-html[lang="ar"] .top .icon-btn:hover{border-color:var(--exercise-accent);color:var(--exercise-accent);background:var(--exercise-accent-soft)}
