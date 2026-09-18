@@ -12,18 +12,7 @@ exports.handler = async (event) => {
   // from breaking the student area before that migration is run.
   await pool.query("UPDATE exercises SET level='B2' WHERE level IS NULL OR TRIM(level)=''");
 
-  let studentData = null;
-  try {
-    const meRes = await pool.query('SELECT id,name,email,first_name,last_name,phone,country,profile_completed,profile_updated_at FROM students WHERE id=$1', [student.student_id]);
-    studentData = meRes.rows[0] || null;
-  } catch (_) {
-    try {
-      const meRes = await pool.query('SELECT id,name,email FROM students WHERE id=$1', [student.student_id]);
-      studentData = meRes.rows[0] || null;
-    } catch (e) {
-      studentData = { id: student.student_id, name: 'Student', email: '' };
-    }
-  }
+  const meRes = await pool.query('SELECT id,name,email,first_name,last_name,phone,country,profile_completed,profile_updated_at FROM students WHERE id=$1', [student.student_id]);
   const accessRes = await pool.query(`
     SELECT c.id AS code_id, c.expires_at, p.name AS plan_name, p.plan_key, p.duration_days
     FROM access_codes c JOIN plans p ON p.id=c.plan_id
@@ -38,23 +27,11 @@ exports.handler = async (event) => {
        teil, id DESC`
   );
   const examRes = await pool.query("SELECT * FROM exams WHERE status='published' ORDER BY id DESC");
-  let attempts = [];
-  try {
-    const attRes = await pool.query(
-      `SELECT DISTINCT ON (exercise_id) exercise_id, score, max_score, percent, result, finished_at
-       FROM attempts
-       WHERE student_id=$1 AND exercise_id IS NOT NULL
-       ORDER BY exercise_id, id DESC`,
-      [student.student_id]
-    );
-    attempts = attRes.rows;
-  } catch (_) {}
 
   return json(200, {
-    student: studentData,
+    student: meRes.rows[0] || null,
     exercises: exRes.rows,
     exams: examRes.rows,
-    attempts,
     ai_enabled: student.ai_enabled,
     subscription: accessRes.rows[0] || null,
   });

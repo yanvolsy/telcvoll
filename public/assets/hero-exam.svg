@@ -1,22 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 620">
-<defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#FF7A2F"/><stop offset="1" stop-color="#FF9654"/></linearGradient></defs>
-<rect width="900" height="620" rx="34" fill="#F5F7F6"/>
-<circle cx="760" cy="120" r="86" fill="#FDE9DC"/><circle cx="115" cy="510" r="110" fill="#FDE9DC"/>
-<rect x="90" y="90" width="720" height="430" rx="28" fill="#FFFFFF" stroke="#DFE5E3" stroke-width="3"/>
-<rect x="120" y="120" width="660" height="54" rx="14" fill="#F5F7F6"/>
-<rect x="145" y="140" width="150" height="13" rx="6" fill="#FF7A2F"/>
-<rect x="620" y="137" width="110" height="18" rx="9" fill="#DFE5E3"/>
-<rect x="145" y="215" width="260" height="250" rx="18" fill="#F5F7F6"/>
-<rect x="435" y="215" width="305" height="250" rx="18" fill="#FDE9DC"/>
+<defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="#f47b20"/><stop offset="1" stop-color="#ff9a3d"/></linearGradient></defs>
+<rect width="900" height="620" rx="34" fill="#eef8f4"/>
+<circle cx="760" cy="120" r="86" fill="#d7eee7"/><circle cx="115" cy="510" r="110" fill="#e0f2ec"/>
+<rect x="90" y="90" width="720" height="430" rx="28" fill="#fff" stroke="#d6e4df" stroke-width="3"/>
+<rect x="120" y="120" width="660" height="54" rx="14" fill="#f3f7f5"/>
+<rect x="145" y="140" width="150" height="13" rx="6" fill="#f47b20"/>
+<rect x="620" y="137" width="110" height="18" rx="9" fill="#e4eee9"/>
+<rect x="145" y="215" width="260" height="250" rx="18" fill="#f7faf9"/>
+<rect x="435" y="215" width="305" height="250" rx="18" fill="#fff7e8"/>
 <!-- student 1 -->
-<circle cx="250" cy="275" r="42" fill="#FDE9DC"/><path d="M208 273q42-72 84 0" fill="#0F1B1A"/>
-<path d="M205 330q45-55 90 0v95h-90z" fill="url(#g)"/><path d="M220 425v35M275 425v35" stroke="#0F1B1A" stroke-width="14" stroke-linecap="round"/>
+<circle cx="250" cy="275" r="42" fill="#f1c7a7"/><path d="M208 273q42-72 84 0" fill="#30343b"/>
+<path d="M205 330q45-55 90 0v95h-90z" fill="url(#g)"/><path d="M220 425v35M275 425v35" stroke="#30343b" stroke-width="14" stroke-linecap="round"/>
 <!-- student 2 -->
-<circle cx="580" cy="280" r="42" fill="#e2af89"/><path d="M538 275q42-66 84 0" fill="#0F1B1A"/>
-<path d="M535 330q45-55 90 0v95h-90z" fill="#0F1B1A"/><path d="M550 425v35M605 425v35" stroke="#0F1B1A" stroke-width="14" stroke-linecap="round"/>
+<circle cx="580" cy="280" r="42" fill="#c98e69"/><path d="M538 275q42-66 84 0" fill="#20262b"/>
+<path d="M535 330q45-55 90 0v95h-90z" fill="#1f6aa5"/><path d="M550 425v35M605 425v35" stroke="#30343b" stroke-width="14" stroke-linecap="round"/>
 <!-- desk/paper -->
-<rect x="160" y="380" width="235" height="18" rx="9" fill="#DFE5E3"/><rect x="170" y="355" width="150" height="42" rx="8" fill="#FFFFFF" stroke="#DFE5E3" stroke-width="2"/>
-<rect x="455" y="355" width="180" height="42" rx="8" fill="#FFFFFF" stroke="#DFE5E3" stroke-width="2"/>
-<circle cx="350" cy="300" r="22" fill="#FFFFFF" stroke="#FF7A2F" stroke-width="6"/><path d="M341 300l7 7 13-16" fill="none" stroke="#FF7A2F" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
-<text x="450" y="505" text-anchor="middle" font-family="'Cairo','Inter',sans-serif" font-size="22" font-weight="700" fill="#0F1B1A">Lernen • Üben • Bestehen</text>
+<rect x="160" y="380" width="235" height="18" rx="9" fill="#c9d8d3"/><rect x="170" y="355" width="150" height="42" rx="8" fill="#fff" stroke="#c9d8d3" stroke-width="2"/>
+<rect x="455" y="355" width="180" height="42" rx="8" fill="#fff" stroke="#e5d5b4" stroke-width="2"/>
+<circle cx="350" cy="300" r="22" fill="#fff" stroke="#f47b20" stroke-width="6"/><path d="M341 300l7 7 13-16" fill="none" stroke="#f47b20" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="450" y="505" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" font-weight="700" fill="#7a3708">Vorbereitung auf die Prüfung</text>
 </svg>

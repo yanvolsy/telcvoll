@@ -2,55 +2,43 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#FF7A2F"><title data-i18n-title="chat_page_title">مساعد TELC</title>
+<meta name="theme-color" content="#0d1310"><title data-i18n-title="chat_page_title">مساعد TELC</title>
 <link rel="stylesheet" href="/assets/app.css?v=20260918-cairo-local-v2">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
 <link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="/manifest.webmanifest">
-
-<style>
-.chat-chips-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:22px;width:100%;max-width:700px}
-.chat-chip{background:var(--white);border:1px solid var(--line);border-radius:14px;padding:12px 16px;text-align:start;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer;transition:all .18s ease;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow-sm);font-family:inherit}
-.chat-chip:hover{border-color:var(--primary);background:var(--primary-soft);color:var(--primary-dark);transform:translateY(-2px)}
-@media(max-width:650px){.chat-chips-grid{grid-template-columns:1fr}}
-</style>
+<style><!-- TELC Voll: unified homepage typography -->
+html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
+html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}</style>
 </head>
 <body>
 <header class="top">
-  <a class="brand" href="/dashboard.html" aria-label="TELC Voll"><span class="brand-dot"></span><span class="brand-name"><span class="brand-telc">TELC</span> <span class="brand-voll">Voll</span></span></a>
-  <nav><a href="/dashboard.html" data-i18n="nav_home_student">منصة الطالب</a><a href="#" id="logoutLink" data-i18n="nav_logout">خروج</a></nav>
+  <a class="brand" href="/dashboard.html"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
+  <nav><a href="/dashboard.html" data-i18n="nav_home_student">منصة الطالب</a><a href="/summaries.html" data-i18n="nav_summaries">الملخصات</a><a href="#" id="logoutLink" data-i18n="nav_logout">خروج</a></nav>
 </header>
 <main class="telc-chat-page">
   <section class="telc-chat-shell">
     <div class="telc-chat-head">
       <div>
         <span class="tag" data-i18n="chat_tag">TELC Voll AI</span>
-        <h1 data-i18n="chat_title">مساعد TELC الشامل</h1>
-        <p class="muted" data-i18n="chat_desc">اسألني عن امتحان TELC، مراكز اجتيازه، الدروس والخطة الدراسية، قواعد ومفردات الألمانية، أو طرق الهجرة والدراسة والعمل في ألمانيا.</p>
+        <h1 data-i18n="chat_title">مساعد TELC للدراسة</h1>
+        <p class="muted" data-i18n="chat_desc">اسألني عن امتحان TELC أو أي شيء يساعدك في التحضير له: الشرح، التمارين، النصوص، الكتابة، التحدث، القواعد والمفردات.</p>
       </div>
     </div>
     <div id="chatMessages" class="telc-chat-messages" aria-live="polite">
       <div id="welcome" class="telc-chat-welcome">
         <div class="telc-chat-welcome-icon">✦</div>
-        <h2 data-i18n="chat_welcome_title">مساعد TELC الذكي للدراسة والهجرة</h2>
-        <p data-i18n="chat_welcome_desc">أنا مرشدك المتخصص في امتحانات TELC ومراكزها، مناهج وقواعد الألمانية، وكافة مسارات الهجرة والتدريب إلى ألمانيا. اختر موضوعاً أو اكتب سؤالك:</p>
-        <div class="chat-chips-grid" id="chatChips">
-          <button type="button" class="chat-chip" data-q="أين يمكنني اجتياز امتحان TELC في ألمانيا وخارجها وما هي المواعيد والتكاليف وطرق التسجيل؟">📍 أين أجتاز امتحان TELC ومواعيده؟</button>
-          <button type="button" class="chat-chip" data-q="ما هي شروط بطاقة الفرصة (Chancenkarte) 2024/2025 ونظام حساب النقاط ومستوى اللغة المطلوب؟">🎯 بطاقة الفرصة (Chancenkarte)</button>
-          <button type="button" class="chat-chip" data-q="كيف أبدأ تدريباً مهنياً (Ausbildung) في ألمانيا وما هو المستوى اللغوي المطلوب وكيف أجد عقداً وفيزا؟">💼 التدريب المهني (Ausbildung)</button>
-          <button type="button" class="chat-chip" data-q="ما هي الخطة الدراسية وقواعد B2 اللازمة لاجتياز امتحان TELC بنجاح؟">📚 الخطة الدراسية وقواعد B2</button>
-          <button type="button" class="chat-chip" data-q="كيف يتم تعديل الشهادات والاعتراف المهني (Anerkennung) وما هي فيزا 16d التأهيلية؟">📜 تعديل الشهادات (Anerkennung)</button>
-          <button type="button" class="chat-chip" data-q="أعطني أهم عبارات Redemittel لقسمي Schreiben و Sprechen في امتحان TELC مع أمثلة.">💬 عبارات Redemittel للامتحان</button>
-        </div>
+        <h2 data-i18n="chat_welcome_title">مساعد TELC</h2>
+        <p data-i18n="chat_welcome_desc">أنا هنا لمساعدتك في الدراسة والتحضير لامتحان TELC. اكتب سؤالك وسأجيبك أو أساعدك في إنشاء ما تحتاجه للتدريب.</p>
       </div>
     </div>
     <form id="chatForm" class="telc-chat-form">
-      <textarea id="chatInput" rows="2" maxlength="4000" data-i18n-ph="chat_placeholder" placeholder="اكتب سؤالك عن امتحان TELC، القواعد، أو الهجرة إلى ألمانيا…" required></textarea>
+      <textarea id="chatInput" rows="2" maxlength="4000" data-i18n-ph="chat_placeholder" placeholder="اكتب سؤالك عن امتحان TELC…" required></textarea>
       <button class="btn" id="sendBtn" type="submit" data-i18n="chat_send">إرسال ↑</button>
     </form>
-    <p class="telc-chat-note" data-i18n="chat_note">مساعدك الذكي مخصص لامتحانات TELC، تعلم اللغة الألمانية، واستشارات الهجرة والعمل والدراسة في ألمانيا.</p>
+    <p class="telc-chat-note" data-i18n="chat_note">مساعدك الدراسي مخصص لمواضيع TELC والتحضير للامتحان والدراسة المرتبطة به.</p>
   </section>
 </main>
 <script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
@@ -126,13 +114,6 @@ $('chatInput').addEventListener('keydown', e => {
 });
 $('chatInput').addEventListener('input', e => {
   e.target.style.height='auto'; e.target.style.height=Math.min(e.target.scrollHeight,180)+'px';
-});
-document.querySelectorAll('.chat-chip').forEach(chip => {
-  chip.onclick = () => {
-    if (sending) return;
-    $('chatInput').value = chip.dataset.q;
-    $('chatForm').requestSubmit();
-  };
 });
 $('logoutLink').onclick=async e=>{
   e.preventDefault();

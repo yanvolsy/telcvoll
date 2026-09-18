@@ -16,9 +16,7 @@ exports.handler = async (event) => {
   const tasks=Array.isArray(body.tasks)?body.tasks:[];
   if(!tasks.length) return json(400,{error:'No exam tasks'});
   const pool=db();
-  let client;
   try{
-    client = await pool.connect();
     const sectionRaw={}; const details=[];
     for(const task of tasks){
       const id=parseInt(task.id,10); if(!id) continue;
@@ -43,5 +41,5 @@ exports.handler = async (event) => {
       sections[section]={score,max,percent:max?Math.round(score/max*10000)/100:0,tasks:v.tasks};
     }
     return json(200,{level:body.level||'',sections,details});
-  }catch(e){console.error('mock-submit failed',e);return json(500,{error:'تعذر إنهاء المحاكاة.'});}finally{if(client)client.release();}
+  }catch(e){console.error('mock-submit failed',e);return json(500,{error:'تعذر إنهاء المحاكاة.'});}finally{client.release();}
 };

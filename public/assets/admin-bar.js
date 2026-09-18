@@ -17,23 +17,22 @@
   function css() {
     const style = document.createElement('style');
     style.textContent = `
-      #adminBar{position:sticky;top:0;z-index:9999;background:#0F1B1A;color:#F5F7F6;
-        font:13px/1.4 'Inter','Cairo',system-ui,sans-serif;display:flex;flex-wrap:wrap;align-items:center;
-        gap:10px;padding:8px 16px;direction:rtl;border-bottom:1px solid #223634}
-      #adminBar b{color:#FF7A2F;letter-spacing:.5px;font-weight:900}
-      #adminBar a{color:#F5F7F6;text-decoration:none;padding:5px 11px;border-radius:8px;background:#172624;border:1px solid #233734;font-weight:600;transition:all .15s}
-      #adminBar a:hover{background:#FF7A2F;color:#fff;border-color:#FF7A2F}
-      #adminTopicBar{background:#FDE9DC;border:1px solid rgba(255,122,47,.25);border-radius:12px;
-        margin:14px 0;padding:12px 16px;font:13px/1.5 'Cairo',system-ui,sans-serif;direction:rtl}
+      #adminBar{position:sticky;top:0;z-index:9999;background:#1c1f26;color:#f4f4f4;
+        font:13px/1.4 system-ui,sans-serif;display:flex;flex-wrap:wrap;align-items:center;
+        gap:10px;padding:8px 14px;direction:rtl}
+      #adminBar b{color:#ffce54;letter-spacing:.5px}
+      #adminBar a{color:#f4f4f4;text-decoration:none;padding:4px 9px;border-radius:6px;background:#33384a}
+      #adminBar a:hover{background:#454b63}
+      #adminTopicBar{background:#eef7f0;border:1px solid #bfe3c9;border-radius:10px;
+        margin:14px 0;padding:10px 14px;font:13px/1.5 system-ui,sans-serif;direction:rtl}
       #adminTopicBar .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-      #adminTopicBar button,#adminTopicBar a.btn-a{cursor:pointer;border:0;border-radius:8px;
-        padding:7px 14px;font-size:13px;font-weight:800;background:#FF7A2F;color:#fff;transition:all .15s}
-      #adminTopicBar button:hover,#adminTopicBar a.btn-a:hover{background:#E56317}
-      #adminTopicBar button.danger{background:#D93829}
-      #adminTopicBar button.secondary{background:#5E6E6A}
-      #adminTopicBar .meta{color:#0F1B1A;margin-inline-end:auto;font-weight:700}
-      #adminPreviewFlag{position:fixed;bottom:14px;inset-inline-end:14px;z-index:9999;
-        background:#FF7A2F;color:#fff;padding:7px 14px;border-radius:999px;font:12px 'Inter','Cairo',sans-serif;font-weight:800;box-shadow:0 6px 18px rgba(255,122,47,.35)}
+      #adminTopicBar button,#adminTopicBar a.btn-a{cursor:pointer;border:0;border-radius:6px;
+        padding:6px 12px;font-size:13px;background:#0b7f52;color:#fff}
+      #adminTopicBar button.danger{background:#c0392b}
+      #adminTopicBar button.secondary{background:#5a6472}
+      #adminTopicBar .meta{color:#40514a;margin-inline-end:auto}
+      #adminPreviewFlag{position:fixed;bottom:12px;inset-inline-end:12px;z-index:9999;
+        background:#ffce54;color:#1c1f26;padding:6px 12px;border-radius:20px;font:12px system-ui,sans-serif}
     `;
     document.head.appendChild(style);
   }
