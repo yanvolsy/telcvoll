@@ -846,3 +846,6 @@ html[dir="rtl"] .topic-tools select{background-position:calc(0% + 17px) 19px,cal
   .topic-toolbar .topic-search-wrap{grid-column:1 / -1!important;grid-row:2!important;width:100%!important;max-width:none!important}
   .topic-toolbar .topic-search-input{width:100%!important;max-width:none!important;height:44px!important}
 }
+
+/* TELC Voll — unified brand typography: Cairo everywhere */
+html,body,body *{font-family:"Cairo","Segoe UI",Arial,sans-serif!important}
