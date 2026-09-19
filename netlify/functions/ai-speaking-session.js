@@ -93,12 +93,123 @@ exports.handler=async(event)=>{
   if(!allowed) return json(429,{error:'You have reached the AI usage limit for this hour.'});
   let b={}; try{b=JSON.parse(event.body||'{}')}catch{}
   const id=parseInt(b.id||'0',10), mode=String(b.mode||'turn');
-  if(!id) return json(400,{error:'Missing exercise id.'});
-  const ex=(await db().query("SELECT id,title,body,level,section,teil FROM exercises WHERE id=$1 AND status='published' AND deleted_at IS NULL",[id])).rows[0];
-  if(!ex || String(ex.section)!=='Sprechen') return json(404,{error:'Sprechen exercise not found.'});
   const transcript=String(b.transcript||'').slice(0,12000);
   const history=Array.isArray(b.history)?b.history.slice(-12):[];
   const requestedTeil=String(b.teil||'').trim();
+
+  // Mode 1: Teil 1 Presentation Generator (5 TELC Official Categories)
+  if(mode==='generate-presentation'){
+    const category=String(b.category||'Reise').trim();
+    const notes=String(b.notes||b.userInput||'').trim();
+    const targetLevel=String(b.level||'B2').trim().toUpperCase();
+    const categoryTitles={
+      'Reise':'Eine Reise (رحلة)',
+      'Film':'Ein Film (فيلم)',
+      'Buch':'Ein Buch (كتاب)',
+      'Erfahrung':'Eine persönliche / wichtige Erfahrung (تجربة شخصية)',
+      'Person':'Eine wichtige Person / Sportereignis / Musikveranstaltung (شخصية مهمة أو حدث رياضي/موسيقي)'
+    };
+    const catLabel=categoryTitles[category]||category;
+
+    const presentationPrompt=`You are a master German examiner and tutor for the official TELC oral examination (CEFR level ${targetLevel}).
+The candidate wants to prepare for TELC Sprechen Teil 1 (Präsentation).
+Category: ${catLabel} (${category}).
+Candidate notes or thoughts (in Arabic, German, or mixed):
+"""
+${notes || 'Generiere ein realistisches, exzellentes TELC B2/C1 Modellthema für ' + category}
+"""
+
+YOUR TASK:
+1. Generate a complete, elegant German presentation for TELC Sprechen Teil 1 (2.5 - 3 minutes, approx. 230-320 words) tailored to level ${targetLevel}:
+   - Begrüßung und Themaankündigung with standard TELC opening phrases ("In meiner Präsentation möchte ich über ... berichten", "Als Thema meiner Präsentation habe ich ... gewählt", "Das Thema meiner heutigen Präsentation ist ...").
+   - Hauptteil: clear paragraphs covering all core aspects (e.g. for Buch: Autor, Handlung, Hauptcharaktere, Höhepunkte, eigene Leseeindrücke; for Film: Regisseur, Schauspieler, Handlung, spannendste Szene, filmische Wirkung; for Reise: Reiseziel, Begleiter, Ablauf, Sehenswürdigkeiten, Atmosphäre; for Erfahrung: Kontext, genauer Ablauf, Gefühle, Lehre fürs Leben; for Person/Event: Wer, warum inspirierend, Errungenschaften, persönliche Bedeutung).
+   - Schluss: persönliche Empfehlung, Zusammenfassung und Dank ("Ich kann ... jedem wärmstens empfehlen. Damit bin ich am Ende meiner Präsentation angelangt. Vielen Dank für Ihre Aufmerksamkeit. Haben Sie noch Fragen?").
+2. Provide an accurate, idiomatic Arabic translation of the complete German presentation.
+3. Generate EXACTLY 5 EXAMINER / JURY QUESTIONS (Mögliche Prüferfragen / Jury-Fragen) based directly on the presentation. In TELC exams, the jury asks questions to test whether the student truly understood, experienced, and can defend what they presented (following the standard László Csörgő TELC examiner patterns).
+   EVERY QUESTION MUST HAVE A POLISHED SUGGESTED ANSWER (Musterantwort) IN GERMAN!
+   Format: {"question": "Frage der Jury auf Deutsch", "answer": "Vorgeschlagene Antwort des Teilnehmers auf Deutsch"}
+4. Generate 6-8 authentic TELC ${targetLevel} presentation Redemittel.
+
+Return ONLY valid JSON:
+{
+  "title": "Titel der Präsentation auf Deutsch",
+  "category": "${category}",
+  "level": "${targetLevel}",
+  "presentation_de": "Der vollständige deutsche Vortragstext mit Absätzen...",
+  "presentation_ar": "الترجمة العربية الكاملة للعرض التقديمي...",
+  "jury_questions": [
+    {"question": "", "answer": ""},
+    {"question": "", "answer": ""},
+    {"question": "", "answer": ""},
+    {"question": "", "answer": ""},
+    {"question": "", "answer": ""}
+  ],
+  "redemittel": [""]
+}`;
+
+    try{
+      let raw=await callAI(presentationPrompt);
+      let out;
+      try{out=cleanJson(raw);}catch{
+        const rep=`Return ONLY valid JSON. Repair the following JSON without altering content:\n${String(raw).slice(0,30000)}`;
+        out=cleanJson(await callAI(rep));
+      }
+      return json(200,out);
+    }catch(e){return json(502,{error:e.message});}
+  }
+
+  // Mode 2: Teil 1 Presentation Evaluation (Audio/Text transcript)
+  if(mode==='evaluate-presentation'){
+    const studentText=String(b.transcript||b.presentation||'').trim();
+    const targetLevel=String(b.level||'B2').trim().toUpperCase();
+    const category=String(b.category||'Präsentation').trim();
+
+    const evalPrompt=`You are a certified TELC German oral examiner evaluating a student's presentation for Sprechen Teil 1 (level ${targetLevel}).
+Category: ${category}
+Student presentation transcript / recorded speech:
+"""
+${studentText}
+"""
+
+Evaluate the candidate according to official TELC criteria:
+1) Aufgabenbewältigung & Struktur (Begrüßung, Thema, Gliederung, Details, Fazit)
+2) Wortschatz & Redemittel (CEFR ${targetLevel} vocabulary, connectors, clarity)
+3) Formale Richtigkeit (Grammatik, Wortstellung, Verben, Endungen, Kasus)
+4) Aussprache, Sprechtempo & Flüssigkeit (practical pronunciation tips, intonation, rhythm for difficult German words in the presentation)
+
+Score each criterion from 0 to 5 (total converted to 25 points).
+Provide strengths, priorities for improvement, and a summary in German and Arabic.
+
+Return ONLY valid JSON:
+{
+  "total": 22,
+  "criteria": [
+    {"key": "struktur", "label": "Aufgabenbewältigung & Struktur", "score": 4.5, "max": 5, "comment": ""},
+    {"key": "wortschatz", "label": "Wortschatz & Redemittel", "score": 4.5, "max": 5, "comment": ""},
+    {"key": "richtigkeit", "label": "Formale Richtigkeit", "score": 4.0, "max": 5, "comment": ""},
+    {"key": "aussprache", "label": "Aussprache & Flüssigkeit (Tipps)", "score": 4.5, "max": 5, "comment": ""}
+  ],
+  "strengths": ["", ""],
+  "priorities": ["", ""],
+  "summary_de": "",
+  "summary_ar": ""
+}`;
+
+    try{
+      let raw=await callAI(evalPrompt);
+      let out;
+      try{out=cleanJson(raw);}catch{
+        const rep=`Return ONLY valid JSON. Repair the following JSON:\n${String(raw).slice(0,30000)}`;
+        out=cleanJson(await callAI(rep));
+      }
+      return json(200,out);
+    }catch(e){return json(502,{error:e.message});}
+  }
+
+  if(!id) return json(400,{error:'Missing exercise id.'});
+  const ex=(await db().query("SELECT id,title,body,level,section,teil FROM exercises WHERE id=$1 AND status='published' AND deleted_at IS NULL",[id])).rows[0];
+  if(!ex || String(ex.section)!=='Sprechen') return json(404,{error:'Sprechen exercise not found.'});
+
   if(mode==='resolve' && requestedTeil){
     const q=await db().query("SELECT id,title,body,level,section,teil FROM exercises WHERE status='published' AND deleted_at IS NULL AND section='Sprechen' AND level=$1 AND lower(trim(title))=lower(trim($2)) AND lower(replace(trim(teil),' ',''))=lower(replace(trim($3),' ','')) ORDER BY id LIMIT 1",
       [ex.level||'B2',ex.title||'',requestedTeil]);
@@ -108,29 +219,34 @@ exports.handler=async(event)=>{
   const activeTeil = requestedTeil || String(ex.teil || 'Teil 1').trim();
   const isTeil3 = /Teil\s*3/i.test(activeTeil);
   const isTeil2 = /Teil\s*2/i.test(activeTeil);
+  const level = String(ex.level || 'B2').toUpperCase();
 
-  const context=`LEVEL: ${ex.level||''}\nTEIL: ${activeTeil}\nTHEMA: ${ex.title||''}\nTASK:\n${ex.body||''}`;
+  const context=`LEVEL: ${level}\nTEIL: ${activeTeil}\nTHEMA: ${ex.title||''}\nTASK:\n${ex.body||''}`;
   let prompt;
   if(mode==='opening'){
     if(isTeil3){
-      prompt=`You are the conversation Partner (Candidate B, not Jerry the examiner) in a TELC Sprechen Teil 3 practice session.
+      prompt=`You are the conversation Partner (Candidate B, not Jerry the examiner) in a TELC Sprechen Teil 3 practice session (level ${level}).
 The examiner Jerry has just told the candidates to plan the task together.
 Speak ONLY German.
-Your job is to start the joint planning dialogue naturally, warmly, and realistically (exactly like TELC B2/C1 exam practice):
+Your job is to start the joint planning dialogue naturally, warmly, and realistically (exactly like TELC ${level} exam practice):
 1) Greet the student (e.g. "Hallo! Schön, dich zu sehen!").
 2) Refer directly to the specific project/event to be planned from the supplied topic (e.g. "Hast du schon gehört? Wir sollen gemeinsam [Thema/Aufgabe] planen.").
 3) Propose getting started with the first planning point, or ask the student what they think we should do first (e.g. "Was meinst du, wie fangen wir am besten an? Hast du schon eine Idee dazu?").
 Keep it friendly, natural, and concise (2-3 short sentences). Do NOT discuss Inhalt, Meinung, or personal experience. Do NOT give away the entire plan yet. Speak ONLY German.
 ${context}
 Return ONLY JSON: {"reply":""}`;
-    } else {
-      prompt=`You are the Partner in a TELC B2 Sprechen Teil 2 training exercise. Speak ONLY German. The examiner Jerry has just instructed the candidates to discuss the topic. Your job is to start the partner side naturally: briefly summarize the core INHALT of the supplied topic in 1-2 sentences, then ask the student to summarize the Inhalt in their own words. Do not give Meinung 1 or Meinung 2 yet. Do not use Arabic. Do not invent information outside the supplied topic.
+    } else if(isTeil2) {
+      prompt=`You are the Partner in a TELC ${level} Sprechen Teil 2 training exercise. Speak ONLY German. The examiner Jerry has just instructed the candidates to discuss the topic. Your job is to start the partner side naturally: briefly summarize the core INHALT of the supplied topic in 1-2 sentences, then ask the student to summarize the Inhalt in their own words. Do not give Meinung 1 or Meinung 2 yet. Do not use Arabic. Do not invent information outside the supplied topic.
 ${context}
 Return ONLY JSON: {"reply":""}`;
+    } else {
+      prompt=`You are the Partner in a TELC ${level} Sprechen Teil 1 practice. Speak ONLY German. Welcome the student and invite them to present their topic, after which you will ask a relevant follow-up question.
+${context}
+Return ONLY JSON: {"reply":"Bitte beginnen Sie mit Ihrer Präsentation. Ich höre aufmerksam zu und habe danach eine interessante Frage an Sie."}`;
     }
   } else if(mode==='model'){
     if(isTeil3){
-      prompt=`Create a realistic, high-quality TELC Sprechen Teil 3 (Gemeinsam etwas planen / organisieren) training model based ONLY on the supplied topic and task.
+      prompt=`Create a realistic, high-quality TELC Sprechen Teil 3 (Gemeinsam etwas planen / organisieren) training model for level ${level} based ONLY on the supplied topic and task.
 ${context}
 
 CRITICAL RULES FOR TEIL 3 — JOINT PLANNING DIALOGUE:
@@ -149,16 +265,16 @@ CRITICAL RULES FOR TEIL 3 — JOINT PLANNING DIALOGUE:
   - "verteilung": [array of tasks assigned to student vs partner]
   - "vereinbarung": [final shared agreement and next meeting details]
   - Keep inhalt, meinung1, meinung2, erfahrung1, erfahrung2, vorteile, nachteile as empty arrays [].
-- PRACTICE QUESTIONS WITH SUGGESTED ANSWERS:
-  Generate 4-6 practice questions that an examiner or partner might ask regarding this planning task, AND PROVIDE A CONCRETE SUGGESTED ANSWER FOR EACH!
-  Format each question as an object: {"question": "Frage auf Deutsch", "answer": "Vorgeschlagene Musterantwort auf Deutsch (1-2 Sätze)"}.
+- JURY QUESTIONS WITH SUGGESTED ANSWERS:
+  Generate 4-6 EXAMINER / JURY QUESTIONS (Prüferfragen) testing the candidates' organizational logic and problem-solving, AND PROVIDE A COMPLETE SUGGESTED ANSWER FOR EACH QUESTION!
+  Format each question as an object: {"question": "Prüferfrage auf Deutsch", "answer": "Vorgeschlagene Antwort auf Deutsch"}.
 - REDEMITTEL FOR TEIL 3:
-  Generate 6-8 useful Redemittel specifically for planning, proposing, agreeing, polite alternatives, task distribution, and concluding.
+  Generate 6-8 useful Redemittel specifically for planning, proposing, agreeing, polite alternatives, task distribution, and concluding at level ${level}.
 
 Return ONLY JSON in this exact shape:
-{"title":"Gemeinsam etwas planen","note":"Trainingsbeispiel für TELC Sprechen Teil 3","dialogue":[{"speaker":"student|partner","phase":"planung|abschluss","text":""}],"structure":{"inhalt":[],"meinung1":[],"meinung2":[],"erfahrung1":[],"erfahrung2":[],"vorteile":[],"nachteile":[],"planung":[],"verteilung":[],"vereinbarung":[]},"questions":[{"question":"","answer":""}],"redemittel":[""]}`;
+{"title":"Gemeinsam etwas planen","note":"Trainingsbeispiel für TELC Sprechen Teil 3 (${level})","dialogue":[{"speaker":"student|partner","phase":"planung|abschluss","text":""}],"structure":{"inhalt":[],"meinung1":[],"meinung2":[],"erfahrung1":[],"erfahrung2":[],"vorteile":[],"nachteile":[],"planung":[],"verteilung":[],"vereinbarung":[]},"questions":[{"question":"","answer":""}],"redemittel":[""]}`;
     } else {
-      prompt=`Create a high-quality TELC B2 Sprechen training model based ONLY on the supplied topic, task and Teil. The supplied topic is the source of truth. Do not invent a different topic and do not claim this is an official telc answer.
+      prompt=`Create a high-quality TELC ${level} Sprechen training model based ONLY on the supplied topic, task and Teil (${activeTeil}). The supplied topic is the source of truth.
 ${context}
 
 IMPORTANT FOR TEIL 2 — FOLLOW THIS ROLE DISTRIBUTION EXACTLY:
@@ -167,21 +283,24 @@ IMPORTANT FOR TEIL 2 — FOLLOW THIS ROLE DISTRIBUTION EXACTLY:
 - Erfahrung 1 is the STUDENT'S personal experience/example.
 - Erfahrung 2 is the PARTNER'S personal experience/example.
 - Vorteile und Nachteile are discussed by BOTH speakers. They should exchange arguments, react to each other, ask follow-up questions, and possibly agree/disagree.
-- The dialogue must feel like a real two-person B2 discussion, not a monologue and not a list of prepared answers.
-- Use the actual points contained in the supplied topic. Do not force sections that are absent from the topic.
+- The dialogue must feel like a real two-person ${level} discussion, not a monologue and not a list of prepared answers.
 
-For Teil 2, build the model dialogue in this exact progression whenever the source contains these elements:
+For Teil 2, build the model dialogue in this exact progression:
 1) Jerry (examiner) is NOT part of the candidate/partner dialogue. The model dialogue itself contains only student and partner.
 2) The PARTNER first gives a short model for INHALT and then asks the STUDENT to give/summarize the Inhalt.
 3) The STUDENT gives MEINUNG 1 (their own opinion + reason).
 4) The PARTNER gives MEINUNG 2 (the partner's own independent opinion + reason).
 5) The STUDENT gives ERFAHRUNG 1.
-6) The PARTNER gives ERFAHRUNG 2 as a plausible partner example/perspective, without pretending it is a real personal memory.
+6) The PARTNER gives ERFAHRUNG 2 as a plausible partner example/perspective.
 7) Both discuss the concrete Vorteile und Nachteile from the source, alternating turns, reacting to each other, asking short follow-up questions, agreeing/disagreeing and giving reasons.
 8) Finish naturally with a short conclusion.
 
-Generate 8-12 dialogue turns for Teil 2 so that all required roles are clearly demonstrated. Use only speaker values student and partner. Add a phase to every dialogue line using one of: inhalt, meinung1, meinung2, erfahrung1, erfahrung2, vorteile, nachteile, abschluss.
-Generate 4-6 practice questions WITH SUGGESTED ANSWERS. Format each as: {"question":"","answer":""}. Generate 5-8 useful Redemittel suitable for the actual topic and Teil.
+Generate 8-12 dialogue turns so that all required roles are clearly demonstrated. Use only speaker values student and partner. Add a phase to every dialogue line using one of: inhalt, meinung1, meinung2, erfahrung1, erfahrung2, vorteile, nachteile, abschluss.
+
+JURY QUESTIONS WITH SUGGESTED ANSWERS:
+Generate 4-6 realistic EXAMINER / JURY QUESTIONS testing student comprehension of the text, arguments, and ability to justify their stance in depth.
+EACH QUESTION MUST HAVE A COMPLETE SUGGESTED ANSWER (Musterantwort)! Format each as: {"question":"","answer":""}.
+Generate 5-8 useful Redemittel suitable for the actual topic and Teil at level ${level}.
 
 Return ONLY JSON in this exact shape:
 {"title":"","note":"","dialogue":[{"speaker":"student|partner","phase":"","text":""}],"structure":{"inhalt":[],"meinung1":[],"meinung2":[],"erfahrung1":[],"erfahrung2":[],"vorteile":[],"nachteile":[],"planung":[],"verteilung":[],"vereinbarung":[]},"questions":[{"question":"","answer":""}],"redemittel":[""]}`;

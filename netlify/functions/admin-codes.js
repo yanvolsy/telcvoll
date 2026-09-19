@@ -102,24 +102,43 @@ exports.handler = async (event) => {
         return json(200, { ok: true });
       }
 
-      // Hard-delete only unused codes. Used codes are disabled instead, so active sessions
-      // and historical relationships are not broken.
+      // Delete code cleanly with linked sessions
       if (action === 'delete-code') {
         const id = parseInt(body.id || 0, 10);
-        const check = await pool.query(
-          'SELECT id,student_id,session_token FROM access_codes WHERE id=$1',
-          [id]
-        );
-        const row = check.rows[0];
-        if (!row) return json(404, { error: 'رمز الدخول غير موجود.' });
+        if (!id) return json(422, { error: 'معرف الرمز غير صالح.' });
+        // Clean up linked sessions first to satisfy foreign key constraint
+        await pool.query('DELETE FROM sessions WHERE code_id=$1', [id]);
+        const delRes = await pool.query('DELETE FROM access_codes WHERE id=$1 RETURNING id', [id]);
+        if (!delRes.rows.length) return json(404, { error: 'رمز الدخول غير موجود.' });
+        return json(200, { ok: true, deleted: true });
+      }
 
-        if (row.student_id || row.session_token) {
-          await pool.query('UPDATE access_codes SET active=FALSE WHERE id=$1', [id]);
-          return json(200, { ok: true, softDeleted: true });
+      // Extend code expiration and/or update plan without altering code string
+      if (action === 'extend-code') {
+        const id = parseInt(body.id || 0, 10);
+        const days = parseInt(body.days || 0, 10);
+        const planId = body.plan_id ? parseInt(body.plan_id, 10) : null;
+        if (!id || days <= 0) return json(422, { error: 'معرف الرمز وعدد أيام التمديد مطلوبان.' });
+
+        if (planId) {
+          await pool.query(
+            `UPDATE access_codes
+             SET expires_at = GREATEST(expires_at, NOW()) + ($1 || ' days')::interval,
+                 plan_id = $2,
+                 active = TRUE
+             WHERE id = $3`,
+            [days, planId, id]
+          );
+        } else {
+          await pool.query(
+            `UPDATE access_codes
+             SET expires_at = GREATEST(expires_at, NOW()) + ($1 || ' days')::interval,
+                 active = TRUE
+             WHERE id = $2`,
+            [days, id]
+          );
         }
-
-        await pool.query('DELETE FROM access_codes WHERE id=$1', [id]);
-        return json(200, { ok: true, softDeleted: false });
+        return json(200, { ok: true });
       }
 
       // Replace the code value without changing its plan or expiry.

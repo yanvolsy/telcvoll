@@ -1672,3 +1672,639 @@ html[data-theme="dark"] .exercise-actions {
   font-weight: 800 !important;
   border: 1px solid var(--line) !important;
 }
+
+/* ==========================================================================
+   TELC VOLL — LUXURY EXERCISE REDESIGN: LESEN, HÖREN, SPRACHBAUSTEINE, SCHREIBEN
+   ========================================================================== */
+
+/* 1. Exercise Heading & Top Controls */
+.exercise-heading {
+  padding: 24px 30px 18px !important;
+  background: var(--white) !important;
+  border-bottom: 1px solid var(--line) !important;
+  box-shadow: 0 4px 20px rgba(16, 35, 30, 0.03) !important;
+}
+.exercise-heading-title .tag {
+  background: var(--green-soft) !important;
+  color: var(--green-dark) !important;
+  font-weight: 850 !important;
+  font-size: 12px !important;
+  border: 1px solid color-mix(in srgb, var(--green) 25%, transparent) !important;
+  padding: 4px 14px !important;
+}
+.exercise-heading h1 {
+  font-weight: 900 !important;
+  letter-spacing: -0.03em !important;
+  color: var(--ink) !important;
+}
+
+/* 2. Reading Texts (Lesen Teil 1, 2, 3) */
+.exam-text-card {
+  border-radius: 18px !important;
+  background: var(--white) !important;
+  border: 1.5px solid var(--line) !important;
+  padding: 26px 28px !important;
+  margin-bottom: 18px !important;
+  box-shadow: 0 3px 14px rgba(16, 35, 30, 0.03) !important;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.exam-text-card:hover {
+  border-color: color-mix(in srgb, var(--green) 40%, var(--line)) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(16, 35, 30, 0.06) !important;
+}
+.exam-text-card.active-item {
+  border-color: var(--green) !important;
+  box-shadow: 0 0 0 3px var(--green-soft), 0 8px 24px rgba(249, 115, 22, 0.12) !important;
+}
+.exam-text-card.answer-correct {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
+}
+.exam-text-card.answer-wrong {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12) !important;
+}
+.exam-text {
+  font-size: 16.5px !important;
+  line-height: 1.95 !important;
+  color: var(--ink) !important;
+}
+.paragraph-assignment {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 10px 14px !important;
+  background: var(--bg) !important;
+  border-radius: 14px !important;
+  margin-bottom: 16px !important;
+  border: 1px solid var(--line) !important;
+}
+.assignment-label {
+  font-size: 11.5px !important;
+  font-weight: 850 !important;
+  color: var(--muted) !important;
+  text-transform: uppercase !important;
+}
+.paragraph-assignment select {
+  flex: 1 !important;
+  border-radius: 10px !important;
+  border: 1px solid var(--line) !important;
+  padding: 8px 12px !important;
+  font-weight: 750 !important;
+  background: var(--white) !important;
+  color: var(--ink) !important;
+  outline: none !important;
+  transition: border-color 0.2s ease !important;
+}
+.paragraph-assignment select:focus {
+  border-color: var(--green) !important;
+  box-shadow: 0 0 0 3px var(--green-soft) !important;
+}
+.assignment-selected {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  background: var(--green-soft) !important;
+  color: var(--green-dark) !important;
+  border: 1px solid color-mix(in srgb, var(--green) 30%, transparent) !important;
+  border-radius: 10px !important;
+  padding: 6px 12px !important;
+  font-weight: 850 !important;
+  font-size: 12.5px !important;
+}
+.assignment-selected b {
+  color: #ef4444 !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+}
+
+/* Long text for Lesen Teil 2 */
+.lesen2-long-text {
+  background: var(--white) !important;
+  border-radius: 20px !important;
+  border: 1px solid var(--line) !important;
+  padding: 30px 34px !important;
+  box-shadow: 0 4px 20px rgba(16, 35, 30, 0.03) !important;
+}
+.lesen2-long-text .long-text-content {
+  font-size: 16.5px !important;
+  line-height: 2 !important;
+  color: var(--ink) !important;
+}
+.lesen2-question {
+  border-radius: 16px !important;
+  background: var(--white) !important;
+  border: 1px solid var(--line) !important;
+  padding: 18px 20px !important;
+  margin-bottom: 14px !important;
+  box-shadow: 0 2px 10px rgba(16, 35, 30, 0.02) !important;
+  transition: border-color 0.2s ease !important;
+}
+.lesen2-question:hover {
+  border-color: color-mix(in srgb, var(--green) 30%, var(--line)) !important;
+}
+.lesen2-question .question-prompt-text {
+  font-size: 15px !important;
+  font-weight: 850 !important;
+  color: var(--ink) !important;
+  margin-bottom: 12px !important;
+  line-height: 1.6 !important;
+}
+
+/* 3. Hören: Audio Player & True/False Items */
+.audio-box {
+  background: linear-gradient(135deg, var(--white) 0%, var(--green-soft) 100%) !important;
+  border: 1.5px solid color-mix(in srgb, var(--green) 25%, var(--line)) !important;
+  border-radius: 18px !important;
+  padding: 12px 18px !important;
+  box-shadow: 0 6px 20px rgba(249, 115, 22, 0.1) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+}
+.audio-box span {
+  font-weight: 850 !important;
+  font-size: 13px !important;
+  color: var(--green-dark) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+.audio-box span::before {
+  content: '🎧';
+  font-size: 16px;
+}
+.tf-row {
+  border-radius: 16px !important;
+  background: var(--white) !important;
+  border: 1.5px solid var(--line) !important;
+  padding: 18px 22px !important;
+  margin-bottom: 12px !important;
+  box-shadow: 0 3px 12px rgba(16, 35, 30, 0.03) !important;
+  display: grid !important;
+  grid-template-columns: 44px 1fr auto !important;
+  gap: 16px !important;
+  align-items: center !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+.tf-row:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(16, 35, 30, 0.06) !important;
+  border-color: color-mix(in srgb, var(--green) 30%, var(--line)) !important;
+}
+.item-number {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 12px !important;
+  background: var(--green-soft) !important;
+  color: var(--green-dark) !important;
+  font-size: 16px !important;
+  font-weight: 950 !important;
+  border: 1px solid color-mix(in srgb, var(--green) 20%, transparent) !important;
+  margin-bottom: 0 !important;
+}
+.tf-text {
+  font-size: 15.5px !important;
+  line-height: 1.65 !important;
+  color: var(--ink) !important;
+  font-weight: 700 !important;
+}
+.tf-actions {
+  display: flex !important;
+  gap: 8px !important;
+}
+.tf-actions .side-option {
+  padding: 10px 18px !important;
+  border-radius: 12px !important;
+  font-weight: 850 !important;
+  font-size: 13.5px !important;
+  border: 1.5px solid var(--line) !important;
+  background: var(--bg) !important;
+  color: var(--ink) !important;
+  transition: all 0.18s ease !important;
+}
+.tf-actions .side-option:hover {
+  border-color: var(--green) !important;
+  background: var(--green-soft) !important;
+  color: var(--green-dark) !important;
+}
+.tf-actions .side-option.selected {
+  background: var(--green) !important;
+  color: #fff !important;
+  border-color: var(--green) !important;
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35) !important;
+}
+
+/* 4. Sprachbausteine: Text, Inline Gaps & Word Bank */
+.inline-answer {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 68px !important;
+  height: 32px !important;
+  padding: 0 12px !important;
+  margin: 0 4px !important;
+  border-radius: 8px !important;
+  border: 1.5px dashed var(--green) !important;
+  background: var(--green-soft) !important;
+  color: var(--green-dark) !important;
+  font-weight: 900 !important;
+  font-size: 13.5px !important;
+  vertical-align: middle !important;
+  transition: all 0.2s ease !important;
+}
+.inline-answer.filled {
+  border-style: solid !important;
+  background: #fff !important;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.15) !important;
+}
+.word-bank {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 10px !important;
+}
+.word-card {
+  border-radius: 14px !important;
+  background: var(--white) !important;
+  border: 1.5px solid var(--line) !important;
+  padding: 12px 14px !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  text-align: start !important;
+}
+.word-card small {
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 8px !important;
+  background: var(--green-soft) !important;
+  color: var(--green-dark) !important;
+  display: grid !important;
+  place-items: center !important;
+  font-weight: 900 !important;
+  font-size: 12px !important;
+  flex: none !important;
+}
+.word-card b {
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  color: var(--ink) !important;
+}
+.word-card:hover:not(.used) {
+  border-color: var(--green) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 18px rgba(16, 35, 30, 0.08) !important;
+}
+.word-card.used {
+  opacity: 0.55 !important;
+  background: var(--bg) !important;
+  border-style: dashed !important;
+}
+
+/* 5. Schreiben: Exam Brief & Luxury Writing Studio */
+.writing-left {
+  padding: 28px !important;
+  background: var(--white) !important;
+  border-radius: 20px 0 0 20px !important;
+}
+.writing-title span {
+  background: var(--green-soft) !important;
+  color: var(--green-dark) !important;
+  font-weight: 850 !important;
+  padding: 4px 12px !important;
+  border-radius: 999px !important;
+  font-size: 12px !important;
+}
+.writing-title h1 {
+  font-size: clamp(24px, 2.5vw, 34px) !important;
+  font-weight: 900 !important;
+  margin: 10px 0 16px !important;
+  color: var(--ink) !important;
+}
+.writing-time-rule {
+  background: linear-gradient(135deg, var(--green-soft) 0%, rgba(249, 115, 22, 0.15) 100%) !important;
+  border: 1px solid color-mix(in srgb, var(--green) 30%, transparent) !important;
+  color: var(--green-dark) !important;
+  font-weight: 850 !important;
+  font-size: 13px !important;
+  border-radius: 12px !important;
+  padding: 10px 16px !important;
+}
+.writing-exam-note {
+  border-radius: 12px !important;
+  background: var(--bg) !important;
+  border: 1px solid var(--line) !important;
+  color: var(--ink) !important;
+  font-size: 13px !important;
+  line-height: 1.7 !important;
+  padding: 14px 16px !important;
+}
+.writing-block {
+  border-radius: 14px !important;
+  border: 1px solid var(--line) !important;
+  padding: 16px 18px !important;
+  margin-bottom: 14px !important;
+  background: var(--white) !important;
+}
+.writing-block h2 {
+  font-size: 15px !important;
+  font-weight: 850 !important;
+  color: var(--green-dark) !important;
+  margin: 0 0 10px !important;
+}
+.writing-editor {
+  padding: 24px !important;
+  background: var(--white) !important;
+  border-radius: 0 20px 20px 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+.editor-tools {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 12px !important;
+}
+.editor-chars button {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 9px !important;
+  border: 1px solid var(--line) !important;
+  background: var(--bg) !important;
+  font-weight: 850 !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+  transition: all 0.18s ease !important;
+}
+.editor-chars button:hover {
+  background: var(--green-soft) !important;
+  color: var(--green-dark) !important;
+  border-color: var(--green) !important;
+  transform: translateY(-1px) !important;
+}
+#wordCount {
+  font-weight: 850 !important;
+  font-size: 13px !important;
+  color: var(--muted) !important;
+  background: var(--bg) !important;
+  padding: 4px 12px !important;
+  border-radius: 999px !important;
+}
+.writing-editor textarea {
+  min-height: 280px !important;
+  border-radius: 14px !important;
+  border: 1.5px solid var(--line) !important;
+  padding: 18px !important;
+  font-size: 16px !important;
+  line-height: 1.85 !important;
+  resize: vertical !important;
+  font-family: inherit !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+.writing-editor textarea:focus {
+  border-color: var(--green) !important;
+  box-shadow: 0 0 0 4px var(--green-soft) !important;
+}
+.ai-check-btn {
+  background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%) !important;
+  color: #fff !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  padding: 12px 28px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 24px rgba(249, 115, 22, 0.3) !important;
+  border: 0 !important;
+  cursor: pointer !important;
+  transition: transform 0.2s ease !important;
+}
+.ai-check-btn:hover:not(:disabled) {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 12px 28px rgba(249, 115, 22, 0.4) !important;
+}
+
+/* ==========================================================================
+   SPRECHEN TEIL 1 STUDIO & JURY Q&A ENHANCEMENTS
+   ========================================================================== */
+.pres-studio-wrap {
+  margin-bottom: 24px;
+}
+.pres-categories {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.pres-cat-btn {
+  border: 1.5px solid var(--line);
+  background: var(--white);
+  border-radius: 14px;
+  padding: 12px 8px;
+  text-align: center;
+  cursor: pointer;
+  font-weight: 850;
+  font-size: 12px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+.pres-cat-btn span:first-child {
+  font-size: 20px;
+}
+.pres-cat-btn:hover {
+  border-color: var(--green);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(16, 35, 30, 0.06);
+}
+.pres-cat-btn.active {
+  background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+  color: #fff;
+  border-color: var(--green);
+  box-shadow: 0 6px 18px rgba(249, 115, 22, 0.35);
+}
+.pres-input-panel {
+  border: 1.5px solid var(--line);
+  border-radius: 18px;
+  padding: 20px;
+  background: var(--white);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 18px;
+}
+.pres-input-panel textarea {
+  width: 100%;
+  min-height: 85px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  padding: 12px 14px;
+  font-size: 14px;
+  line-height: 1.7;
+  resize: vertical;
+  margin: 10px 0 14px;
+}
+.pres-input-panel textarea:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px var(--green-soft);
+}
+.pres-generate-btn {
+  width: 100%;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+  color: #fff;
+  border: 0;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(249, 115, 22, 0.28);
+}
+.pres-result-box {
+  background: var(--white);
+  border: 1.5px solid var(--line);
+  border-radius: 20px;
+  padding: 26px;
+  margin-top: 18px;
+  box-shadow: var(--shadow);
+}
+.pres-result-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 18px;
+}
+.pres-result-head h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 900;
+}
+.pres-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.pres-text-de {
+  font-size: 16px;
+  line-height: 1.95;
+  color: var(--ink);
+  white-space: pre-line;
+  padding: 16px 20px;
+  background: var(--bg);
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  direction: ltr;
+  text-align: left;
+}
+.pres-text-ar {
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--muted);
+  white-space: pre-line;
+  padding: 14px 18px;
+  background: #fffbf5;
+  border-radius: 12px;
+  border: 1px solid #fed7aa;
+  margin-top: 12px;
+}
+.pres-practice-bar {
+  margin-top: 20px;
+  padding: 16px 20px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.pres-mic-record {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: var(--green);
+  color: #fff;
+  font-weight: 850;
+  border: 0;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);
+}
+.pres-mic-record.recording {
+  background: #ef4444;
+  animation: micPulse 1s infinite;
+}
+
+/* Chat voice controls */
+.chat-voice-toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.chat-voice-toggle {
+  font-weight: 850 !important;
+  font-size: 12.5px !important;
+  border-radius: 999px !important;
+  padding: 6px 14px !important;
+  border-color: var(--line) !important;
+}
+.chat-voice-toggle[aria-pressed="true"] {
+  background: var(--green-soft) !important;
+  color: var(--green-dark) !important;
+  border-color: var(--green) !important;
+}
+.chat-input-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+.voice-input-btn {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 12px !important;
+  font-size: 18px !important;
+  flex: none !important;
+  border: 1px solid var(--line) !important;
+  background: var(--white) !important;
+  transition: all 0.2s ease !important;
+}
+.voice-input-btn.recording-active {
+  background: #ef4444 !important;
+  color: #fff !important;
+  border-color: #ef4444 !important;
+  animation: micPulse 1s infinite !important;
+}
+.bubble-tts-btn {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 0.65;
+  transition: opacity 0.15s ease;
+  padding: 2px 4px;
+  align-self: flex-start;
+  margin-top: 4px;
+}
+.bubble-tts-btn:hover {
+  opacity: 1;
+}
+
+@media(max-width: 800px) {
+  .pres-categories {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media(max-width: 550px) {
+  .pres-categories {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+

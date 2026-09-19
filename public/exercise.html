@@ -19,6 +19,25 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <script>
 const id=qs('id'); const duration=Number(qs('duration')||0); const sessionId=qs('session'); const mockMode=qs('mock')==='1' && !!sessionId; let model=null; let answers={}; let activeItem=null; let submitted=false; let resultData=null;
 let matchingOrder=null; let headingOrder=null; let optionOrders={}; let showModelAnswers=false; let titleRevealed=false; const translationCache=new Map();
+const TELC_DUR = {
+  B1: { Lesen: { 'Teil 1': 20, 'Teil 2': 20, 'Teil 3': 15, _default: 20 }, Sprachbausteine: { 'Teil 1': 10, 'Teil 2': 10, _default: 10 }, Hören: { 'Teil 1': 10, 'Teil 2': 10, 'Teil 3': 10, _default: 10 }, Schreiben: { 'Teil 1': 30, _default: 30 }, Sprechen: { 'Teil 1': 4, 'Teil 2': 5, 'Teil 3': 5, _default: 5 } },
+  B2: { Lesen: { 'Teil 1': 20, 'Teil 2': 25, 'Teil 3': 20, _default: 20 }, Sprachbausteine: { 'Teil 1': 15, 'Teil 2': 10, _default: 15 }, Hören: { 'Teil 1': 6, 'Teil 2': 8, 'Teil 3': 6, _default: 7 }, Schreiben: { 'Teil 1': 30, _default: 30 }, Sprechen: { 'Teil 1': 5, 'Teil 2': 5, 'Teil 3': 5, _default: 5 } },
+  C1: { Lesen: { 'Teil 1': 25, 'Teil 2': 25, 'Teil 3': 20, _default: 25 }, Sprachbausteine: { 'Teil 1': 20, 'Teil 2': 20, _default: 20 }, Hören: { 'Teil 1': 12, 'Teil 2': 15, 'Teil 3': 13, _default: 13 }, Schreiben: { 'Teil 1': 70, _default: 70 }, Sprechen: { 'Teil 1': 6, 'Teil 2': 6, 'Teil 3': 6, _default: 6 } }
+};
+function getTelcDurationSeconds(ex){
+  const explicit = Number(ex?.settings_json?.duration_seconds || ex?.duration_seconds || ex?.time_limit_seconds || 0);
+  if(explicit > 0) return explicit > 180 ? explicit : explicit * 60;
+  const lvl = String(ex?.level || 'B2').toUpperCase();
+  const sec = String(ex?.section || '');
+  const teil = String(ex?.teil || 'Teil 1').trim();
+  const lvlMap = TELC_DUR[lvl] || TELC_DUR.B2;
+  const secMap = lvlMap[sec] || TELC_DUR.B2[sec];
+  if(!secMap) return 1200;
+  for(const k of Object.keys(secMap)){
+    if(k !== '_default' && (teil.includes(k) || k.includes(teil))) return secMap[k] * 60;
+  }
+  return (secMap._default || 20) * 60;
+}
 const text=(ar,de)=>getLang()==='ar'?ar:de;
 function saveExerciseReturn(){try{sessionStorage.setItem('telc_exercise_return',JSON.stringify({url:location.href,scrollY:window.scrollY}));}catch{}}
 document.getElementById('exerciseBack')?.addEventListener('click',e=>{e.preventDefault();saveExerciseReturn();location.href='/dashboard.html';});
@@ -225,17 +244,20 @@ function renderWriting(){
  const situationRaw=settings.situation_text||model.exercise.body||'';
  const taskRaw=settings.task_text||'';
  const sid='writing-situation'; const tid='writing-task';
+ const activeDur = duration || (model?.exercise ? getTelcDurationSeconds(model.exercise) : 1800);
+ const durMin = Math.round(activeDur / 60);
+ const wordLimit = String(model?.exercise?.level||'').toUpperCase() === 'C1' ? 350 : 150;
  document.getElementById('content').innerHTML=`<div class="writing-page-shell">
    <div class="writing-workspace">
     <section class="writing-left">
       <div class="writing-title"><span>${esc(model.exercise.level||'B2')} · ${esc(model.exercise.teil)}</span><h1>${esc(model.exercise.title)}</h1></div>
-      <div class="writing-time-rule">Zeit: 30 Minuten | Mindestens 150 Wörter</div>
-      <div class="writing-exam-note">Vergessen Sie nicht: Absender, Anschrift, Datum, Betreffzeile, Anrede und Schlussformel. Schreiben Sie mindestens 150 Wörter.</div>
+      <div class="writing-time-rule">${text(`الوقت: ${durMin} دقيقة | الحد الأدنى ${wordLimit} كلمة`,`Zeit: ${durMin} Minuten | Mindestens ${wordLimit} Wörter`)}</div>
+      <div class="writing-exam-note">Vergessen Sie nicht: Absender, Anschrift, Datum, Betreffzeile, Anrede und Schlussformel. Schreiben Sie mindestens ${wordLimit} Wörter.</div>
       <div class="writing-block"><h2>${text('الوضعية','Situation')}</h2><div class="question-text-tools">${textTools(situationRaw,sid)}<div id="${sid}" class="writing-german-content" data-content-id="${sid}" data-source="${esc(situationRaw)}">${escBody(situationRaw)}</div>${translationBox(sid+'-translation')}</div></div>
       ${taskRaw?`<div class="writing-block"><h2>${text('المطلوب','Aufgabe')}</h2><div class="writing-task question-text-tools">${textTools(taskRaw,tid)}<div id="${tid}" class="writing-german-content" data-content-id="${tid}" data-source="${esc(taskRaw)}">${escBody(taskRaw)}</div>${translationBox(tid+'-translation')}</div></div>`:''}
     </section>
     <section class="writing-editor">
-      <div class="editor-tools"><div class="editor-chars">${['ä','ö','ü','ß','Ä','Ö','Ü'].map(c=>`<button type="button" data-char="${c}">${c}</button>`).join('')}</div><span id="wordCount">0 Wörter</span></div>
+      <div class="editor-tools"><div class="editor-chars">${['ä','ö','ü','ß','Ä','Ö','Ü'].map(c=>`<button type="button" data-char="${c}">${c}</button>`).join('')}</div><div style="display:flex;align-items:center;gap:10px"><div class="progress-pill" id="timerEl">00:00</div><span id="wordCount">0 Wörter</span></div></div>
       <textarea id="writingAnswer" placeholder="${text('ابدأ في كتابة إجابتك هنا…','Beginne hier mit deiner Antwort…')}"></textarea>
       <div class="editor-bottom"><button class="btn ai-check-btn" id="aiWritingCheck">✦ ${text('تصحيح بالذكاء الاصطناعي','Mit KI korrigieren')}</button></div>
     </section>
@@ -249,6 +271,7 @@ function renderWriting(){
  document.querySelectorAll('[data-char]').forEach(b=>b.onclick=()=>{const a=ta.selectionStart,c=ta.selectionEnd;ta.setRangeText(b.dataset.char,a,c,'end');ta.focus();update();});
  document.getElementById('aiWritingCheck').onclick=()=>runWritingAI(ta.value);
  bindTextTools();
+ if(!mockMode) startExerciseTimer();
 }
 
 function renderWritingAIResult(r){
@@ -284,6 +307,33 @@ function mockRemaining(){const s=getMockSession();return s?Math.max(0,Math.ceil(
 function goNextMock(){const session=getMockSession();if(!session)return false;session.index=(session.ids||[]).findIndex(x=>String(x)===String(id));localStorage.setItem('telc_self_test',JSON.stringify(session));const nextId=session.ids[session.index+1];if(nextId){location.href='/exercise.html?id='+encodeURIComponent(nextId)+'&session='+encodeURIComponent(sessionId)+'&mock=1';return true;}location.href='/self-test-result.html';return true;}
 async function advanceSession(){if(mockMode)return goNextMock();return false;}
 async function finishMockSession(){const session=getMockSession();if(!session)return; if(!submitted){try{const r=await api('exercise-submit',{method:'POST',body:{exercise_id:id,answers}});session.results=session.results||[];session.results.push({id,title:model.exercise.title,section:model.exercise.section,teil:model.exercise.teil,score:r.score,max:r.max,percent:r.percent,result:r.result});localStorage.setItem('telc_self_test',JSON.stringify(session));}catch(e){}} location.href='/self-test-result.html?expired=1';}
+let exerciseTimerEnd = null;
+let exerciseTimerInterval = null;
+function startExerciseTimer(){
+  const el = document.getElementById('timerEl');
+  if(!el || mockMode) return;
+  const activeDuration = duration || (model?.exercise ? getTelcDurationSeconds(model.exercise) : 1200);
+  if(!exerciseTimerEnd && activeDuration > 0){
+    exerciseTimerEnd = Date.now() + activeDuration * 1000;
+  }
+  if(!exerciseTimerEnd) return;
+  el.dataset.started = '1';
+  if(exerciseTimerInterval) clearInterval(exerciseTimerInterval);
+  const tick = () => {
+    const curEl = document.getElementById('timerEl');
+    if(!curEl) return;
+    const remaining = Math.max(0, Math.ceil((exerciseTimerEnd - Date.now()) / 1000));
+    curEl.textContent = String(Math.floor(remaining / 60)).padStart(2, '0') + ':' + String(remaining % 60).padStart(2, '0');
+    curEl.classList.toggle('timer-danger', remaining <= 60);
+    if(remaining <= 0){
+      clearInterval(exerciseTimerInterval);
+      exerciseTimerInterval = null;
+      submit();
+    }
+  };
+  tick();
+  exerciseTimerInterval = setInterval(tick, 500);
+}
 function startMockTimer(){const el=document.getElementById('timerEl');if(!mockMode||!el||el.dataset.started)return;el.dataset.started='1';const tick=()=>{const n=mockRemaining();el.textContent=String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');el.classList.toggle('timer-danger',n<=60);if(n>0)window.setTimeout(tick,250);else finishMockSession();};tick();}
 function parseSpeakingTasks(body){
  const raw=String(body||'').replace(/\r/g,'');
@@ -304,18 +354,294 @@ function renderSpeakingTaskList(body){
  if(!tasks.length)return '';
  return `<section class="speaking-tasks-panel"><div class="speaking-section-head"><div><span class="speaking-section-kicker">${text('الخطوات والمطلوب','Aufgaben')}</span><h2>${text('خطوات المهمة','Aufgaben')}</h2></div><button type="button" class="mini-tool" data-toggle-speaking-tasks aria-expanded="true">▾</button></div><div class="speaking-task-list" data-speaking-task-list>${tasks.map((task,i)=>{const cid='sp-task-'+(i+1);return `<article class="speaking-task-item"><span class="speaking-task-number">${i+1}</span><div class="speaking-task-item-body"><div class="speaking-task-item-top"><b id="${cid}" data-content-id="${cid}" data-source="${esc(task)}">${esc(task)}</b>${textTools(task,cid)}</div><div class="inline-translation" id="${cid}-translation"></div></div></article>`}).join('')}</div></section>`;
 }
+
+let currentPresCategory = 'Reise';
+let presRecognition = null;
+let presRecording = false;
+let presTranscript = '';
+let presTimer = null;
+let presSeconds = 0;
+
+function renderTeil1Studio(){
+  const cats = [
+    { key: 'Reise', icon: '✈️', title: 'Eine Reise', desc: text('رحلة قمت بها','Reisebericht') },
+    { key: 'Film', icon: '🎬', title: 'Ein Film', desc: text('فيلم شاهدته','Filmbericht') },
+    { key: 'Buch', icon: '📖', title: 'Ein Buch', desc: text('كتاب قرأته','Buchbericht') },
+    { key: 'Erfahrung', icon: '🌟', title: 'Erfahrung', desc: text('تجربة شخصية مهمة','Persönliche Erfahrung') },
+    { key: 'Person', icon: '👤', title: 'Person / Event', desc: text('شخصية أو حدث','Wichtige Person / Event') }
+  ];
+  return `
+  <section class="pres-studio-wrap">
+    <div class="pres-input-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <div><h3 style="margin:0;font-size:18px">${text('استوديو العرض التقديمي (Präsentation Studio)','Präsentations-Studio')}</h3><small class="muted">${text('اختر أحد مواضيع TELC الرسمية الـ 5، واكتب أفكارك لإنشاء عرض متكامل مع أسئلة اللجنة وإجاباتها النموذجية.','Wähle eines der 5 telc-Themen und erstelle eine vollständige Präsentation inklusive Jury-Fragen.')}</small></div>
+        <span class="tag">Teil 1 Präsentation</span>
+      </div>
+      <div class="pres-categories">
+        ${cats.map(c => `
+          <button type="button" class="pres-cat-btn ${currentPresCategory === c.key ? 'active' : ''}" data-cat="${c.key}">
+            <span>${c.icon}</span>
+            <span>${c.title}</span>
+            <small style="font-size:10.5px;opacity:.8">${c.desc}</small>
+          </button>
+        `).join('')}
+      </div>
+      <label style="font-size:12px;font-weight:800;color:var(--muted)">${text('اكتب أفكارك أو تفاصيل تريد تضمينها (بالعربية أو الألمانية):','Schreiben Sie Ihre Notizen oder Stichpunkte (auf Arabisch oder Deutsch):')}</label>
+      <textarea id="presNotes" placeholder="${text('مثال: رحلة إلى برلين الصيف الماضي مع أصدقائي، زرنا بوابة براندنبورغ، أعجبني النظام والمتاحف…','z. B. Eine Reise nach Berlin im letzten Sommer mit Freunden, Brandenburger Tor besucht, tolle Museen…')}"></textarea>
+      <button type="button" class="pres-generate-btn" id="presGenBtn">✦ ${text('إنشاء العرض التقديمي بالذكاء الاصطناعي مع أسئلة اللجنة','Präsentation mit KI & Jury-Fragen generieren')}</button>
+      <div id="presResultWrap"></div>
+    </div>
+  </section>`;
+}
+
+function bindTeil1StudioEvents(){
+  document.querySelectorAll('.pres-cat-btn').forEach(btn=>{
+    btn.onclick=()=>{
+      currentPresCategory=btn.dataset.cat;
+      document.querySelectorAll('.pres-cat-btn').forEach(b=>b.classList.toggle('active',b===btn));
+    };
+  });
+  const genBtn = document.getElementById('presGenBtn');
+  if(genBtn){
+    genBtn.onclick=async()=>{
+      const notes = document.getElementById('presNotes')?.value || '';
+      genBtn.disabled=true;
+      genBtn.textContent=text('⏳ جارٍ توليد العرض وأسئلة اللجنة…','⏳ Präsentation wird generiert…');
+      const wrap = document.getElementById('presResultWrap');
+      wrap.innerHTML=`<div style="padding:20px;text-align:center;color:var(--muted)">${text('جارٍ صياغة العرض التقديمي وفق معايير TELC الرسمية…','Präsentation wird nach offiziellen telc-Standards erstellt…')}</div>`;
+      try{
+        const r = await api('ai-speaking-session', {
+          method: 'POST',
+          body: {
+            id,
+            mode: 'generate-presentation',
+            category: currentPresCategory,
+            notes,
+            level: model?.exercise?.level || 'B2'
+          }
+        });
+        renderPresResult(r);
+      }catch(err){
+        wrap.innerHTML=`<div class="alert bad">${esc(err.message||'حدث خطأ أثناء توليد العرض.')}</div>`;
+      }finally{
+        genBtn.disabled=false;
+        genBtn.textContent=text('✦ إنشاء العرض التقديمي بالذكاء الاصطناعي مع أسئلة اللجنة','✦ Präsentation mit KI & Jury-Fragen generieren');
+      }
+    };
+  }
+}
+
+function renderPresResult(data){
+  const wrap = document.getElementById('presResultWrap');
+  if(!wrap) return;
+  const juryList = Array.isArray(data.jury_questions) ? data.jury_questions : [];
+  const redemittel = Array.isArray(data.redemittel) ? data.redemittel : [];
+
+  wrap.innerHTML = `
+  <div class="pres-result-box">
+    <div class="pres-result-head">
+      <div><span class="tag">TELC ${esc(data.level||'B2')} · ${esc(data.category||'')}</span><h3>${esc(data.title||'Ihre Präsentation')}</h3></div>
+      <div class="pres-actions-row">
+        <button type="button" class="btn light" id="presSpeakBtn">🔊 ${text('استماع للعرض','Anhören')}</button>
+        <button type="button" class="btn light" id="presTransBtn">文 ${text('الترجمة العربية','Arabische Übersetzung')}</button>
+      </div>
+    </div>
+    <div class="pres-text-de" id="presTextDe">${esc(data.presentation_de||'')}</div>
+    <div class="pres-text-ar" id="presTextAr" hidden>${esc(data.presentation_ar||'')}</div>
+
+    <div class="pres-practice-bar">
+      <div>
+        <strong>🎙️ ${text('تدرّب على إلقاء العرض بصوتك','Präsentation mündlich üben')}</strong>
+        <p class="muted" style="margin:2px 0 0;font-size:12px">${text('اضغط الميكروفون وسجل إلقاءك للحصول على تحليل ذكي لنطقك وطلاقتك.','Klicken Sie auf das Mikrofon, um Ihre Rede aufzunehmen und KI-Feedback zu erhalten.')}</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span id="presTimerDisplay" style="font-weight:900;font-variant-numeric:tabular-nums">00:00</span>
+        <button type="button" class="pres-mic-record" id="presMicBtn">🎙️ ${text('بدء الإلقاء','Aufnahme starten')}</button>
+        <button type="button" class="btn dark" id="presEvalBtn" style="display:none">✦ ${text('تقييم الإلقاء','Bewerten')}</button>
+      </div>
+    </div>
+    <div id="presLiveText" style="margin-top:10px;font-size:13px;color:var(--muted);min-height:22px;direction:ltr;text-align:left"></div>
+    <div id="presEvalOutput" hidden style="margin-top:14px"></div>
+
+    <div class="speaking-model-questions" style="margin-top:24px">
+      <div class="speaking-model-questions-head">
+        <h4>${text('أسئلة اللجنة والممتحن (Jury-Fragen) مع إجابات نموذجية','Jury-Fragen & Antwortvorschläge')}</h4>
+        <small>${text('أسئلة يطرحها الممتحن لاختبار فهمك لما قدمته والقدرة على الدفاع عنه، مرفقة بإجابات نموذجية متوقعة.','Fragen der Prüfer zur Überprüfung Ihres Textverständnisses mit vorgeschlagenen Antworten.')}</small>
+      </div>
+      <div class="speaking-qa-list">
+        ${juryList.map((item, i) => {
+          const qText = item.question || item.q || '';
+          const aText = item.answer || item.a || '';
+          return `
+          <div class="speaking-model-qa-card">
+            <div class="speaking-model-q-row">
+              <span class="speaking-qa-badge q-badge">${text('سؤال اللجنة','Jury-Frage')} ${i+1}</span>
+              <div class="speaking-qa-text"><b>${esc(qText)}</b></div>
+              <span class="speaking-model-tools">
+                <button type="button" class="speaking-voice-btn" data-speak-q="${esc(qText)}" aria-label="${text('استماع','Anhören')}">🔊</button>
+                <button type="button" class="speaking-translate-btn" data-translate-q aria-label="${text('ترجمة','Übersetzen')}">文</button>
+              </span>
+            </div>
+            <div class="speaking-qa-translation" hidden></div>
+            ${aText ? `
+            <div class="speaking-model-a-row">
+              <span class="speaking-qa-badge a-badge">${text('الإجابة المقترحة','Vorgeschlagene Antwort')}</span>
+              <div class="speaking-qa-text"><p>${esc(aText)}</p></div>
+              <span class="speaking-model-tools">
+                <button type="button" class="speaking-voice-btn" data-speak-q="${esc(aText)}" aria-label="${text('استماع','Anhören')}">🔊</button>
+                <button type="button" class="speaking-translate-btn" data-translate-q aria-label="${text('ترجمة','Übersetzen')}">文</button>
+              </span>
+            </div>
+            <div class="speaking-qa-translation" hidden></div>` : ''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    ${redemittel.length ? `
+    <div class="speaking-model-phrases" style="margin-top:20px">
+      <h4>${text('عبارات مفيدة للعرض التقديمي','Redemittel für die Präsentation')}</h4>
+      <div>${redemittel.map(r => `<span>${esc(r)}</span>`).join('')}</div>
+    </div>` : ''}
+  </div>`;
+
+  document.getElementById('presSpeakBtn').onclick = () => speakGerman(data.presentation_de);
+  document.getElementById('presTransBtn').onclick = () => {
+    const el = document.getElementById('presTextAr');
+    el.hidden = !el.hidden;
+  };
+
+  const micBtn = document.getElementById('presMicBtn');
+  const evalBtn = document.getElementById('presEvalBtn');
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (SR) {
+    presRecognition = new SR();
+    presRecognition.lang = 'de-DE';
+    presRecognition.continuous = true;
+    presRecognition.interimResults = true;
+
+    presRecognition.onresult = (ev) => {
+      let interim = '';
+      for (let i = ev.resultIndex; i < ev.results.length; i++) {
+        const textVal = ev.results[i][0].transcript;
+        if (ev.results[i].isFinal) presTranscript += textVal + ' ';
+        else interim += textVal;
+      }
+      document.getElementById('presLiveText').textContent = (presTranscript + ' ' + interim).trim() || '…';
+    };
+
+    micBtn.onclick = () => {
+      if (!presRecording) {
+        presRecording = true;
+        presTranscript = '';
+        presSeconds = 0;
+        micBtn.classList.add('recording');
+        micBtn.textContent = '⏹️ ' + text('إيقاف التسجيل','Aufnahme stoppen');
+        evalBtn.style.display = 'none';
+        document.getElementById('presLiveText').textContent = text('تحدث الآن بالألمانية لإلقاء عرضك…','Sprechen Sie jetzt auf Deutsch…');
+        presTimer = setInterval(() => {
+          presSeconds++;
+          const m = String(Math.floor(presSeconds / 60)).padStart(2, '0');
+          const s = String(presSeconds % 60).padStart(2, '0');
+          document.getElementById('presTimerDisplay').textContent = `${m}:${s}`;
+        }, 1000);
+        try { presRecognition.start(); } catch (_) {}
+      } else {
+        presRecording = false;
+        clearInterval(presTimer);
+        micBtn.classList.remove('recording');
+        micBtn.textContent = '🎙️ ' + text('إعادة الإلقاء','Neu aufnehmen');
+        try { presRecognition.stop(); } catch (_) {}
+        if (presTranscript.trim().length > 10) {
+          evalBtn.style.display = 'inline-block';
+        }
+      }
+    };
+
+    evalBtn.onclick = async () => {
+      evalBtn.disabled = true;
+      evalBtn.textContent = text('⏳ جارٍ التقييم…','⏳ Bewertung läuft…');
+      const out = document.getElementById('presEvalOutput');
+      out.hidden = false;
+      out.innerHTML = `<div style="padding:15px;text-align:center">${text('جارٍ تحليل الإلقاء والنطق ومعايير TELC…','Präsentation wird bewertet…')}</div>`;
+      try {
+        const res = await api('ai-speaking-session', {
+          method: 'POST',
+          body: {
+            id,
+            mode: 'evaluate-presentation',
+            transcript: presTranscript,
+            category: data.category,
+            level: data.level || 'B2'
+          }
+        });
+        out.innerHTML = `
+        <div class="speaking-eval" style="border:1px solid var(--line);border-radius:16px;padding:20px;background:var(--white)">
+          <div class="speaking-eval-head">
+            <strong>${text('تقييم Jerry للعرض التقديمي','Jerry-Bewertung')}</strong>
+            <b>${esc(res.total)} / 25</b>
+          </div>
+          <div class="speaking-eval-grid" style="margin:14px 0">
+            ${(res.criteria || []).map(c => `
+              <article>
+                <b>${esc(c.label)}</b>
+                <strong>${esc(c.score)} / ${esc(c.max || 5)}</strong>
+                <p>${esc(c.comment)}</p>
+              </article>
+            `).join('')}
+          </div>
+          <div class="speaking-feedback">
+            <h3>${text('نقاط القوة','Stärken')}</h3><ul>${(res.strengths || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+            <h3>${text('أولوية التحسين','Prioritäten')}</h3><ul>${(res.priorities || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+            <p>${esc(getLang()==='ar'?(res.summary_ar||res.summary_de||''):(res.summary_de||res.summary_ar||''))}</p>
+          </div>
+        </div>`;
+      } catch (e) {
+        out.innerHTML = `<div class="alert bad">${esc(e.message)}</div>`;
+      } finally {
+        evalBtn.disabled = false;
+        evalBtn.textContent = text('✦ تقييم الإلقاء','✦ Bewerten');
+      }
+    };
+  } else {
+    micBtn.style.display = 'none';
+  }
+
+  wrap.querySelectorAll('[data-speak-q]').forEach(b => b.onclick = () => speakGerman(b.dataset.speakQ, b));
+  wrap.querySelectorAll('[data-translate-q]').forEach(b => b.onclick = async () => {
+    const row = b.closest('.speaking-model-q-row') || b.closest('.speaking-model-a-row');
+    const box = row?.nextElementSibling;
+    const source = row?.querySelector('.speaking-qa-text')?.textContent || '';
+    if(!box || !source) return;
+    if(!box.hidden){ box.hidden = true; return; }
+    b.disabled = true;
+    box.textContent = text('جارٍ الترجمة…','Übersetzung…');
+    box.hidden = false;
+    try {
+      box.textContent = await translateText(source, 'ar');
+    } catch(e) {
+      box.textContent = text('تعذرت الترجمة.','Übersetzung nicht verfügbar.');
+    } finally {
+      b.disabled = false;
+    }
+  });
+}
+
 function renderSpeaking(){
  const qid='speaking-question', body=model.exercise.body||'', teil=String(model.exercise.teil||'Teil 1');
- const hint=teil==='Teil 1'?text('قدّم موضوعك بالألمانية، ثم تفاعل مع الشريك.','Präsentiere dein Thema auf Deutsch und tausche dich danach mit deinem Partner aus'):
- teil==='Teil 2'?text('ناقش الموضوع مع الشريك: ابدأ بالمحتوى ثم عبّر عن رأيك وناقش التجارب والمزايا والعيوب.','Diskutiere das Thema mit deinem Partner: Beginne mit dem Inhalt, äußere deine Meinung und besprecht Erfahrungen sowie Vor- und Nachteile.'):
+ const hint=teil==='Teil 1'?text('اختر موضوع العرض التقديمي واستعد للإلقاء ومناقشة أسئلة اللجنة مع الشريك.','Wählen Sie ein Thema für Ihre Präsentation und bereiten Sie sich auf die Fragen der Prüfer vor.'):
+ teil==='Teil 2'?text('ناقش الموضوع مع الشريك: ابدأ بالمحتوى ثم عبّر عن رأيك وناقش التجارب والمزايا والعيوب وأسئلة اللجنة.','Diskutiere das Thema mit deinem Partner: Beginne mit dem Inhalt, äußere deine Meinung und besprecht Erfahrungen sowie Vor- und Nachteile.'):
  text('خططا المهمة معًا خطوة بخطوة، تفاوضا حول النقاط المطلوبة، ثم توصلا إلى اتفاق واضح.','Plant die Aufgabe gemeinsam Schritt für Schritt, besprecht die vorgegebenen Punkte und findet am Ende eine klare gemeinsame Lösung.');
  document.getElementById('content').innerHTML=`<div class="speaking-exercise-shell">
  <div class="thema-title-row speaking-title-row"><h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title)}" class="${titleRevealed?'':'thema-title-hidden'}">${esc(model.exercise.title)}</h1><div class="thema-tools">${textTools(model.exercise.title,'thema-title')}<div class="inline-translation" id="thema-title-translation"></div><button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text('إظهار العنوان','Titel anzeigen')}"><span class="eye-icon eye-off"></span></button></div></div>
+ ${teil==='Teil 1'?renderTeil1Studio():''}
  <div class="speaking-layout"><section class="speaking-task-panel"><div class="speaking-task-head"><span class="tag">${esc(model.exercise.level||'B2')} · ${esc(teil)}</span><strong>${text('الموضوع','Thema')}</strong></div><div class="speaking-task-text question-text-tools">${textTools(body,qid)}<div id="${qid}" data-content-id="${qid}" data-source="${esc(body)}">${escBody(body)}</div>${translationBox(qid+'-translation')}</div>${teil==='Teil 3'?renderSpeakingTaskList(body):''}<div class="speaking-hint">${esc(hint)}</div></section>
- <section class="speaking-simulator"><div class="speaking-sim-head"><div><span class="tag">${esc(teil)}</span><h2>${text('محادثة مع الشريك','Gespräch mit dem Partner')}</h2><small>${text('اكتب إجابتك بالألمانية واستمع إلى رد الشريك صوتيًا.','Schreibe deine Antwort auf Deutsch und höre die Antwort deines Partners an.')}</small></div><span class="speaking-live-dot">●</span></div><div class="speaking-roles"><div class="speaking-role"><span class="speaking-avatar jerry-avatar">J</span><div><b>Jerry</b><small>${text('الممتحن والمدرب','Prüfer & Trainer')}</small></div></div><div class="speaking-role"><span class="speaking-avatar partner-avatar">P</span><div><b>${text('الشريك','Partner')}</b><small>${text('يتفاعل معك في المحادثة','Gesprächspartner')}</small></div></div></div><div class="speaking-chat" id="speakingChat"></div>
+ <section class="speaking-simulator"><div class="speaking-sim-head"><div><span class="tag">${esc(teil)}</span><h2>${text('محادثة مع الشريك والممتحن','Gespräch mit Partner & Prüfer')}</h2><small>${text('اكتب إجابتك بالألمانية واستمع إلى رد الشريك صوتيًا.','Schreibe deine Antwort auf Deutsch und höre die Antwort deines Partners an.')}</small></div><span class="speaking-live-dot">●</span></div><div class="speaking-roles"><div class="speaking-role"><span class="speaking-avatar jerry-avatar">J</span><div><b>Jerry</b><small>${text('الممتحن والمدرب','Prüfer & Trainer')}</small></div></div><div class="speaking-role"><span class="speaking-avatar partner-avatar">P</span><div><b>${text('الشريك','Partner')}</b><small>${text('يتفاعل معك في المحادثة','Gesprächspartner')}</small></div></div></div><div class="speaking-chat" id="speakingChat"></div>
  <div class="speaking-writing-box"><div class="speaking-writing-label"><span>${text('إجابتك','Deine Antwort')}</span><small>${text('اكتب بالألمانية ثم اضغط إرسال','Auf Deutsch schreiben und Senden drücken')}</small></div><div class="speaking-input-row"><textarea id="speakingInput" placeholder="${text('اكتب ردك هنا بالألمانية…','Schreibe deine Antwort auf Deutsch…')}"></textarea><button type="button" class="btn dark" id="speakingSend">${text('إرسال','Senden')}</button></div></div>
  <div class="speaking-controls"><span class="speaking-time" id="speakingTime">00:00</span><button type="button" class="btn model-btn speaking-model-btn" id="speakingModel">${text('إجابة نموذجية بالذكاء الاصطناعي','KI-Musterantwort')}</button><button type="button" class="btn dark" id="speakingFinish">${text('إنهاء وتقييم','Beenden & bewerten')}</button></div><div id="speakingModelBox" class="speaking-model-box" hidden></div><div id="speakingEval" class="speaking-eval" hidden></div></section></div></div>`;
  initInlineSpeaking(teil);bindTextTools();
+ if(teil==='Teil 1') bindTeil1StudioEvents();
  document.querySelector('[data-toggle-speaking-tasks]')?.addEventListener('click',e=>{const list=document.querySelector('[data-speaking-task-list]');if(!list)return;const hidden=list.hidden;list.hidden=!hidden;e.currentTarget.textContent=hidden?'▾':'▸';e.currentTarget.setAttribute('aria-expanded',String(hidden));});
 }
 function initInlineSpeaking(currentTeil){
@@ -324,12 +650,12 @@ function initInlineSpeaking(currentTeil){
  const add=(who,msg,autoSpeak=false)=>{const d=document.createElement('div');d.className='speaking-bubble '+who;const label=who==='jerry'?'Jerry':who==='partner'?text('الشريك','Partner'):text('أنت','Du');const safe=String(msg||'');d.dataset.message=safe;d.innerHTML=`<div class="speaking-bubble-head"><b>${label}</b><span class="speaking-bubble-tools"><button type="button" class="speaking-voice-btn" data-voice="${esc(safe)}" aria-label="${text('سماع الرسالة','Nachricht anhören')}">🔊</button><button type="button" class="speaking-translate-btn" data-translate-msg aria-label="${text('ترجمة الرسالة','Nachricht übersetzen')}">文</button></span></div><span class="speaking-bubble-text">${esc(safe)}</span><div class="speaking-bubble-translation" hidden></div>`;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;const vb=d.querySelector('[data-voice]');if(vb)vb.onclick=()=>speakGerman(vb.dataset.voice,vb);const tb=d.querySelector('[data-translate-msg]');if(tb)tb.onclick=async()=>{const box=d.querySelector('.speaking-bubble-translation');if(!box)return;if(!box.hidden){box.hidden=true;return}tb.disabled=true;box.textContent=text('جارٍ الترجمة…','Übersetzung…');box.hidden=false;try{box.textContent=await translateText(safe,'ar')}catch(e){box.textContent=text('تعذرت الترجمة.','Übersetzung nicht verfügbar.')}finally{tb.disabled=false}};if(autoSpeak&&vb)setTimeout(()=>speakGerman(safe,vb),120)};
  const clock=()=>{if(timer)return;startAt=Date.now();timer=setInterval(()=>{const n=Math.floor((Date.now()-startAt)/1000);timeEl.textContent=String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0')},500)};
  const sendText=async val=>{val=String(val||'').trim();if(!val||busy)return;busy=true;send.disabled=true;add('me',val);transcript.push('Schüler: '+val);history.push({role:'student',content:val});input.value='';clock();try{const r=await api('ai-speaking-session',{method:'POST',body:{id,mode:'turn',transcript:transcript.join('\n'),history,teil:currentTeil}});if(r.reply){add('partner',r.reply,true);history.push({role:'partner',content:r.reply})}}catch(e){add('jerry',e?.message||'AI-Fehler',true)}finally{busy=false;send.disabled=false;input.focus()}};
-  add('jerry',currentTeil==='Teil 1'?'Bitte beginnen Sie mit Ihrer Präsentation. Danach reagiert Ihr Gesprächspartner und stellt Ihnen eine Frage.':currentTeil==='Teil 2'?'Bitte besprechen Sie zunächst den Inhalt des Themas. Danach äußern Sie Ihre Meinung und tauschen Sie sich mit Ihrem Gesprächspartner aus.':'Bitte planen Sie die Aufgabe gemeinsam. Machen Sie einen ersten Vorschlag und finden Sie am Ende eine gemeinsame Lösung.');
+  add('jerry',currentTeil==='Teil 1'?'Bitte beginnen Sie mit Ihrer Präsentation. Danach reagiert Ihr Gesprächspartner und stellt Ihnen eine Jury-Frage.':currentTeil==='Teil 2'?'Bitte besprechen Sie zunächst den Inhalt des Themas. Danach äußern Sie Ihre Meinung und tauschen Sie sich mit Ihrem Gesprächspartner aus.':'Bitte planen Sie die Aufgabe gemeinsam. Machen Sie einen ersten Vorschlag und finden Sie am Ende eine gemeinsame Lösung.');
   if(currentTeil==='Teil 3'){
     (async()=>{try{const r=await api('ai-speaking-session',{method:'POST',body:{id,mode:'opening',teil:currentTeil}});add('partner',r.reply||'Hallo! Schön, dich zu sehen. Lass uns die Aufgabe gemeinsam planen. Wie fangen wir am besten an? Hast du schon eine Idee dazu?',true);history.push({role:'partner',content:r.reply||''});}catch{add('partner','Hallo! Schön, dich zu sehen. Lass uns die Aufgabe gemeinsam planen. Wie fangen wir am besten an? Hast du schon eine Idee dazu?',true);}})();
   } else if(currentTeil==='Teil 2'){
     (async()=>{try{const r=await api('ai-speaking-session',{method:'POST',body:{id,mode:'opening',teil:currentTeil}});add('partner',r.reply||'Ich fasse zunächst kurz den Inhalt des Themas zusammen. Wie würden Sie den Inhalt in Ihren eigenen Worten wiedergeben?',true);history.push({role:'partner',content:r.reply||''});}catch{add('partner','Ich fasse zunächst kurz den Inhalt des Themas zusammen. Wie würden Sie den Inhalt in Ihren eigenen Worten wiedergeben?',true);}})();
-  } else if(currentTeil==='Teil 1') add('partner','Bitte beginnen Sie. Danach reagiere ich auf Ihre Präsentation und stelle eine passende Frage.');
+  } else if(currentTeil==='Teil 1') add('partner','Bitte beginnen Sie mit Ihrer Präsentation. Danach stelle ich Ihnen als Prüfer eine Frage zum Thema.');
   else add('partner','Hallo! Schön, dich zu sehen. Lass uns die Aufgabe gemeinsam planen.');
   send.onclick=()=>sendText(input.value);input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendText(input.value)}});
   finish.onclick=async()=>{if(busy||!transcript.length)return;busy=true;finish.disabled=true;try{const r=await api('ai-speaking-session',{method:'POST',body:{id,mode:'evaluate',transcript:transcript.join('\n'),teil:currentTeil}});evalBox.hidden=false;evalBox.innerHTML=`<div class="speaking-eval-head"><strong>${text('تقييم Jerry','Jerry · Bewertung')}</strong><b>${esc(r.total??0)} / 25</b></div><div class="speaking-eval-grid">${(r.criteria||[]).map(c=>`<article><b>${esc(c.label)}</b><strong>${esc(c.score)} / ${esc(c.max||5)}</strong><p>${esc(c.comment)}</p></article>`).join('')}</div><div class="speaking-feedback"><h3>${text('نقاط القوة','Stärken')}</h3><ul>${(r.strengths||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul><h3>${text('أولوية التحسين','Prioritäten')}</h3><ul>${(r.priorities||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul><p>${esc(getLang()==='ar'?(r.summary_ar||''):(r.summary_de||''))}</p></div>`;evalBox.scrollIntoView({behavior:'smooth',block:'nearest'})}catch(e){add('jerry',e?.message||'AI-Fehler')}finally{busy=false;finish.disabled=false}};
@@ -339,7 +665,9 @@ function initInlineSpeaking(currentTeil){
 function layout(main,side,workspaceClass=''){
  const mockTitle=mockMode?'':`<div class="thema-title-row"><h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}" class="${titleRevealed?'':'thema-title-hidden'}">${esc(model.exercise.title)}</h1><div class="thema-tools">${textTools(model.exercise.title,'thema-title')}<div class="inline-translation" id="thema-title-translation"></div><button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text('إظهار العنوان','Titel anzeigen')}" title="${text('إظهار العنوان','Titel anzeigen')}"><span class="eye-icon eye-off" aria-hidden="true"></span></button></div></div>`;
  const headingTools=mockMode?'':mockTitle;
- const timer=(mockMode||duration)?`<div class="progress-pill ${mockMode?'mock-global-timer':''}" id="timerEl">00:00</div>`:'';
+ const activeDuration = duration || (model?.exercise ? getTelcDurationSeconds(model.exercise) : 1200);
+ const initialMin = String(Math.floor(activeDuration / 60)).padStart(2, '0');
+ const timer=(mockMode||activeDuration)?`<div class="progress-pill ${mockMode?'mock-global-timer':''}" id="timerEl">${initialMin}:00</div>`:'';
  const resultPanel=resultData?`<div class="inline-result-panel ${resultData.percent>=60?'pass':'fail'}"><div class="result-panel-main"><span class="result-panel-label">${text('النتيجة','Ergebnis')}</span><strong>${resultData.score} / ${resultData.max}</strong></div><div class="result-panel-meta"><span>${resultData.percent}%</span><b>${esc(resultData.result||'')}</b></div></div>`:''; return `<div class="exercise-heading"><div class="exercise-heading-title"><span class="tag">Telc ${esc(model.exercise.level||'B2')} · ${esc(model.exercise.section)}</span>${headingTools}<small>${esc(model.exercise.teil)}</small></div>${renderAudio()}${timer}</div>${resultPanel}<div class="exam-workspace ${workspaceClass}"><section class="exam-main">${main}</section><aside class="exam-side">${side}</aside></div><div class="exercise-actions">${mockMode?'':`<a class="btn dark topics-back" href="/dashboard.html">${text('العودة إلى المواضيع','Zurück zu den Themen')}</a>`}<div class="exercise-nav"><button class="btn" id="checkBtn">${text(mockMode?'إنهاء الجزء':'تحقق من الإجابات',mockMode?'Teil beenden':'Antworten prüfen')}</button>${mockMode?'':`<button class="btn model-btn" id="modelBtn">${text('الإجابة النموذجية','Musterlösung')}</button>`}</div></div>`;
 }
 
@@ -358,7 +686,7 @@ function bindActions(){
  };
  const tr=document.getElementById('titleReveal');
  if(tr)tr.onclick=()=>{titleRevealed=!titleRevealed;const h=document.getElementById('thema-title');if(h)h.classList.toggle('thema-title-hidden',!titleRevealed);tr.setAttribute('aria-label',text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen'));};
- if(mockMode){startMockTimer();}else if(duration&&document.getElementById('timerEl')&&!document.getElementById('timerEl').dataset.started){document.getElementById('timerEl').dataset.started='1';startTimer(document.getElementById('timerEl'),duration,submit);}
+ if(mockMode){startMockTimer();}else{startExerciseTimer();}
 }
 
 function renderWorkspace(){stopSpeaking();const t=model.exercise.task_type;const isSpb1=model.exercise.section==='Sprachbausteine'&&model.exercise.teil==='Teil 1';const isMatching=(t==='MATCHING')||(model.exercise.section==='Lesen'&&['Teil 1','Teil 3'].includes(model.exercise.teil))||(model.exercise.section==='Hören'&&model.exercise.teil==='Teil 3');if(t==='WRITING')return renderWriting();if(t==='SPEAKING')return renderSpeaking();if(t==='AUDIO_TF')return renderTF();if(isSpb1)return renderSprachbausteine1();if(isMatching)return renderMatching();return renderChoiceQuestions();}

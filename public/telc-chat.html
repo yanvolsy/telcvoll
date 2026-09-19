@@ -22,23 +22,32 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
   <section class="telc-chat-shell">
     <div class="telc-chat-head">
       <div>
-        <span class="tag" data-i18n="chat_tag">TELC Voll AI</span>
-        <h1 data-i18n="chat_title">مساعد TELC للدراسة</h1>
-        <p class="muted" data-i18n="chat_desc">اسألني عن امتحان TELC أو أي شيء يساعدك في التحضير له: الشرح، التمارين، النصوص، الكتابة، التحدث، القواعد والمفردات.</p>
+        <span class="tag" data-i18n="chat_tag">TELC Voll AI Mentor</span>
+        <h1 data-i18n="chat_title">مساعد TELC ومستشار ألمانيا الذكي</h1>
+        <p class="muted" data-i18n="chat_desc">اسألني صوتيًا أو كتابيًا عن امتحان TELC، تعلم اللغة الألمانية، أو متطلبات الدراسة، الأوسبيلدونغ (Ausbildung)، بطاقة الفرصة (Chancenkarte)، والاعتراف المهني (Anerkennung) في ألمانيا.</p>
+      </div>
+      <div class="chat-voice-toggle-wrap">
+        <button type="button" class="btn light chat-voice-toggle" id="ttsToggleBtn" aria-pressed="true">
+          <span id="ttsToggleIcon">🔊</span>
+          <span id="ttsToggleLabel">صوت المساعد: مفعل</span>
+        </button>
       </div>
     </div>
     <div id="chatMessages" class="telc-chat-messages" aria-live="polite">
       <div id="welcome" class="telc-chat-welcome">
         <div class="telc-chat-welcome-icon">✦</div>
-        <h2 data-i18n="chat_welcome_title">مساعد TELC</h2>
-        <p data-i18n="chat_welcome_desc">أنا هنا لمساعدتك في الدراسة والتحضير لامتحان TELC. اكتب سؤالك وسأجيبك أو أساعدك في إنشاء ما تحتاجه للتدريب.</p>
+        <h2 data-i18n="chat_welcome_title">مساعدك الذكي للدراسة وألمانيا</h2>
+        <p data-i18n="chat_welcome_desc">مرحباً بك! أنا هنا لمساعدتك في التحضير لشهادة TELC (B1, B2, C1)، الإجابة على استفسارات القواعد والكتابة والتحدث، وإرشادك في مسار الدراسة والفيزا والعمل في ألمانيا 🇩🇪. يمكنك التحدث معي صوتيًا أو كتابيًا.</p>
       </div>
     </div>
     <form id="chatForm" class="telc-chat-form">
-      <textarea id="chatInput" rows="2" maxlength="4000" data-i18n-ph="chat_placeholder" placeholder="اكتب سؤالك عن امتحان TELC…" required></textarea>
+      <div class="chat-input-bar">
+        <button type="button" class="icon-btn voice-input-btn" id="micBtn" title="تحدث عبر الميكروفون" aria-label="تسجيل صوتي">🎙️</button>
+        <textarea id="chatInput" rows="2" maxlength="4000" data-i18n-ph="chat_placeholder" placeholder="اكتب سؤالك أو اضغط على الميكروفون للتحدث…" required></textarea>
+      </div>
       <button class="btn" id="sendBtn" type="submit" data-i18n="chat_send">إرسال ↑</button>
     </form>
-    <p class="telc-chat-note" data-i18n="chat_note">مساعدك الدراسي مخصص لمواضيع TELC والتحضير للامتحان والدراسة المرتبطة به.</p>
+    <p class="telc-chat-note" data-i18n="chat_note">مساعدك الدراسي معزز بالذكاء الاصطناعي لمساعدتك في كل مراحل TELC وألمانيا.</p>
   </section>
 </main>
 <script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
@@ -46,19 +55,104 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 const $ = id => document.getElementById(id);
 let history = [];
 let sending = false;
+let ttsEnabled = localStorage.getItem('telc_chat_tts') !== 'false';
+let recognition = null;
+let isRecording = false;
+
+function updateTtsUi(){
+  $('ttsToggleBtn').setAttribute('aria-pressed', String(ttsEnabled));
+  $('ttsToggleIcon').textContent = ttsEnabled ? '🔊' : '🔇';
+  $('ttsToggleLabel').textContent = ttsEnabled ? 'صوت المساعد: مفعل' : 'صوت المساعد: معطل';
+}
+$('ttsToggleBtn').onclick = () => {
+  ttsEnabled = !ttsEnabled;
+  localStorage.setItem('telc_chat_tts', String(ttsEnabled));
+  updateTtsUi();
+  if(!ttsEnabled) window.speechSynthesis.cancel();
+};
+updateTtsUi();
+
+function speakText(text){
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  // Detect language: if mostly latin characters, use German, else Arabic
+  const latinCount = (text.match(/[A-Za-zäöüÄÖÜß]/g) || []).length;
+  const arabicCount = (text.match(/[\u0600-\u06FF]/g) || []).length;
+  u.lang = latinCount >= arabicCount ? 'de-DE' : 'ar-SA';
+  u.rate = 0.95;
+  window.speechSynthesis.speak(u);
+}
+
+// Setup Speech Recognition
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+if(SpeechRec){
+  recognition = new SpeechRec();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.lang = getLang() === 'de' ? 'de-DE' : 'ar-SA';
+
+  recognition.onstart = () => {
+    isRecording = true;
+    $('micBtn').classList.add('recording-active');
+    $('micBtn').title = 'جارٍ الاستماع… اضغط للتوقف';
+  };
+  recognition.onresult = (ev) => {
+    const transcript = ev.results[0][0].transcript;
+    if(transcript){
+      const cur = $('chatInput').value;
+      $('chatInput').value = cur ? cur + ' ' + transcript : transcript;
+      $('chatInput').focus();
+    }
+  };
+  recognition.onerror = () => {
+    isRecording = false;
+    $('micBtn').classList.remove('recording-active');
+    $('micBtn').title = 'تحدث عبر الميكروفون';
+  };
+  recognition.onend = () => {
+    isRecording = false;
+    $('micBtn').classList.remove('recording-active');
+    $('micBtn').title = 'تحدث عبر الميكروفون';
+  };
+
+  $('micBtn').onclick = () => {
+    if(isRecording){
+      recognition.stop();
+    } else {
+      try {
+        recognition.lang = getLang() === 'de' ? 'de-DE' : 'ar-SA';
+        recognition.start();
+      } catch(_) {}
+    }
+  };
+} else {
+  $('micBtn').style.display = 'none';
+}
 
 function esc(s){
   return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
-function add(role, text){
+function add(role, text, allowTts = true){
   const welcome = $('welcome');
   if (welcome) welcome.remove();
   const el = document.createElement('div');
   el.className = 'telc-chat-msg ' + role;
+  const ttsBtn = role === 'assistant' ? `<button type="button" class="bubble-tts-btn" title="استماع للإجابة">🔊</button>` : '';
   el.innerHTML = '<div class="telc-chat-avatar">' + (role === 'assistant' ? 'AI' : 'أنت') + '</div>' +
-    '<div class="telc-chat-bubble">' + esc(text).replace(/\n/g,'<br>') + '</div>';
+    '<div class="telc-chat-bubble">' +
+      '<div class="telc-chat-bubble-content">' + esc(text).replace(/\n/g,'<br>') + '</div>' +
+      ttsBtn +
+    '</div>';
   $('chatMessages').appendChild(el);
   $('chatMessages').scrollTop = $('chatMessages').scrollHeight;
+
+  const btn = el.querySelector('.bubble-tts-btn');
+  if(btn) btn.onclick = () => speakText(text);
+
+  if(role === 'assistant' && allowTts && ttsEnabled){
+    speakText(text);
+  }
 }
 function showTyping(){
   const old = $('typing'); if (old) old.remove();
