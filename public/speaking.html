@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#080808"><title>TELC Voll Med · Sprechen</title>
+<meta name="theme-color" content="#080808"><title>TELC Voll · Sprechen</title>
 <link rel="stylesheet" href="/assets/app.css?v=20260918-cairo-local-v2">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
@@ -28,7 +28,7 @@ html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !impo
 html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}</style>
 </head>
 <body>
-<header class="top"><a class="brand" href="/dashboard.html">TELC Voll Med</a><nav>
+<header class="top"><a class="brand" href="/dashboard.html">TELC Voll</a><nav>
 <a href="/dashboard.html">الرئيسية</a><a href="/errors.html">أخطائي</a><a href="#" id="logout">خروج</a>
 </nav></header>
 <main class="wrap spk-shell"><div class="panel">
@@ -55,7 +55,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <details class="typing-fallback"><summary>استخدام الكتابة بدل الميكروفون</summary><div class="spk-row"><textarea id="input" placeholder="اكتب إجابتك بالألمانية هنا…"></textarea><button class="btn dark" id="send">إرسال</button></div></details>
 <div id="eval" class="card" hidden></div>
 </div></div></main>
-<footer>TELC Voll Med</footer>
+<footer>TELC Voll</footer>
 <script src="/assets/app.js"></script>
 <script>
 const id=new URLSearchParams(location.search).get('id');
@@ -121,7 +121,7 @@ function renderTeil1Studio(){
     { key: 'Film', icon: '🎬', title: 'Ein Film', desc: 'فيلم شاهدته' },
     { key: 'Buch', icon: '📖', title: 'Ein Buch', desc: 'كتاب قرأته' },
     { key: 'Erfahrung', icon: '🌟', title: 'Erfahrung', desc: 'تجربة شخصية مهمة' },
-    { key: 'Person', icon: '👤', title: 'Person / Event', desc: 'شخصية أو حدث' }
+    { key: 'Person', icon: '👤', title: 'Eine wichtige Person', desc: 'شخص مهم' }
   ];
   return `
   <section class="pres-studio-wrap">

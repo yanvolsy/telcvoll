@@ -107,7 +107,7 @@ exports.handler=async(event)=>{
       'Film':'Ein Film (فيلم)',
       'Buch':'Ein Buch (كتاب)',
       'Erfahrung':'Eine persönliche / wichtige Erfahrung (تجربة شخصية)',
-      'Person':'Eine wichtige Person / Sportereignis / Musikveranstaltung (شخصية مهمة أو حدث رياضي/موسيقي)'
+      'Person':'Eine wichtige Person (شخص مهم)'
     };
     const catLabel=categoryTitles[category]||category;
 
