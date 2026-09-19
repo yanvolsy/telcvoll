@@ -93,6 +93,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <script>
 if (qs('error') === 'session') {
   msg.innerHTML = `<div class="alert bad">${getLang() === 'de' ? 'Ihre Sitzung ist abgelaufen oder wurde auf einem anderen Gerät geöffnet. Bitte geben Sie Ihren Code erneut ein.' : 'انتهت الجلسة أو تم تسجيل الدخول من جهاز آخر. يرجى إدخال رمز الوصول مرة أخرى.'}</div>`;
+  try { history.replaceState(null, '', location.pathname); } catch (_) {}
 }
 loginForm.onsubmit = async (e) => {
   e.preventDefault(); msg.innerHTML = '';
@@ -105,9 +106,9 @@ loginForm.onsubmit = async (e) => {
   try {
     const result = await api('auth-login', { method:'POST', body:{ code: rawCode } });
     if (result.token) {
-      localStorage.setItem('telc_student_token', result.token);
+      try { localStorage.setItem('telc_student_token', result.token); } catch (_) {}
     }
-    location.href = result.profile_completed ? '/dashboard.html' : '/profile.html?onboarding=1';
+    location.href = '/dashboard.html';
   } catch(err) {
     if (btn) { btn.disabled = false; btn.textContent = oldText; }
     const errCode = err?.data?.error || err.message;
