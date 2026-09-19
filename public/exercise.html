@@ -24,8 +24,10 @@ const TELC_DUR = {
   B2: { Lesen: { 'Teil 1': 20, 'Teil 2': 25, 'Teil 3': 20, _default: 20 }, Sprachbausteine: { 'Teil 1': 15, 'Teil 2': 10, _default: 15 }, Hören: { 'Teil 1': 6, 'Teil 2': 8, 'Teil 3': 6, _default: 7 }, Schreiben: { 'Teil 1': 30, _default: 30 }, Sprechen: { 'Teil 1': 5, 'Teil 2': 5, 'Teil 3': 5, _default: 5 } },
   C1: { Lesen: { 'Teil 1': 25, 'Teil 2': 25, 'Teil 3': 20, _default: 25 }, Sprachbausteine: { 'Teil 1': 20, 'Teil 2': 20, _default: 20 }, Hören: { 'Teil 1': 12, 'Teil 2': 15, 'Teil 3': 13, _default: 13 }, Schreiben: { 'Teil 1': 70, _default: 70 }, Sprechen: { 'Teil 1': 6, 'Teil 2': 6, 'Teil 3': 6, _default: 6 } }
 };
+function parseSettings(x){if(!x||!x.settings_json)return {};if(typeof x.settings_json==='object')return x.settings_json;try{return JSON.parse(x.settings_json);}catch(_){return {};}}
 function getTelcDurationSeconds(ex){
-  const explicit = Number(ex?.settings_json?.duration_seconds || ex?.duration_seconds || ex?.time_limit_seconds || 0);
+  const s = parseSettings(ex);
+  const explicit = Number(s?.duration_seconds || ex?.duration_seconds || ex?.time_limit_seconds || 0);
   if(explicit > 0) return explicit > 180 ? explicit : explicit * 60;
   const lvl = String(ex?.level || 'B2').toUpperCase();
   const sec = String(ex?.section || '');
@@ -38,11 +40,10 @@ function getTelcDurationSeconds(ex){
   }
   return (secMap._default || 20) * 60;
 }
-const text=(ar,de)=>getLang()==='ar'?ar:de;
+var text = window.text || ((ar,de)=>getLang()==='ar'?ar:de);
 function saveExerciseReturn(){try{sessionStorage.setItem('telc_exercise_return',JSON.stringify({url:location.href,scrollY:window.scrollY}));}catch{}}
 document.getElementById('exerciseBack')?.addEventListener('click',e=>{e.preventDefault();saveExerciseReturn();location.href='/dashboard.html';});
 function escBody(v){return esc(v).replace(/\n/g,'<br>');}
-function parseSettings(x){if(!x||!x.settings_json)return {};if(typeof x.settings_json==='object')return x.settings_json;try{return JSON.parse(x.settings_json);}catch(_){return {};}}
 function answerValue(n){return answers[String(n)]||'';}
 function labelFor(n,val){const it=model.items.find(x=>String(x.position_no)===String(n));const o=(it?.options||[]).find(x=>x.option_key===val);return o?o.option_text:val;}
 function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
@@ -708,10 +709,15 @@ async function submit(){if(submitted)return;if(!model.items.length){if(mockMode)
     if(mockMode)startMockTimer();
   }catch(e){
     console.error('Exercise load error:', e);
+    if (e?.status === 401) {
+      try { localStorage.removeItem('telc_student_token'); } catch (_) {}
+      location.href = '/?error=session';
+      return;
+    }
     const isDe = (typeof getLang === 'function' && getLang() === 'de');
     const msg = e?.message || (isDe ? 'Fehler beim Laden der Übung.' : 'حدث خطأ أثناء تحميل التمرين.');
     const retryTxt = isDe ? 'Erneut versuchen' : 'إعادة المحاولة';
-    const backTxt = isDe ? 'العودة إلى لوحة التمارين' : 'العودة إلى لوحة التمارين';
+    const backTxt = isDe ? 'Zurück zum Dashboard' : 'العودة إلى لوحة التمارين';
     const contentEl = document.getElementById('content');
     if(contentEl){
       contentEl.innerHTML = `

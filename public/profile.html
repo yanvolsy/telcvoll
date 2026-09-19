@@ -28,7 +28,7 @@ html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !impo
 <script>
 const $=id=>document.getElementById(id); let data=null;
 function lang(){return getLang();}
-function text(ar,de){return lang()==='ar'?ar:de;}
+var text = window.text || ((ar,de)=>lang()==='ar'?ar:de);
 function render(){
   const s=data.student||{}, sub=data.subscription||{};
   $('content').innerHTML=`<section class="profile-shell">

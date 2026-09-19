@@ -75,7 +75,7 @@ const SECTION_ORDER=['Lesen','Hören','Sprachbausteine','Schreiben'];
 const SECTION_LABEL={Lesen:'Lesen',Hören:'Hören',Sprachbausteine:'Sprachbausteine',Schreiben:'Schreiben'};
 const state={session:null,models:{},currentIndex:0,timerHandle:null,finishing:false};
 const app=document.getElementById('app');
-const text=(ar,de)=>getLang()==='ar'?ar:de;
+var text = window.text || ((ar,de)=>getLang()==='ar'?ar:de);
 function escBody(v){return esc(v).replace(/\n/g,'<br>')}
 function getSession(){try{const s=JSON.parse(localStorage.getItem('telc_mock_exam')||'null');return s&&s.id===sessionId?s:null}catch{return null}}
 function saveSession(){state.session.currentIndex=state.currentIndex;localStorage.setItem('telc_mock_exam',JSON.stringify(state.session))}

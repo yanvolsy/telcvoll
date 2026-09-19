@@ -41,12 +41,11 @@ function esc(v) {
   }[c]));
 }
 
-function text(ar, de) {
+window.text = window.text || function(ar, de) {
   return (typeof getLang === 'function' && getLang() === 'de') ? de : ar;
-}
-window.text = text;
+};
 
-function sectionIcon(s) {
+window.sectionIcon = window.sectionIcon || function(s) {
   const icons = {
     Lesen: '📖',
     Hören: '🎧',
@@ -55,8 +54,7 @@ function sectionIcon(s) {
     Sprechen: '🎙️'
   };
   return icons[s] || '📄';
-}
-window.sectionIcon = sectionIcon;
+};
 
 document.addEventListener('click', (e) => {
   const b = e.target.closest('[data-copy]');
