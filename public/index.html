@@ -91,11 +91,38 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <script src="/assets/i18n.js"></script>
 <script src="/assets/app.js"></script>
 <script>
+if (qs('error') === 'session') {
+  msg.innerHTML = `<div class="alert bad">${getLang() === 'de' ? 'Ihre Sitzung ist abgelaufen oder wurde auf einem anderen Gerät geöffnet. Bitte geben Sie Ihren Code erneut ein.' : 'انتهت الجلسة أو تم تسجيل الدخول من جهاز آخر. يرجى إدخال رمز الوصول مرة أخرى.'}</div>`;
+}
 loginForm.onsubmit = async (e) => {
   e.preventDefault(); msg.innerHTML = '';
   const fd = new FormData(loginForm);
-  try { const result = await api('auth-login', { method:'POST', body:{ code:fd.get('code') }}); location.href = result.profile_completed ? '/dashboard.html' : '/profile.html?onboarding=1'; }
-  catch(err) { msg.innerHTML=`<div class="alert bad">${t('access_error')}</div>`; }
+  const rawCode = String(fd.get('code') || '').trim();
+  if (!rawCode) return;
+  const btn = loginForm.querySelector('button');
+  const oldText = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = getLang() === 'de' ? 'Wird geprüft…' : 'جارٍ التحقق…'; }
+  try {
+    const result = await api('auth-login', { method:'POST', body:{ code: rawCode } });
+    if (result.token) {
+      localStorage.setItem('telc_student_token', result.token);
+    }
+    location.href = result.profile_completed ? '/dashboard.html' : '/profile.html?onboarding=1';
+  } catch(err) {
+    if (btn) { btn.disabled = false; btn.textContent = oldText; }
+    const errCode = err?.data?.error || err.message;
+    let errorMsg = t('access_error');
+    if (errCode === 'Too many login attempts. Please wait 15 minutes.' || err.status === 429) {
+      errorMsg = getLang() === 'de' ? 'Zu viele Versuche. Bitte warten Sie 15 Minuten.' : 'محاولات دخول متكررة كثيرة. يرجى الانتظار 15 دقيقة قبل المحاولة مرة أخرى.';
+    } else if (errCode === 'expired_or_inactive') {
+      errorMsg = getLang() === 'de' ? 'Dieser Code ist abgelaufen oder inaktiv. Bitte kontaktieren Sie den Administrator.' : 'رمز الدخول هذا منتهي الصلاحية أو غير مفعّل. يرجى مراجعة المشرف.';
+    } else if (errCode === 'invalid' || err.status === 401) {
+      errorMsg = getLang() === 'de' ? 'Ungültiger Zugangscode. Bitte überprüfen Sie den Code.' : 'رمز الدخول غير صحيح. يرجى التأكد من كتابة الرمز بشكل سليم.';
+    } else if (errCode === 'Cross-origin request blocked.' || err.status === 403) {
+      errorMsg = getLang() === 'de' ? 'Anfrage blockiert. Bitte telcvoll.de verwenden.' : 'تم حظر الطلب. يرجى التأكد من الدخول عبر telcvoll.de';
+    }
+    msg.innerHTML = `<div class="alert bad">${esc(errorMsg)}</div>`;
+  }
 };
 (async () => {
   try {

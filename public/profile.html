@@ -49,7 +49,7 @@ function render(){
   $('profileForm').onsubmit=save;
 }
 async function save(e){e.preventDefault();const f=new FormData($('profileForm'));const status=$('profileStatus');status.innerHTML='';const btn=document.querySelector('.profile-save');btn.disabled=true;btn.textContent=text('جارٍ الحفظ…','Wird gespeichert…');try{const r=await api('profile-update',{method:'POST',body:{first_name:f.get('first_name'),last_name:f.get('last_name'),email:f.get('email'),phone:f.get('phone'),country:f.get('country')}});data.student=r.student;status.innerHTML=`<div class="alert ok">${text('تم حفظ بياناتك بنجاح.','Deine Daten wurden erfolgreich gespeichert.')}</div>`;setTimeout(()=>location.href='/dashboard.html',350);}catch(err){const key=err?.data?.error;const msg=key==='invalid_email'?text('يرجى إدخال بريد إلكتروني صحيح.','Bitte gib eine gültige E-Mail-Adresse ein.'):key==='required_fields'?text('يرجى ملء الاسم واللقب والبريد الإلكتروني.','Bitte fülle Vorname, Nachname und E-Mail aus.'):text('تعذر حفظ البيانات حالياً. حاول مرة أخرى.','Die Daten konnten gerade nicht gespeichert werden. Bitte versuche es erneut.');status.innerHTML=`<div class="alert bad">${msg}</div>`;btn.disabled=false;btn.textContent=text('حفظ ومتابعة','Speichern und weiter')+' →';}}
-$('logoutLink').onclick=async e=>{e.preventDefault();await api('auth-logout',{method:'POST'});location.href='/';};
+$('logoutLink').onclick=async e=>{e.preventDefault();try{localStorage.removeItem('telc_student_token');}catch(_){}await api('auth-logout',{method:'POST'});location.href='/';};
 (async()=>{try{data=await api('me');if(!data.student){location.href='/';return;}render();}catch(e){location.href='/?error=session';}})();
 document.addEventListener('langchange',()=>{if(data)render();});
 </script>

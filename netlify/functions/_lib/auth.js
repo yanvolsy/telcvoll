@@ -25,20 +25,22 @@ function getCookies(event) {
 }
 
 function setCookie(name, value, maxAgeSeconds) {
+  const isDev = process.env.NETLIFY_DEV === 'true' || process.env.NODE_ENV === 'development';
   return cookie.serialize(name, value, {
     httpOnly: true,
-    secure: true,
-    sameSite: 'Strict',
+    secure: !isDev,
+    sameSite: 'Lax',
     path: '/',
     maxAge: maxAgeSeconds,
   });
 }
 
 function clearCookie(name) {
+  const isDev = process.env.NETLIFY_DEV === 'true' || process.env.NODE_ENV === 'development';
   return cookie.serialize(name, '', {
     httpOnly: true,
-    secure: true,
-    sameSite: 'Strict',
+    secure: !isDev,
+    sameSite: 'Lax',
     path: '/',
     maxAge: 0,
   });
@@ -46,12 +48,22 @@ function clearCookie(name) {
 
 function studentFromEvent(event) {
   const cookies = getCookies(event);
-  return verify(cookies.student_token);
+  let token = cookies.student_token;
+  if (!token) {
+    const auth = (event.headers && (event.headers.authorization || event.headers.Authorization)) || '';
+    if (auth.startsWith('Bearer ')) token = auth.slice(7).trim();
+  }
+  return verify(token);
 }
 
 function adminFromEvent(event) {
   const cookies = getCookies(event);
-  const payload = verify(cookies.admin_token);
+  let token = cookies.admin_token;
+  if (!token) {
+    const auth = (event.headers && (event.headers.authorization || event.headers.Authorization)) || '';
+    if (auth.startsWith('Bearer ')) token = auth.slice(7).trim();
+  }
+  const payload = verify(token);
   return payload && payload.admin === true ? payload : null;
 }
 

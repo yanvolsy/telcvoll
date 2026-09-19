@@ -1,9 +1,14 @@
 // أدوات مشتركة لكل الصفحات الثابتة.
 async function api(path, options = {}) {
+  const token = localStorage.getItem('telc_student_token') || localStorage.getItem('telc_admin_token');
+  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+  if (token && !headers['Authorization']) {
+    headers['Authorization'] = 'Bearer ' + token;
+  }
   const res = await fetch('/api/' + path, {
     method: options.method || 'GET',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'same-origin',
+    headers,
+    credentials: 'include',
     body: options.body ? JSON.stringify(options.body) : undefined,
   });
   let data = {};

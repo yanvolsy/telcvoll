@@ -10,29 +10,72 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return json(405, { error: 'Method not allowed' });
 
   const ip = clientIp(event);
-  const allowed = await rateLimit('login', 10, 900, ip);
-  if (!allowed) return json(429, { error: 'Too many login attempts. Please wait 15 minutes.' });
+  try {
+    const allowed = await rateLimit('login', 30, 900, ip);
+    if (!allowed) return json(429, { error: 'Too many login attempts. Please wait 15 minutes.' });
+  } catch (err) {
+    console.warn('Rate limit non-fatal error:', err?.message);
+  }
 
   let body;
   try { body = JSON.parse(event.body || '{}'); } catch { return json(400, { error: 'Bad request' }); }
 
-  // Accept both the new compact codes and older codes that contain spaces.
-  const code = String(body.code || '').trim().toUpperCase();
-  const normalizedCode = code.replace(/\s+/g, '');
-  if (!normalizedCode) return json(422, { error: 'Zugangscode erforderlich.' });
+  // Robust code normalization: strip all hidden unicode, directional marks, zero-width chars, spaces, and normalize dashes
+  let raw = String(body.code || '').trim();
+  raw = raw.replace(/[\u200B-\u200D\uFEFF\u200E\u200F\u202A-\u202E\u00A0]/g, '');
+  const clean = raw.toUpperCase().replace(/\s+/g, '').replace(/[–—−_]/g, '-');
+  if (!clean) return json(422, { error: 'Zugangscode erforderlich.' });
+
+  const withHyphen = clean.includes('-') ? clean : (clean.startsWith('TV') ? 'TV-' + clean.slice(2) : 'TV-' + clean);
+  const withoutHyphen = clean.replace(/-/g, '');
+  const pureSuffix = withoutHyphen.startsWith('TV') ? withoutHyphen.slice(2) : withoutHyphen;
 
   const pool = db();
   const client = await pool.connect();
   try {
+    // Auto-ensure profile columns exist on students table without failing
+    try {
+      await client.query(`
+        ALTER TABLE students ADD COLUMN IF NOT EXISTS first_name VARCHAR(100);
+        ALTER TABLE students ADD COLUMN IF NOT EXISTS last_name VARCHAR(100);
+        ALTER TABLE students ADD COLUMN IF NOT EXISTS phone VARCHAR(40);
+        ALTER TABLE students ADD COLUMN IF NOT EXISTS country VARCHAR(100);
+        ALTER TABLE students ADD COLUMN IF NOT EXISTS profile_completed BOOLEAN NOT NULL DEFAULT FALSE;
+        ALTER TABLE students ADD COLUMN IF NOT EXISTS profile_updated_at TIMESTAMP NULL;
+      `);
+    } catch (_) {}
+
     const { rows } = await client.query(
       `SELECT c.*, p.duration_days, p.ai_enabled
        FROM access_codes c JOIN plans p ON p.id=c.plan_id
-       WHERE (c.code=$1 OR REPLACE(UPPER(c.code),' ','')=$1)
-         AND c.active=TRUE AND c.expires_at>NOW()`,
-      [normalizedCode]
+       WHERE (
+         UPPER(c.code) = $1
+         OR UPPER(c.code) = $2
+         OR REPLACE(REPLACE(UPPER(c.code),' ',''),'-','') = $3
+         OR REPLACE(REPLACE(REPLACE(UPPER(c.code),'TV-',''),' ',''),'-','') = $4
+       )
+         AND c.active=TRUE AND c.expires_at>NOW()
+       ORDER BY c.expires_at DESC LIMIT 1`,
+      [clean, withHyphen, withoutHyphen, pureSuffix]
     );
     const c = rows[0];
-    if (!c) return json(401, { error: 'invalid' });
+    if (!c) {
+      // Check if code exists but is expired or deactivated to give clear feedback
+      const checkRes = await client.query(
+        `SELECT active, expires_at FROM access_codes
+         WHERE (
+           UPPER(code) = $1
+           OR UPPER(code) = $2
+           OR REPLACE(REPLACE(UPPER(code),' ',''),'-','') = $3
+           OR REPLACE(REPLACE(REPLACE(UPPER(code),'TV-',''),' ',''),'-','') = $4
+         ) LIMIT 1`,
+        [clean, withHyphen, withoutHyphen, pureSuffix]
+      );
+      if (checkRes.rows[0]) {
+        return json(401, { error: 'expired_or_inactive' });
+      }
+      return json(401, { error: 'invalid' });
+    }
 
     await client.query('BEGIN');
     let studentId = c.student_id;
@@ -53,8 +96,13 @@ exports.handler = async (event) => {
     );
     await client.query('COMMIT');
 
-    const profileRes = await client.query('SELECT profile_completed FROM students WHERE id=$1', [studentId]);
-    const profileCompleted = profileRes.rows[0]?.profile_completed === true;
+    let profileCompleted = true;
+    try {
+      const profileRes = await client.query('SELECT profile_completed FROM students WHERE id=$1', [studentId]);
+      profileCompleted = profileRes.rows[0]?.profile_completed === true;
+    } catch (_) {
+      profileCompleted = true;
+    }
 
     const jwtToken = sign({
       student_id: studentId,
@@ -63,11 +111,11 @@ exports.handler = async (event) => {
       ai_enabled: !!c.ai_enabled,
     });
 
-    return json(200, { ok: true, profile_completed: profileCompleted }, {
+    return json(200, { ok: true, profile_completed: profileCompleted, token: jwtToken }, {
       'Set-Cookie': setCookie('student_token', jwtToken, 60 * 60 * 24 * 30),
     });
   } catch (e) {
-    await client.query('ROLLBACK');
+    try { await client.query('ROLLBACK'); } catch (_) {}
     return json(500, { error: e.message });
   } finally {
     client.release();
