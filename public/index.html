@@ -27,10 +27,14 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 </header>
 
 <main class="landing-page">
+  <div class="landing-ambient-mesh" aria-hidden="true">
+    <div class="mesh-shape mesh-shape-1"></div>
+    <div class="mesh-shape mesh-shape-2"></div>
+  </div>
   <section class="landing-hero">
     <div class="landing-hero-copy">
       <div class="landing-kicker"><span class="landing-kicker-dot"></span><span data-i18n="hero_tag">منصة تدريب TELC Voll</span></div>
-      <h1 data-i18n="hero_title">تدرّب بذكاء.<br><span>ادخل الامتحان بثقة.</span></h1>
+      <h1 data-i18n="hero_title">تدرّب بذكاء.<br><span class="hero-gradient-text">ادخل الامتحان بثقة.</span></h1>
       <p data-i18n="hero_desc">منصة تدريب احترافية لمحاكاة امتحان TELC Voll والتدرب على Lesen وHören وSprachbausteine وSchreiben وSprechen.</p>
       <div class="landing-levels" aria-label="مستويات TELC Voll">
         <span>B1</span><span class="active">B2</span><span>C1</span>
@@ -61,7 +65,13 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
   </section>
 
   <section class="landing-showcase">
-    <div class="landing-showcase-image"><img class="visual" src="/assets/dashboard-preview.svg" alt="واجهة منصة TELC Voll"></div>
+    <div class="landing-showcase-image">
+      <div class="showcase-browser-bar">
+        <div class="showcase-dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></div>
+        <div class="showcase-url-bar">telcvoll.app/dashboard</div>
+      </div>
+      <img class="visual" src="/assets/dashboard-preview.svg" alt="واجهة منصة TELC Voll">
+    </div>
     <div class="landing-showcase-copy"><span class="tag" data-i18n="studentexp_tag">تجربة الطالب</span><h2 data-i18n="studentexp_title">واجهة صُممت لتبقى مركز تركيزك</h2><p class="muted" data-i18n="studentexp_desc">انتقل بين المستويات والمهارات والتمارين بسهولة، وواصل من حيث توقفت دون تعقيد.</p><div class="landing-mini-grid"><div><b>B1</b><span>Grundlagen</span></div><div class="featured"><b>B2</b><span>Prüfung</span></div><div><b>C1</b><span>Fortgeschritten</span></div></div></div>
   </section>
 

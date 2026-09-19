@@ -53,7 +53,7 @@ function render(){
   const has=levelAvailable(state.level);
   $('content').innerHTML=`
     <section class="hub-head">
-      <div class="hub-title-block"><span class="hub-greeting">${text('مرحباً، '+(state.student?.name||'الطالب'),'Hallo, '+(state.student?.name||'Student'))}</span><h1>${text('منصة الطالب','Student Platform')}</h1><p class="muted">${text('اختر المستوى والقسم ثم افتح التمرين.','Wähle Niveau und Prüfungsteil und öffne anschließend die Übung.')}</p></div>
+      <div class="hub-title-block"><span class="hub-greeting"><span>✨</span> ${text('مرحباً، '+(state.student?.name||'الطالب'),'Hallo, '+(state.student?.name||'Student'))}</span><h1>${text('منصة الطالب','Student Platform')}</h1><p class="muted">${text('اختر المستوى والقسم ثم افتح التمرين.','Wähle Niveau und Prüfungsteil und öffne anschließend die Übung.')}</p></div>
       <div class="hub-kpis">
         <div class="hub-kpi days-kpi ${remainingDays<=2?'warning':''}"><strong>${remainingDays}</strong><span>${text('يوم متبقٍ','Tage verbleibend')}</span></div>
         <div class="hub-progress-card" aria-label="${text('تقدم الطالب','Lernfortschritt')}">

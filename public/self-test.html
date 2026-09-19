@@ -48,4 +48,4 @@ function start(){
 }
 (async()=>{try{const d=await api('me');exercises=d.exercises||[];render();}catch(e){location.href='/?error=session';}})();
 logoutLink.onclick=async e=>{e.preventDefault();await api('auth-logout',{method:'POST'});location.href='/';};
-</script>`;
+</script></body></html>
