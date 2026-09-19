@@ -1,8 +1,8 @@
 {
-  "name": "telc-platform-netlify",
+  "name": "telcvoll-med",
   "version": "1.0.0",
   "private": true,
-  "description": "TELC Platform converted to Netlify Functions + Postgres",
+  "description": "TELC Voll Med Platform",
   "dependencies": {
     "pg": "^8.11.5",
     "jsonwebtoken": "^9.0.2",

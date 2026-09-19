@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#080808"><title>TELC Voll · Sprechen</title>
+<meta name="theme-color" content="#080808"><title>TELC Voll Med · Sprechen</title>
 <link rel="stylesheet" href="/assets/app.css?v=20260918-cairo-local-v2">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
@@ -28,7 +28,7 @@ html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !impo
 html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}</style>
 </head>
 <body>
-<header class="top"><a class="brand" href="/dashboard.html">TELC Voll</a><nav>
+<header class="top"><a class="brand" href="/dashboard.html">TELC Voll Med</a><nav>
 <a href="/dashboard.html">الرئيسية</a><a href="/errors.html">أخطائي</a><a href="#" id="logout">خروج</a>
 </nav></header>
 <main class="wrap spk-shell"><div class="panel">
@@ -55,7 +55,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <details class="typing-fallback"><summary>استخدام الكتابة بدل الميكروفون</summary><div class="spk-row"><textarea id="input" placeholder="اكتب إجابتك بالألمانية هنا…"></textarea><button class="btn dark" id="send">إرسال</button></div></details>
 <div id="eval" class="card" hidden></div>
 </div></div></main>
-<footer>TELC Voll</footer>
+<footer>TELC Voll Med</footer>
 <script src="/assets/app.js"></script>
 <script>
 const id=new URLSearchParams(location.search).get('id');
@@ -392,14 +392,25 @@ async function load(){try{
    if(same){data=await api('exercise-get',{method:'GET',query:{id:same.id}});ex=data.exercise}
  }
  $('level').textContent=ex.level||'';$('title').textContent=ex.title||'Sprechen';$('teilLabel').textContent=ex.teil||'Teil 1';$('task').textContent=ex.body||'';
- document.getElementById('teil1Studio').innerHTML=renderTeil1Studio();bindTeil1StudioEvents();
- document.getElementById('teil3Tasks').innerHTML=renderTeil3Tasks();renderPhases();$('chat').innerHTML='';history=[];transcript=[];$('liveTranscript').textContent='اضغط على الميكروفون وابدأ الحديث بالألمانية…';addBubble('jerry',currentTeil()==='Teil 2'?'Bitte besprechen Sie zunächst den Inhalt des Themas. Danach äußern Sie Ihre Meinung und tauschen Sie sich mit Ihrem Gesprächspartner aus.':currentTeil()==='Teil 1'?'Bitte beginnen Sie mit Ihrer Präsentation. Danach stellt Ihnen die Jury Fragen zum Verständnis.':'Bitte planen Sie die Aufgabe gemeinsam. Machen Sie einen ersten Vorschlag und finden Sie am Ende eine gemeinsame Lösung.');
- if(currentTeil()==='Teil 3'){
-   try{const opening=await api('ai-speaking-session',{method:'POST',body:{id,mode:'opening',teil:currentTeil()}});addBubble('partner',opening.reply||'Hallo! Schön, dich zu sehen. Lass uns die Aufgabe gemeinsam planen. Wie fangen wir am besten an? Hast du schon eine Idee dazu?',true);history.push({role:'partner',content:opening.reply||''})}catch{addBubble('partner','Hallo! Schön, dich zu sehen. Lass uns die Aufgabe gemeinsam planen. Wie fangen wir am besten an? Hast du schon eine Idee dazu?',true)}
- } else if(currentTeil()==='Teil 2'){
-   try{const opening=await api('ai-speaking-session',{method:'POST',body:{id,mode:'opening',teil:currentTeil()}});addBubble('partner',opening.reply||'Ich fasse zunächst kurz den Inhalt des Themas zusammen. Wie würden Sie den Inhalt in Ihren eigenen Worten wiedergeben?',true);history.push({role:'partner',content:opening.reply||''})}catch{addBubble('partner','Ich fasse zunächst kurz den Inhalt des Themas zusammen. Wie würden Sie den Inhalt in Ihren eigenen Worten wiedergeben?',true)}
- }
- $('app').hidden=false;$('loading').hidden=true;
+  const isT1 = currentTeil()==='Teil 1';
+  document.getElementById('teil1Studio').innerHTML=renderTeil1Studio();bindTeil1StudioEvents();
+  document.getElementById('teil3Tasks').innerHTML=renderTeil3Tasks();renderPhases();
+  $('modelBox').hidden = isT1;
+  $('chat').hidden = isT1;
+  $('voicePanel').hidden = isT1;
+  const tf = document.querySelector('.typing-fallback');
+  if(tf) tf.hidden = isT1;
+  if(isT1){
+    $('app').hidden=false;$('loading').hidden=true;
+    return;
+  }
+  $('chat').innerHTML='';history=[];transcript=[];$('liveTranscript').textContent='اضغط على الميكروفون وابدأ الحديث بالألمانية…';addBubble('jerry',currentTeil()==='Teil 2'?'Bitte besprechen Sie zunächst den Inhalt des Themas. Danach äußern Sie Ihre Meinung und tauschen Sie sich mit Ihrem Gesprächspartner aus.':currentTeil()==='Teil 1'?'Bitte beginnen Sie mit Ihrer Präsentation. Danach stellt Ihnen die Jury Fragen zum Verständnis.':'Bitte planen Sie die Aufgabe gemeinsam. Machen Sie einen ersten Vorschlag und finden Sie am Ende eine gemeinsame Lösung.');
+  if(currentTeil()==='Teil 3'){
+    try{const opening=await api('ai-speaking-session',{method:'POST',body:{id,mode:'opening',teil:currentTeil()}});addBubble('partner',opening.reply||'Hallo! Schön, dich zu sehen. Lass uns die Aufgabe gemeinsam planen. Wie fangen wir am besten an? Hast du schon eine Idee dazu?',true);history.push({role:'partner',content:opening.reply||''})}catch{addBubble('partner','Hallo! Schön, dich zu sehen. Lass uns die Aufgabe gemeinsam planen. Wie fangen wir am besten an? Hast du schon eine Idee dazu?',true)}
+  } else if(currentTeil()==='Teil 2'){
+    try{const opening=await api('ai-speaking-session',{method:'POST',body:{id,mode:'opening',teil:currentTeil()}});addBubble('partner',opening.reply||'Ich fasse zunächst kurz den Inhalt des Themas zusammen. Wie würden Sie den Inhalt in Ihren eigenen Worten wiedergeben?',true);history.push({role:'partner',content:opening.reply||''})}catch{addBubble('partner','Ich fasse zunächst kurz den Inhalt des Themas zusammen. Wie würden Sie den Inhalt in Ihren eigenen Worten wiedergeben?',true)}
+  }
+  $('app').hidden=false;$('loading').hidden=true;
  }catch(e){$('loading').textContent=e?.message||'Fehler beim Laden.'}}
 function getRecognition(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR)return null; const r=new SR();r.lang='de-DE';r.interimResults=true;r.continuous=false;r.maxAlternatives=1; return r}
 function startListening(){if(!voiceRunning||busy||speakingNow)return; if(!recognition)recognition=getRecognition(); if(!recognition){setVoiceStatus('هذا المتصفح لا يدعم التعرف على الكلام. استخدم Chrome على الكمبيوتر أو خيار الكتابة.');return} $('voicePanel').classList.add('active');$('mic').classList.add('listening');$('mic').disabled=true;$('stop').disabled=false;setVoiceStatus('Jerry يستمع إليك… تحدث الآن بالألمانية');$('liveTranscript').textContent='…';let finalText='';

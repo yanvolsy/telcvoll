@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1310"><title>تمرين TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260918-cairo-local-v2">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1310"><title>تمرين · TELC Voll Med</title><link rel="stylesheet" href="/assets/app.css?v=20260918-cairo-local-v2">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
@@ -634,15 +634,32 @@ function renderSpeaking(){
  const hint=teil==='Teil 1'?text('اختر موضوع العرض التقديمي واستعد للإلقاء ومناقشة أسئلة اللجنة مع الشريك.','Wählen Sie ein Thema für Ihre Präsentation und bereiten Sie sich auf die Fragen der Prüfer vor.'):
  teil==='Teil 2'?text('ناقش الموضوع مع الشريك: ابدأ بالمحتوى ثم عبّر عن رأيك وناقش التجارب والمزايا والعيوب وأسئلة اللجنة.','Diskutiere das Thema mit deinem Partner: Beginne mit dem Inhalt, äußere deine Meinung und besprecht Erfahrungen sowie Vor- und Nachteile.'):
  text('خططا المهمة معًا خطوة بخطوة، تفاوضا حول النقاط المطلوبة، ثم توصلا إلى اتفاق واضح.','Plant die Aufgabe gemeinsam Schritt für Schritt, besprecht die vorgegebenen Punkte und findet am Ende eine klare gemeinsame Lösung.');
+
+ if(teil==='Teil 1'){
+   if(model?.exercise?.title){
+     const t=model.exercise.title.toLowerCase();
+     if(t.includes('film')||t.includes('kino')) currentPresCategory='Film';
+     else if(t.includes('buch')||t.includes('roman')||t.includes('lesen')) currentPresCategory='Buch';
+     else if(t.includes('erfahrung')||t.includes('erlebnis')) currentPresCategory='Erfahrung';
+     else if(t.includes('person')||t.includes('sport')||t.includes('event')) currentPresCategory='Person';
+     else if(t.includes('reise')||t.includes('urlaub')||t.includes('stadt')) currentPresCategory='Reise';
+   }
+   document.getElementById('content').innerHTML=`<div class="speaking-exercise-shell">
+   <div class="thema-title-row speaking-title-row"><h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title)}" class="${titleRevealed?'':'thema-title-hidden'}">${esc(model.exercise.title)}</h1><div class="thema-tools">${textTools(model.exercise.title,'thema-title')}<div class="inline-translation" id="thema-title-translation"></div><button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text('إظهار العنوان','Titel anzeigen')}"><span class="eye-icon eye-off"></span></button></div></div>
+   ${renderTeil1Studio()}
+   </div>`;
+   bindTeil1StudioEvents();
+   bindTextTools();
+   return;
+ }
+
  document.getElementById('content').innerHTML=`<div class="speaking-exercise-shell">
  <div class="thema-title-row speaking-title-row"><h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title)}" class="${titleRevealed?'':'thema-title-hidden'}">${esc(model.exercise.title)}</h1><div class="thema-tools">${textTools(model.exercise.title,'thema-title')}<div class="inline-translation" id="thema-title-translation"></div><button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text('إظهار العنوان','Titel anzeigen')}"><span class="eye-icon eye-off"></span></button></div></div>
- ${teil==='Teil 1'?renderTeil1Studio():''}
  <div class="speaking-layout"><section class="speaking-task-panel"><div class="speaking-task-head"><span class="tag">${esc(model.exercise.level||'B2')} · ${esc(teil)}</span><strong>${text('الموضوع','Thema')}</strong></div><div class="speaking-task-text question-text-tools">${textTools(body,qid)}<div id="${qid}" data-content-id="${qid}" data-source="${esc(body)}">${escBody(body)}</div>${translationBox(qid+'-translation')}</div>${teil==='Teil 3'?renderSpeakingTaskList(body):''}<div class="speaking-hint">${esc(hint)}</div></section>
  <section class="speaking-simulator"><div class="speaking-sim-head"><div><span class="tag">${esc(teil)}</span><h2>${text('محادثة مع الشريك والممتحن','Gespräch mit Partner & Prüfer')}</h2><small>${text('اكتب إجابتك بالألمانية واستمع إلى رد الشريك صوتيًا.','Schreibe deine Antwort auf Deutsch und höre die Antwort deines Partners an.')}</small></div><span class="speaking-live-dot">●</span></div><div class="speaking-roles"><div class="speaking-role"><span class="speaking-avatar jerry-avatar">J</span><div><b>Jerry</b><small>${text('الممتحن والمدرب','Prüfer & Trainer')}</small></div></div><div class="speaking-role"><span class="speaking-avatar partner-avatar">P</span><div><b>${text('الشريك','Partner')}</b><small>${text('يتفاعل معك في المحادثة','Gesprächspartner')}</small></div></div></div><div class="speaking-chat" id="speakingChat"></div>
  <div class="speaking-writing-box"><div class="speaking-writing-label"><span>${text('إجابتك','Deine Antwort')}</span><small>${text('اكتب بالألمانية ثم اضغط إرسال','Auf Deutsch schreiben und Senden drücken')}</small></div><div class="speaking-input-row"><textarea id="speakingInput" placeholder="${text('اكتب ردك هنا بالألمانية…','Schreibe deine Antwort auf Deutsch…')}"></textarea><button type="button" class="btn dark" id="speakingSend">${text('إرسال','Senden')}</button></div></div>
  <div class="speaking-controls"><span class="speaking-time" id="speakingTime">00:00</span><button type="button" class="btn model-btn speaking-model-btn" id="speakingModel">${text('إجابة نموذجية بالذكاء الاصطناعي','KI-Musterantwort')}</button><button type="button" class="btn dark" id="speakingFinish">${text('إنهاء وتقييم','Beenden & bewerten')}</button></div><div id="speakingModelBox" class="speaking-model-box" hidden></div><div id="speakingEval" class="speaking-eval" hidden></div></section></div></div>`;
  initInlineSpeaking(teil);bindTextTools();
- if(teil==='Teil 1') bindTeil1StudioEvents();
  document.querySelector('[data-toggle-speaking-tasks]')?.addEventListener('click',e=>{const list=document.querySelector('[data-speaking-task-list]');if(!list)return;const hidden=list.hidden;list.hidden=!hidden;e.currentTarget.textContent=hidden?'▾':'▸';e.currentTarget.setAttribute('aria-expanded',String(hidden));});
 }
 function initInlineSpeaking(currentTeil){
