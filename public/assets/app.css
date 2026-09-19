@@ -2333,3 +2333,43 @@ html[data-theme="dark"] .exercise-actions {
   }
 }
 
+/* When a section has 1 Teil (e.g. Schreiben), remove middle gap and keep search + shuffle clean */
+html[dir="rtl"] .student-hub .topic-toolbar.no-teil-tabs {
+  grid-template-columns: 320px 1fr 56px !important;
+}
+html[dir="ltr"] .student-hub .topic-toolbar.no-teil-tabs {
+  grid-template-columns: 56px 1fr 320px !important;
+}
+@media(max-width:1050px){
+  html[dir="rtl"] .student-hub .topic-toolbar.no-teil-tabs {
+    grid-template-columns: 280px 1fr 52px !important;
+  }
+  html[dir="ltr"] .student-hub .topic-toolbar.no-teil-tabs {
+    grid-template-columns: 52px 1fr 280px !important;
+  }
+}
+@media(max-width:700px){
+  html[dir="rtl"] .student-hub .topic-toolbar.no-teil-tabs,
+  html[dir="ltr"] .student-hub .topic-toolbar.no-teil-tabs {
+    grid-template-columns: 52px 1fr !important;
+  }
+}
+
+/* Anti-copy & selection protection across learner platform */
+body:not(.is-admin-page),
+body:not(.is-admin-page) *:not(input):not(textarea) {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+}
+body:not(.is-admin-page) input,
+body:not(.is-admin-page) textarea,
+body:not(.is-admin-page) [contenteditable="true"] {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  user-select: text !important;
+}
+
+

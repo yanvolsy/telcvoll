@@ -19,7 +19,13 @@ async function api(path, options = {}) {
     clearTimeout(timeoutId);
     let data = {};
     try { data = await res.json(); } catch { /* no json body */ }
-    if (!res.ok) throw Object.assign(new Error(data.error || res.statusText), { status: res.status, data });
+    if (!res.ok) {
+      if (res.status === 401 && !location.pathname.startsWith('/admin') && location.pathname !== '/' && location.pathname !== '/index.html' && location.pathname !== '/contact.html') {
+        try { localStorage.removeItem('telc_student_token'); } catch (_) {}
+        location.href = '/?error=session';
+      }
+      throw Object.assign(new Error(data.error || res.statusText), { status: res.status, data });
+    }
     return data;
   } catch (err) {
     clearTimeout(timeoutId);
@@ -236,5 +242,116 @@ function initAdminLoginTools() {
 }
 
 document.addEventListener('DOMContentLoaded', initAdminLoginTools);
+
+// Anti-copy & right-click protection for learner/public pages
+(function initAntiCopy() {
+  if (location.pathname.startsWith('/admin')) return;
+
+  // Block right-click context menu
+  document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    return false;
+  }, { capture: true });
+
+  // Block copy event
+  document.addEventListener('copy', function(e) {
+    var t = e.target;
+    var isEditable = t && (t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && !['button','submit','checkbox','radio'].includes(t.type)));
+    if (!isEditable) {
+      e.preventDefault();
+      return false;
+    }
+  }, { capture: true });
+
+  // Block cut event
+  document.addEventListener('cut', function(e) {
+    var t = e.target;
+    var isEditable = t && (t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && !['button','submit','checkbox','radio'].includes(t.type)));
+    if (!isEditable) {
+      e.preventDefault();
+      return false;
+    }
+  }, { capture: true });
+
+  // Block selectstart event
+  document.addEventListener('selectstart', function(e) {
+    var t = e.target;
+    var isEditable = t && (t.tagName === 'TEXTAREA' || t.tagName === 'INPUT');
+    if (!isEditable) {
+      e.preventDefault();
+      return false;
+    }
+  }, { capture: true });
+
+  // Block dragstart event
+  document.addEventListener('dragstart', function(e) {
+    var t = e.target;
+    var isEditable = t && (t.tagName === 'TEXTAREA' || t.tagName === 'INPUT');
+    if (!isEditable) {
+      e.preventDefault();
+      return false;
+    }
+  }, { capture: true });
+
+  // Block shortcut keys: Ctrl+C, Ctrl+X, Ctrl+U, Ctrl+S, Ctrl+P
+  document.addEventListener('keydown', function(e) {
+    var isCtrl = e.ctrlKey || e.metaKey;
+    if (!isCtrl) return;
+    var k = (e.key || '').toLowerCase();
+    var t = e.target;
+    var isEditable = t && (t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && !['button','submit','checkbox','radio'].includes(t.type)));
+
+    if ((k === 'c' || k === 'x') && !isEditable) {
+      e.preventDefault();
+      return false;
+    }
+    if (k === 'u' || k === 's' || k === 'p') {
+      if (location.pathname.includes('exercise') || location.pathname.includes('dashboard') || location.pathname.includes('speaking')) {
+        e.preventDefault();
+        return false;
+      }
+    }
+  }, { capture: true });
+})();
+
+// Enforce single active session for student
+(function initStudentSessionWatcher() {
+  if (location.pathname.startsWith('/admin') || location.pathname === '/' || location.pathname === '/index.html' || location.pathname === '/contact.html') return;
+  var token = localStorage.getItem('telc_student_token');
+  var hasCookie = document.cookie.includes('student_token');
+  if (!token && !hasCookie) return;
+
+  var checking = false;
+  async function checkSingleSession() {
+    if (checking || document.hidden) return;
+    checking = true;
+    try {
+      var headers = {};
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+      var res = await fetch('/api/session', { credentials: 'include', headers: headers });
+      if (res.status === 401) {
+        try { localStorage.removeItem('telc_student_token'); } catch (_) {}
+        location.href = '/?error=session';
+        return;
+      }
+      var d = await res.json();
+      if (d && d.role === null) {
+        try { localStorage.removeItem('telc_student_token'); } catch (_) {}
+        location.href = '/?error=session';
+      }
+    } catch (_) {
+      // Network glitches should not log student out
+    } finally {
+      checking = false;
+    }
+  }
+
+  setInterval(checkSingleSession, 20000);
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') checkSingleSession();
+  });
+  window.addEventListener('focus', checkSingleSession);
+})();
+
 
 

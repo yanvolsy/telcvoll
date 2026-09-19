@@ -56,5 +56,13 @@ function requireAdmin(event) {
   return adminFromEvent(event);
 }
 
-module.exports = { requireStudent, requireAdmin };
+async function requireSession(event) {
+  const admin = adminFromEvent(event);
+  if (admin) return { role: 'admin' };
+  const student = await requireStudent(event);
+  if (student) return { role: 'student', ...student };
+  return null;
+}
+
+module.exports = { requireStudent, requireAdmin, requireSession };
 
