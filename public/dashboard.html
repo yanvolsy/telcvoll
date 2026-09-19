@@ -35,6 +35,8 @@ let selectedTeil='';
 function calcRemainingDays(){const raw=state.subscription?.expires_at;if(!raw)return 0;const ms=new Date(raw).getTime()-Date.now();return Math.max(0,Math.ceil(ms/86400000));}
 const $=id=>document.getElementById(id);
 function lang(){return getLang();}
+function text(ar,de){return (typeof getLang==='function' && getLang()==='de')?de:ar;}
+function sectionIcon(s){const icons={Lesen:'📖',Hören:'🎧',Sprachbausteine:'🧩',Schreiben:'✍️',Sprechen:'🎙️'};return icons[s]||'📄';}
 const TELC_DURATIONS = {
   B1: {
     Lesen: { 'Teil 1': 20, 'Teil 2': 20, 'Teil 3': 15, _default: 20 },
@@ -76,17 +78,24 @@ function exerciseDuration(x){
 function sectionLabel(s){return ({Lesen:'Lesen',Hören:'Hören',Sprachbausteine:'Sprachbausteine',Schreiben:'Schreiben',Sprechen:'Sprechen'})[s]||s;}
 function taskTypeLabel(type){const map={MATCHING:{ar:'مطابقة',de:'Zuordnung'},MCQ:{ar:'اختيار من متعدد',de:'Multiple Choice'},AUDIO_TF:{ar:'صحيح / خطأ',de:'Richtig / Falsch'},WRITING:{ar:'كتابة',de:'Schreiben'},SPEAKING:{ar:'تحدث',de:'Sprechen'}};const x=map[type];return x?text(x.ar,x.de):type;}
 function levelAvailable(level){return state.exercises.some(x=>(x.level||'B2')===level);}
-function availableTeileFor(section, level=state.level){const order=TEIL_ORDER[section]||[];const present=new Set(state.exercises.filter(x=>(x.level||'B2')===level&&x.section===section).map(x=>String(x.teil||'').trim()).filter(Boolean));return order.filter(t=>present.has(t)).concat([...present].filter(t=>!order.includes(t)).sort((a,b)=>a.localeCompare(b,'de',{numeric:true})));}
+function availableTeileFor(section, level=state.level){
+  const order=TEIL_ORDER[section]||['Teil 1'];
+  const present=new Set(state.exercises.filter(x=>(x.level||'B2')===level&&x.section===section).map(x=>String(x.teil||'').trim()).filter(Boolean));
+  if(!present.size) return order.slice();
+  return order.filter(t=>present.has(t)).concat([...present].filter(t=>!order.includes(t)).sort((a,b)=>a.localeCompare(b,'de',{numeric:true})));
+}
 function levelExercises(level=state.level){return state.exercises.filter(x=>(x.level||'B2')===level);}
 function totalCountForLevel(){return levelExercises().length;}
 function completedCountForLevel(){return levelExercises().filter(x=>isExerciseCompleted(x.id)).length;}
 function levelProgressPercent(){const total=totalCountForLevel();return total?Math.round((completedCountForLevel()/total)*100):0;}
 function render(){
+  const contentEl = $('content');
+  if(!contentEl) return;
   const list=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===state.section);
   const availableTeile=availableTeileFor(state.section);
   if(!availableTeile.includes(selectedTeil)) selectedTeil=availableTeile[0]||'';
   const has=levelAvailable(state.level);
-  $('content').innerHTML=`
+  contentEl.innerHTML=`
     <section class="hub-head">
       <div class="hub-title-block"><span class="hub-greeting"><span>✨</span> ${text('مرحباً، '+(state.student?.name||'الطالب'),'Hallo, '+(state.student?.name||'Student'))}</span><h1>${text('منصة الطالب','Student Platform')}</h1><p class="muted">${text('اختر المستوى والقسم ثم افتح التمرين.','Wähle Niveau und Prüfungsteil und öffne anschließend die Übung.')}</p></div>
       <div class="hub-kpis">
@@ -129,7 +138,7 @@ function render(){
   document.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>{state.section=b.dataset.section;selectedTeil=availableTeileFor(state.section)[0]||'';render();});
   document.querySelectorAll('[data-teil]').forEach(b=>b.onclick=()=>{selectedTeil=b.dataset.teil;renderTopics();});
   const nav=$('telcChatNav'); if(nav) nav.href='/telc-chat.html';
-  $('search').oninput=renderTopics;
+  const searchInput=$('search'); if(searchInput) searchInput.oninput=renderTopics;
   const shuffleBtn=$('shuffleToggle'); if(shuffleBtn) shuffleBtn.onclick=()=>{shuffleEnabled=!shuffleEnabled; shuffleOrderKey=''; shuffleOrder=[]; updateShuffleButton(); renderTopics();};
   renderTopics();
 }
@@ -146,7 +155,9 @@ function updateShuffleButton(){
   const label=b.querySelector('.shuffle-label'); if(label) label.textContent=shuffleEnabled?text('خلط','Mischen'):text('ترتيب','Reihenfolge');
 }
 function renderTopics(){
-  const q=($('search')?.value||'').trim().toLowerCase(); const teil=selectedTeil || (TEIL_ORDER[state.section]||[])[0] || '';
+  const q=($('search')?.value||'').trim().toLowerCase();
+  const availableTeile=availableTeileFor(state.section);
+  const teil=selectedTeil || availableTeile[0] || (TEIL_ORDER[state.section]||[])[0] || '';
   const base=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===state.section);
   const orderKey=state.level+'|'+state.section;
   if(orderKey!==shuffleOrderKey || !shuffleOrder.length || shuffleOrder.length!==base.length){
@@ -157,21 +168,26 @@ function renderTopics(){
   }
   let list=shuffleOrder.slice();
   if(teil) list=list.filter(x=>x.teil===teil);
-  if(q) list=list.filter(x=>(x.title+' '+(x.body||'')).toLowerCase().includes(q));
+  if(q) list=list.filter(x=>((x.title||'')+' '+(x.body||'')).toLowerCase().includes(q));
   updateShuffleButton();
   document.querySelectorAll('.teil-tab').forEach(b=>b.classList.toggle('active',b.dataset.teil===selectedTeil));
-  $('topicGrid').innerHTML=list.length?list.map((x,i)=>`<article class="topic-card"><div class="topic-card-head"><span class="topic-index">${String(i+1).padStart(2,'0')}</span><span class="tag">Telc ${esc(x.level||'B2')}</span></div><h3 class="topic-card-title"><span class="topic-status-dot ${isExerciseCompleted(x.id)?'is-done':'is-new'}" title="${isExerciseCompleted(x.id)?text('تم التدريب على هذا الموضوع من قبل','Bereits trainiert'):text('لم يتم التدريب على هذا الموضوع بعد','Noch nicht trainiert')}" aria-label="${isExerciseCompleted(x.id)?text('تم التدريب من قبل','Bereits trainiert'):text('لم يتم التدريب بعد','Noch nicht trainiert')}"></span><span>${esc(x.title)}</span></h3><div class="topic-meta"><span>${esc(x.teil)}</span><span>${esc(taskTypeLabel(x.task_type))}</span><span>${exerciseDuration(x)} ${text('دقيقة','Min.')}</span></div><a class="btn light" href="/exercise.html?id=${x.id}&duration=${exerciseDuration(x)*60}">${text('فتح التمرين','Übung öffnen')} →</a></article>`).join(''):`<div class="empty-panel"><h3>${text('لا توجد تمارين منشورة هنا','Keine veröffentlichten Übungen')}</h3><p class="muted">${text('يمكن للمشرف إضافة الموضوع من لوحة الإدارة.','Der Administrator kann Aufgaben im Adminbereich hinzufügen.')}</p></div>`;
+  const gridEl=$('topicGrid');
+  if(gridEl){
+    gridEl.innerHTML=list.length?list.map((x,i)=>`<article class="topic-card"><div class="topic-card-head"><span class="topic-index">${String(i+1).padStart(2,'0')}</span><span class="tag">Telc ${esc(x.level||'B2')}</span></div><h3 class="topic-card-title"><span class="topic-status-dot ${isExerciseCompleted(x.id)?'is-done':'is-new'}" title="${isExerciseCompleted(x.id)?text('تم التدريب على هذا الموضوع من قبل','Bereits trainiert'):text('لم يتم التدريب على هذا الموضوع بعد','Noch nicht trainiert')}" aria-label="${isExerciseCompleted(x.id)?text('تم التدريب من قبل','Bereits trainiert'):text('لم يتم التدريب بعد','Noch nicht trainiert')}"></span><span>${esc(x.title)}</span></h3><div class="topic-meta"><span>${esc(x.teil)}</span><span>${esc(taskTypeLabel(x.task_type))}</span><span>${exerciseDuration(x)} ${text('دقيقة','Min.')}</span></div><a class="btn light" href="/exercise.html?id=${x.id}&duration=${exerciseDuration(x)*60}">${text('فتح التمرين','Übung öffnen')} →</a></article>`).join(''):`<div class="empty-panel"><h3>${text('لا توجد تمارين منشورة هنا','Keine veröffentlichten Übungen')}</h3><p class="muted">${text('يمكن للمشرف إضافة الموضوع من لوحة الإدارة.','Der Administrator kann Aufgaben im Adminbereich hinzufügen.')}</p></div>`;
+  }
 }
 
 document.addEventListener('click',e=>{const a=e.target.closest('a[href*="/exercise.html"]');if(!a)return;try{sessionStorage.setItem('telc_dashboard_return',JSON.stringify({level:state.level,section:state.section,teil:selectedTeil,search:$('search')?.value||'',scrollY:window.scrollY}));}catch{}});
 
-logoutLink.onclick=async e=>{e.preventDefault();try{localStorage.removeItem('telc_student_token');}catch(_){}await api('auth-logout',{method:'POST'});location.href='/';};
+const logoutBtn=$('logoutLink');
+if(logoutBtn) logoutBtn.onclick=async e=>{e.preventDefault();try{localStorage.removeItem('telc_student_token');}catch(_){}await api('auth-logout',{method:'POST'});location.href='/';};
+
 (async()=>{
   try {
     const d = await api('me');
-    state.exercises = d.exercises || [];
-    state.student = d.student || {};
-    state.subscription = d.subscription || null;
+    state.exercises = Array.isArray(d?.exercises) ? d.exercises : [];
+    state.student = d?.student || {};
+    state.subscription = d?.subscription || null;
     remainingDays = calcRemainingDays();
     const urlLevel = qs('level');
     if (['B1','B2','C1'].includes(urlLevel)) state.level = urlLevel;
@@ -198,12 +214,19 @@ logoutLink.onclick=async e=>{e.preventDefault();try{localStorage.removeItem('tel
       try { localStorage.removeItem('telc_student_token'); } catch (_) {}
       location.href = '/?error=session';
     } else {
-      $('content').innerHTML = `
-        <div class="empty-panel" style="margin:60px auto;max-width:520px;text-align:center;padding:30px;border-radius:20px;background:var(--white)">
-          <h3 style="margin-bottom:10px">${text('تعذر تحميل بيانات التمارين','Fehler beim Laden')}</h3>
-          <p class="muted" style="margin-bottom:20px">${text('حدث خطأ أثناء تحميل التمارين. يرجى الضغط على إعادة المحاولة.','Beim Laden ist ein Fehler aufgetreten. Bitte erneut versuchen.')}</p>
-          <button class="btn" type="button" onclick="location.reload()">${text('إعادة المحاولة','Erneut versuchen')}</button>
-        </div>`;
+      const isDe = (typeof getLang === 'function' && getLang() === 'de');
+      const title = isDe ? 'Fehler beim Laden' : 'تعذر تحميل بيانات التمارين';
+      const msg = isDe ? 'Beim Laden der Aufgaben ist ein Fehler aufgetreten. Bitte erneut versuchen.' : 'حدث خطأ أثناء تحميل التمارين. يرجى الضغط على زر إعادة المحاولة.';
+      const retry = isDe ? 'Erneut versuchen' : 'إعادة المحاولة';
+      const contentEl = $('content');
+      if (contentEl) {
+        contentEl.innerHTML = `
+          <div class="empty-panel" style="margin:60px auto;max-width:520px;text-align:center;padding:30px;border-radius:20px;background:var(--white)">
+            <h3 style="margin-bottom:10px">${esc(title)}</h3>
+            <p class="muted" style="margin-bottom:20px">${esc(msg)}</p>
+            <button class="btn" type="button" onclick="location.reload()">${esc(retry)}</button>
+          </div>`;
+      }
     }
   }
 })();

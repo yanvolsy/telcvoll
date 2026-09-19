@@ -291,6 +291,11 @@ function initHeaderActions() {
   applyTheme();
 }
 
+function text(ar, de) {
+  return (typeof getLang === 'function' && getLang() === 'de') ? de : ar;
+}
+window.text = text;
+
 // طبّق فوراً لتفادي وميض المحتوى، ثم أعد التطبيق عند اكتمال الصفحة.
 applyI18n();
 applyTheme();

@@ -27,6 +27,23 @@ function esc(v) {
   }[c]));
 }
 
+function text(ar, de) {
+  return (typeof getLang === 'function' && getLang() === 'de') ? de : ar;
+}
+window.text = text;
+
+function sectionIcon(s) {
+  const icons = {
+    Lesen: '📖',
+    Hören: '🎧',
+    Sprachbausteine: '🧩',
+    Schreiben: '✍️',
+    Sprechen: '🎙️'
+  };
+  return icons[s] || '📄';
+}
+window.sectionIcon = sectionIcon;
+
 document.addEventListener('click', (e) => {
   const b = e.target.closest('[data-copy]');
   if (b) {
