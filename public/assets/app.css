@@ -904,6 +904,23 @@ html[dir="ltr"] .student-hub .topic-toolbar .topic-search-input{text-align:left!
 .speaking-model-line{position:relative}.speaking-model-line .speaking-model-phase{display:inline-block;margin-bottom:5px;padding:3px 7px;border-radius:999px;background:var(--exercise-accent-soft);color:var(--exercise-accent);font-size:10px;font-weight:900}.speaking-model-line p{white-space:pre-wrap}
 @media(max-width:650px){.speaking-tasks-panel{margin-top:12px}.speaking-section-head{padding:12px}.speaking-task-list{padding:2px 12px}.speaking-task-item{grid-template-columns:30px minmax(0,1fr);gap:8px}.speaking-task-number{width:25px;height:25px}.speaking-task-item-top b{font-size:13px}}
 
+/* Sprechen Model QA styling — questions with suggested model answers */
+.speaking-qa-list{display:grid;gap:14px;margin-top:12px}
+.speaking-model-qa-card{padding:14px 16px;border:1px solid var(--line);border-radius:16px;background:var(--white);box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px;transition:border-color .18s,transform .18s}
+.speaking-model-qa-card:hover{border-color:var(--green);transform:translateY(-2px)}
+.speaking-model-q-row,.speaking-model-a-row{display:flex;align-items:flex-start;gap:10px;direction:ltr;text-align:left}
+.speaking-qa-badge{font-size:11px;font-weight:900;padding:4px 9px;border-radius:999px;white-space:nowrap;flex-shrink:0;letter-spacing:.02em}
+.speaking-qa-badge.q-badge{background:#eaf5ff;color:#1e6bb8;border:1px solid #bfdbfe}
+.speaking-qa-badge.a-badge{background:var(--green-soft);color:var(--green);border:1px solid rgba(244,123,32,.25)}
+.speaking-qa-text{flex:1;min-width:0;line-height:1.7}
+.speaking-qa-text b{font-size:14px;color:var(--ink)}
+.speaking-qa-text p{margin:0;font-size:13.5px;color:var(--ink);line-height:1.65}
+.speaking-qa-translation{margin-top:4px;padding:8px 12px;border-radius:10px;background:var(--bg);color:var(--muted);font-size:12.5px;line-height:1.6;direction:rtl;text-align:right;border-right:3px solid var(--green)}
+.speaking-qa-translation[hidden]{display:none}
+html[data-theme="dark"] .speaking-model-qa-card{background:var(--white)}
+html[data-theme="dark"] .speaking-qa-badge.q-badge{background:rgba(30,107,184,.18);color:#93c5fd;border-color:rgba(147,197,253,.3)}
+html[data-theme="dark"] .speaking-qa-badge.a-badge{background:rgba(255,173,102,.12);color:#ffad66;border-color:rgba(255,173,102,.25)}
+
 /* TELC Voll Admin UI — unified orange identity, responsive mobile navigation, full light/dark support */
 .admin-shell{min-height:100vh;background:var(--bg)!important;color:var(--ink)}
 .admin-shell .admin-nav{min-height:72px;padding:0 clamp(14px,4vw,56px);background:var(--white)!important;color:var(--ink)!important;border-bottom:1px solid var(--line);box-shadow:0 5px 24px rgba(16,35,30,.05);position:sticky;top:0;z-index:100}

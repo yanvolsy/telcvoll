@@ -105,14 +105,60 @@ exports.handler=async(event)=>{
     if(q.rows[0]) return json(200,{exercise:q.rows[0]});
     return json(404,{error:'Für dieses Thema wurde kein passender '+requestedTeil+' gefunden.'});
   }
-  const context=`LEVEL: ${ex.level||''}\nTEIL: ${ex.teil||''}\nTHEMA: ${ex.title||''}\nTASK:\n${ex.body||''}`;
+  const activeTeil = requestedTeil || String(ex.teil || 'Teil 1').trim();
+  const isTeil3 = /Teil\s*3/i.test(activeTeil);
+  const isTeil2 = /Teil\s*2/i.test(activeTeil);
+
+  const context=`LEVEL: ${ex.level||''}\nTEIL: ${activeTeil}\nTHEMA: ${ex.title||''}\nTASK:\n${ex.body||''}`;
   let prompt;
   if(mode==='opening'){
-    prompt=`You are the Partner in a TELC B2 Sprechen Teil 2 training exercise. Speak ONLY German. The examiner Jerry has just instructed the candidates to discuss the topic. Your job is to start the partner side naturally: briefly summarize the core INHALT of the supplied topic in 1-2 sentences, then ask the student to summarize the Inhalt in their own words. Do not give Meinung 1 or Meinung 2 yet. Do not use Arabic. Do not invent information outside the supplied topic.
+    if(isTeil3){
+      prompt=`You are the conversation Partner (Candidate B, not Jerry the examiner) in a TELC Sprechen Teil 3 practice session.
+The examiner Jerry has just told the candidates to plan the task together.
+Speak ONLY German.
+Your job is to start the joint planning dialogue naturally, warmly, and realistically (exactly like TELC B2/C1 exam practice):
+1) Greet the student (e.g. "Hallo! Schön, dich zu sehen!").
+2) Refer directly to the specific project/event to be planned from the supplied topic (e.g. "Hast du schon gehört? Wir sollen gemeinsam [Thema/Aufgabe] planen.").
+3) Propose getting started with the first planning point, or ask the student what they think we should do first (e.g. "Was meinst du, wie fangen wir am besten an? Hast du schon eine Idee dazu?").
+Keep it friendly, natural, and concise (2-3 short sentences). Do NOT discuss Inhalt, Meinung, or personal experience. Do NOT give away the entire plan yet. Speak ONLY German.
 ${context}
 Return ONLY JSON: {"reply":""}`;
+    } else {
+      prompt=`You are the Partner in a TELC B2 Sprechen Teil 2 training exercise. Speak ONLY German. The examiner Jerry has just instructed the candidates to discuss the topic. Your job is to start the partner side naturally: briefly summarize the core INHALT of the supplied topic in 1-2 sentences, then ask the student to summarize the Inhalt in their own words. Do not give Meinung 1 or Meinung 2 yet. Do not use Arabic. Do not invent information outside the supplied topic.
+${context}
+Return ONLY JSON: {"reply":""}`;
+    }
   } else if(mode==='model'){
-    prompt=`Create a high-quality TELC B2 Sprechen training model based ONLY on the supplied topic, task and Teil. The supplied topic is the source of truth. Do not invent a different topic and do not claim this is an official telc answer.
+    if(isTeil3){
+      prompt=`Create a realistic, high-quality TELC Sprechen Teil 3 (Gemeinsam etwas planen / organisieren) training model based ONLY on the supplied topic and task.
+${context}
+
+CRITICAL RULES FOR TEIL 3 — JOINT PLANNING DIALOGUE:
+- This is a JOINT PLANNING AND NEGOTIATION DIALOGUE between two candidates (student and partner) to plan an event, project, or solve a problem.
+- Absolutely NO "Inhalt", NO "Meinung 1 / Meinung 2", NO "Erfahrung 1 / Erfahrung 2", NO "Vorteile und Nachteile" monologues!
+- Follow the authentic TELC exam format (like in the official practice tests):
+  1) Start naturally with a short friendly greeting ("Hallo! Schön, dich zu sehen...") and mention the planning task.
+  2) Go step-by-step through ALL the concrete Aufgaben / planning tasks from the prompt.
+  3) For each point: one partner makes a concrete proposal ("Wie wäre es, wenn...", "Wir könnten..."), the other reacts (enthusiastic agreement, or polite alternative with reasons: "Das ist eine gute Idee, aber wir könnten auch..."), and they agree.
+  4) Distribute tasks and responsibilities clearly ("Ich kann mich um X kümmern, übernimmst du Y?").
+  5) Arrange the next meeting / next steps ("Wann und wo treffen wir uns wieder?").
+  6) Conclude with a warm shared agreement ("Perfekt, dann machen wir das so. Bis dann!").
+- Write 12 to 18 dialogue turns alternating between 'student' and 'partner'. Every line must have speaker 'student' or 'partner' and phase 'planung' (final line 'abschluss').
+- For structure in Teil 3:
+  - "planung": [array of the concrete planning steps agreed upon]
+  - "verteilung": [array of tasks assigned to student vs partner]
+  - "vereinbarung": [final shared agreement and next meeting details]
+  - Keep inhalt, meinung1, meinung2, erfahrung1, erfahrung2, vorteile, nachteile as empty arrays [].
+- PRACTICE QUESTIONS WITH SUGGESTED ANSWERS:
+  Generate 4-6 practice questions that an examiner or partner might ask regarding this planning task, AND PROVIDE A CONCRETE SUGGESTED ANSWER FOR EACH!
+  Format each question as an object: {"question": "Frage auf Deutsch", "answer": "Vorgeschlagene Musterantwort auf Deutsch (1-2 Sätze)"}.
+- REDEMITTEL FOR TEIL 3:
+  Generate 6-8 useful Redemittel specifically for planning, proposing, agreeing, polite alternatives, task distribution, and concluding.
+
+Return ONLY JSON in this exact shape:
+{"title":"Gemeinsam etwas planen","note":"Trainingsbeispiel für TELC Sprechen Teil 3","dialogue":[{"speaker":"student|partner","phase":"planung|abschluss","text":""}],"structure":{"inhalt":[],"meinung1":[],"meinung2":[],"erfahrung1":[],"erfahrung2":[],"vorteile":[],"nachteile":[],"planung":[],"verteilung":[],"vereinbarung":[]},"questions":[{"question":"","answer":""}],"redemittel":[""]}`;
+    } else {
+      prompt=`Create a high-quality TELC B2 Sprechen training model based ONLY on the supplied topic, task and Teil. The supplied topic is the source of truth. Do not invent a different topic and do not claim this is an official telc answer.
 ${context}
 
 IMPORTANT FOR TEIL 2 — FOLLOW THIS ROLE DISTRIBUTION EXACTLY:
@@ -133,33 +179,63 @@ For Teil 2, build the model dialogue in this exact progression whenever the sour
 6) The PARTNER gives ERFAHRUNG 2 as a plausible partner example/perspective, without pretending it is a real personal memory.
 7) Both discuss the concrete Vorteile und Nachteile from the source, alternating turns, reacting to each other, asking short follow-up questions, agreeing/disagreeing and giving reasons.
 8) Finish naturally with a short conclusion.
-Do NOT label Meinung 2 as another student answer. It belongs to the partner. Do NOT make the student say Erfahrung 2.
 
-For TEIL 3, follow the supplied TELC Voll training examples exactly in FORM: TEIL 3 is a JOINT PLANNING dialogue between TWO CANDIDATES. It is NOT an Inhalt/Meinung/Erfahrung/Vorteile/Nachteile task. Never create or mention those phases for Teil 3.
-Use ONLY the concrete planning points listed in the supplied task. The supplied Aufgaben are the checklist and source of truth. Cover them in a natural order; do not replace them with generic categories and do not invent unrelated points.
-The model answer must be a realistic dialogue, not a list and not a monologue. Start naturally with a short greeting or direct introduction to the planning problem. Then, for each concrete Aufgabe, one partner makes a specific proposal, the other reacts, agrees, disagrees or suggests an alternative, and they briefly negotiate. Use natural B2 expressions such as 'Was denkst du?', 'Das klingt gut.', 'Ich hätte einen anderen Vorschlag.', 'Da hast du recht.', 'Wie wäre es, wenn ...?' only where they fit the actual task.
-Both partners must contribute actively. The dialogue should resemble the supplied examples such as Schüleraustausch Planung, Lehrveranstaltung, Blutspendeveranstaltung, Infotag Gesundheit, Museumsbesuch and the other uploaded TEIL 3 examples. End with a concrete agreement/plan and, where appropriate, a date, meeting arrangement or division of responsibilities. Do not add an artificial 'Inhalt' or 'Meinung' section.
-Use approximately 12-18 dialogue turns for Teil 3, with enough turns to cover the actual Aufgaben. Every line must use speaker 'student' or 'partner' and phase 'planung' except an optional final 'abschluss'. The phase is internal metadata only and must not be used to introduce sections in the displayed answer. The model dialogue is a training example, not an official telc answer.
-
-For Teil 1, model a short structured presentation followed by a natural partner reaction and follow-up questions.
-
-Generate 8-12 dialogue turns for Teil 2 so that all required roles are clearly demonstrated. Use only speaker values student and partner for Teil 2. Add a phase to every dialogue line using one of: inhalt, meinung1, meinung2, erfahrung1, erfahrung2, vorteile, nachteile, abschluss. For Teil 3 use only planung/abschluss metadata. For Teil 1 use inhalt/meinung/abschluss as appropriate.
-For TEIL 3, return questions=[] and redemittel=[] because the model-answer format is the dialogue itself, matching the supplied MusterDialog examples. For TEIL 1 and TEIL 2, keep the existing practice-question and Redemittel generation.
+Generate 8-12 dialogue turns for Teil 2 so that all required roles are clearly demonstrated. Use only speaker values student and partner. Add a phase to every dialogue line using one of: inhalt, meinung1, meinung2, erfahrung1, erfahrung2, vorteile, nachteile, abschluss.
+Generate 4-6 practice questions WITH SUGGESTED ANSWERS. Format each as: {"question":"","answer":""}. Generate 5-8 useful Redemittel suitable for the actual topic and Teil.
 
 Return ONLY JSON in this exact shape:
-{"title":"","note":"","dialogue":[{"speaker":"student|partner","phase":"","text":""}],"structure":{"inhalt":[],"meinung1":[],"meinung2":[],"erfahrung1":[],"erfahrung2":[],"vorteile":[],"nachteile":[],"planung":[]},"questions":[""],"redemittel":[""]}
-For TEIL 3, ALL structure fields except 'planung' MUST be empty arrays. Do not put Inhalt, Meinung, Erfahrung, Vorteile or Nachteile into the Teil 3 response. The main answer for Teil 3 is the dialogue itself.
-For TEIL 2, preserve the existing structure and role distribution exactly as specified above; do not apply the TEIL 3 rules to Teil 2. Keep the dialogue in German. Keep the note short. Make the dialogue, structure and questions consistent with each other.`;
+{"title":"","note":"","dialogue":[{"speaker":"student|partner","phase":"","text":""}],"structure":{"inhalt":[],"meinung1":[],"meinung2":[],"erfahrung1":[],"erfahrung2":[],"vorteile":[],"nachteile":[],"planung":[],"verteilung":[],"vereinbarung":[]},"questions":[{"question":"","answer":""}],"redemittel":[""]}`;
+    }
   } else if(mode==='evaluate'){
-    prompt=`Evaluate a TELC speaking practice session for training only. Do not claim an official telc score.
+    if(isTeil3){
+      prompt=`Evaluate a TELC speaking practice session for TEIL 3 (Gemeinsam etwas planen / organisieren).
+${context}
+TRANSCRIPT:
+${transcript}
+Evaluate specifically for TEIL 3 criteria:
+1) Aufgabenbewältigung: Did the candidates address the required planning tasks from the prompt and find practical solutions?
+2) Interaktion: Did the student actively participate, propose ideas, react to the partner's suggestions, ask questions, negotiate, and reach a consensus?
+3) Ausdrucksfähigkeit: Appropriate B2/C1 vocabulary and Redemittel for planning, suggesting, agreeing, and organizing.
+4) Formale Richtigkeit: Grammar, sentence structures, and syntax.
+5) Aussprache und Intonation: Note that pronunciation cannot be reliably assessed from text.
+IMPORTANT: Do NOT penalize or expect an introduction, monologue presentation, or personal opinion essay — this is Teil 3 (Joint Planning).
+Return ONLY JSON:
+{"criteria":[{"key":"ausdruck","label":"Ausdrucksfähigkeit","score":0,"max":5,"comment":""},{"key":"aufgabe","label":"Aufgabenbewältigung","score":0,"max":5,"comment":""},{"key":"richtigkeit","label":"Formale Richtigkeit","score":0,"max":5,"comment":""},{"key":"aussprache","label":"Aussprache und Intonation","score":0,"max":5,"comment":"Aus dem Transkript nicht zuverlässig beurteilbar."},{"key":"interaktion","label":"Interaktion","score":0,"max":5,"comment":""}],"total":0,"strengths":[],"priorities":[],"summary_de":"","summary_ar":""}`;
+    } else {
+      prompt=`Evaluate a TELC speaking practice session for training only. Do not claim an official telc score.
 ${context}
 TRANSCRIPT:
 ${transcript}
 Return ONLY JSON:
 {"criteria":[{"key":"ausdruck","label":"Ausdrucksfähigkeit","score":0,"max":5,"comment":""},{"key":"aufgabe","label":"Aufgabenbewältigung","score":0,"max":5,"comment":""},{"key":"richtigkeit","label":"Formale Richtigkeit","score":0,"max":5,"comment":""},{"key":"aussprache","label":"Aussprache und Intonation","score":0,"max":5,"comment":"Aus dem Transkript nicht zuverlässig beurteilbar."},{"key":"interaktion","label":"Interaktion","score":0,"max":5,"comment":""}],"total":0,"strengths":[],"priorities":[],"summary_de":"","summary_ar":""}
 Score 0-5 for each. For pronunciation explicitly say it cannot reliably be assessed from text transcript and do not pretend to hear audio. Keep feedback specific to this topic and Teil.`;
+    }
   } else {
-    prompt=`Act as the exam PARTNER (not Jerry) for a realistic TELC German speaking simulation. Stay in German. Be natural, concise, and interactive. The student is the candidate and you are the independent conversation partner. Never become the examiner and never write the student's answer for them.
+    if(isTeil3){
+      prompt=`Act as the exam PARTNER (Candidate B, not Jerry the examiner) in a TELC German speaking simulation for TEIL 3: GEMEINSAM ETWAS PLANEN / ORGANISIEREN.
+Stay strictly in German. Be natural, concise, friendly, and cooperative.
+CRITICAL RULES FOR TEIL 3:
+- This is a joint planning dialogue between two equal candidates. Never give a lecture or monologue.
+- DO NOT ask for "Inhalt", DO NOT ask for "Meinung 1 / Meinung 2", DO NOT ask for personal stories/Erfahrungen, DO NOT give a presentation.
+- Focus strictly on the concrete planning tasks (Aufgaben) in the supplied topic.
+- In each turn:
+  1) React to what the student just proposed (e.g. agree warmly: "Das ist eine super Idee!", or agree with a constructive addition: "Genau, und wir könnten auch...", or suggest a polite alternative with a reason: "Das klingt gut, aber denkst du nicht, dass...? Wie wäre es mit...?").
+  2) Advance the planning by asking about or proposing the next task/point from the Aufgaben (e.g. "Was machen wir eigentlich mit...?", "Wer kümmert sich um...?").
+  3) Ask for the student's opinion ("Was meinst du dazu?", "Passt das für dich?").
+- When all tasks have been discussed:
+  - Agree on who does what (task distribution).
+  - Arrange when and where to meet next ("Wann treffen wir uns wieder?").
+  - Finalize the agreement cheerfully ("Abgemacht! Dann haben wir alles Wichtige geplant. Bis dann!").
+- Keep every reply concise (2-3 sentences max) so the student has space to talk.
+- Never write the student's answer for them. Never use Arabic or English in the conversation.
+${context}
+Student transcript:
+${transcript}
+Conversation history:
+${JSON.stringify(history)}
+Return ONLY JSON: {"reply":"","short_note":"","continue":true}`;
+    } else {
+      prompt=`Act as the exam PARTNER (not Jerry) for a realistic TELC German speaking simulation. Stay in German. Be natural, concise, and interactive. The student is the candidate and you are the independent conversation partner. Never become the examiner and never write the student's answer for them.
 ${context}
 Student transcript:
 ${transcript}
@@ -181,8 +257,9 @@ STRICT TEIL 2 ROLE RULES:
 Rules by Teil:
 - Teil 1: react to the presentation and ask one relevant follow-up question.
 - Teil 2: follow the role sequence above and keep the conversation natural.
-- Teil 3: behave ONLY as the other candidate in a joint planning dialogue. There is no Inhalt, Meinung, Erfahrung, Vorteile/Nachteile sequence in Teil 3. Use only the concrete Aufgaben from the supplied topic. Take the next relevant planning point, make or react to a concrete proposal, negotiate briefly, and move to the next point. Do not give a lecture, summary, model answer, or list. Do not ask the student to summarize the topic. Do not introduce generic categories unless they are explicitly present in the task. Work toward a concrete shared plan/agreement and keep both speakers active.
+- Teil 3: actively plan/negotiate; introduce or react to concrete planning points such as time, place, cost, tasks and priorities, and work toward agreement.
 Return ONLY JSON: {"reply":"","short_note":"","continue":true}`;
+    }
   }
   try{
     let raw=await callAI(prompt);
@@ -192,6 +269,15 @@ Return ONLY JSON: {"reply":"","short_note":"","continue":true}`;
       const repairPrompt=`Return ONLY valid JSON. Repair the following AI output without changing its meaning. Do not add commentary. OUTPUT:\n${String(raw).slice(0,30000)}`;
       raw=await callAI(repairPrompt);
       out=cleanJson(raw);
+    }
+    if(out && Array.isArray(out.questions)){
+      out.questions = out.questions.map(item => {
+        if(typeof item === 'string') return { question: item, answer: '' };
+        return {
+          question: String(item.question || item.q || item.title || '').trim(),
+          answer: String(item.answer || item.a || item.solution || item.model || '').trim()
+        };
+      });
     }
     await db().query('INSERT INTO ai_logs(student_id,kind,input_text,output_text) VALUES($1,$2,$3,$4)',
       [student.student_id,'speaking',JSON.stringify({exercise_id:id,mode,transcript}),JSON.stringify(out)]);

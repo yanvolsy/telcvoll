@@ -77,24 +77,35 @@ function renderModel(out){
  const dialogue=Array.isArray(out.dialogue)?out.dialogue:[];
  const questions=Array.isArray(out.questions)?out.questions:[];
  const phrases=Array.isArray(out.redemittel)?out.redemittel:[];
- let html=`<div class="speaking-model-head" style="margin-top:4px"><div><span class="tag">${esc(currentTeil())}</span><h3>${esc(out.title||'Modellantwort')}</h3></div><small>${esc(out.note||'Trainingsbeispiel – keine offizielle telc Musterlösung.')}</small></div>`;
- if(dialogue.length){html+=`<div class="speaking-model-dialogue">${dialogue.map((x,i)=>{const txt=String(x.text||'');const isT3=currentTeil()==='Teil 3';const label=isT3?(x.speaker==='student'?'PARTNER 1':x.speaker==='partner'?'PARTNER 2':'Jerry'):(x.speaker==='student'?'Schüler':x.speaker==='partner'?'Partner':'Jerry');return `<div class="speaking-model-line model-${esc(x.speaker||'partner')}"><div><b>${label}</b><p>${esc(txt)}</p><div class="speaking-model-translation" hidden></div></div><span class="speaking-model-tools"><button class="icon-btn speaking-model-speak" type="button" aria-label="Anhören" data-speak="${esc(txt)}">🔊</button><button class="bubble-translate" type="button" data-model-translate>文</button></span></div>`}).join('')}</div>`}
+ const isT3=currentTeil()==='Teil 3';
+ let html=`<div class="speaking-model-head" style="margin-top:4px"><div><span class="tag">${esc(currentTeil())}</span><h3>${esc(out.title||(isT3?'Gemeinsam etwas planen':'Modellantwort'))}</h3></div><small>${esc(out.note||'Trainingsbeispiel – keine offizielle telc Musterlösung.')}</small></div>`;
+ if(dialogue.length){html+=`<div class="speaking-model-dialogue">${dialogue.map((x,i)=>{const txt=String(x.text||'');const who=x.speaker==='student'?'Schüler (Kandidat A)':x.speaker==='partner'?'Partner (Kandidat B)':'Jerry';return `<div class="speaking-model-line model-${esc(x.speaker||'partner')}"><div><b>${esc(who)}</b><p>${esc(txt)}</p><div class="speaking-model-translation" hidden></div></div><span class="speaking-model-tools"><button class="icon-btn speaking-model-speak" type="button" aria-label="Anhören" data-speak="${esc(txt)}">🔊</button><button class="bubble-translate" type="button" data-model-translate>文</button></span></div>`}).join('')}</div>`}
  if(out.structure&&typeof out.structure==='object'){
    const st=out.structure;
-   if(currentTeil()==='Teil 3'){
-     html+=modelSection('Planung / Vereinbarung',st.planung);
-   }else{
+   if(isT3){
+     html+=modelSection('Planungsschritte — خطوات التخطيط',st.planung);
+     html+=modelSection('Aufgabenverteilung — توزيع المهام',st.verteilung);
+     html+=modelSection('Vereinbarung & Treffen — الاتفاق النهائي وموعد اللقاء',st.vereinbarung);
+   } else {
      html+=modelSection('Inhalt',st.inhalt);
-     html+=modelSection('Meinung',st.meinung);
-     html+=modelSection('Erfahrung',st.erfahrung);
+     html+=modelSection('Meinung',st.meinung||st.meinung1);
+     html+=modelSection('Erfahrung',st.erfahrung||st.erfahrung1);
      html+=modelSection('Vorteile',st.vorteile);
      html+=modelSection('Nachteile',st.nachteile);
      html+=modelSection('Planung / Vereinbarung',st.planung);
    }
  }
- if(currentTeil()!=='Teil 3' && questions.length){html+=`<div class="speaking-model-questions"><div class="speaking-model-questions-head"><h4>أسئلة للتدرب — بدون إجابات</h4><small>أسئلة فقط، أجب عنها بنفسك.</small></div>${questions.map((q,i)=>`<div class="speaking-model-q"><span>${i+1}.</span><div style="flex:1">${esc(q)}</div><button class="icon-btn speaking-model-speak" type="button" data-speak="${esc(q)}">🔊</button></div>`).join('')}</div>`}
- if(currentTeil()!=='Teil 3' && phrases.length){html+=`<div class="speaking-model-phrases"><h4>Redemittel</h4><div>${phrases.map(x=>`<span>${esc(x)}</span>`).join('')}</div></div>`}
- c.innerHTML=html;c.hidden=false;c.querySelectorAll('[data-speak]').forEach(b=>b.onclick=()=>modelSpeak(b.dataset.speak));c.querySelectorAll('[data-model-translate]').forEach(b=>b.onclick=async()=>{const line=b.closest('.speaking-model-line');const box=line?.querySelector('.speaking-model-translation');const source=line?.querySelector('p')?.textContent||'';if(!box||!source)return;box.hidden=!box.hidden;if(!box.hidden)return;box.textContent='…';try{box.textContent=await translateText(source)}catch{box.textContent='Übersetzung nicht verfügbar.'}});
+ if(questions.length){
+   html+=`<div class="speaking-model-questions"><div class="speaking-model-questions-head"><h4>أسئلة للتدرب مع إجابات مقترحة</h4><small>نماذج أسئلة وإجابات متوقعة للتدرب عليها مع الشريك أو الممتحن.</small></div><div class="speaking-qa-list">${questions.map((item,i)=>{
+     const qText=typeof item==='string'?item:(item.question||item.q||'');
+     const aText=typeof item==='object'?(item.answer||item.a||''):'';
+     return `<div class="speaking-model-qa-card"><div class="speaking-model-q-row"><span class="speaking-qa-badge q-badge">سؤال ${i+1}</span><div class="speaking-qa-text"><b>${esc(qText)}</b></div><span class="speaking-model-tools"><button class="icon-btn speaking-model-speak" type="button" data-speak="${esc(qText)}" title="استمع للسؤال">🔊</button><button class="bubble-translate" type="button" data-qa-translate title="ترجمة">文</button></span></div><div class="speaking-qa-translation" hidden></div>${aText?`<div class="speaking-model-a-row"><span class="speaking-qa-badge a-badge">الإجابة المقترحة</span><div class="speaking-qa-text"><p>${esc(aText)}</p></div><span class="speaking-model-tools"><button class="icon-btn speaking-model-speak" type="button" data-speak="${esc(aText)}" title="استمع للإجابة">🔊</button><button class="bubble-translate" type="button" data-qa-translate title="ترجمة">文</button></span></div><div class="speaking-qa-translation" hidden></div>`:''}</div>`}).join('')}</div></div>`;
+ }
+ if(phrases.length){html+=`<div class="speaking-model-phrases"><h4>Redemittel</h4><div>${phrases.map(x=>`<span>${esc(x)}</span>`).join('')}</div></div>`}
+ c.innerHTML=html;c.hidden=false;
+ c.querySelectorAll('[data-speak]').forEach(b=>b.onclick=()=>modelSpeak(b.dataset.speak));
+ c.querySelectorAll('[data-model-translate]').forEach(b=>b.onclick=async()=>{const line=b.closest('.speaking-model-line');const box=line?.querySelector('.speaking-model-translation');const source=line?.querySelector('p')?.textContent||'';if(!box||!source)return;box.hidden=!box.hidden;if(!box.hidden)return;box.textContent='…';try{box.textContent=await translateText(source)}catch{box.textContent='Übersetzung nicht verfügbar.'}});
+ c.querySelectorAll('[data-qa-translate]').forEach(b=>b.onclick=async()=>{const row=b.closest('.speaking-model-q-row')||b.closest('.speaking-model-a-row');const box=row?.nextElementSibling;const source=row?.querySelector('.speaking-qa-text')?.textContent||'';if(!box||!source)return;box.hidden=!box.hidden;if(!box.hidden)return;box.textContent='…';try{box.textContent=await translateText(source)}catch{box.textContent='Übersetzung nicht verfügbar.'}});
 }
 async function generateModel(){if(modelBusy)return;modelBusy=true;$('modelBtn').disabled=true;$('modelBtn').textContent='⏳ جارٍ التوليد…';$('modelContent').hidden=false;$('modelContent').innerHTML='<div class="speaking-model-empty">جارٍ إنشاء نموذج مناسب لهذا الموضوع…</div>';try{const r=await api('ai-speaking-session',{method:'POST',body:{id,mode:'model',teil:currentTeil()}});if(r.error)throw new Error(r.error);renderModel(r)}catch(e){$('modelContent').innerHTML=`<div class="alert bad">${esc(e?.message||'حدث خطأ أثناء توليد الإجابة النموذجية.')}</div>`}finally{modelBusy=false;$('modelBtn').disabled=false;$('modelBtn').textContent='🧠 توليد الإجابة النموذجية'}}
 async function load(){try{
@@ -109,7 +120,13 @@ async function load(){try{
      (String(x.title||'').trim().toLowerCase()===String(ex.title||'').trim().toLowerCase() || String(x.body||'').includes(String(ex.title||''))));
    if(same){data=await api('exercise-get',{method:'GET',query:{id:same.id}});ex=data.exercise}
  }
- $('level').textContent=ex.level||'';$('title').textContent=ex.title||'Sprechen';$('teilLabel').textContent=ex.teil||'Teil 1';$('task').textContent=ex.body||'';document.getElementById('teil3Tasks').innerHTML=renderTeil3Tasks();renderPhases();$('chat').innerHTML='';history=[];transcript=[];$('liveTranscript').textContent='اضغط على الميكروفون وابدأ الحديث بالألمانية…';addBubble('jerry',currentTeil()==='Teil 2'?'Bitte besprechen Sie zunächst den Inhalt des Themas. Danach äußern Sie Ihre Meinung und tauschen Sie sich mit Ihrem Gesprächspartner aus.':currentTeil()==='Teil 1'?'Bitte beginnen Sie mit Ihrer Präsentation. Danach reagiert Ihr Gesprächspartner und stellt Ihnen eine Frage.':'Bitte planen Sie die Aufgabe gemeinsam. Machen Sie einen ersten Vorschlag und finden Sie am Ende eine gemeinsame Lösung.'); if(currentTeil()==='Teil 2'){try{const opening=await api('ai-speaking-session',{method:'POST',body:{id,mode:'opening',teil:currentTeil()}});addBubble('partner',opening.reply||'Ich fasse zunächst kurz den Inhalt des Themas zusammen. Wie würden Sie den Inhalt in Ihren eigenen Worten wiedergeben?',true);history.push({role:'partner',content:opening.reply||''})}catch{addBubble('partner','Ich fasse zunächst kurz den Inhalt des Themas zusammen. Wie würden Sie den Inhalt in Ihren eigenen Worten wiedergeben?',true)}}$('app').hidden=false;$('loading').hidden=true;
+ $('level').textContent=ex.level||'';$('title').textContent=ex.title||'Sprechen';$('teilLabel').textContent=ex.teil||'Teil 1';$('task').textContent=ex.body||'';document.getElementById('teil3Tasks').innerHTML=renderTeil3Tasks();renderPhases();$('chat').innerHTML='';history=[];transcript=[];$('liveTranscript').textContent='اضغط على الميكروفون وابدأ الحديث بالألمانية…';addBubble('jerry',currentTeil()==='Teil 2'?'Bitte besprechen Sie zunächst den Inhalt des Themas. Danach äußern Sie Ihre Meinung und tauschen Sie sich mit Ihrem Gesprächspartner aus.':currentTeil()==='Teil 1'?'Bitte beginnen Sie mit Ihrer Präsentation. Danach reagiert Ihr Gesprächspartner und stellt Ihnen eine Frage.':'Bitte planen Sie die Aufgabe gemeinsam. Machen Sie einen ersten Vorschlag und finden Sie am Ende eine gemeinsame Lösung.');
+ if(currentTeil()==='Teil 3'){
+   try{const opening=await api('ai-speaking-session',{method:'POST',body:{id,mode:'opening',teil:currentTeil()}});addBubble('partner',opening.reply||'Hallo! Schön, dich zu sehen. Lass uns die Aufgabe gemeinsam planen. Wie fangen wir am besten an? Hast du schon eine Idee dazu?',true);history.push({role:'partner',content:opening.reply||''})}catch{addBubble('partner','Hallo! Schön, dich zu sehen. Lass uns die Aufgabe gemeinsam planen. Wie fangen wir am besten an? Hast du schon eine Idee dazu?',true)}
+ } else if(currentTeil()==='Teil 2'){
+   try{const opening=await api('ai-speaking-session',{method:'POST',body:{id,mode:'opening',teil:currentTeil()}});addBubble('partner',opening.reply||'Ich fasse zunächst kurz den Inhalt des Themas zusammen. Wie würden Sie den Inhalt in Ihren eigenen Worten wiedergeben?',true);history.push({role:'partner',content:opening.reply||''})}catch{addBubble('partner','Ich fasse zunächst kurz den Inhalt des Themas zusammen. Wie würden Sie den Inhalt in Ihren eigenen Worten wiedergeben?',true)}
+ }
+ $('app').hidden=false;$('loading').hidden=true;
  }catch(e){$('loading').textContent=e?.message||'Fehler beim Laden.'}}
 function getRecognition(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR)return null; const r=new SR();r.lang='de-DE';r.interimResults=true;r.continuous=false;r.maxAlternatives=1; return r}
 function startListening(){if(!voiceRunning||busy||speakingNow)return; if(!recognition)recognition=getRecognition(); if(!recognition){setVoiceStatus('هذا المتصفح لا يدعم التعرف على الكلام. استخدم Chrome على الكمبيوتر أو خيار الكتابة.');return} $('voicePanel').classList.add('active');$('mic').classList.add('listening');$('mic').disabled=true;$('stop').disabled=false;setVoiceStatus('Jerry يستمع إليك… تحدث الآن بالألمانية');$('liveTranscript').textContent='…';let finalText='';
