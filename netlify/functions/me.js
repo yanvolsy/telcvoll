@@ -2,31 +2,12 @@ const { db } = require('./_lib/db');
 const { json } = require('./_lib/auth');
 const { requireStudent } = require('./_lib/guard');
 
-let schemaEnsured = false;
-async function ensureSchemaOnce(pool) {
-  if (schemaEnsured) return;
-  schemaEnsured = true;
-  try {
-    await pool.query(`
-      ALTER TABLE students ADD COLUMN IF NOT EXISTS first_name VARCHAR(100);
-      ALTER TABLE students ADD COLUMN IF NOT EXISTS last_name VARCHAR(100);
-      ALTER TABLE students ADD COLUMN IF NOT EXISTS phone VARCHAR(40);
-      ALTER TABLE students ADD COLUMN IF NOT EXISTS country VARCHAR(100);
-      ALTER TABLE students ADD COLUMN IF NOT EXISTS profile_completed BOOLEAN NOT NULL DEFAULT FALSE;
-      ALTER TABLE students ADD COLUMN IF NOT EXISTS profile_updated_at TIMESTAMP NULL;
-      ALTER TABLE exercises ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP NULL;
-      ALTER TABLE exercises ADD COLUMN IF NOT EXISTS level VARCHAR(20) NOT NULL DEFAULT 'B2';
-    `);
-  } catch (_) {}
-}
-
 exports.handler = async (event) => {
   try {
     const student = await requireStudent(event, { allowIncompleteProfile: true });
     if (!student) return json(401, { error: 'unauthenticated' });
 
     const pool = db();
-    await ensureSchemaOnce(pool);
 
     let studentData = null;
     try {

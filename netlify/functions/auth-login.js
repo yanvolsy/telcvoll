@@ -4,22 +4,6 @@ const { sign, setCookie, clientIp, json } = require('./_lib/auth');
 const { rateLimit } = require('./_lib/ratelimit');
 const { requireSameOrigin, requestSize } = require('./_lib/request');
 
-let schemaEnsured = false;
-async function ensureStudentSchemaOnce(client) {
-  if (schemaEnsured) return;
-  schemaEnsured = true;
-  try {
-    await client.query(`
-      ALTER TABLE students ADD COLUMN IF NOT EXISTS first_name VARCHAR(100);
-      ALTER TABLE students ADD COLUMN IF NOT EXISTS last_name VARCHAR(100);
-      ALTER TABLE students ADD COLUMN IF NOT EXISTS phone VARCHAR(40);
-      ALTER TABLE students ADD COLUMN IF NOT EXISTS country VARCHAR(100);
-      ALTER TABLE students ADD COLUMN IF NOT EXISTS profile_completed BOOLEAN NOT NULL DEFAULT FALSE;
-      ALTER TABLE students ADD COLUMN IF NOT EXISTS profile_updated_at TIMESTAMP NULL;
-    `);
-  } catch (_) {}
-}
-
 exports.handler = async (event) => {
   if (!requireSameOrigin(event)) return json(403, { error: 'Cross-origin request blocked.' });
   if (!requestSize(event)) return json(413, { error: 'Request too large.' });
@@ -49,7 +33,6 @@ exports.handler = async (event) => {
   const pool = db();
   const client = await pool.connect();
   try {
-    await ensureStudentSchemaOnce(client);
 
     const { rows } = await client.query(
       `SELECT c.*, p.duration_days, p.ai_enabled

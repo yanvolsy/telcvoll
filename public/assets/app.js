@@ -5,16 +5,30 @@ async function api(path, options = {}) {
   if (token && !headers['Authorization']) {
     headers['Authorization'] = 'Bearer ' + token;
   }
-  const res = await fetch('/api/' + path, {
-    method: options.method || 'GET',
-    headers,
-    credentials: 'include',
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  });
-  let data = {};
-  try { data = await res.json(); } catch { /* no json body */ }
-  if (!res.ok) throw Object.assign(new Error(data.error || res.statusText), { status: res.status, data });
-  return data;
+  const controller = new AbortController();
+  const timeoutMs = options.timeout || 12000;
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch('/api/' + path, {
+      method: options.method || 'GET',
+      headers,
+      credentials: 'include',
+      body: options.body ? JSON.stringify(options.body) : undefined,
+      signal: options.signal || controller.signal,
+    });
+    clearTimeout(timeoutId);
+    let data = {};
+    try { data = await res.json(); } catch { /* no json body */ }
+    if (!res.ok) throw Object.assign(new Error(data.error || res.statusText), { status: res.status, data });
+    return data;
+  } catch (err) {
+    clearTimeout(timeoutId);
+    if (err.name === 'AbortError') {
+      const isDe = typeof getLang === 'function' && getLang() === 'de';
+      throw Object.assign(new Error(isDe ? 'Zeitüberschreitung der Anfrage. Bitte erneut versuchen.' : 'استغرق الطلب وقتاً طويلاً. يرجى إعادة المحاولة.'), { status: 408 });
+    }
+    throw err;
+  }
 }
 
 function qs(name) {

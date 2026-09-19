@@ -8,8 +8,14 @@ function db() {
       ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('localhost')
         ? false
         : { rejectUnauthorized: false },
-      max: 3,
+      max: 5,
+      connectionTimeoutMillis: 5000,
       idleTimeoutMillis: 10000,
+      statement_timeout: 8000,
+      query_timeout: 8000,
+    });
+    pool.on('error', (err) => {
+      console.error('Unexpected error on idle pg client', err);
     });
   }
   return pool;

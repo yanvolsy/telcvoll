@@ -42,7 +42,7 @@ const text=(ar,de)=>getLang()==='ar'?ar:de;
 function saveExerciseReturn(){try{sessionStorage.setItem('telc_exercise_return',JSON.stringify({url:location.href,scrollY:window.scrollY}));}catch{}}
 document.getElementById('exerciseBack')?.addEventListener('click',e=>{e.preventDefault();saveExerciseReturn();location.href='/dashboard.html';});
 function escBody(v){return esc(v).replace(/\n/g,'<br>');}
-function parseSettings(x){return x?.settings_json && typeof x.settings_json==='object'?x.settings_json:{};}
+function parseSettings(x){if(!x||!x.settings_json)return {};if(typeof x.settings_json==='object')return x.settings_json;try{return JSON.parse(x.settings_json);}catch(_){return {};}}
 function answerValue(n){return answers[String(n)]||'';}
 function labelFor(n,val){const it=model.items.find(x=>String(x.position_no)===String(n));const o=(it?.options||[]).find(x=>x.option_key===val);return o?o.option_text:val;}
 function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
@@ -692,6 +692,40 @@ function bindActions(){
 function renderWorkspace(){stopSpeaking();const t=model.exercise.task_type;const isSpb1=model.exercise.section==='Sprachbausteine'&&model.exercise.teil==='Teil 1';const isMatching=(t==='MATCHING')||(model.exercise.section==='Lesen'&&['Teil 1','Teil 3'].includes(model.exercise.teil))||(model.exercise.section==='Hören'&&model.exercise.teil==='Teil 3');if(t==='WRITING')return renderWriting();if(t==='SPEAKING')return renderSpeaking();if(t==='AUDIO_TF')return renderTF();if(isSpb1)return renderSprachbausteine1();if(isMatching)return renderMatching();return renderChoiceQuestions();}
 function renderResult(r){const st=captureExerciseScroll();submitted=true;resultData=r;rerenderExerciseStable(st);}
 async function submit(){if(submitted)return;if(!model.items.length){if(mockMode){goNextMock();}return;}try{const r=await api('exercise-submit',{method:'POST',body:{exercise_id:id,answers}});localStorage.setItem('last_exercise_result_'+id,JSON.stringify(r));markExerciseCompleted(id);if(mockMode){const s=getMockSession();if(s){s.results=s.results||[];s.results.push({id,title:model.exercise.title,section:model.exercise.section,teil:model.exercise.teil,score:r.score,max:r.max,percent:r.percent,result:r.result});s.index=(s.ids||[]).findIndex(x=>String(x)===String(id));localStorage.setItem('telc_self_test',JSON.stringify(s));}goNextMock();return;}renderResult(r);}catch(e){document.getElementById('content').insertAdjacentHTML('beforeend',`<div class="alert bad">${esc(e.message)}</div>`);}}
-(async()=>{try{const d=await api('exercise-get?id='+encodeURIComponent(id));model=d;document.body.classList.toggle('mock-mode',mockMode);renderWorkspace();bindActions();if(mockMode)startMockTimer();}catch(e){document.getElementById('content').innerHTML=`<div class="alert bad">${esc(e.message)}</div>`;}})();
+(async()=>{
+  try{
+    if(!id){
+      throw new Error(text('معرف التمرين غير محدد في الرابط.','Keine Übungs-ID angegeben.'));
+    }
+    const d=await api('exercise-get?id='+encodeURIComponent(id));
+    if(!d||!d.exercise){
+      throw new Error(text('تعذر العثور على التمرين المطلوب. قد يكون غير منشور أو محذوف.','Übung nicht gefunden oder nicht veröffentlicht.'));
+    }
+    model=d;
+    document.body.classList.toggle('mock-mode',mockMode);
+    renderWorkspace();
+    bindActions();
+    if(mockMode)startMockTimer();
+  }catch(e){
+    console.error('Exercise load error:', e);
+    const isDe = (typeof getLang === 'function' && getLang() === 'de');
+    const msg = e?.message || (isDe ? 'Fehler beim Laden der Übung.' : 'حدث خطأ أثناء تحميل التمرين.');
+    const retryTxt = isDe ? 'Erneut versuchen' : 'إعادة المحاولة';
+    const backTxt = isDe ? 'العودة إلى لوحة التمارين' : 'العودة إلى لوحة التمارين';
+    const contentEl = document.getElementById('content');
+    if(contentEl){
+      contentEl.innerHTML = `
+        <div class="empty-panel" style="margin:50px auto;max-width:540px;text-align:center;padding:32px;background:var(--white);border-radius:20px;box-shadow:var(--shadow)">
+          <div style="font-size:36px;margin-bottom:12px">⚠️</div>
+          <h3 style="margin-bottom:10px">${isDe ? 'Übung konnte nicht geladen werden' : 'تعذر تحميل التمرين'}</h3>
+          <p class="muted" style="margin-bottom:24px">${esc(msg)}</p>
+          <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+            <button class="btn" type="button" onclick="location.reload()">${retryTxt}</button>
+            <a class="btn light" href="/dashboard.html">${backTxt}</a>
+          </div>
+        </div>`;
+    }
+  }
+})();
 
 </script></body></html>

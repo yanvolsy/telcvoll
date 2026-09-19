@@ -46,6 +46,27 @@ function start(){
   localStorage.setItem('telc_mock_exam',JSON.stringify(session));
   location.href='/mock-exam.html?session='+encodeURIComponent(session.id);
 }
-(async()=>{try{const d=await api('me');exercises=d.exercises||[];render();}catch(e){location.href='/?error=session';}})();
+(async()=>{
+  try {
+    const d = await api('me');
+    exercises = Array.isArray(d?.exercises) ? d.exercises : [];
+    render();
+  } catch(e) {
+    console.error('Self-test init error:', e);
+    if (e?.status === 401) {
+      location.href = '/?error=session';
+    } else {
+      const contentEl = document.getElementById('content');
+      if (contentEl) {
+        contentEl.innerHTML = `
+          <div class="empty-panel" style="margin:50px auto;max-width:540px;text-align:center;padding:32px;background:var(--white);border-radius:20px">
+            <h3 style="margin-bottom:10px">${txt('تعذر تحميل الامتحان التجريبي','Fehler beim Laden der Simulation')}</h3>
+            <p class="muted" style="margin-bottom:20px">${txt('حدث خطأ أثناء الاتصال بالخادم. يرجى إعادة المحاولة.','Verbindungsfehler. Bitte erneut versuchen.')}</p>
+            <button class="btn" type="button" onclick="location.reload()">${txt('إعادة المحاولة','Erneut versuchen')}</button>
+          </div>`;
+      }
+    }
+  }
+})();
 logoutLink.onclick=async e=>{e.preventDefault();await api('auth-logout',{method:'POST'});location.href='/';};
 </script></body></html>

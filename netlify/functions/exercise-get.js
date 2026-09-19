@@ -3,35 +3,60 @@ const { json } = require('./_lib/auth');
 const { requireStudent } = require('./_lib/guard');
 
 exports.handler = async (event) => {
-  const student = await requireStudent(event);
-  if (!student) return json(401, { error: 'unauthenticated' });
+  try {
+    const student = await requireStudent(event);
+    if (!student) return json(401, { error: 'unauthenticated' });
 
-  const id = parseInt((event.queryStringParameters || {}).id || '0', 10);
-  if (!id) return json(400, { error: 'Missing id' });
+    const id = parseInt((event.queryStringParameters || {}).id || '0', 10);
+    if (!id) return json(400, { error: 'Missing id' });
 
-  const pool = db();
-  // Keep exercise loading read-only and fast: schema migrations must not run on every page view.
-  // We filter deleted exercises in application code so older databases without deleted_at also remain compatible.
-  const exRes = await pool.query("SELECT * FROM exercises WHERE id=$1 AND status='published'", [id]);
-  const exercise = exRes.rows[0];
-  if (!exercise || exercise.deleted_at) return json(404, { error: 'Exercise not found' });
+    const pool = db();
+    const exRes = await pool.query("SELECT * FROM exercises WHERE id=$1 AND status='published'", [id]);
+    const exercise = exRes.rows[0];
+    if (!exercise || exercise.deleted_at) return json(404, { error: 'Exercise not found' });
 
-  const itemsRes = await pool.query('SELECT * FROM items WHERE exercise_id=$1 ORDER BY position_no', [id]);
-  const items = [];
-  for (const it of itemsRes.rows) {
-    const optsRes = await pool.query(
-      'SELECT id, option_key, option_text FROM item_options WHERE item_id=$1 ORDER BY sort_order,id',
-      [it.id]
-    );
-    // Never send correct_answer to the client — only what's needed to render the question.
-    items.push({
+    const itemsRes = await pool.query('SELECT * FROM items WHERE exercise_id=$1 ORDER BY position_no', [id]);
+    const itemsRows = itemsRes.rows || [];
+
+    const itemIds = itemsRows.map(it => it.id).filter(Boolean);
+    const optionsByItemId = new Map();
+
+    if (itemIds.length > 0) {
+      try {
+        const optsRes = await pool.query(
+          'SELECT id, item_id, option_key, option_text FROM item_options WHERE item_id = ANY($1) ORDER BY sort_order, id',
+          [itemIds]
+        );
+        for (const opt of optsRes.rows) {
+          const list = optionsByItemId.get(opt.item_id) || [];
+          list.push({ id: opt.id, option_key: opt.option_key, option_text: opt.option_text });
+          optionsByItemId.set(opt.item_id, list);
+        }
+      } catch (_) {
+        // Fallback to sequential query if ANY($1) is not supported
+        for (const it of itemsRows) {
+          try {
+            const optsRes = await pool.query(
+              'SELECT id, option_key, option_text FROM item_options WHERE item_id=$1 ORDER BY sort_order,id',
+              [it.id]
+            );
+            optionsByItemId.set(it.id, optsRes.rows);
+          } catch (_) {}
+        }
+      }
+    }
+
+    const items = itemsRows.map(it => ({
       id: it.id,
       position_no: it.position_no,
       prompt: it.prompt,
       points: it.points,
-      options: optsRes.rows,
-    });
-  }
+      options: optionsByItemId.get(it.id) || [],
+    }));
 
-  return json(200, { exercise, items });
+    return json(200, { exercise, items });
+  } catch (err) {
+    console.error('Fatal error in exercise-get.js:', err);
+    return json(500, { error: err.message || 'Server error' });
+  }
 };
