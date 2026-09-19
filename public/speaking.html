@@ -147,14 +147,92 @@ function renderTeil1Studio(){
   </section>`;
 }
 
+function loadSavedPres(catKey, lvl){
+  try {
+    const key = 'telc_saved_pres_' + catKey + '_' + (lvl || ex?.level || 'B2');
+    const fallbackKey = 'telc_saved_pres_' + catKey;
+    const raw = localStorage.getItem(key) || localStorage.getItem(fallbackKey);
+    return raw ? JSON.parse(raw) : null;
+  } catch(_){ return null; }
+}
+
+function savePresData(data){
+  if(!data) return;
+  const cat = data.category || currentPresCategory;
+  const lvl = data.level || ex?.level || 'B2';
+  try {
+    const str = JSON.stringify(data);
+    localStorage.setItem('telc_saved_pres_' + cat + '_' + lvl, str);
+    localStorage.setItem('telc_saved_pres_' + cat, str);
+  } catch(_){}
+}
+
+function deleteSavedPres(catKey, lvl){
+  try {
+    localStorage.removeItem('telc_saved_pres_' + catKey + '_' + (lvl || ex?.level || 'B2'));
+    localStorage.removeItem('telc_saved_pres_' + catKey);
+  } catch(_){}
+}
+
+async function copyPresText(str, btn){
+  let ok = false;
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(str);
+      ok = true;
+    }
+  } catch(_) {}
+  if (!ok) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = str;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      ok = true;
+    } catch(_) {}
+  }
+  if (btn) {
+    const span = btn.querySelector('span') || btn;
+    const old = span.textContent;
+    btn.style.borderColor = '#228151';
+    btn.style.color = '#228151';
+    span.textContent = 'تم النسخ بنجاح ✓';
+    setTimeout(() => {
+      span.textContent = old;
+      btn.style.borderColor = '';
+      btn.style.color = '';
+    }, 2200);
+  }
+}
+
 function bindTeil1StudioEvents(){
   if(currentTeil()!=='Teil 1') return;
   document.querySelectorAll('.pres-cat-btn').forEach(btn=>{
     btn.onclick=()=>{
       currentPresCategory=btn.dataset.cat;
       document.querySelectorAll('.pres-cat-btn').forEach(b=>b.classList.toggle('active',b===btn));
+      const notesEl = $('presNotes');
+      if(notesEl) notesEl.value = localStorage.getItem('telc_pres_notes_'+currentPresCategory) || '';
+      const saved = loadSavedPres(currentPresCategory, ex?.level);
+      if (saved) {
+        renderPresResult(saved, true);
+      } else {
+        const wrap = $('presResultWrap');
+        if (wrap) wrap.innerHTML = '';
+      }
     };
   });
+  const notesEl = $('presNotes');
+  if(notesEl){
+    notesEl.oninput=()=>{
+      try { localStorage.setItem('telc_pres_notes_'+currentPresCategory, notesEl.value); } catch(_){}
+    };
+  }
   const genBtn = $('presGenBtn');
   if(genBtn){
     genBtn.onclick=async()=>{
@@ -174,7 +252,8 @@ function bindTeil1StudioEvents(){
             level: ex?.level || 'B2'
           }
         });
-        renderPresResult(r);
+        savePresData(r);
+        renderPresResult(r, true);
       }catch(err){
         wrap.innerHTML=`<div class="alert bad">${esc(err.message||'حدث خطأ أثناء توليد العرض.')}</div>`;
       }finally{
@@ -183,25 +262,40 @@ function bindTeil1StudioEvents(){
       }
     };
   }
+
+  // Restore saved presentation for current category on load
+  const initialSaved = loadSavedPres(currentPresCategory, ex?.level);
+  if (initialSaved) {
+    renderPresResult(initialSaved, true);
+  }
 }
 
-function renderPresResult(data){
+function renderPresResult(data, isSaved){
   const wrap = $('presResultWrap');
   if(!wrap) return;
   const juryList = Array.isArray(data.jury_questions) ? data.jury_questions : [];
   const redemittel = Array.isArray(data.redemittel) ? data.redemittel : [];
 
   wrap.innerHTML = `
-  <div class="pres-result-box">
+  <div class="pres-result-box" data-allow-copy="true">
     <div class="pres-result-head">
-      <div><span class="tag">TELC ${esc(data.level||'B2')} · ${esc(data.category||'')}</span><h3>${esc(data.title||'Ihre Präsentation')}</h3></div>
+      <div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
+          <span class="tag">TELC ${esc(data.level||ex?.level||'B2')} · ${esc(data.category||currentPresCategory)}</span>
+          ${isSaved ? `<span class="tag" style="background:#dff5e8;color:#186b3e;border-color:#bce5ce;font-weight:800">💾 عرض محفوظ مسبقاً</span>` : ''}
+        </div>
+        <h3>${esc(data.title||'Ihre Präsentation')}</h3>
+      </div>
       <div class="pres-actions-row">
+        <button type="button" class="btn light" id="presCopyBtn" title="نسخ نص العرض التقديمي">📋 <span id="presCopyBtnText">نسخ العرض</span></button>
+        <button type="button" class="btn light" id="presSaveBtn" title="حفظ العرض في هذا المتصفح للرجوع إليه دائماً">💾 <span id="presSaveBtnText">${isSaved ? 'محفوظ في جهازك ✓' : 'حفظ العرض'}</span></button>
         <button type="button" class="btn light" id="presSpeakBtn">🔊 استماع للعرض</button>
         <button type="button" class="btn light" id="presTransBtn">文 الترجمة العربية</button>
+        ${isSaved ? `<button type="button" class="btn light" id="presDeleteBtn" style="color:#bd3f35;border-color:#f5c2bd;font-size:12px" title="حذف هذا العرض المحفوظ">🗑️ حذف المحفوظ</button>` : ''}
       </div>
     </div>
-    <div class="pres-text-de" id="presTextDe">${esc(data.presentation_de||'')}</div>
-    <div class="pres-text-ar" id="presTextAr" hidden>${esc(data.presentation_ar||'')}</div>
+    <div class="pres-text-de" id="presTextDe" data-allow-copy="true">${esc(data.presentation_de||'')}</div>
+    <div class="pres-text-ar" id="presTextAr" hidden data-allow-copy="true">${esc(data.presentation_ar||'')}</div>
 
     <div class="pres-practice-bar">
       <div>
@@ -227,7 +321,7 @@ function renderPresResult(data){
           const qText = item.question || item.q || '';
           const aText = item.answer || item.a || '';
           return `
-          <div class="speaking-model-qa-card">
+          <div class="speaking-model-qa-card" data-allow-copy="true">
             <div class="speaking-model-q-row">
               <span class="speaking-qa-badge q-badge">سؤال اللجنة ${i+1}</span>
               <div class="speaking-qa-text"><b>${esc(qText)}</b></div>
@@ -258,6 +352,34 @@ function renderPresResult(data){
       <div>${redemittel.map(r => `<span>${esc(r)}</span>`).join('')}</div>
     </div>` : ''}
   </div>`;
+
+  const copyBtn = $('presCopyBtn');
+  if(copyBtn){
+    copyBtn.onclick = () => copyPresText(data.presentation_de || '', copyBtn);
+  }
+
+  const saveBtn = $('presSaveBtn');
+  if(saveBtn){
+    saveBtn.onclick = () => {
+      savePresData(data);
+      const span = $('presSaveBtnText') || saveBtn;
+      saveBtn.style.borderColor = '#228151';
+      saveBtn.style.color = '#228151';
+      span.textContent = 'تم الحفظ بنجاح ✓';
+      setTimeout(() => {
+        span.textContent = 'محفوظ في جهازك ✓';
+      }, 2000);
+    };
+  }
+
+  const delBtn = $('presDeleteBtn');
+  if(delBtn){
+    delBtn.onclick = () => {
+      deleteSavedPres(data.category || currentPresCategory, ex?.level);
+      const wrap = $('presResultWrap');
+      if(wrap) wrap.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:15px">تم حذف العرض المحفوظ. يمكنك إنشاء عرض جديد الآن.</div>';
+    };
+  }
 
   $('presSpeakBtn').onclick = () => speak(data.presentation_de);
   $('presTransBtn').onclick = () => {

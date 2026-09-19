@@ -247,7 +247,15 @@ document.addEventListener('DOMContentLoaded', initAdminLoginTools);
 (function initAntiCopy() {
   if (location.pathname.startsWith('/admin')) return;
 
-  // Block right-click context menu
+  function isAllowedCopy(t) {
+    if (!t) return false;
+    if (t.tagName === 'TEXTAREA') return true;
+    if (t.tagName === 'INPUT' && !['button','submit','checkbox','radio'].includes(t.type)) return true;
+    if (t.closest && (t.closest('.pres-result-box') || t.closest('.pres-text-de') || t.closest('.speaking-model-qa-card') || t.closest('[data-allow-copy]'))) return true;
+    return false;
+  }
+
+  // Block right-click context menu (except on allow-copy elements if needed, but contextmenu is blocked to prevent inspect/save)
   document.addEventListener('contextmenu', function(e) {
     e.preventDefault();
     return false;
@@ -256,8 +264,7 @@ document.addEventListener('DOMContentLoaded', initAdminLoginTools);
   // Block copy event
   document.addEventListener('copy', function(e) {
     var t = e.target;
-    var isEditable = t && (t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && !['button','submit','checkbox','radio'].includes(t.type)));
-    if (!isEditable) {
+    if (!isAllowedCopy(t)) {
       e.preventDefault();
       return false;
     }
@@ -276,8 +283,7 @@ document.addEventListener('DOMContentLoaded', initAdminLoginTools);
   // Block selectstart event
   document.addEventListener('selectstart', function(e) {
     var t = e.target;
-    var isEditable = t && (t.tagName === 'TEXTAREA' || t.tagName === 'INPUT');
-    if (!isEditable) {
+    if (!isAllowedCopy(t)) {
       e.preventDefault();
       return false;
     }
@@ -299,11 +305,15 @@ document.addEventListener('DOMContentLoaded', initAdminLoginTools);
     if (!isCtrl) return;
     var k = (e.key || '').toLowerCase();
     var t = e.target;
-    var isEditable = t && (t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && !['button','submit','checkbox','radio'].includes(t.type)));
 
-    if ((k === 'c' || k === 'x') && !isEditable) {
-      e.preventDefault();
-      return false;
+    if ((k === 'c' || k === 'x')) {
+      if (k === 'x') {
+        var isEditable = t && (t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && !['button','submit','checkbox','radio'].includes(t.type)));
+        if (!isEditable) { e.preventDefault(); return false; }
+      } else if (!isAllowedCopy(t)) {
+        e.preventDefault();
+        return false;
+      }
     }
     if (k === 'u' || k === 's' || k === 'p') {
       if (location.pathname.includes('exercise') || location.pathname.includes('dashboard') || location.pathname.includes('speaking')) {

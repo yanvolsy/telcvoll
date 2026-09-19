@@ -2372,4 +2372,18 @@ body:not(.is-admin-page) [contenteditable="true"] {
   user-select: text !important;
 }
 
+/* Allow text selection in the presentation studio output so students can study and copy */
+body:not(.is-admin-page) .pres-result-box,
+body:not(.is-admin-page) .pres-result-box *,
+body:not(.is-admin-page) .pres-text-de,
+body:not(.is-admin-page) .pres-text-ar,
+body:not(.is-admin-page) .speaking-model-qa-card,
+body:not(.is-admin-page) .speaking-model-qa-card * {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  user-select: text !important;
+}
+
+
 

@@ -395,13 +395,91 @@ function renderTeil1Studio(){
   </section>`;
 }
 
+function loadSavedPres(catKey, lvl){
+  try {
+    const key = 'telc_saved_pres_' + catKey + '_' + (lvl || model?.exercise?.level || 'B2');
+    const fallbackKey = 'telc_saved_pres_' + catKey;
+    const raw = localStorage.getItem(key) || localStorage.getItem(fallbackKey);
+    return raw ? JSON.parse(raw) : null;
+  } catch(_){ return null; }
+}
+
+function savePresData(data){
+  if(!data) return;
+  const cat = data.category || currentPresCategory;
+  const lvl = data.level || model?.exercise?.level || 'B2';
+  try {
+    const str = JSON.stringify(data);
+    localStorage.setItem('telc_saved_pres_' + cat + '_' + lvl, str);
+    localStorage.setItem('telc_saved_pres_' + cat, str);
+  } catch(_){}
+}
+
+function deleteSavedPres(catKey, lvl){
+  try {
+    localStorage.removeItem('telc_saved_pres_' + catKey + '_' + (lvl || model?.exercise?.level || 'B2'));
+    localStorage.removeItem('telc_saved_pres_' + catKey);
+  } catch(_){}
+}
+
+async function copyPresText(str, btn){
+  let ok = false;
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(str);
+      ok = true;
+    }
+  } catch(_) {}
+  if (!ok) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = str;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      ok = true;
+    } catch(_) {}
+  }
+  if (btn) {
+    const span = btn.querySelector('span') || btn;
+    const old = span.textContent;
+    btn.style.borderColor = '#228151';
+    btn.style.color = '#228151';
+    span.textContent = text('تم النسخ بنجاح ✓','Kopiert ✓');
+    setTimeout(() => {
+      span.textContent = old;
+      btn.style.borderColor = '';
+      btn.style.color = '';
+    }, 2200);
+  }
+}
+
 function bindTeil1StudioEvents(){
   document.querySelectorAll('.pres-cat-btn').forEach(btn=>{
     btn.onclick=()=>{
       currentPresCategory=btn.dataset.cat;
       document.querySelectorAll('.pres-cat-btn').forEach(b=>b.classList.toggle('active',b===btn));
+      const notesEl = document.getElementById('presNotes');
+      if(notesEl) notesEl.value = localStorage.getItem('telc_pres_notes_'+currentPresCategory) || '';
+      const saved = loadSavedPres(currentPresCategory, model?.exercise?.level);
+      if (saved) {
+        renderPresResult(saved, true);
+      } else {
+        const wrap = document.getElementById('presResultWrap');
+        if (wrap) wrap.innerHTML = '';
+      }
     };
   });
+  const notesEl = document.getElementById('presNotes');
+  if(notesEl){
+    notesEl.oninput=()=>{
+      try { localStorage.setItem('telc_pres_notes_'+currentPresCategory, notesEl.value); } catch(_){}
+    };
+  }
   const genBtn = document.getElementById('presGenBtn');
   if(genBtn){
     genBtn.onclick=async()=>{
@@ -421,7 +499,8 @@ function bindTeil1StudioEvents(){
             level: model?.exercise?.level || 'B2'
           }
         });
-        renderPresResult(r);
+        savePresData(r);
+        renderPresResult(r, true);
       }catch(err){
         wrap.innerHTML=`<div class="alert bad">${esc(err.message||'حدث خطأ أثناء توليد العرض.')}</div>`;
       }finally{
@@ -430,25 +509,40 @@ function bindTeil1StudioEvents(){
       }
     };
   }
+
+  // Restore saved presentation for current category on load
+  const initialSaved = loadSavedPres(currentPresCategory, model?.exercise?.level);
+  if (initialSaved) {
+    renderPresResult(initialSaved, true);
+  }
 }
 
-function renderPresResult(data){
+function renderPresResult(data, isSaved){
   const wrap = document.getElementById('presResultWrap');
   if(!wrap) return;
   const juryList = Array.isArray(data.jury_questions) ? data.jury_questions : [];
   const redemittel = Array.isArray(data.redemittel) ? data.redemittel : [];
 
   wrap.innerHTML = `
-  <div class="pres-result-box">
+  <div class="pres-result-box" data-allow-copy="true">
     <div class="pres-result-head">
-      <div><span class="tag">TELC ${esc(data.level||'B2')} · ${esc(data.category||'')}</span><h3>${esc(data.title||'Ihre Präsentation')}</h3></div>
+      <div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
+          <span class="tag">TELC ${esc(data.level||model?.exercise?.level||'B2')} · ${esc(data.category||currentPresCategory)}</span>
+          ${isSaved ? `<span class="tag" style="background:#dff5e8;color:#186b3e;border-color:#bce5ce;font-weight:800">💾 ${text('عرض محفوظ مسبقاً','Gespeicherte Präsentation')}</span>` : ''}
+        </div>
+        <h3>${esc(data.title||'Ihre Präsentation')}</h3>
+      </div>
       <div class="pres-actions-row">
+        <button type="button" class="btn light" id="presCopyBtn" title="${text('نسخ نص العرض التقديمي','Präsentation kopieren')}">📋 <span id="presCopyBtnText">${text('نسخ العرض','Kopieren')}</span></button>
+        <button type="button" class="btn light" id="presSaveBtn" title="${text('حفظ العرض في هذا المتصفح للرجوع إليه دائماً','Im Browser speichern')}">💾 <span id="presSaveBtnText">${isSaved ? text('محفوظ في جهازك ✓','Gespeichert ✓') : text('حفظ العرض','Speichern')}</span></button>
         <button type="button" class="btn light" id="presSpeakBtn">🔊 ${text('استماع للعرض','Anhören')}</button>
         <button type="button" class="btn light" id="presTransBtn">文 ${text('الترجمة العربية','Arabische Übersetzung')}</button>
+        ${isSaved ? `<button type="button" class="btn light" id="presDeleteBtn" style="color:#bd3f35;border-color:#f5c2bd;font-size:12px" title="${text('حذف هذا العرض المحفوظ','Gespeicherte Präsentation löschen')}">🗑️ ${text('حذف المحفوظ','Löschen')}</button>` : ''}
       </div>
     </div>
-    <div class="pres-text-de" id="presTextDe">${esc(data.presentation_de||'')}</div>
-    <div class="pres-text-ar" id="presTextAr" hidden>${esc(data.presentation_ar||'')}</div>
+    <div class="pres-text-de" id="presTextDe" data-allow-copy="true">${esc(data.presentation_de||'')}</div>
+    <div class="pres-text-ar" id="presTextAr" hidden data-allow-copy="true">${esc(data.presentation_ar||'')}</div>
 
     <div class="pres-practice-bar">
       <div>
@@ -474,7 +568,7 @@ function renderPresResult(data){
           const qText = item.question || item.q || '';
           const aText = item.answer || item.a || '';
           return `
-          <div class="speaking-model-qa-card">
+          <div class="speaking-model-qa-card" data-allow-copy="true">
             <div class="speaking-model-q-row">
               <span class="speaking-qa-badge q-badge">${text('سؤال اللجنة','Jury-Frage')} ${i+1}</span>
               <div class="speaking-qa-text"><b>${esc(qText)}</b></div>
@@ -505,6 +599,34 @@ function renderPresResult(data){
       <div>${redemittel.map(r => `<span>${esc(r)}</span>`).join('')}</div>
     </div>` : ''}
   </div>`;
+
+  const copyBtn = document.getElementById('presCopyBtn');
+  if(copyBtn){
+    copyBtn.onclick = () => copyPresText(data.presentation_de || '', copyBtn);
+  }
+
+  const saveBtn = document.getElementById('presSaveBtn');
+  if(saveBtn){
+    saveBtn.onclick = () => {
+      savePresData(data);
+      const span = document.getElementById('presSaveBtnText') || saveBtn;
+      saveBtn.style.borderColor = '#228151';
+      saveBtn.style.color = '#228151';
+      span.textContent = text('تم الحفظ بنجاح ✓','Gespeichert ✓');
+      setTimeout(() => {
+        span.textContent = text('محفوظ في جهازك ✓','Gespeichert ✓');
+      }, 2000);
+    };
+  }
+
+  const delBtn = document.getElementById('presDeleteBtn');
+  if(delBtn){
+    delBtn.onclick = () => {
+      deleteSavedPres(data.category || currentPresCategory, model?.exercise?.level);
+      const wrap = document.getElementById('presResultWrap');
+      if(wrap) wrap.innerHTML = `<div style="padding:16px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:15px">${text('تم حذف العرض المحفوظ. يمكنك إنشاء عرض جديد الآن.','Gespeicherte Präsentation gelöscht.')}</div>`;
+    };
+  }
 
   document.getElementById('presSpeakBtn').onclick = () => speakGerman(data.presentation_de);
   document.getElementById('presTransBtn').onclick = () => {
