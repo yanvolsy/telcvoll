@@ -172,18 +172,6 @@ CREATE TABLE IF NOT EXISTS student_errors(
   UNIQUE(student_id, item_id)
 );
 
-CREATE TABLE IF NOT EXISTS summaries(
-  id BIGSERIAL PRIMARY KEY,
-  section VARCHAR(80),
-  teil VARCHAR(50),
-  title VARCHAR(255),
-  body TEXT,
-  keywords TEXT,
-  strategy TEXT,
-  common_errors TEXT,
-  status VARCHAR(20) DEFAULT 'published'
-);
-
 CREATE TABLE IF NOT EXISTS settings(
   key VARCHAR(80) PRIMARY KEY,
   value TEXT

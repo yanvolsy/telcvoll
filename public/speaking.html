@@ -21,6 +21,8 @@
 .spk-phases{display:flex;gap:8px;flex-wrap:wrap}.phase.active{outline:2px solid currentColor}
 .eval-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.eval-item{padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:12px}.eval-score{font-size:20px;font-weight:700}
 @keyframes micPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}@keyframes voiceBar{from{height:5px}to{height:17px}}.speaking-model-head-actions{display:flex;align-items:center;gap:10px;justify-content:flex-end}.speaking-model-head-actions small{max-width:340px}.speaking-model-dialogue{direction:ltr}.speaking-model-line{direction:ltr;text-align:left}.speaking-model-section{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--white)}.speaking-model-section h4{margin:0 0 8px;font-size:14px}.speaking-model-list{margin:0;padding-inline-start:20px;line-height:1.8}.speaking-model-q{display:flex;align-items:flex-start;gap:9px;padding:9px 0;border-bottom:1px solid var(--line);direction:ltr;text-align:left}.speaking-model-q:last-child{border-bottom:0}.speaking-model-q button,.speaking-model-speak{flex:0 0 auto}.speaking-model-empty{padding:14px;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}
+.speaking-ai-box{margin-top:18px;padding:16px;border:1px solid rgba(255,130,0,.18);border-radius:18px;background:rgba(255,130,0,.025)}.speaking-ai-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:4px}.speaking-ai-head h3{margin:4px 0}.speaking-ai-head small{color:var(--muted);max-width:520px;line-height:1.6}.speaking-ai-box .spk-chat{margin-top:12px}.speaking-ai-box .bubble.partner{border-color:rgba(255,130,0,.18)}
+
 @media(max-width:650px){.eval-grid{grid-template-columns:1fr}.bubble{max-width:94%}.spk-chat{max-height:42vh}.voice-mic{width:70px;height:70px}}
 </style>
 <style><!-- TELC Voll: unified homepage typography -->
@@ -29,7 +31,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 </head>
 <body>
 <header class="top"><a class="brand" href="/dashboard.html">TELC Voll</a><nav>
-<a href="/dashboard.html">الرئيسية</a><a href="/errors.html">أخطائي</a><a href="/summaries.html">الملخصات</a><a href="#" id="logout">خروج</a>
+<a href="/dashboard.html">الرئيسية</a><a href="/errors.html">أخطائي</a><a href="#" id="logout">خروج</a>
 </nav></header>
 <main class="wrap spk-shell"><div class="panel">
 <div id="loading">جارٍ تحميل موضوع Sprechen…</div>
@@ -39,12 +41,15 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <div class="question"><strong id="teilLabel"></strong><div class="spk-task" id="task"></div></div><div id="teil3Tasks"></div>
 <div class="speaking-model-box" id="modelBox">
   <div class="speaking-model-head">
-    <div><span class="tag">AI</span><h3>الإجابة النموذجية</h3></div>
-    <div class="speaking-model-head-actions"><small>نموذج تدريبي مبني على موضوعك، مع حوار وأسئلة مشابهة لطريقة التدريب.</small><button class="btn speaking-model-btn" id="modelBtn" type="button">🧠 توليد الإجابة النموذجية</button></div>
+    <div><span class="tag">MODEL</span><h3 id="modelHeading">الإجابة النموذجية</h3></div>
+    <div class="speaking-model-head-actions"><small id="modelHint">حوار نموذجي مبني مباشرة على نقاط المهمة، وليس إجابة رسمية من telc.</small><button class="btn speaking-model-btn" id="modelBtn" type="button">توليد الإجابة النموذجية</button></div>
   </div>
   <div id="modelContent" hidden></div>
 </div>
-<div class="spk-chat" id="chat"></div>
+<div class="speaking-ai-box" id="aiBox">
+  <div class="speaking-ai-head"><div><span class="tag">AI</span><h3>إجابة الذكاء الاصطناعي</h3></div><small id="aiHint">أجب بالألمانية، وسيواصل الشريك الافتراضي الحوار معك وفق نقاط المهمة.</small></div>
+  <div class="spk-chat" id="chat"></div>
+</div>
 <div class="voice-panel" id="voicePanel">
   <div class="voice-bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
   <div class="voice-status" id="voiceStatus">اضغط على الميكروفون وابدأ الحديث بالألمانية مع Jerry</div>
@@ -92,7 +97,7 @@ function renderModel(out){
  if(phrases.length){html+=`<div class="speaking-model-phrases"><h4>Redemittel</h4><div>${phrases.map(x=>`<span>${esc(x)}</span>`).join('')}</div></div>`}
  c.innerHTML=html;c.hidden=false;c.querySelectorAll('[data-speak]').forEach(b=>b.onclick=()=>modelSpeak(b.dataset.speak));c.querySelectorAll('[data-model-translate]').forEach(b=>b.onclick=async()=>{const line=b.closest('.speaking-model-line');const box=line?.querySelector('.speaking-model-translation');const source=line?.querySelector('p')?.textContent||'';if(!box||!source)return;box.hidden=!box.hidden;if(!box.hidden)return;box.textContent='…';try{box.textContent=await translateText(source)}catch{box.textContent='Übersetzung nicht verfügbar.'}});
 }
-async function generateModel(){if(modelBusy)return;modelBusy=true;$('modelBtn').disabled=true;$('modelBtn').textContent='⏳ جارٍ التوليد…';$('modelContent').hidden=false;$('modelContent').innerHTML='<div class="speaking-model-empty">جارٍ إنشاء نموذج مناسب لهذا الموضوع…</div>';try{const r=await api('ai-speaking-session',{method:'POST',body:{id,mode:'model',teil:currentTeil()}});if(r.error)throw new Error(r.error);renderModel(r)}catch(e){$('modelContent').innerHTML=`<div class="alert bad">${esc(e?.message||'حدث خطأ أثناء توليد الإجابة النموذجية.')}</div>`}finally{modelBusy=false;$('modelBtn').disabled=false;$('modelBtn').textContent='🧠 توليد الإجابة النموذجية'}}
+async function generateModel(){if(modelBusy)return;modelBusy=true;$('modelBtn').disabled=true;$('modelBtn').textContent='⏳ جارٍ التوليد…';$('modelContent').hidden=false;$('modelContent').innerHTML='<div class="speaking-model-empty">جارٍ إنشاء نموذج مناسب لهذا الموضوع…</div>';try{const r=await api('ai-speaking-session',{method:'POST',body:{id,mode:'model',teil:currentTeil()}});if(r.error)throw new Error(r.error);renderModel(r)}catch(e){$('modelContent').innerHTML=`<div class="alert bad">${esc(e?.message||'حدث خطأ أثناء توليد الإجابة النموذجية.')}</div>`}finally{modelBusy=false;$('modelBtn').disabled=false;$('modelBtn').textContent='توليد الإجابة النموذجية'}}
 async function load(){try{
  const wanted=new URLSearchParams(location.search).get('teil');
  let data=await api('exercise-get?id='+encodeURIComponent(id));
@@ -105,7 +110,7 @@ async function load(){try{
      (String(x.title||'').trim().toLowerCase()===String(ex.title||'').trim().toLowerCase() || String(x.body||'').includes(String(ex.title||''))));
    if(same){data=await api('exercise-get',{method:'GET',query:{id:same.id}});ex=data.exercise}
  }
- $('level').textContent=ex.level||'';$('title').textContent=ex.title||'Sprechen';$('teilLabel').textContent=ex.teil||'Teil 1';$('task').textContent=ex.body||'';document.getElementById('teil3Tasks').innerHTML=renderTeil3Tasks();renderPhases();$('chat').innerHTML='';history=[];transcript=[];$('liveTranscript').textContent='اضغط على الميكروفون وابدأ الحديث بالألمانية…';addBubble('jerry',currentTeil()==='Teil 2'?'Bitte besprechen Sie zunächst den Inhalt des Themas. Danach äußern Sie Ihre Meinung und tauschen Sie sich mit Ihrem Gesprächspartner aus.':currentTeil()==='Teil 1'?'Bitte beginnen Sie mit Ihrer Präsentation. Danach reagiert Ihr Gesprächspartner und stellt Ihnen eine Frage.':'Bitte planen Sie die Aufgabe gemeinsam. Machen Sie einen ersten Vorschlag und finden Sie am Ende eine gemeinsame Lösung.'); if(currentTeil()==='Teil 2'){try{const opening=await api('ai-speaking-session',{method:'POST',body:{id,mode:'opening',teil:currentTeil()}});addBubble('partner',opening.reply||'Ich fasse zunächst kurz den Inhalt des Themas zusammen. Wie würden Sie den Inhalt in Ihren eigenen Worten wiedergeben?',true);history.push({role:'partner',content:opening.reply||''})}catch{addBubble('partner','Ich fasse zunächst kurz den Inhalt des Themas zusammen. Wie würden Sie den Inhalt in Ihren eigenen Worten wiedergeben?',true)}}$('app').hidden=false;$('loading').hidden=true;
+ if(currentTeil()==='Teil 3'){ $('modelHeading').textContent='الإجابة النموذجية — Teil 3'; $('modelHint').textContent='حوار نموذجي بين شريكين، نقطة بنقطة، مع اقتراح وردّ وتفاوض ثم اتفاق نهائي.'; $('aiHint').textContent='إجابة AI: الشريك يتفاعل مع إجابتك ويواصل التخطيط حسب نقاط المهمة الفعلية.'; } else { $('modelHeading').textContent='الإجابة النموذجية'; $('modelHint').textContent='نموذج تدريبي مبني على موضوعك، وليس إجابة رسمية من telc.'; $('aiHint').textContent='أجب بالألمانية، وسيواصل الشريك الافتراضي الحوار معك.'; } $('level').textContent=ex.level||'';$('title').textContent=ex.title||'Sprechen';$('teilLabel').textContent=ex.teil||'Teil 1';$('task').textContent=ex.body||'';document.getElementById('teil3Tasks').innerHTML=renderTeil3Tasks();renderPhases();$('chat').innerHTML='';history=[];transcript=[];$('liveTranscript').textContent='اضغط على الميكروفون وابدأ الحديث بالألمانية…';addBubble('jerry',currentTeil()==='Teil 2'?'Bitte besprechen Sie zunächst den Inhalt des Themas. Danach äußern Sie Ihre Meinung und tauschen Sie sich mit Ihrem Gesprächspartner aus.':currentTeil()==='Teil 1'?'Bitte beginnen Sie mit Ihrer Präsentation. Danach reagiert Ihr Gesprächspartner und stellt Ihnen eine Frage.':'Bitte planen Sie die Aufgabe gemeinsam. Machen Sie einen ersten Vorschlag und finden Sie am Ende eine gemeinsame Lösung.'); if(currentTeil()==='Teil 2'){try{const opening=await api('ai-speaking-session',{method:'POST',body:{id,mode:'opening',teil:currentTeil()}});addBubble('partner',opening.reply||'Ich fasse zunächst kurz den Inhalt des Themas zusammen. Wie würden Sie den Inhalt in Ihren eigenen Worten wiedergeben?',true);history.push({role:'partner',content:opening.reply||''})}catch{addBubble('partner','Ich fasse zunächst kurz den Inhalt des Themas zusammen. Wie würden Sie den Inhalt in Ihren eigenen Worten wiedergeben?',true)}}$('app').hidden=false;$('loading').hidden=true;
  }catch(e){$('loading').textContent=e?.message||'Fehler beim Laden.'}}
 function getRecognition(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR)return null; const r=new SR();r.lang='de-DE';r.interimResults=true;r.continuous=false;r.maxAlternatives=1; return r}
 function startListening(){if(!voiceRunning||busy||speakingNow)return; if(!recognition)recognition=getRecognition(); if(!recognition){setVoiceStatus('هذا المتصفح لا يدعم التعرف على الكلام. استخدم Chrome على الكمبيوتر أو خيار الكتابة.');return} $('voicePanel').classList.add('active');$('mic').classList.add('listening');$('mic').disabled=true;$('stop').disabled=false;setVoiceStatus('Jerry يستمع إليك… تحدث الآن بالألمانية');$('liveTranscript').textContent='…';let finalText='';

@@ -3,7 +3,7 @@
 
 const I18N = {
   ar: {
-    nav_home: 'الرئيسية', nav_home_student: 'منصة الطالب', nav_errors: 'أخطائي', nav_summaries: 'الملخصات',
+    nav_home: 'الرئيسية', nav_home_student: 'منصة الطالب', nav_errors: 'أخطائي',
     nav_speaking: 'مساعد TELC', profile_link: 'ملفي', nav_logout: 'خروج',
     nav_services: 'الخدمات', nav_plans: 'الخطط', nav_about: 'عن المنصة', nav_access: 'الدخول', nav_contact: 'اتصل بنا', nav_mock: 'امتحان تجريبي', nav_speaking_ai: 'Sprechen AI',
     footer: 'TELC Voll — منصة تدريب B1 · B2 · C1',
@@ -30,7 +30,6 @@ const I18N = {
     feature2_title: 'التدريب حسب المهارة', feature2_desc: 'تدرب على Lesen وHören وSprachbausteine وSchreiben وSprechen بشكل منفصل.',
     feature3_title: 'Meine Fehler', feature3_desc: 'احتفظ بالأخطاء المتكررة وراجع الإجابة الصحيحة والتفسير عند توفره.',
     feature4_title: 'Sprechen AI', feature4_desc: 'سجّل إجابتك واحصل على تحليل AI للنص أو الموضوع الذي تتدرب عليه.',
-    feature5_title: 'Zusammenfassungen & Strategien', feature5_desc: 'كلمات مهمة واستراتيجيات وأخطاء شائعة تساعدك على المراجعة.',
     feature6_title: 'متابعة التقدم', feature6_desc: 'لوحة شخصية تجمع الامتحانات والتمارين والتقدم في مكان واحد.',
 
     studentexp_tag: 'تجربة الطالب', studentexp_title: 'لوحة تحكم مصممة للدراسة اليومية',
@@ -77,9 +76,6 @@ const I18N = {
     sp_topic_placeholder: 'الموضوع أو المقال أو نص الممتحن',
     sp_start_btn: 'بدء التسجيل', sp_stop_btn: 'إيقاف', sp_ai_btn: 'تحليل بواسطة AI', sp_analyzing: 'جارٍ التحليل…',
 
-    sum_page_title: 'الملخصات', sum_keywords: 'الكلمات:', sum_strategy: 'الاستراتيجية:',
-    sum_errors: 'الأخطاء الشائعة:', sum_none: 'لا توجد ملخصات بعد.',
-
     err_page_title: 'أخطائي', err_your_answer: 'إجابتك:', err_correct: 'صحيح:',
     err_count: '{n} خطأ', err_none: 'لا توجد أخطاء محفوظة بعد.',
 
@@ -87,7 +83,7 @@ const I18N = {
     install_password_ph: 'كلمة مرور قوية (8 أحرف على الأقل)', install_btn: 'تثبيت',
   },
   de: {
-    nav_home: 'Startseite', nav_home_student: 'Schülerbereich', nav_errors: 'Meine Fehler', nav_summaries: 'Zusammenfassungen',
+    nav_home: 'Startseite', nav_home_student: 'Schülerbereich', nav_errors: 'Meine Fehler',
     nav_speaking: 'Sprechen AI', profile_link: 'Mein Profil', nav_logout: 'Abmelden',
     nav_services: 'Leistungen', nav_plans: 'Pläne', nav_about: 'Über uns', nav_access: 'Zugang', nav_contact: 'Kontakt', nav_mock: 'Prüfungssimulation', nav_speaking_ai: 'Sprechen AI',
     footer: 'TELC Voll – Übungsplattform für B1 · B2 · C1',
@@ -114,7 +110,6 @@ const I18N = {
     feature2_title: 'Training nach Fertigkeit', feature2_desc: 'Übe Lesen, Hören, Sprachbausteine, Schreiben und Sprechen einzeln.',
     feature3_title: 'Meine Fehler', feature3_desc: 'Wiederholte Fehler werden gespeichert; überprüfe die richtige Antwort und ggf. die Erklärung.',
     feature4_title: 'Sprechen AI', feature4_desc: 'Nimm deine Antwort auf und erhalte eine KI-Analyse zum Text oder Thema, das du übst.',
-    feature5_title: 'Zusammenfassungen & Strategien', feature5_desc: 'Wichtige Wörter, Strategien und häufige Fehler für deine Wiederholung.',
     feature6_title: 'Fortschritt verfolgen', feature6_desc: 'Ein persönliches Dashboard, das Prüfungen, Übungen und Fortschritt an einem Ort vereint.',
 
     studentexp_tag: 'Lernerfahrung', studentexp_title: 'Ein Dashboard für das tägliche Lernen',
@@ -160,9 +155,6 @@ const I18N = {
     sp_desc: 'Der Browser kann deine Antwort aufnehmen; anschließend erfolgt die KI-Analyse auf dem Server.',
     sp_topic_placeholder: 'Thema, Text oder Prüferaussage',
     sp_start_btn: 'Aufnahme starten', sp_stop_btn: 'Stopp', sp_ai_btn: 'KI-Analyse', sp_analyzing: 'Analyse läuft…',
-
-    sum_page_title: 'Zusammenfassungen', sum_keywords: 'Wörter:', sum_strategy: 'Strategie:',
-    sum_errors: 'Häufige Fehler:', sum_none: 'Noch keine Zusammenfassungen.',
 
     err_page_title: 'Meine Fehler', err_your_answer: 'Deine Antwort:', err_correct: 'Richtig:',
     err_count: '{n} Fehler', err_none: 'Noch keine gespeicherten Fehler.',

@@ -175,7 +175,7 @@ STRICT TEIL 2 ROLE RULES:
 Rules by Teil:
 - Teil 1: react to the presentation and ask one relevant follow-up question.
 - Teil 2: follow the role sequence above and keep the conversation natural.
-- Teil 3: actively plan/negotiate; introduce or react to concrete planning points such as time, place, cost, tasks and priorities, and work toward agreement.
+- Teil 3: act strictly as the student's discussion partner. Respond to the student's LAST contribution, not with a prewritten monologue. Use the concrete numbered Aufgaben contained in the supplied source. If the student has just addressed one point, react to it and move naturally to the next unresolved point. Alternate proposing, reacting, agreeing/disagreeing, asking a short relevant question, and negotiating. Cover the task points progressively and finish only after the main points have been discussed and a concrete agreement is reached. Do not invent unrelated categories or facts. Never write the student's answer for them. Keep the response to 1-3 natural B2-level sentences.
 Return ONLY JSON: {"reply":"","short_note":"","continue":true}`;
   }
   try{
