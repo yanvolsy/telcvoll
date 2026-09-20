@@ -109,7 +109,8 @@ exports.handler = async (event) => {
   const pool = db();
 
   if (event.httpMethod === 'GET') {
-    const id = new URL(event.rawUrl || 'http://localhost' + (event.path || '/'), 'http://localhost').searchParams.get('id');
+    const url = new URL(event.rawUrl || 'http://localhost' + (event.path || '/'), 'http://localhost');
+    const id = url.searchParams.get('id');
     if (id) {
       const ex = await pool.query('SELECT * FROM exercises WHERE id=$1', [id]);
       if (!ex.rows.length) return json(404, { error: 'التمرين غير موجود.' });
@@ -120,12 +121,36 @@ exports.handler = async (event) => {
       }
       return json(200, { exercise: ex.rows[0], items: items.rows });
     }
+
+    const level = url.searchParams.get('level');
+    const section = url.searchParams.get('section');
+    const teil = url.searchParams.get('teil');
+    const includeDeleted = url.searchParams.get('include_deleted') === '1';
+
+    const clauses = [];
+    const params = [];
+    if (!includeDeleted) clauses.push('e.deleted_at IS NULL');
+    if (level && level !== 'ALL') {
+      params.push(level);
+      clauses.push(`UPPER(TRIM(e.level)) = UPPER(TRIM($${params.length}))`);
+    }
+    if (section && section !== 'ALL') {
+      params.push(section);
+      clauses.push(`LOWER(TRIM(e.section)) = LOWER(TRIM($${params.length}))`);
+    }
+    if (teil && teil !== 'ALL') {
+      params.push(teil);
+      clauses.push(`LOWER(REPLACE(TRIM(e.teil),' ','')) = LOWER(REPLACE(TRIM($${params.length}),' ',''))`);
+    }
+    const whereSql = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
+
     const { rows } = await pool.query(`
       SELECT e.*,
         (SELECT COUNT(*) FROM items i WHERE i.exercise_id=e.id) AS item_count
       FROM exercises e
-      ORDER BY e.id DESC LIMIT 100
-    `);
+      ${whereSql}
+      ORDER BY e.id DESC
+    `, params);
     return json(200, { exercises: rows });
   }
 

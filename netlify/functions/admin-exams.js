@@ -54,7 +54,7 @@ exports.handler = async (event) => {
   }
 
   const exercises = (await pool.query(
-    "SELECT id,section,teil,title FROM exercises WHERE status='published' ORDER BY id DESC"
+    "SELECT id,level,section,teil,title,status FROM exercises WHERE deleted_at IS NULL ORDER BY id DESC"
   )).rows;
   const exams = (await pool.query('SELECT * FROM exams ORDER BY id DESC')).rows;
   return json(200, { exercises, exams });

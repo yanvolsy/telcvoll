@@ -28,8 +28,8 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <main class="exercise-admin">
   <div class="admin-head"><div><span class="tag">لوحة المشرف</span><h1>إدارة التمارين</h1><p>اختر المستوى والقسم وTeil، وستظهر التمارين بنفس منطق بطاقات الطالب.</p></div></div>
   <div class="context-bar"><div class="context-item"><span>المستوى</span><strong id="pageLevel">Telc B2</strong></div><div class="context-item"><span>القسم</span><strong id="pageSection">Lesen — القراءة</strong></div><div class="context-item"><span>Teil</span><strong id="pageTeil">Teil 1</strong></div></div>
-  <section class="panel browser"><div class="browser-toolbar"><div><h2>التمارين</h2></div><div class="browser-toolbar-actions"><button class="btn" id="refreshBtn">تحديث</button><button class="btn" id="importBtn">⇧ استيراد تمارين</button><button class="btn" id="newBtn">+ إضافة موضوع جديد</button><input id="importFile" type="file" accept=".json,application/json" hidden></div></div>
-    <div class="browser-filters"><select id="browserLevel"><option>B1</option><option selected>B2</option><option>C1</option></select><select id="browserSection"><option value="Lesen">Lesen — القراءة</option><option value="Hören">Hören — الاستماع</option><option value="Sprachbausteine">Sprachbausteine — القواعد والمفردات</option><option value="Schreiben">Schreiben — الكتابة</option><option value="Sprechen">Sprechen — التحدث</option></select><select id="browserTeil"></select><input id="browserSearch" placeholder="ابحث عن موضوع…"></div>
+  <section class="panel browser"><div class="browser-toolbar"><div><h2>التمارين <span id="exerciseCountBadge" style="font-size:14px;font-weight:normal;color:var(--muted);margin-right:8px"></span></h2></div><div class="browser-toolbar-actions"><button class="btn" id="refreshBtn">تحديث</button><button class="btn" id="importBtn">⇧ استيراد تمارين</button><button class="btn" id="newBtn">+ إضافة موضوع جديد</button><input id="importFile" type="file" accept=".json,application/json" hidden></div></div>
+    <div class="browser-filters"><select id="browserLevel"><option value="ALL">كل المستويات</option><option value="B1">B1</option><option value="B2" selected>B2</option><option value="C1">C1</option></select><select id="browserSection"><option value="ALL">كل الأقسام</option><option value="Lesen" selected>Lesen — القراءة</option><option value="Hören">Hören — الاستماع</option><option value="Sprachbausteine">Sprachbausteine — القواعد والمفردات</option><option value="Schreiben">Schreiben — الكتابة</option><option value="Sprechen">Sprechen — التحدث</option></select><select id="browserTeil"></select><input id="browserSearch" placeholder="ابحث بالعنوان أو المحتوى أو ID…"></div>
     <div class="browser-list" id="browserList"></div>
   </section>
 </main>
@@ -43,18 +43,56 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 </div><div class="modal-footer"><button class="btn" id="saveBtn">إضافة الموضوع</button><button class="small-btn" id="cancelBtn">إلغاء</button></div></div></div>
 <script src="/assets/i18n.js"></script><script src="/assets/app.js"></script><script src="/assets/admin-guard.js"></script>
 <script>
-const state={editId:null,cloneMode:false,exercises:[]};
+const state={editId:null,cloneMode:false,exercises:[],activeModalContext:null};
 const teilMap={Lesen:['Teil 1','Teil 2','Teil 3'],Hören:['Teil 1','Teil 2','Teil 3'],Sprachbausteine:['Teil 1','Teil 2'],Schreiben:['Teil 1'],Sprechen:['Teil 1','Teil 2','Teil 3']};
 const taskMap={Lesen:{'Teil 1':'MATCHING','Teil 2':'MCQ','Teil 3':'MATCHING'},Hören:{'Teil 1':'AUDIO_MCQ','Teil 2':'AUDIO_TF','Teil 3':'MATCHING'},Sprachbausteine:{'Teil 1':'GAP','Teil 2':'GAP'},Schreiben:{'Teil 1':'WRITING'},Sprechen:{'Teil 1':'SPEAKING','Teil 2':'SPEAKING','Teil 3':'SPEAKING'}};
 const sectionNames={Lesen:'Lesen — القراءة',Hören:'Hören — الاستماع',Sprachbausteine:'Sprachbausteine — القواعد والمفردات',Schreiben:'Schreiben — الكتابة',Sprechen:'Sprechen — التحدث'};
 const $=id=>document.getElementById(id); const modal=$('editorModal');
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function currentContext(){return {level:$('browserLevel').value,section:$('browserSection').value,teil:$('browserTeil').value||'Teil 1'};}
-function setTeile(select,section,keep){const old=keep||select.value;select.innerHTML=(teilMap[section]||['Teil 1']).map(t=>`<option>${t}</option>`).join('');if([...select.options].some(o=>o.value===old))select.value=old;}
-function updateContext(){const c=currentContext();$('pageLevel').textContent='Telc '+c.level;$('pageSection').textContent=sectionNames[c.section];$('pageTeil').textContent=c.teil;}
-function openModal(mode='new',data=null){const c=currentContext();state.editId=mode==='edit'?data.id:null;state.cloneMode=mode==='clone';modal.classList.add('open');modal.setAttribute('aria-hidden','false');$('modalTitle').textContent=mode==='edit'?'تعديل الموضوع':mode==='clone'?'مضاعفة الموضوع':'إضافة موضوع جديد';$('saveBtn').textContent=mode==='edit'?'حفظ التعديلات':mode==='clone'?'إضافة النسخة':'إضافة الموضوع';$('lockLevel').textContent='Telc '+c.level;$('lockSection').textContent=sectionNames[c.section];$('lockTeil').textContent=c.teil;$('title').value=mode==='new'?'':(data?.title||'');let formData=mode==='new'?{}:JSON.parse(JSON.stringify(data||{}));if(c.section==='Sprachbausteine'&&formData.body&&Array.isArray(formData.items)){formData.body=formData.body.replace(/\((\d+)\)/g,(_,n)=>{const it=formData.items.find(x=>String(x.position_no||formData.items.indexOf(x)+1)===String(n));return it?.correctText?'['+it.correctText+']':'('+n+')';});}renderDynamic(taskMap[c.section]?.[c.teil],formData);setTimeout(()=>$('title').focus(),30);}
-function closeModal(){modal.classList.remove('open');modal.setAttribute('aria-hidden','true');state.editId=null;state.cloneMode=false;}
-function renderDynamic(type,data={}){const c=currentContext();const d=$('dynamic');d.innerHTML='';
+function norm(v){return String(v||'').trim().toLowerCase().replace(/\s+/g,'');}
+function currentContext(){return {level:$('browserLevel').value||'B2',section:$('browserSection').value||'Lesen',teil:$('browserTeil').value||'Teil 1'};}
+function setTeile(select,section,keep){
+  const old=keep||select.value;
+  const teils=(!section||section==='ALL'||!teilMap[section])?[]:teilMap[section];
+  select.innerHTML='<option value="ALL">كل الأجزاء</option>'+teils.map(t=>`<option value="${t}">${t}</option>`).join('');
+  if([...select.options].some(o=>o.value===old)) select.value=old;
+  else select.value=old==='ALL'?'ALL':(teils.length?teils[0]:'ALL');
+}
+function updateContext(){
+  const c=currentContext();
+  $('pageLevel').textContent=c.level==='ALL'?'كل المستويات':('Telc '+c.level);
+  $('pageSection').textContent=c.section==='ALL'?'كل الأقسام':(sectionNames[c.section]||c.section);
+  $('pageTeil').textContent=c.teil==='ALL'?'كل الأجزاء':c.teil;
+}
+function openModal(mode='new',data=null){
+  const c=currentContext();
+  state.editId=mode==='edit'?data.id:null;
+  state.cloneMode=mode==='clone';
+  modal.classList.add('open');
+  modal.setAttribute('aria-hidden','false');
+  $('modalTitle').textContent=mode==='edit'?'تعديل الموضوع':mode==='clone'?'مضاعفة الموضوع':'إضافة موضوع جديد';
+  $('saveBtn').textContent=mode==='edit'?'حفظ التعديلات':mode==='clone'?'إضافة النسخة':'إضافة الموضوع';
+  let exLevel=data?.level||(c.level==='ALL'?'B2':c.level);
+  let exSection=data?.section||(c.section==='ALL'?'Lesen':c.section);
+  let exTeil=data?.teil||(c.teil==='ALL'?(teilMap[exSection]||['Teil 1'])[0]:c.teil);
+  if(!taskMap[exSection]?.[exTeil]) exTeil=(teilMap[exSection]||['Teil 1'])[0];
+  state.activeModalContext={level:exLevel,section:exSection,teil:exTeil};
+  $('lockLevel').textContent='Telc '+exLevel;
+  $('lockSection').textContent=sectionNames[exSection]||exSection;
+  $('lockTeil').textContent=exTeil;
+  $('title').value=mode==='new'?'':(data?.title||'');
+  let formData=mode==='new'?{}:JSON.parse(JSON.stringify(data||{}));
+  if(exSection==='Sprachbausteine'&&formData.body&&Array.isArray(formData.items)){
+    formData.body=formData.body.replace(/\((\d+)\)/g,(_,n)=>{
+      const it=formData.items.find(x=>String(x.position_no||formData.items.indexOf(x)+1)===String(n));
+      return it?.correctText?'['+it.correctText+']':'('+n+')';
+    });
+  }
+  renderDynamic(taskMap[exSection]?.[exTeil],formData);
+  setTimeout(()=>$('title').focus(),30);
+}
+function closeModal(){modal.classList.remove('open');modal.setAttribute('aria-hidden','true');state.editId=null;state.cloneMode=false;state.activeModalContext=null;}
+function renderDynamic(type,data={}){const c=state.activeModalContext||currentContext();const d=$('dynamic');d.innerHTML='';
  if(type==='MATCHING') renderMatching(data);
  else if(type==='MCQ'||type==='AUDIO_MCQ') renderMCQ(data,type==='AUDIO_MCQ');
  else if(type==='AUDIO_TF') renderTF(data);
@@ -139,17 +177,17 @@ function bindDistractorPreview(){document.querySelectorAll('.distractor-input').
 function renderGap2Preview(drafts){const box=$('studentPreview');if(!box)return;const text=$('mainBody').value||'';let n=0;const html=esc(text).replace(/\[([^\]]*)\]/g,()=>`<span class="preview-gap">${31+n++}</span>`);const words=[...drafts.map(x=>x.correctText).filter(Boolean),...document.querySelectorAll('.distractor-input')].map(x=>typeof x==='string'?x:x.value.trim()).filter(Boolean);const unique=[];const seen=new Set();words.forEach(w=>{const k=w.toLocaleLowerCase();if(!seen.has(k)){seen.add(k);unique.push(w);}});box.innerHTML=`<div class="preview-meta"><span>SPRACHBAUSTEINE · TEIL 2</span><strong>31–40</strong></div><div class="preview-text">${html.replace(/\n/g,'<br>')}</div><div class="preview-bank"><div class="bank-title">WÖRTER</div><div class="bank-grid">${unique.map((w,i)=>`<button><small>${String.fromCharCode(65+i)}</small>${esc(w)}</button>`).join('')}</div></div>`;}
 
 function renderSimpleText(data,label,placeholder){$('dynamic').innerHTML=`<div class="section-box"><h3>${label}</h3><div class="field"><textarea id="mainBody" placeholder="${placeholder}">${esc(data.body||'')}</textarea></div></div>`;}
-async function collect(){const c=currentContext(),type=taskMap[c.section]?.[c.teil];const items=[];let body=document.getElementById('mainBody')?.value||'';
+async function collect(){const c=state.activeModalContext||currentContext();const sec=c.section==='ALL'?'Lesen':c.section;const teil=(c.teil==='ALL'||!taskMap[sec]?.[c.teil])?(teilMap[sec]||['Teil 1'])[0]:c.teil;const lvl=c.level==='ALL'?'B2':c.level;const type=taskMap[sec]?.[teil];const items=[];let body=document.getElementById('mainBody')?.value||'';
  if(type==='MATCHING'){document.querySelectorAll('#paras .para-card').forEach(p=>items.push({prompt:p.querySelector('.para-text').value,correct:p.querySelector('.correct-head').value,points:1,options:{}}));}
  else if(type==='MCQ'||type==='AUDIO_MCQ'){document.querySelectorAll('#questions .question-card').forEach(q=>{const options={};q.querySelectorAll('.q-opt').forEach(x=>options[x.dataset.key]=x.value.trim());items.push({prompt:q.querySelector('.q-prompt').value,correct:q.querySelector('.correct-radio:checked')?.value||'',points:1,options});});}
  else if(type==='AUDIO_TF'){document.querySelectorAll('#questions .question-card').forEach(q=>items.push({prompt:q.querySelector('.q-prompt').value,correct:q.querySelector('.correct-radio:checked')?.value||'',points:1,options:{Richtig:'Richtig',Falsch:'Falsch'}}));}
- else if(type==='GAP'&&c.section==='Sprachbausteine'&&c.teil==='Teil 1'){
+ else if(type==='GAP'&&sec==='Sprachbausteine'&&teil==='Teil 1'){
    const gaps=[...body.matchAll(/\[([^\]]*)\]/g)].map(m=>m[1].trim());
    const cards=[...document.querySelectorAll('#questions .question-card')];
    if(gaps.length!==cards.length)throw Error('أكمل الفراغات بين [ ] في النص.');
    let n=0;body=body.replace(/\[([^\]]*)\]/g,()=>{n++;return '('+(20+n)+')';});
    cards.forEach((q,i)=>{const options={};q.querySelectorAll('.q-opt').forEach(x=>options[x.dataset.key]=x.value.trim());items.push({prompt:gaps[i],correct:q.querySelector('.correct-radio:checked')?.value||'',correctText:gaps[i],points:1,options});});
- } else if(type==='GAP'&&c.section==='Sprachbausteine'&&c.teil==='Teil 2'){
+ } else if(type==='GAP'&&sec==='Sprachbausteine'&&teil==='Teil 2'){
    const words=[...body.matchAll(/\[([^\]]*)\]/g)].map(m=>m[1].trim()).filter(Boolean);
    let n=0;body=body.replace(/\[([^\]]*)\]/g,()=>{n++;return '('+(30+n)+')';});
    if(!words.length)throw Error('ضع كلمة صحيحة واحدة على الأقل بين [ ].');
@@ -158,13 +196,57 @@ async function collect(){const c=currentContext(),type=taskMap[c.section]?.[c.te
    if(!bank.length)throw Error('أضف كلمة صحيحة واحدة على الأقل.');
    words.forEach((word,i)=>{const options={};bank.forEach((w,j)=>options['W'+(j+1)]=w);items.push({prompt:word,correct:'W'+(bank.findIndex(w=>w.toLocaleLowerCase()===word.toLocaleLowerCase())+1),correctText:word,points:1,options});});
  } else if(type==='GAP'){document.querySelectorAll('#questions .question-card').forEach(q=>{const word=q.querySelector('.gap-word').value.trim();items.push({prompt:word,correct:word,correctText:word,points:1,options:{[word]:word}});});}
- let settings={};if(type==='GAP'&&c.section==='Sprachbausteine'&&c.teil==='Teil 2')settings.distractors=[...document.querySelectorAll('.distractor-input')].map(x=>x.value.trim()).filter(Boolean);
+ let settings={};if(type==='GAP'&&sec==='Sprachbausteine'&&teil==='Teil 2')settings.distractors=[...document.querySelectorAll('.distractor-input')].map(x=>x.value.trim()).filter(Boolean);
  let audio_url=document.getElementById('audioUrl')?.value||'';const file=document.getElementById('audioFile')?.files?.[0];if(file){if(file.size>5*1024*1024)throw Error('ملف الصوت كبير جداً. استخدم ملفاً أقل من 5MB.');audio_url=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file);});}
- return {id:state.editId,level:c.level,section:c.section,teil:c.teil,title:$('title').value.trim(),task_type:type,body,translation:'',audio_url,allow_replay:true,headings:[...document.querySelectorAll('.head-input')].map(x=>x.value.trim()).filter(Boolean),items,settings};}
+ return {id:state.editId,level:lvl,section:sec,teil:teil,title:$('title').value.trim(),task_type:type,body,translation:'',audio_url,allow_replay:true,headings:[...document.querySelectorAll('.head-input')].map(x=>x.value.trim()).filter(Boolean),items,settings};}
 function validate(data){if(!data.title)throw Error('اكتب عنوان الموضوع.');if(data.task_type==='MATCHING'){if(data.headings.length<2)throw Error('أضف عنوانين على الأقل.');if(!data.items.length)throw Error('أضف فقرة واحدة على الأقل.');if(data.items.some(x=>!x.prompt.trim()||!x.correct))throw Error('أكمل نص كل فقرة وحدد عنوانها الصحيح.');}if(['MCQ','AUDIO_MCQ'].includes(data.task_type)){if(!data.items.length)throw Error('أضف سؤالاً واحداً على الأقل.');if(data.items.some(x=>!x.prompt.trim()||!x.correct||Object.keys(x.options).length!==3||Object.values(x.options).some(v=>!String(v).trim())))throw Error('كل سؤال يجب أن يحتوي على سؤال و3 اختيارات وتحديد الإجابة الصحيحة.');}if(data.task_type==='AUDIO_TF'&&data.items.some(x=>!x.prompt.trim()||!x.correct))throw Error('أكمل كل عبارة وحدد Richtig أو Falsch.');if(data.task_type==='GAP'){if(!data.body.trim())throw Error('أدخل النص.');if(!data.items.length)throw Error('أضف فراغاً واحداً على الأقل.');if(data.section==='Sprachbausteine'&&data.teil==='Teil 1'&&data.items.some(x=>!x.correctText.trim()||!['A','B','C'].includes(x.correct)||Object.keys(x.options).length!==3||Object.values(x.options).some(v=>!String(v).trim())))throw Error('أكمل كل فراغ بكلمة صحيحة و3 اختيارات وحدد الصحيحة.');if(data.section==='Sprachbausteine'&&data.teil==='Teil 2'&&data.items.some(x=>!x.correctText.trim()||!x.correct))throw Error('أكمل الكلمات الصحيحة لكل الفراغات.');}if(['WRITING','SPEAKING'].includes(data.task_type)&&!data.body.trim())throw Error('أدخل نص الموضوع.');}
 async function save(){try{const data=await collect();validate(data);await api('admin-questions',{method:state.editId&&!state.cloneMode?'PUT':'POST',body:data});closeModal();showToast(state.editId&&!state.cloneMode?'تم تعديل الموضوع بنجاح':'تمت إضافة الموضوع بنجاح');await load();}catch(e){showToast(e.message||'حدث خطأ',true);}}
 function showToast(msg,bad=false){const t=$('toast');t.textContent=msg;t.className='toast show'+(bad?' bad':'');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.className='toast',2600);}
-function renderBrowser(){const c=currentContext();let rows=state.exercises.filter(x=>(x.level||'B2')===c.level&&x.section===c.section&&x.teil===c.teil);const q=$('browserSearch').value.trim().toLowerCase();if(q)rows=rows.filter(x=>(x.title+' '+(x.body||'')).toLowerCase().includes(q));$('browserList').innerHTML=rows.length?rows.map((r,i)=>`<article class="student-card"><div class="student-card-top"><span class="tag">Telc ${esc(r.level||'B2')}</span><span class="tag">${String(i+1).padStart(2,'0')}</span></div><h3>${esc(r.title)}</h3><div class="student-meta"><span>${esc(r.teil)}</span><span>${Number(r.item_count||0)} عناصر</span><span class="status ${r.status==='disabled'?'disabled':'published'}">${r.status==='disabled'?'معطل':'منشور'}</span></div><div class="open-like">فتح التمرين →</div><div class="admin-actions"><button class="icon-btn" title="تعديل" data-edit="${r.id}">✎</button><button class="icon-btn" title="مضاعفة" data-clone="${r.id}">⧉</button><button class="icon-btn danger" title="حذف" data-delete="${r.id}">⌫</button></div></article>`).join(''):`<div class="empty">لا توجد تمارين في هذا القسم وTeil حالياً.<br><button class="small-btn" style="margin-top:12px" id="emptyAdd">+ إضافة موضوع جديد</button></div>`;document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=async()=>{try{const x=await api('admin-questions?id='+b.dataset.edit);openModal('edit',{id:b.dataset.edit,...x.exercise,items:(x.items||[]).map(it=>{const opts=Object.fromEntries((it.options||[]).map(o=>[o.option_key,o.option_text]));return {prompt:it.prompt,correct:it.correct_answer||'',correctText:opts[it.correct_answer]||it.prompt,points:it.points,options:opts};}) ,headings:x.exercise.settings_json?.headings||[],settings:x.exercise.settings_json||{}});}catch(e){showToast(e.message,true);}});document.querySelectorAll('[data-clone]').forEach(b=>b.onclick=async()=>{try{const x=await api('admin-questions?id='+b.dataset.clone);openModal('clone',{id:null,...x.exercise,items:(x.items||[]).map(it=>{const opts=Object.fromEntries((it.options||[]).map(o=>[o.option_key,o.option_text]));return {prompt:it.prompt,correct:it.correct_answer||'',correctText:opts[it.correct_answer]||it.prompt,points:it.points,options:opts};}),headings:x.exercise.settings_json?.headings||[],settings:x.exercise.settings_json||{}});}catch(e){showToast(e.message,true);}});document.querySelectorAll('[data-delete]').forEach(b=>b.onclick=async()=>{if(!confirm('هل تريد حذف هذا الموضوع نهائياً؟'))return;try{await api('admin-questions',{method:'DELETE',body:{id:Number(b.dataset.delete)}});showToast('تم حذف الموضوع بنجاح');await load();}catch(e){showToast(e.message,true);}});$('emptyAdd')?.addEventListener('click',()=>openModal());}
+function renderBrowser(){
+  const c=currentContext();
+  const cLvl=norm(c.level);
+  const cSec=norm(c.section);
+  const cTeil=norm(c.teil);
+
+  let rows=state.exercises.filter(x=>{
+    const xLvl=norm(x.level||'B2');
+    const xSec=norm(x.section);
+    const xTeil=norm(x.teil);
+
+    if(cLvl!=='all'&&cLvl!==norm('كلالمستويات')&&xLvl!==cLvl) return false;
+    if(cSec!=='all'&&cSec!==norm('كلاﻷقسام')&&cSec!==norm('كلاقسام')&&xSec!==cSec) return false;
+    if(cTeil!=='all'&&cTeil!==norm('كلاﻷجزاء')&&cTeil!==norm('كلاجزاء')&&xTeil!==cTeil) return false;
+    return true;
+  });
+
+  const q=$('browserSearch').value.trim().toLowerCase();
+  if(q){
+    rows=rows.filter(x=>(String(x.id||'')+' '+String(x.title||'')+' '+String(x.section||'')+' '+String(x.teil||'')+' '+String(x.body||'')).toLowerCase().includes(q));
+  }
+
+  const badge=$('exerciseCountBadge');
+  if(badge) badge.textContent=`(المعروض: ${rows.length} من إجمالي ${state.exercises.length} تمرين)`;
+
+  $('browserList').innerHTML=rows.length?rows.map((r,i)=>`<article class="student-card" data-edit-card="${r.id}"><div class="student-card-top"><span class="tag">Telc ${esc(r.level||'B2')}</span><span class="tag" style="background:#f4f6f8;color:var(--muted)">#${r.id}</span></div><h3>${esc(r.title)}</h3><div class="student-meta"><span class="tag" style="font-size:10px">${esc(sectionNames[r.section]||r.section)}</span><span>${esc(r.teil)}</span><span>${Number(r.item_count||0)} عناصر</span><span class="status ${r.status==='disabled'?'disabled':'published'}">${r.status==='disabled'?'معطل':'منشور'}</span></div><div class="open-like">فتح التمرين للتعديل ✎</div><div class="admin-actions"><button class="icon-btn" title="تعديل" data-edit="${r.id}">✎</button><button class="icon-btn" title="مضاعفة" data-clone="${r.id}">⧉</button><button class="icon-btn danger" title="حذف" data-delete="${r.id}">⌫</button></div></article>`).join(''):`<div class="empty">لا توجد تمارين تطابق التصفية الحالية.<br><small style="display:inline-block;margin-top:6px;color:var(--muted)">إجمالي التمارين المحمّلة في المنصة: ${state.exercises.length} تمرين</small><br><button class="small-btn" style="margin-top:12px" id="emptyAdd">+ إضافة موضوع جديد</button></div>`;
+
+  async function openForEdit(id){
+    try{
+      const x=await api('admin-questions?id='+id);
+      openModal('edit',{id:id,...x.exercise,items:(x.items||[]).map(it=>{const opts=Object.fromEntries((it.options||[]).map(o=>[o.option_key,o.option_text]));return {prompt:it.prompt,correct:it.correct_answer||'',correctText:opts[it.correct_answer]||it.prompt,points:it.points,options:opts};}),headings:x.exercise.settings_json?.headings||[],settings:x.exercise.settings_json||{}});
+    }catch(e){showToast(e.message,true);}
+  }
+
+  document.querySelectorAll('[data-edit-card]').forEach(card=>{
+    card.onclick=(e)=>{
+      if(e.target.closest('.admin-actions')) return;
+      openForEdit(card.dataset.editCard);
+    };
+  });
+  document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=(e)=>{e.stopPropagation();openForEdit(b.dataset.edit);});
+  document.querySelectorAll('[data-clone]').forEach(b=>b.onclick=async(e)=>{e.stopPropagation();try{const x=await api('admin-questions?id='+b.dataset.clone);openModal('clone',{id:null,...x.exercise,items:(x.items||[]).map(it=>{const opts=Object.fromEntries((it.options||[]).map(o=>[o.option_key,o.option_text]));return {prompt:it.prompt,correct:it.correct_answer||'',correctText:opts[it.correct_answer]||it.prompt,points:it.points,options:opts};}),headings:x.exercise.settings_json?.headings||[],settings:x.exercise.settings_json||{}});}catch(err){showToast(err.message,true);}});
+  document.querySelectorAll('[data-delete]').forEach(b=>b.onclick=async(e)=>{e.stopPropagation();if(!confirm('هل تريد حذف هذا الموضوع نهائياً؟'))return;try{await api('admin-questions',{method:'DELETE',body:{id:Number(b.dataset.delete)}});showToast('تم حذف الموضوع بنجاح');await load();}catch(err){showToast(err.message,true);}});
+  $('emptyAdd')?.addEventListener('click',()=>openModal());
+}
 async function load(){const r=await api('admin-questions');state.exercises=r.exercises||[];updateContext();renderBrowser();}
 $('importBtn').onclick=()=>$('importFile').click();
 $('importFile').onchange=async e=>{
