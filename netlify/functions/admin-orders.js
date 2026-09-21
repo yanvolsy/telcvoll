@@ -62,7 +62,7 @@ exports.handler = async (event) => {
         COUNT(*) FILTER (WHERE status='CONFIRMED')::int AS confirmed_orders,
         COUNT(*) FILTER (WHERE status='PENDING')::int AS pending_orders,
         COUNT(*) FILTER (WHERE status='FAILED' OR status='CANCELLED')::int AS failed_orders,
-        COALESCE(SUM(amount) FILTER (WHERE status='CONFIRMED'), 0)::numeric AS total_revenue
+        COALESCE(SUM(o.amount) FILTER (WHERE o.status='CONFIRMED' AND o.code_id IS NOT NULL), 0)::numeric AS total_revenue
       FROM orders
     `);
 

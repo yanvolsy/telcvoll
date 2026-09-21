@@ -48,12 +48,21 @@ exports.handler = async (event) => {
           const id = parseInt(body.id || 0, 10);
           if (!id) return json(422, { error: 'معرف الخطة غير صالح.' });
 
+          // Keep the current featured plan featured when it is merely edited.
+          // The featured plan changes only when another plan is explicitly selected.
+          let keepFeatured = false;
+          try {
+            const current = await pool.query('SELECT COALESCE(is_featured,FALSE) AS is_featured FROM plans WHERE id=$1', [id]);
+            keepFeatured = !!current.rows[0]?.is_featured;
+          } catch {}
+          const finalFeatured = isFeatured || keepFeatured;
+
           try {
             await pool.query(
               `UPDATE plans
                SET plan_key=$1,name=$2,duration_days=$3,max_attempts=$4,ai_enabled=$5,price_dzd=$6,is_featured=$7
                WHERE id=$8`,
-              [planKey, name, days, attempts, ai, priceDzd, isFeatured, id]
+              [planKey, name, days, attempts, ai, priceDzd, finalFeatured, id]
             );
           } catch {
             await pool.query(
@@ -63,13 +72,15 @@ exports.handler = async (event) => {
               [planKey, name, days, attempts, ai, priceDzd, id]
             );
           }
-          if (isFeatured) {
+          if (finalFeatured) {
             try { await pool.query('UPDATE plans SET is_featured=FALSE WHERE id<>$1', [id]); } catch {}
+            try { await pool.query('UPDATE plans SET is_featured=TRUE WHERE id=$1', [id]); } catch {}
           }
-          return json(200, { ok: true });
+          return json(200, { ok: true, is_featured: finalFeatured });
         }
 
         try {
+          if (isFeatured) await pool.query('UPDATE plans SET is_featured=FALSE');
           await pool.query(
             'INSERT INTO plans(plan_key,name,duration_days,max_attempts,ai_enabled,price_dzd,is_featured) VALUES($1,$2,$3,$4,$5,$6,$7)',
             [planKey, name, days, attempts, ai, priceDzd, isFeatured]
@@ -87,15 +98,14 @@ exports.handler = async (event) => {
         const id = parseInt(body.id || 0, 10);
         if (!id) return json(422, { error: 'معرف الخطة غير صالح.' });
         try {
-          const curRes = await pool.query('SELECT COALESCE(is_featured, FALSE) AS is_featured FROM plans WHERE id=$1', [id]);
-          const willBeFeatured = !curRes.rows[0]?.is_featured;
+          const exists = await pool.query('SELECT id FROM plans WHERE id=$1 LIMIT 1', [id]);
+          if (!exists.rows.length) return json(404, { error: 'الخطة غير موجودة.' });
+          // Persistent single selection: clicking the selected plan again does not unselect it.
           await pool.query('UPDATE plans SET is_featured=FALSE');
-          if (willBeFeatured) {
-            await pool.query('UPDATE plans SET is_featured=TRUE WHERE id=$1', [id]);
-          }
-          return json(200, { ok: true, is_featured: willBeFeatured });
+          await pool.query('UPDATE plans SET is_featured=TRUE WHERE id=$1', [id]);
+          return json(200, { ok: true, is_featured: true });
         } catch {
-          return json(200, { ok: true, note: 'Column is_featured not created yet' });
+          return json(500, { error: 'تعذر تثبيت الخطة كالأكثر اختياراً حالياً.' });
         }
       }
 
@@ -140,15 +150,48 @@ exports.handler = async (event) => {
         return json(200, { ok: true });
       }
 
-      // Delete code cleanly with linked sessions
+      // Delete code cleanly with linked sessions.
+      // If this was a sold/confirmed code, the linked order remains as an audit
+      // record, but its code_id is cleared by ON DELETE SET NULL. Revenue
+      // statistics intentionally count only confirmed orders that still have
+      // an active linked access code, so deleting a sold code removes its
+      // amount from the confirmed-revenue counter.
       if (action === 'delete-code') {
         const id = parseInt(body.id || 0, 10);
         if (!id) return json(422, { error: 'معرف الرمز غير صالح.' });
-        // Clean up linked sessions first to satisfy foreign key constraint
-        await pool.query('DELETE FROM sessions WHERE code_id=$1', [id]);
-        const delRes = await pool.query('DELETE FROM access_codes WHERE id=$1 RETURNING id', [id]);
-        if (!delRes.rows.length) return json(404, { error: 'رمز الدخول غير موجود.' });
-        return json(200, { ok: true, deleted: true });
+
+        const codeRes = await pool.query(
+          `SELECT c.id, c.code, c.student_id, o.order_id, o.status AS order_status
+           FROM access_codes c
+           LEFT JOIN orders o ON o.code_id=c.id
+           WHERE c.id=$1
+           LIMIT 1`,
+          [id]
+        );
+        if (!codeRes.rows.length) return json(404, { error: 'رمز الدخول غير موجود.' });
+
+        const client = await pool.connect();
+        try {
+          await client.query('BEGIN');
+          await client.query('DELETE FROM sessions WHERE code_id=$1', [id]);
+          const delRes = await client.query('DELETE FROM access_codes WHERE id=$1 RETURNING id', [id]);
+          if (!delRes.rows.length) {
+            await client.query('ROLLBACK');
+            return json(404, { error: 'رمز الدخول غير موجود.' });
+          }
+          await client.query('COMMIT');
+          return json(200, {
+            ok: true,
+            deleted: true,
+            was_sold: codeRes.rows[0].order_status === 'CONFIRMED',
+            revenue_removed: codeRes.rows[0].order_status === 'CONFIRMED'
+          });
+        } catch (err) {
+          try { await client.query('ROLLBACK'); } catch {}
+          throw err;
+        } finally {
+          client.release();
+        }
       }
 
       // Extend code expiration and/or update plan without altering code string
