@@ -62,6 +62,7 @@ async function sendAccessCodeEmail({ to, name, planName, durationDays, expiresAt
   }) : `${durationDays} يوماً`;
 
   const subject = `رمز الدخول إلى منصة TELC Voll — كود تفعيل B1 · B2 · C1`;
+  const codeLink = `${SITE_URL}/?code=${encodeURIComponent(accessCode || '')}`;
 
   const html = `<!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -84,9 +85,11 @@ async function sendAccessCodeEmail({ to, name, planName, durationDays, expiresAt
     .order-row:last-child { border-bottom: none; }
     .order-row span { color: #6b7f76; }
     .order-row strong { color: #0d1310; }
-    .code-card { background: #fff7f0; border: 2px dashed #f47b20; border-radius: 16px; padding: 22px; text-align: center; margin: 28px 0; }
-    .code-label { font-size: 12px; font-weight: 800; color: #f47b20; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
-    .code-val { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 28px; font-weight: 900; color: #0d1310; letter-spacing: 2px; direction: ltr; display: inline-block; }
+    .code-card { background: #fff7f0; border: 2px dashed #f47b20; border-radius: 18px; padding: 24px 20px 20px; text-align: center; margin: 28px 0; }
+    .code-label { font-size: 12px; font-weight: 900; color: #a4500b; margin-bottom: 10px; }
+    .code-val { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 30px; font-weight: 950; color: #f47b20; letter-spacing: 3px; direction: ltr; display: block; user-select: all; padding: 6px 0; }
+    .code-copy { display: inline-block; background: #f47b20; color: #ffffff !important; text-decoration: none; padding: 12px 22px; border-radius: 10px; font-size: 14px; font-weight: 900; margin-top: 14px; }
+    .code-help { font-size: 12px; color: #7b8c84; margin-top: 10px; line-height: 1.6; }
     .btn-wrap { text-align: center; margin: 30px 0; }
     .btn { display: inline-block; background: #f47b20; color: #ffffff !important; text-decoration: none; padding: 14px 34px; border-radius: 12px; font-size: 16px; font-weight: 800; }
     .steps { background: #f7faf9; border-radius: 14px; padding: 18px 22px; margin: 24px 0; font-size: 14px; color: #3d5249; }
@@ -125,8 +128,10 @@ async function sendAccessCodeEmail({ to, name, planName, durationDays, expiresAt
       </div>
 
       <div class="code-card">
-        <div class="code-label">رمز الوصول الخاص بك (Access Code)</div>
+        <div class="code-label">رمز الدخول الخاص بك · ACCESS CODE</div>
         <div class="code-val">${escapeHtml(accessCode)}</div>
+        <a class="code-copy" href="${escapeHtml(codeLink)}">فتح صفحة الدخول ونسخ الكود ←</a>
+        <div class="code-help">يمكنك أيضًا تحديد الكود أعلاه ونسخه مباشرة. زر النسخ يفتح TELC Voll والكود مملوء تلقائيًا.</div>
       </div>
 
       <div class="steps">
