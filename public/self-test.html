@@ -8,7 +8,8 @@ html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !impo
 html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}</style>
 </head><body><header class="top"><a class="brand" href="/dashboard.html">TELC Voll</a><nav><a href="/dashboard.html">الرئيسية</a><a href="#" id="logoutLink">خروج</a></nav></header><main class="self-test-page" id="content"><div class="student-loading">جارٍ التحميل…</div></main><script src="/assets/i18n.js"></script><script src="/assets/app.js"></script><script>
 const LEVELS=['B1','B2','C1'];
-let exercises=[],level=['B1','B2','C1'].includes(qs('level'))?qs('level'):'B2';
+const rawLvl = String(qs('level')||'').toUpperCase();
+let exercises=[],level=['B1','B2','C1'].includes(rawLvl)?rawLvl:'B2';
 const txt=(a,d)=>getLang()==='ar'?a:d;
 const groups={Lesen:['Teil 1','Teil 2','Teil 3'],Hören:['Teil 1','Teil 2','Teil 3'],Sprachbausteine:['Teil 1','Teil 2'],Schreiben:['Teil 1']};
 
@@ -17,7 +18,7 @@ function render(){
     <span class="tag">${txt('امتحان تجريبي','Probeprüfung')}</span>
     <h1>${txt('اختر مستوى الامتحان','Prüfungsniveau wählen')}</h1>
     <p class="muted">${txt('اختر B1 أو B2 أو C1 فقط. بعد البدء يختار الموقع التمارين عشوائياً من المحتوى المنشور ويبدأ مؤقت واحد للامتحان الكتابي كاملاً.','Wähle nur B1, B2 oder C1. Danach wählt die Plattform die veröffentlichten Aufgaben zufällig aus und startet eine einzige Gesamtzeit für die komplette schriftliche Simulation.')}</p>
-    <div class="self-levels">${LEVELS.map(l=>`<button class="level-btn ${level===l?'active':''}" data-level="${l}">Telc ${l}</button>`).join('')}</div>
+    <div class="self-levels">${LEVELS.map(l=>`<button class="level-btn ${String(level).toUpperCase()===l?'active':''}" data-level="${l}" aria-pressed="${String(level).toUpperCase()===l?'true':'false'}">Telc ${l}</button>`).join('')}</div>
     <div class="self-test-grid mock-rules">
       <article><span class="self-icon">↝</span><h2>${txt('اختيار عشوائي','Zufällige Auswahl')}</h2><p>${txt('لا تظهر قائمة بالمواضيع ولا يمكنك اختيار موضوع أو قسم.','Keine Themenliste und keine Auswahl einzelner Themen oder Bereiche.')}</p></article>
       <article><span class="self-icon">◷</span><h2>${txt('مؤقت واحد','Ein Gesamt-Timer')}</h2><p>${txt('مؤقت واحد للامتحان الكتابي كاملاً ويظهر دائماً في الأعلى بجانب أقسام الامتحان.','Ein einziger Timer läuft für die gesamte schriftliche Prüfung und bleibt oben neben den Prüfungsteilen sichtbar.')}</p></article>
@@ -25,7 +26,7 @@ function render(){
     </div>
     <button class="btn self-test-btn" id="startBtn">${txt('بدء امتحان Telc','Telc-Prüfung starten')} ←</button>
   </section>`;
-  document.querySelectorAll('[data-level]').forEach(b=>b.onclick=()=>{level=b.dataset.level;render();});
+  document.querySelectorAll('[data-level]').forEach(b=>b.onclick=()=>{level=String(b.dataset.level||'B2').toUpperCase();render();});
   document.getElementById('startBtn').onclick=start;
 }
 

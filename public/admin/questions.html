@@ -18,6 +18,14 @@
 .spb-editor-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(360px,.85fr);gap:16px;align-items:start}.spb-editor-pane,.spb-preview-pane{min-width:0}.section-title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.editor-badge,.preview-status{display:inline-flex;align-items:center;white-space:nowrap;border:1px solid var(--line);background:var(--green-soft);color:var(--green);border-radius:999px;padding:5px 9px;font-size:10px;font-weight:900}.spb-text-editor{min-height:260px;font-family:inherit;direction:ltr;text-align:left;line-height:2}.gap-editor-card{padding:14px}.gap-editor-card .row-title{margin-bottom:12px}.gap-editor-card .row-title small{color:var(--muted);font-weight:700}.correct-word-chip{font-size:11px;color:var(--green);background:var(--green-soft);border-radius:999px;padding:5px 9px}.gap-answer-grid{display:grid;grid-template-columns:180px minmax(0,1fr);gap:12px;align-items:start}.correct-source label{display:block;font-size:11px;font-weight:900;margin-bottom:6px}.source-word{min-height:42px;display:flex;align-items:center;padding:9px 12px;border:1px dashed var(--line);border-radius:10px;background:rgba(255,255,255,.6);font-weight:900;direction:ltr;text-align:left}.spb-preview-pane{position:sticky;top:10px;border:1px solid var(--line);border-radius:18px;background:var(--white);box-shadow:var(--shadow);overflow:hidden}.preview-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}.preview-head h3{margin:2px 0 0;font-size:17px}.preview-kicker{font-size:9px;letter-spacing:.12em;color:var(--muted);font-weight:900}.student-preview{padding:16px;max-height:70vh;overflow:auto}.preview-meta{display:flex;justify-content:space-between;gap:10px;font-size:10px;color:var(--muted);margin-bottom:13px}.preview-text{direction:ltr;text-align:left;font-size:14px;line-height:2.05;border:1px solid var(--line);border-radius:13px;padding:15px;background:rgba(0,0,0,.025)}.preview-gap{display:inline-flex;min-width:34px;height:24px;align-items:center;justify-content:center;border:1px solid #8a9bb1;border-radius:6px;background:rgba(244,123,32,.08);color:#8a5a2a;font-size:11px;font-weight:900;vertical-align:middle;margin:0 2px}.preview-questions{margin-top:14px;display:grid;gap:8px}.preview-q{border:1px solid var(--line);border-radius:11px;padding:9px}.preview-q-title{font-size:11px;font-weight:900;margin-bottom:7px}.preview-options{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.preview-options button,.bank-grid button{border:1px solid var(--line);background:var(--white);border-radius:8px;padding:8px;font-size:11px;font-weight:800}.preview-bank{margin-top:14px;border:1px solid var(--line);border-radius:13px;padding:12px}.bank-title{font-size:11px;font-weight:900;margin-bottom:9px}.bank-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.bank-grid button{display:flex;gap:7px;align-items:center;text-align:left;direction:ltr}.bank-grid small{color:var(--muted);font-weight:900}.distractor-box{background:rgba(244,123,32,.035)}
 @media(max-width:900px){.browser-list{grid-template-columns:1fr}.browser-filters{grid-template-columns:1fr 1fr}.context-bar,.context-lock{grid-template-columns:1fr}.choice-grid,.audio-box{grid-template-columns:1fr}.spb-editor-grid{grid-template-columns:1fr}.spb-preview-pane{position:relative;top:auto}.gap-answer-grid{grid-template-columns:1fr}}
 @media(max-width:600px){.exercise-admin{padding:20px 13px 55px}.admin-head{align-items:flex-start;flex-direction:column}.browser-filters{grid-template-columns:1fr}.modal{padding:8px}.modal-box{max-height:96vh;border-radius:18px}.modal-body{padding:15px}.modal-head{padding:15px}.modal-footer{padding:12px 15px}.dynamic-row{align-items:stretch}.dynamic-row .remove-btn{align-self:center}}
+
+.browser.drag-over{outline:2px dashed var(--green) !important;outline-offset:-4px;background:color-mix(in srgb,var(--green-soft) 45%,transparent) !important}
+.import-summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}
+.import-summary-item{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.import-summary-item span{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}
+.import-summary-item strong{font-size:16px;color:var(--ink)}
+.import-warning-box{background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:12px 14px;color:#9a3412;font-size:12px;margin:14px 0}
+.import-progress-bar-inner{height:100%;background:var(--green);border-radius:inherit;transition:width .2s ease}
 </style>
 <style><!-- TELC Voll: unified homepage typography -->
 html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
@@ -41,6 +49,32 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
   <div class="field"><label>عنوان الموضوع / Thema</label><input id="title" placeholder="مثال: LimOnade"></div>
   <div id="dynamic"></div>
 </div><div class="modal-footer"><button class="btn" id="saveBtn">إضافة الموضوع</button><button class="small-btn" id="cancelBtn">إلغاء</button></div></div></div>
+
+<div class="modal" id="importModal" aria-hidden="true"><div class="modal-box" style="max-width:640px;"><div class="modal-head"><h2 id="importModalTitle">معاينة استيراد التمارين</h2><button class="close" id="closeImportModal">×</button></div><div class="modal-body">
+  <div id="importPreviewContent"></div>
+  <div id="duplicateOptionsWrap" style="margin-top:16px;display:none;">
+    <label style="font-weight:900;display:block;margin-bottom:8px;">إجراء عند وجود تمارين مكررة مسبقاً:</label>
+    <div style="display:flex;flex-direction:column;gap:8px;font-size:13px;">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+        <input type="radio" name="dupAction" value="skip" checked>
+        <span><strong>تخطي التمارين المكررة</strong> (الموصى به — لن يتم تكرار نفس المواضيع)</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+        <input type="radio" name="dupAction" value="clone">
+        <span><strong>استيراد كنسخ إضافية</strong> (إضافة «— نسخة» لعنوان الموضوع)</span>
+      </label>
+    </div>
+  </div>
+  <div id="importProgressWrap" style="margin-top:20px;display:none;">
+    <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px;">
+      <span id="importProgressLabel">جارٍ الاستيراد…</span>
+      <strong id="importProgressPercent">0%</strong>
+    </div>
+    <div style="height:10px;border-radius:999px;background:var(--line);overflow:hidden;">
+      <div id="importProgressBar" class="import-progress-bar-inner" style="width:0%;"></div>
+    </div>
+  </div>
+</div><div class="modal-footer"><button class="btn" id="confirmImportBtn">بدء الاستيراد الآن ←</button><button class="small-btn" id="cancelImportBtn">إلغاء</button></div></div></div>
 <script src="/assets/i18n.js"></script><script src="/assets/app.js"></script><script src="/assets/admin-guard.js"></script>
 <script>
 const state={editId:null,cloneMode:false,exercises:[],activeModalContext:null};
@@ -248,78 +282,338 @@ function renderBrowser(){
   $('emptyAdd')?.addEventListener('click',()=>openModal());
 }
 async function load(){const r=await api('admin-questions');state.exercises=r.exercises||[];updateContext();renderBrowser();}
-$('importBtn').onclick=()=>$('importFile').click();
-$('importFile').onchange=async e=>{
-  const file=e.target.files?.[0]; e.target.value=''; if(!file)return;
-  try{
-    const raw=await file.text(); const pack=JSON.parse(raw); const list=Array.isArray(pack)?pack:(Array.isArray(pack.exercises)?pack.exercises:[]);
-    if(!list.length) throw Error('ملف JSON لا يحتوي على تمارين.');
-    // Detect the import context from the JSON itself. The admin filter is
-    // only a browser filter and must not prevent a valid batch from importing.
-    const meta=list.map(x=>({
-      level:String(x.level||'').trim(),
-      section:String(x.section||'').trim(),
-      teil:String(x.teil||'').trim()
-    }));
-    const first=meta[0];
-    if(!first.level || !first.section || !first.teil) {
-      throw Error('لا يمكن تحديد المستوى والقسم وTeil من الملف. يجب أن يحتوي كل تمرين على level وsection وteil.');
+let pendingImportList = [];
+
+function normalizeImportBatch(pack) {
+  let list = [];
+  if (Array.isArray(pack)) list = pack;
+  else if (Array.isArray(pack?.exercises)) list = pack.exercises;
+  else if (Array.isArray(pack?.data)) list = pack.data;
+  else if (Array.isArray(pack?.items) && (pack.level || pack.section || pack.title)) list = [pack];
+  else if (typeof pack === 'object' && pack !== null) list = [pack];
+  if (!list.length) throw new Error('ملف JSON لا يحتوي على أي تمارين صالحة.');
+
+  const ctx = currentContext();
+  const normalized = list.map((raw, idx) => {
+    let title = String(raw.title || raw.name || raw.headline || raw.thema || `موضوع ${idx + 1}`).trim();
+
+    // Level detection: B1, B2, C1
+    let rawLvl = String(raw.level || raw.target_level || raw.tier || '').trim().toUpperCase();
+    if (!['B1', 'B2', 'C1'].includes(rawLvl)) {
+      const match = (title + ' ' + (raw.section || '')).match(/\b(B1|B2|C1)\b/i);
+      rawLvl = match ? match[1].toUpperCase() : (ctx.level !== 'ALL' ? ctx.level : 'B2');
     }
-    const mixed=meta.find(m=>m.level!==first.level || m.section!==first.section || m.teil!==first.teil);
-    if(mixed) throw Error('الملف يحتوي على تمارين من مستويات أو أقسام أو أجزاء مختلفة. استورد كل مجموعة في ملف مستقل.');
-    if(!['B1','B2','C1'].includes(first.level)) throw Error(`المستوى غير صالح: ${first.level}.`);
-    if(!teilMap[first.section] || !teilMap[first.section].includes(first.teil)) {
-      throw Error(`القسم أو Teil غير صالح: ${first.section} / ${first.teil}.`);
+    const level = ['B1', 'B2', 'C1'].includes(rawLvl) ? rawLvl : 'B2';
+
+    // Section detection
+    let rawSec = String(raw.section || raw.category || raw.skill || raw.module || '').trim();
+    let section = 'Lesen';
+    if (/lesen|reading/i.test(rawSec)) section = 'Lesen';
+    else if (/h[oö]ren|listen/i.test(rawSec)) section = 'Hören';
+    else if (/sprachbausteine|grammar|vocab/i.test(rawSec)) section = 'Sprachbausteine';
+    else if (/schreiben|writing/i.test(rawSec)) section = 'Schreiben';
+    else if (/sprechen|speaking/i.test(rawSec)) section = 'Sprechen';
+    else if (ctx.section !== 'ALL') section = ctx.section;
+
+    // Teil detection
+    let rawTeil = String(raw.teil || raw.part || raw.task_part || '').trim();
+    let teil = 'Teil 1';
+    if (/(?:teil|part)\s*3|3/i.test(rawTeil) && teilMap[section]?.includes('Teil 3')) teil = 'Teil 3';
+    else if (/(?:teil|part)\s*2|2/i.test(rawTeil) && teilMap[section]?.includes('Teil 2')) teil = 'Teil 2';
+    else if (/(?:teil|part)\s*1|1/i.test(rawTeil) && teilMap[section]?.includes('Teil 1')) teil = 'Teil 1';
+    else if (ctx.teil !== 'ALL' && teilMap[section]?.includes(ctx.teil)) teil = ctx.teil;
+    else teil = (teilMap[section] || ['Teil 1'])[0];
+
+    // Task type detection
+    let task_type = String(raw.task_type || raw.type || raw.format || '').toUpperCase().trim();
+    if (!['MATCHING', 'MCQ', 'AUDIO_MCQ', 'AUDIO_TF', 'GAP', 'WRITING', 'SPEAKING'].includes(task_type)) {
+      task_type = taskMap[section]?.[teil] || (section === 'Schreiben' ? 'WRITING' : section === 'Sprechen' ? 'SPEAKING' : section === 'Sprachbausteine' ? 'GAP' : 'MCQ');
     }
 
-    // Synchronize the visible filters with the detected batch.
-    $('browserLevel').value=first.level;
-    $('browserSection').value=first.section;
-    setTeile($('browserTeil'),first.section,first.teil);
-    $('browserTeil').value=first.teil;
-    updateContext();
-    const c={level:first.level,section:first.section,teil:first.teil};
+    // Body / Passage text
+    let body = String(raw.body || raw.passage || raw.text || raw.content || raw.reading_text || raw.situation || '').trim();
 
-    if(!confirm(`تم اكتشاف الملف تلقائياً: Telc ${c.level} — ${sectionNames[c.section]} — ${c.teil}\nعدد التمارين: ${list.length}\nهل تريد المتابعة؟`))return;
-    const btn=$('importBtn'); btn.disabled=true; btn.textContent='جارٍ الاستيراد…';
-    let done=0;
-    for(const x of list){
-      const section=String(x.section||c.section), teil=String(x.teil||c.teil);
-      let body=String(x.body||'');
-      let items=Array.isArray(x.items)?x.items.map(it=>{
-        const options=Array.isArray(it.options)
-          ? Object.fromEntries(it.options.map(o=>[String(o.option_key||o.key||'').trim(),String(o.option_text??o.text??'')]).filter(([k])=>k))
-          : (it.options||{});
-        return {...it, prompt:String(it.prompt||''), correct:String(it.correct||it.correct_answer||''), correct_answer:String(it.correct_answer||it.correct||''), options};
-      }):[];
-      if(section==='Sprachbausteine'&&teil==='Teil 1'){
-        const gaps=[...body.matchAll(/\[([^\]]*)\]/g)];
-        if(gaps.length!==10) throw Error(`الموضوع «${x.title||'بدون عنوان'}» يجب أن يحتوي على 10 فراغات بين [ ].`);
-        if(items.length!==10 || items.some(it=>!String(it.correct||it.correctText||'').trim() || Object.keys(it.options||{}).length!==3)) throw Error(`بيانات الخيارات غير مكتملة في «${x.title||'بدون عنوان'}».`);
-        let n=0; body=body.replace(/\[([^\]]*)\]/g,()=>`(${21+n++})`);
+    // Translation & Audio
+    const translation = String(raw.translation || raw.arabic_translation || raw.translation_ar || '').trim();
+    const audio_url = String(raw.audio_url || raw.audioUrl || raw.audio || raw.sound_url || '').trim();
+
+    // Headings (for MATCHING)
+    const headings = Array.isArray(raw.headings) ? raw.headings :
+      (Array.isArray(raw.headings_list) ? raw.headings_list :
+      (Array.isArray(raw.settings?.headings) ? raw.settings.headings : []));
+
+    // Items (Questions / Gaps)
+    const rawItems = Array.isArray(raw.items) ? raw.items :
+      (Array.isArray(raw.questions) ? raw.questions :
+      (Array.isArray(raw.gaps) ? raw.gaps : []));
+
+    const items = rawItems.map((it, iIdx) => {
+      let prompt = String(it.prompt || it.question || it.statement || it.text || it.word || it.correctText || '').trim();
+      let correct = String(it.correct || it.correct_answer || it.correct_key || it.answer || it.solution || '').trim();
+
+      let options = {};
+      if (Array.isArray(it.options)) {
+        it.options.forEach((o, oIdx) => {
+          const key = String(o.option_key || o.key || String.fromCharCode(65 + oIdx)).trim();
+          const val = String(o.option_text ?? o.text ?? o).trim();
+          if (key && val) options[key] = val;
+        });
+      } else if (Array.isArray(it.choices)) {
+        it.choices.forEach((c, cIdx) => {
+          const key = String.fromCharCode(65 + cIdx);
+          options[key] = String(c).trim();
+        });
+      } else if (it.options && typeof it.options === 'object') {
+        options = { ...it.options };
+      } else if (it.choices && typeof it.choices === 'object') {
+        options = { ...it.choices };
       }
-      const payload={
-        level:String(x.level||c.level), section, teil,
-        title:String(x.title||'').trim(),
-        task_type:String(x.task_type|| (section==='Schreiben'?'WRITING':section==='Sprechen'?'SPEAKING':section==='Sprachbausteine'?'GAP':'MCQ')),
-        body,
-        translation:String(x.translation||''), audio_url:String(x.audio_url||''),
-        allow_replay:x.allow_replay!==false,
-        headings:Array.isArray(x.headings)?x.headings:(Array.isArray(x.settings?.headings)?x.settings.headings:[]),
-        items,
-        settings:x.settings||{}
+
+      // If correct answer matches an option value rather than key, map to key
+      if (correct && !options[correct]) {
+        for (const [k, v] of Object.entries(options)) {
+          if (String(v).trim().toLowerCase() === correct.toLowerCase()) {
+            correct = k;
+            break;
+          }
+        }
+      }
+
+      return {
+        prompt: prompt || `السؤال ${iIdx + 1}`,
+        correct,
+        correct_answer: correct,
+        points: Number.parseFloat(it.points ?? 1) || 1,
+        explanation: String(it.explanation || it.reason || '').trim(),
+        options
       };
-      if(!payload.title) throw Error('كل تمرين يجب أن يحتوي على عنوان.');
-      if(section==='Schreiben' || section==='Sprechen'){
-        if(!payload.body.trim()) throw Error(`الموضوع «${payload.title}» لا يحتوي على نص المهمة.`);
+    });
+
+    // Formatting for Sprachbausteine Teil 1
+    if (section === 'Sprachbausteine' && teil === 'Teil 1') {
+      const gaps = [...body.matchAll(/\[([^\]]*)\]/g)];
+      if (gaps.length) {
+        let n = 0;
+        body = body.replace(/\[([^\]]*)\]/g, () => `(${21 + n++})`);
       }
-      await api('admin-questions',{method:'POST',body:payload});
-      done++; btn.textContent=`استيراد ${done}/${list.length}…`;
     }
-    showToast(`تم استيراد ${done} تمارين بنجاح`); await load();
-  }catch(err){showToast(err.message||'فشل الاستيراد',true);}finally{const b=$('importBtn');b.disabled=false;b.textContent='⇧ استيراد تمارين';}
+
+    return {
+      level,
+      section,
+      teil,
+      title,
+      task_type,
+      body,
+      translation,
+      audio_url,
+      allow_replay: raw.allow_replay !== false,
+      headings,
+      items,
+      settings: raw.settings || {}
+    };
+  });
+
+  // Duplicate detection against existing state.exercises
+  normalized.forEach(ex => {
+    const isDup = state.exercises.some(existing =>
+      String(existing.level || '').toUpperCase() === ex.level &&
+      String(existing.section || '').toLowerCase() === ex.section.toLowerCase() &&
+      String(existing.teil || '').toLowerCase().replace(/\s+/g, '') === ex.teil.toLowerCase().replace(/\s+/g, '') &&
+      norm(existing.title) === norm(ex.title)
+    );
+    ex._isDuplicate = isDup;
+  });
+
+  return normalized;
+}
+
+const importModal = $('importModal');
+function closeImportModal() {
+  if (importModal) {
+    importModal.classList.remove('open');
+    importModal.setAttribute('aria-hidden', 'true');
+  }
+  pendingImportList = [];
+}
+$('closeImportModal')?.addEventListener('click', closeImportModal);
+$('cancelImportBtn')?.addEventListener('click', closeImportModal);
+
+async function handleImportFile(file) {
+  if (!file) return;
+  try {
+    const raw = await file.text();
+    const pack = JSON.parse(raw);
+    const list = normalizeImportBatch(pack);
+    openImportPreview(list, file.name);
+  } catch (err) {
+    showToast(err.message || 'تعذر قراءة أو استيراد الملف', true);
+  }
+}
+
+function openImportPreview(list, filename = '') {
+  pendingImportList = list;
+  const dupCount = list.filter(x => x._isDuplicate).length;
+  const totalQuestions = list.reduce((sum, x) => sum + (x.items?.length || 0), 0);
+
+  // Group by level and section
+  const summaryMap = {};
+  list.forEach(x => {
+    const key = `Telc ${x.level} — ${x.section} (${x.teil})`;
+    summaryMap[key] = (summaryMap[key] || 0) + 1;
+  });
+  const summaryTags = Object.entries(summaryMap).map(([k, v]) => `<span class="tag" style="margin:2px 4px 2px 0;">${k}: ${v}</span>`).join('');
+
+  const previewEl = $('importPreviewContent');
+  if (previewEl) {
+    previewEl.innerHTML = `
+      <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">ملف: <strong>${esc(filename || 'ملف التمارين')}</strong></div>
+      <div class="import-summary-grid">
+        <div class="import-summary-item">
+          <span>إجمالي التمارين</span>
+          <strong>${list.length} موضوع</strong>
+        </div>
+        <div class="import-summary-item">
+          <span>إجمالي الأسئلة / الفقرات</span>
+          <strong>${totalQuestions} سؤال</strong>
+        </div>
+        <div class="import-summary-item">
+          <span>التمارين الجديدة</span>
+          <strong style="color:var(--green);">${list.length - dupCount} موضوع</strong>
+        </div>
+        <div class="import-summary-item">
+          <span>التمارين المكررة</span>
+          <strong style="color:${dupCount > 0 ? '#ea580c' : 'var(--muted)'};">${dupCount} موضوع</strong>
+        </div>
+      </div>
+      <div style="margin:14px 0 10px;">
+        <label style="display:block;font-size:11px;font-weight:900;color:var(--muted);margin-bottom:6px;">المستويات والأقسام المكتشفة:</label>
+        <div>${summaryTags}</div>
+      </div>
+      ${dupCount > 0 ? `
+        <div class="import-warning-box">
+          ⚠️ <strong>تنبيه:</strong> تم العثور على ${dupCount} تمرين موجود مسبقاً بنفس العنوان والقسم والمستوى في المنصة.
+        </div>
+      ` : ''}
+    `;
+  }
+
+  const dupWrap = $('duplicateOptionsWrap');
+  if (dupWrap) {
+    dupWrap.style.display = dupCount > 0 ? 'block' : 'none';
+  }
+
+  const progressWrap = $('importProgressWrap');
+  if (progressWrap) progressWrap.style.display = 'none';
+
+  const confirmBtn = $('confirmImportBtn');
+  if (confirmBtn) {
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = 'بدء الاستيراد الآن ←';
+  }
+
+  if (importModal) {
+    importModal.classList.add('open');
+    importModal.setAttribute('aria-hidden', 'false');
+  }
+}
+
+$('confirmImportBtn')?.addEventListener('click', async () => {
+  if (!pendingImportList.length) return;
+
+  const dupAction = document.querySelector('input[name="dupAction"]:checked')?.value || 'skip';
+  let toImport = [];
+  let skipped = 0;
+
+  if (dupAction === 'skip') {
+    toImport = pendingImportList.filter(x => !x._isDuplicate);
+    skipped = pendingImportList.length - toImport.length;
+  } else {
+    toImport = pendingImportList.map(x => x._isDuplicate ? { ...x, title: `${x.title} — نسخة` } : x);
+  }
+
+  if (!toImport.length) {
+    alert('جميع التمارين في هذا الملف مكررة وتم تخطيها. لم يتم استيراد أي تمرين جديد.');
+    closeImportModal();
+    return;
+  }
+
+  const confirmBtn = $('confirmImportBtn');
+  const cancelBtn = $('cancelImportBtn');
+  const progressWrap = $('importProgressWrap');
+  const progressBar = $('importProgressBar');
+  const progressLabel = $('importProgressLabel');
+  const progressPercent = $('importProgressPercent');
+
+  if (confirmBtn) confirmBtn.disabled = true;
+  if (cancelBtn) cancelBtn.disabled = true;
+  if (progressWrap) progressWrap.style.display = 'block';
+
+  let done = 0;
+  try {
+    for (let i = 0; i < toImport.length; i++) {
+      const ex = toImport[i];
+      const pct = Math.round(((i + 1) / toImport.length) * 100);
+      if (progressBar) progressBar.style.width = `${pct}%`;
+      if (progressPercent) progressPercent.textContent = `${pct}%`;
+      if (progressLabel) progressLabel.textContent = `جارٍ استيراد (${i + 1}/${toImport.length}): ${ex.title}…`;
+
+      await api('admin-questions', { method: 'POST', body: ex });
+      done++;
+    }
+
+    showToast(`تم استيراد ${done} تمارين بنجاح ${skipped > 0 ? `(تم تخطي ${skipped} مكرر)` : ''}`);
+    closeImportModal();
+
+    // Switch filters to first imported exercise context if helpful
+    if (toImport[0]) {
+      $('browserLevel').value = toImport[0].level;
+      $('browserSection').value = toImport[0].section;
+      setTeile($('browserTeil'), toImport[0].section, toImport[0].teil);
+      $('browserTeil').value = toImport[0].teil;
+      updateContext();
+    }
+    await load();
+  } catch (err) {
+    showToast(err.message || 'فشل الاستيراد في أحد التمارين', true);
+    if (confirmBtn) confirmBtn.disabled = false;
+    if (cancelBtn) cancelBtn.disabled = false;
+  }
+});
+
+$('importBtn').onclick = () => $('importFile').click();
+$('importFile').onchange = e => {
+  const file = e.target.files?.[0];
+  e.target.value = '';
+  if (file) handleImportFile(file);
 };
-$('newBtn').onclick=()=>openModal();$('closeModal').onclick=closeModal;$('cancelBtn').onclick=closeModal;$('saveBtn').onclick=save;$('refreshBtn').onclick=load;$('browserLevel').onchange=()=>{updateContext();renderBrowser();};$('browserSection').onchange=()=>{setTeile($('browserTeil'),$('browserSection').value);updateContext();renderBrowser();};$('browserTeil').onchange=()=>{updateContext();renderBrowser();};$('browserSearch').oninput=renderBrowser;modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('open'))closeModal();});$('logoutLink').onclick=async e=>{e.preventDefault();await api('admin-logout',{method:'POST'});location.href='/admin/login.html'};
+
+// Drag & Drop support on .browser
+const browserEl = document.querySelector('.browser');
+if (browserEl) {
+  ['dragenter', 'dragover'].forEach(name => {
+    browserEl.addEventListener(name, e => {
+      e.preventDefault();
+      e.stopPropagation();
+      browserEl.classList.add('drag-over');
+    });
+  });
+  ['dragleave', 'drop'].forEach(name => {
+    browserEl.addEventListener(name, e => {
+      e.preventDefault();
+      e.stopPropagation();
+      browserEl.classList.remove('drag-over');
+    });
+  });
+  browserEl.addEventListener('drop', e => {
+    const file = e.dataTransfer?.files?.[0];
+    if (file && (file.type === 'application/json' || file.name.endsWith('.json'))) {
+      handleImportFile(file);
+    }
+  });
+}
+
+$('newBtn').onclick=()=>openModal();$('closeModal').onclick=closeModal;$('cancelBtn').onclick=closeModal;$('saveBtn').onclick=save;$('refreshBtn').onclick=load;$('browserLevel').onchange=()=>{updateContext();renderBrowser();};$('browserSection').onchange=()=>{setTeile($('browserTeil'),$('browserSection').value);updateContext();renderBrowser();};$('browserTeil').onchange=()=>{updateContext();renderBrowser();};$('browserSearch').oninput=renderBrowser;modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('open'))closeModal();if(e.key==='Escape'&&importModal?.classList.contains('open'))closeImportModal();});$('logoutLink').onclick=async e=>{e.preventDefault();await api('admin-logout',{method:'POST'});location.href='/admin/login.html'};
 setTeile($('browserTeil'),'Lesen','Teil 1');load().catch(e=>{if(e.status===401)location.href='/admin/login.html';else showToast(e.message||'تعذر تحميل التمارين',true);});
 </script>
 </body></html>

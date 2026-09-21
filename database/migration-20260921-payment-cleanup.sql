@@ -1,0 +1,5 @@
+-- TELC Voll: automatic cleanup policy for stale payment orders.
+-- The Netlify Scheduled Function cleanup-payment-orders.js runs every 30 minutes
+-- and deletes only PENDING/FAILED/CANCELLED orders older than 2 hours.
+-- CONFIRMED orders are never touched.
+-- No new table is required.

@@ -2641,3 +2641,110 @@ html[data-theme="dark"] .admin-shell .small-btn{
   color:#ffad66 !important;
   border-color:#33443d !important;
 }
+
+/* ==========================================================================
+   TELC Voll — Premium Frosted Glassmorphism & Visual Polish
+   ========================================================================== */
+
+/* Translucent Frosted Glass Cards (Dashboard, Admin, Exams) */
+.topic-card,
+.student-card,
+.hub-kpi,
+.hub-progress-card,
+.context-item,
+.pricing-card,
+.plan-item,
+.plan-card,
+.self-test-features article {
+  background: rgba(255, 255, 255, 0.84) !important;
+  backdrop-filter: blur(14px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(160%) !important;
+  border: 1px solid color-mix(in srgb, var(--line) 75%, rgba(255, 255, 255, 0.7)) !important;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.22s ease !important;
+}
+
+html[data-theme="dark"] .topic-card,
+html[data-theme="dark"] .student-card,
+html[data-theme="dark"] .hub-kpi,
+html[data-theme="dark"] .hub-progress-card,
+html[data-theme="dark"] .context-item,
+html[data-theme="dark"] .pricing-card,
+html[data-theme="dark"] .plan-item,
+html[data-theme="dark"] .plan-card,
+html[data-theme="dark"] .self-test-features article,
+html[data-theme="dark"] .admin-shell .student-card,
+html[data-theme="dark"] .admin-shell .context-item {
+  background: rgba(17, 24, 21, 0.78) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Translucent Capsules & Switchers */
+.level-switch,
+.section-switch,
+.self-levels,
+.teil-tabs {
+  background: rgba(255, 255, 255, 0.70) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid var(--line) !important;
+}
+
+html[data-theme="dark"] .level-switch,
+html[data-theme="dark"] .section-switch,
+html[data-theme="dark"] .self-levels,
+html[data-theme="dark"] .teil-tabs {
+  background: rgba(17, 24, 21, 0.65) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Translucent Modals & Popups */
+.modal-box {
+  background: rgba(255, 255, 255, 0.94) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border: 1px solid color-mix(in srgb, var(--line) 80%, rgba(255,255,255,0.8)) !important;
+}
+
+html[data-theme="dark"] .modal-box,
+html[data-theme="dark"] .admin-shell .modal-box {
+  background: rgba(15, 21, 18, 0.92) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Translucent Notification Center */
+.notif-dropdown {
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(18px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(180%) !important;
+  border: 1px solid var(--line) !important;
+}
+
+html[data-theme="dark"] .notif-dropdown {
+  background: rgba(15, 21, 18, 0.92) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Sticky Action Bars */
+.exercise-actions {
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(18px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(180%) !important;
+  border-top: 1px solid var(--line) !important;
+}
+
+html[data-theme="dark"] .exercise-actions {
+  background: rgba(11, 15, 14, 0.90) !important;
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Translucent Floating Assistant */
+.telc-study-float {
+  background: rgba(244, 123, 32, 0.92) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  box-shadow: 0 8px 24px rgba(244, 123, 32, 0.38) !important;
+}
+
