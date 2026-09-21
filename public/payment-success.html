@@ -11,164 +11,47 @@
   <link rel="manifest" href="/manifest.webmanifest">
   <style>
     html, html body, html body * { font-family: "Cairo", "Segoe UI", Arial, sans-serif !important; }
-    .payment-result-shell {
-      min-height: calc(100vh - 80px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 30px 16px 60px;
-    }
-    .result-card {
-      background: var(--white, #fff);
-      border: 1px solid var(--line, #e2e8e5);
-      border-radius: 24px;
-      box-shadow: 0 15px 45px rgba(16, 35, 30, 0.08);
-      max-width: 580px;
-      width: 100%;
-      padding: clamp(24px, 5vw, 42px);
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-    .result-card::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 6px;
-      background: #f47b20;
-    }
-    .result-icon-wrap {
-      width: 76px;
-      height: 76px;
-      margin: 0 auto 20px;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      font-size: 38px;
-    }
-    .result-icon-success { background: #e8f7ee; color: #1f9d55; }
-    .result-icon-pending { background: #fff5eb; color: #f47b20; animation: spin-slow 2s linear infinite; }
-    .result-icon-failed { background: #feebe8; color: #d93829; }
-    @keyframes spin-slow { 100% { transform: rotate(360deg); } }
-
-    .result-title {
-      font-size: clamp(24px, 4vw, 30px);
-      font-weight: 900;
-      margin: 0 0 8px;
-      color: #10231e;
-      letter-spacing: -0.03em;
-    }
-    .result-subtitle {
-      font-size: 15px;
-      color: #61736b;
-      margin: 0 0 24px;
-      line-height: 1.6;
-    }
-
-    .details-box {
-      background: #f9fbfb;
-      border: 1px solid var(--line, #e2e8e5);
-      border-radius: 18px;
-      padding: 20px;
-      text-align: right;
-      margin-bottom: 24px;
-    }
-    .details-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 9px 0;
-      border-bottom: 1px dashed #e2e8e5;
-      font-size: 14px;
-    }
-    .details-row:last-child { border-bottom: none; }
-    .details-label { color: #61736b; font-weight: 700; }
-    .details-val { font-weight: 900; color: #10231e; }
-
-    .code-display-box {
-      background: #fff8f2;
-      border: 2px dashed #f47b20;
-      border-radius: 16px;
-      padding: 18px;
-      margin: 20px 0;
-      text-align: center;
-    }
-    .code-display-label {
-      font-size: 13px;
-      font-weight: 800;
-      color: #b35209;
-      margin-bottom: 8px;
-    }
-    .code-string {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
-      font-size: clamp(22px, 5vw, 32px);
-      font-weight: 900;
-      color: #f47b20;
-      letter-spacing: 0.08em;
-      direction: ltr;
-      display: inline-block;
-      user-select: all;
-      margin-bottom: 12px;
-    }
-
-    .btn-group {
-      display: grid;
-      gap: 12px;
-      margin-top: 15px;
-    }
-    .btn-copy {
-      background: #f47b20;
-      color: #fff;
-      border: none;
-      padding: 13px 20px;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 800;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: background .2s, transform .15s;
-    }
-    .btn-copy:hover { background: #d96614; transform: translateY(-1px); }
-    .btn-direct {
-      background: #10231e;
-      color: #fff;
-      border: none;
-      padding: 13px 20px;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 800;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      text-decoration: none;
-      transition: background .2s;
-    }
-    .btn-direct:hover { background: #1a3830; }
-
-    .toast-pop {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: #10231e;
-      color: #fff;
-      padding: 12px 24px;
-      border-radius: 999px;
-      font-size: 14px;
-      font-weight: 700;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
-      z-index: 1000;
-    }
-    .toast-pop.show {
-      transform: translateX(-50%) translateY(0);
+    body { background: radial-gradient(circle at 50% 8%, rgba(244,123,32,.08), transparent 34%), #0b100e; }
+    .payment-result-shell { min-height: calc(100vh - 80px); display:flex; align-items:center; justify-content:center; padding:48px 18px 76px; }
+    .result-card { width:min(680px,100%); background:linear-gradient(180deg,#111a17 0%,#0e1512 100%); border:1px solid rgba(244,123,32,.20); border-radius:28px; box-shadow:0 28px 80px rgba(0,0,0,.34); padding:clamp(26px,5vw,46px); text-align:center; position:relative; overflow:hidden; color:#eef6f2; }
+    .result-card::before { content:""; position:absolute; inset:0 0 auto; height:4px; background:linear-gradient(90deg,#f47b20,#ff9b48,#f47b20); }
+    .result-icon-wrap { width:82px;height:82px;margin:0 auto 22px;border-radius:50%;display:grid;place-items:center;font-size:42px;font-weight:900;box-shadow:0 12px 35px rgba(0,0,0,.22); }
+    .result-icon-success { background:#e9fbf1;color:#18a85a; }
+    .result-icon-pending { background:#fff3e8;color:#f47b20; }
+    .result-icon-failed { background:#ffebe8;color:#df4034; }
+    .result-title { font-size:clamp(25px,4vw,34px);font-weight:900;margin:0 0 10px;color:#f7fbf9;letter-spacing:-.035em;line-height:1.35; }
+    .result-subtitle { font-size:15px;color:#9eafa8;margin:0 auto 28px;line-height:1.9;max-width:560px; }
+    .success-badge { display:inline-flex;align-items:center;gap:7px;background:rgba(25,170,91,.12);border:1px solid rgba(25,170,91,.24);color:#54d68d;padding:7px 13px;border-radius:999px;font-size:12px;font-weight:900;margin-bottom:18px; }
+    .details-box { background:#f8fbfa;border:1px solid #dce7e2;border-radius:20px;padding:8px 20px;margin:0 0 20px;text-align:right;box-shadow:0 12px 35px rgba(0,0,0,.12); }
+    .details-row { display:flex;justify-content:space-between;align-items:center;gap:18px;padding:14px 0;border-bottom:1px dashed #dce4e0;font-size:14px; }
+    .details-row:last-child { border-bottom:none; }
+    .details-label { color:#64766e;font-weight:700; }
+    .details-val { font-weight:900;color:#13241f;text-align:left; }
+    .access-pill { color:#15934d !important; }
+    .code-display-box { background:linear-gradient(145deg,#fff8f2,#fffdfb);border:1.5px solid #f47b20;border-radius:22px;padding:22px 20px 20px;margin:20px 0;box-shadow:0 16px 40px rgba(244,123,32,.08); }
+    .code-display-label { font-size:12px;font-weight:900;color:#9a4d0b;margin-bottom:11px; }
+    .code-string { font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace !important;font-size:clamp(26px,6vw,38px);font-weight:950;color:#f47b20;letter-spacing:.12em;direction:ltr;display:block;user-select:all;margin:2px 0 16px; }
+    .code-hint { color:#7a8882;font-size:12px;margin-top:10px; }
+    .btn-group { display:grid;gap:11px;margin-top:18px; }
+    .btn-copy,.btn-direct,.btn-home { min-height:50px;border-radius:14px;font-size:15px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;text-decoration:none;transition:transform .18s,box-shadow .18s,background .18s; }
+    .btn-copy { background:linear-gradient(135deg,#f47b20,#ff8f34);color:#fff;border:0;box-shadow:0 10px 24px rgba(244,123,32,.22);padding:13px 20px; }
+    .btn-copy:hover { transform:translateY(-1px);box-shadow:0 14px 28px rgba(244,123,32,.28); }
+    .btn-direct { background:#123129;color:#fff;border:1px solid rgba(89,211,151,.16);padding:13px 20px; }
+    .btn-direct:hover { background:#183e34;transform:translateY(-1px); }
+    .btn-home { background:transparent;color:#f47b20;border:1px solid rgba(244,123,32,.32);padding:12px 20px; }
+    .btn-home:hover { background:rgba(244,123,32,.06); }
+    .email-note { display:flex;align-items:flex-start;gap:10px;text-align:right;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);border-radius:15px;padding:13px 15px;color:#9eafa8;font-size:12px;line-height:1.8;margin:18px 0 4px; }
+    .email-note strong { color:#dbe8e3; }
+    .toast-pop { position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(120px);background:#f47b20;color:#fff;padding:12px 20px;border-radius:999px;font-size:14px;font-weight:800;box-shadow:0 12px 35px rgba(0,0,0,.28);transition:transform .3s cubic-bezier(.18,.89,.32,1.28);z-index:1000;white-space:nowrap; }
+    .toast-pop.show { transform:translateX(-50%) translateY(0); }
+    @media (max-width:600px) {
+      .payment-result-shell { padding:28px 12px 54px;align-items:flex-start; }
+      .result-card { border-radius:22px;padding:28px 16px; }
+      .details-box { padding:7px 14px; }
+      .details-row { align-items:flex-start; }
+      .details-label { max-width:48%; }
+      .details-val { max-width:52%; }
+      .code-string { font-size:25px;letter-spacing:.08em; }
     }
   </style>
 </head>
@@ -191,9 +74,10 @@
     </div>
 
     <div class="result-card" id="stateConfirmed" style="display:none;">
+      <div class="success-badge"><span>✓</span> Paiement confirmé · تم تأكيد الدفع</div>
       <div class="result-icon-wrap result-icon-success">✓</div>
-      <h1 class="result-title">Paiement réussi / تم الدفع بنجاح</h1>
-      <p class="result-subtitle">Votre abonnement TELC Voll est activé.<br>تم تفعيل اشتراكك في منصة TELC Voll بنجاح، ويمكنك الآن التدرب على كافة المستويات.</p>
+      <h1 class="result-title">تم الدفع وتفعيل اشتراكك بنجاح</h1>
+      <p class="result-subtitle">اشتراكك في TELC Voll أصبح فعالًا الآن. يمكنك استخدام رمز الدخول أدناه للوصول إلى جميع مستويات المنصة B1 وB2 وC1.</p>
 
       <div class="details-box">
         <div class="details-row">
@@ -215,27 +99,25 @@
       </div>
 
       <div class="code-display-box">
-        <div class="code-display-label">Votre code d'accès / رمز الدخول الخاص بك:</div>
+        <div class="code-display-label">VOTRE CODE D'ACCÈS · رمز الدخول الخاص بك</div>
         <div class="code-string" id="accessCodeText">TV-54WJV8</div>
-        <div>
-          <button type="button" class="btn-copy" id="copyCodeBtn">
-            <span>📋</span>
-            <span id="copyBtnLabel">Copier le code / نسخ الرمز</span>
-          </button>
-        </div>
+        <button type="button" class="btn-copy" id="copyCodeBtn">
+          <span>📋</span>
+          <span id="copyBtnLabel">نسخ كود الدخول</span>
+        </button>
+        <div class="code-hint">يمكنك الضغط على زر النسخ أو تحديد الكود ونسخه يدويًا.</div>
       </div>
 
-      <div style="font-size:13px;color:#61736b;margin:16px 0;line-height:1.7;">
-        ✉ تم إرسال نسخة من كود الاشتراك وتفاصيل الحساب إلى بريدك الإلكتروني.<br>
-        احتفظ بهذا الرمز، فهو مفتاح دخولك لمنصة TELC Voll في أي وقت ومن أي جهاز.
+      <div class="email-note">
+        <span>✉️</span>
+        <div><strong>تم إرسال الكود إلى بريدك الإلكتروني.</strong><br>احتفظ به، فهو مفتاح دخولك إلى TELC Voll من أي جهاز طوال مدة الاشتراك.</div>
       </div>
 
       <div class="btn-group">
         <button type="button" class="btn-direct" id="enterDashboardBtn">
-          <span>الدخول المباشر إلى المنصة</span>
-          <span>←</span>
+          <span>الدخول المباشر إلى المنصة</span><span>←</span>
         </button>
-        <a href="/" class="btn light" style="text-decoration:none;padding:12px;font-weight:700;">العودة للصفحة الرئيسية</a>
+        <a href="/" class="btn-home">العودة إلى الصفحة الرئيسية</a>
       </div>
     </div>
 
