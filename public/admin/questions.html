@@ -255,14 +255,32 @@ $('importFile').onchange=async e=>{
     const raw=await file.text(); const pack=JSON.parse(raw); const list=Array.isArray(pack)?pack:(Array.isArray(pack.exercises)?pack.exercises:[]);
     if(!list.length) throw Error('ملف JSON لا يحتوي على تمارين.');
     const c=currentContext();
-    const wrong=list.find(x=>{
-      const level=String(x.level||c.level);
-      const section=String(x.section||c.section);
-      const teil=String(x.teil||c.teil);
-      return level!==c.level || section!==c.section || teil!==c.teil;
+    // Detect the import context from the JSON itself. This prevents valid batches
+    // from being rejected simply because the admin was viewing another Teil.
+    const detected = {
+      level: String(list[0]?.level || c.level).trim().toUpperCase(),
+      section: String(list[0]?.section || c.section).trim(),
+      teil: String(list[0]?.teil || c.teil).trim()
+    };
+    if(!['B1','B2','C1'].includes(detected.level)) throw Error(`المستوى غير صالح في الملف: ${detected.level || 'غير محدد'}.`);
+    if(!sectionNames[detected.section]) throw Error(`القسم غير صالح في الملف: ${detected.section || 'غير محدد'}.`);
+    if(!detected.teil) throw Error('جزء الامتحان (Teil) غير محدد في الملف.');
+    const inconsistent=list.find(x=>{
+      const level=String(x.level||detected.level).trim().toUpperCase();
+      const section=String(x.section||detected.section).trim();
+      const teil=String(x.teil||detected.teil).trim();
+      return level!==detected.level || section!==detected.section || teil!==detected.teil;
     });
-    if(wrong) throw Error(`الملف لا يطابق الاختيار الحالي: Telc ${c.level} / ${sectionNames[c.section]} / ${c.teil}.`);
-    if(!confirm(`سيتم استيراد ${list.length} تمرينًا إلى Telc ${c.level} — ${sectionNames[c.section]} — ${c.teil}. هل تريد المتابعة؟`))return;
+    if(inconsistent) throw Error(`ملف الاستيراد يحتوي على مستويات/أقسام/أجزاء مختلفة. يجب أن تكون جميع التمارين: Telc ${detected.level} / ${sectionNames[detected.section]} / ${detected.teil}.`);
+
+    // Synchronize the admin browser with the detected context before importing.
+    $('browserLevel').value=detected.level;
+    $('browserSection').value=detected.section;
+    setTeile($('browserTeil'),detected.section,detected.teil);
+    updateContext();
+    renderBrowser();
+
+    if(!confirm(`تم اكتشاف الملف تلقائيًا: Telc ${detected.level} — ${sectionNames[detected.section]} — ${detected.teil}.\n\nسيتم استيراد ${list.length} تمرينًا. هل تريد المتابعة؟`))return;
     const btn=$('importBtn'); btn.disabled=true; btn.textContent='جارٍ الاستيراد…';
     let done=0;
     for(const x of list){
@@ -281,7 +299,7 @@ $('importFile').onchange=async e=>{
         let n=0; body=body.replace(/\[([^\]]*)\]/g,()=>`(${21+n++})`);
       }
       const payload={
-        level:String(x.level||c.level), section, teil,
+        level:String(x.level||detected.level).trim().toUpperCase(), section, teil,
         title:String(x.title||'').trim(),
         task_type:String(x.task_type|| (section==='Schreiben'?'WRITING':section==='Sprechen'?'SPEAKING':section==='Sprachbausteine'?'GAP':'MCQ')),
         body,

@@ -275,11 +275,9 @@ checkoutForm.onsubmit = async (e) => {
   try {
     const { plans } = await api('public-plans');
     publicPlansList = plans || [];
-    let featuredIndex = publicPlansList.findIndex(p => p.is_featured);
-    if (featuredIndex === -1) {
-      featuredIndex = publicPlansList.findIndex(p => p.duration_days === 15);
-      if (featuredIndex === -1) featuredIndex = publicPlansList.length > 1 ? 1 : 0;
-    }
+    // The featured badge must reflect the admin-selected plan only.
+    // Never assign it by duration or array position.
+    const featuredIndex = publicPlansList.findIndex(p => p.is_featured === true || p.is_featured === 1 || p.is_featured === 'true');
     plansGrid.innerHTML = plans.length ? plans.map((p,i) => {
       const isFree = isPlanFree(p);
       const isFeatured = (i === featuredIndex);

@@ -12,7 +12,6 @@ exports.handler = async (event) => {
   const pool = db();
 
   if (event.httpMethod === 'GET') {
-    try {
     const url = new URL(event.rawUrl || 'http://localhost' + (event.path || '/'), 'http://localhost');
     const search = (url.searchParams.get('search') || '').trim();
     const status = (url.searchParams.get('status') || '').trim();
@@ -48,34 +47,22 @@ exports.handler = async (event) => {
     const whereSql = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
 
     const ordersRes = await pool.query(`
-      SELECT o.*, COALESCE(p.duration_days, 0) AS duration_days, COALESCE(p.name, o.plan_name) AS current_plan_name
+      SELECT o.*, p.duration_days, p.name AS current_plan_name
       FROM orders o
-      LEFT JOIN plans p ON p.id=o.plan_id
+      JOIN plans p ON p.id=o.plan_id
       ${whereSql}
       ORDER BY o.id DESC
       LIMIT ${limit} OFFSET ${offset}
     `, params);
 
-    // Summary stats. Older databases may not yet have code_id; keep the
-    // orders page usable while the migration is being applied.
-    const colRes = await pool.query(`
-      SELECT EXISTS (
-        SELECT 1 FROM information_schema.columns
-        WHERE table_schema='public' AND table_name='orders' AND column_name='code_id'
-      ) AS has_code_id
-    `);
-    const hasCodeId = !!colRes.rows[0]?.has_code_id;
-    const revenueFilter = hasCodeId
-      ? "status='CONFIRMED' AND code_id IS NOT NULL"
-      : "status='CONFIRMED' AND access_code IS NOT NULL";
-
+    // Summary stats
     const statsRes = await pool.query(`
       SELECT
         COUNT(*)::int AS total_orders,
         COUNT(*) FILTER (WHERE status='CONFIRMED')::int AS confirmed_orders,
         COUNT(*) FILTER (WHERE status='PENDING')::int AS pending_orders,
         COUNT(*) FILTER (WHERE status='FAILED' OR status='CANCELLED')::int AS failed_orders,
-        COALESCE(SUM(amount) FILTER (WHERE ${revenueFilter}), 0)::numeric AS total_revenue
+        COALESCE(SUM(amount) FILTER (WHERE status='CONFIRMED'), 0)::numeric AS total_revenue
       FROM orders
     `);
 
@@ -84,13 +71,8 @@ exports.handler = async (event) => {
     return json(200, {
       orders: ordersRes.rows,
       stats: statsRes.rows[0] || {},
-      plans: plansRes.rows,
-      schema: { has_code_id: hasCodeId }
+      plans: plansRes.rows
     });
-    } catch (err) {
-      console.error('admin-orders GET failed:', err?.message || err);
-      return json(500, { error: 'تعذر تحميل طلبات الدفع حالياً.' });
-    }
   }
 
   if (event.httpMethod === 'POST') {

@@ -150,48 +150,15 @@ exports.handler = async (event) => {
         return json(200, { ok: true });
       }
 
-      // Delete code cleanly with linked sessions.
-      // If this was a sold/confirmed code, the linked order remains as an audit
-      // record, but its code_id is cleared by ON DELETE SET NULL. Revenue
-      // statistics intentionally count only confirmed orders that still have
-      // an active linked access code, so deleting a sold code removes its
-      // amount from the confirmed-revenue counter.
+      // Delete code cleanly with linked sessions
       if (action === 'delete-code') {
         const id = parseInt(body.id || 0, 10);
         if (!id) return json(422, { error: 'معرف الرمز غير صالح.' });
-
-        const codeRes = await pool.query(
-          `SELECT c.id, c.code, c.student_id, o.order_id, o.status AS order_status
-           FROM access_codes c
-           LEFT JOIN orders o ON o.code_id=c.id
-           WHERE c.id=$1
-           LIMIT 1`,
-          [id]
-        );
-        if (!codeRes.rows.length) return json(404, { error: 'رمز الدخول غير موجود.' });
-
-        const client = await pool.connect();
-        try {
-          await client.query('BEGIN');
-          await client.query('DELETE FROM sessions WHERE code_id=$1', [id]);
-          const delRes = await client.query('DELETE FROM access_codes WHERE id=$1 RETURNING id', [id]);
-          if (!delRes.rows.length) {
-            await client.query('ROLLBACK');
-            return json(404, { error: 'رمز الدخول غير موجود.' });
-          }
-          await client.query('COMMIT');
-          return json(200, {
-            ok: true,
-            deleted: true,
-            was_sold: codeRes.rows[0].order_status === 'CONFIRMED',
-            revenue_removed: codeRes.rows[0].order_status === 'CONFIRMED'
-          });
-        } catch (err) {
-          try { await client.query('ROLLBACK'); } catch {}
-          throw err;
-        } finally {
-          client.release();
-        }
+        // Clean up linked sessions first to satisfy foreign key constraint
+        await pool.query('DELETE FROM sessions WHERE code_id=$1', [id]);
+        const delRes = await pool.query('DELETE FROM access_codes WHERE id=$1 RETURNING id', [id]);
+        if (!delRes.rows.length) return json(404, { error: 'رمز الدخول غير موجود.' });
+        return json(200, { ok: true, deleted: true });
       }
 
       // Extend code expiration and/or update plan without altering code string
