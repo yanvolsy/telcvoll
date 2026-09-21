@@ -11,6 +11,150 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <style>
 .pres-studio-active-grid { display: block !important; width: 100% !important; grid-column: 1 / -1; }
+/* In-app Student Notification Center */
+.notif-bell-btn {
+  background: var(--line, #eef2f0);
+  border: 1px solid var(--line, #e2e8e5);
+  border-radius: 12px;
+  padding: 6px 10px;
+  cursor: pointer;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+.notif-bell-btn:hover { background: #e5ece8; }
+.notif-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #f47b20;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid var(--white, #fff);
+  line-height: 1;
+}
+.notif-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  width: min(360px, 88vw);
+  max-height: 420px;
+  background: var(--white, #fff);
+  border: 1px solid var(--line, #e2e8e5);
+  border-radius: 18px;
+  box-shadow: 0 16px 40px rgba(16, 35, 30, 0.15);
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  text-align: right;
+}
+.notif-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line, #e2e8e5);
+  background: #fbfdfc;
+}
+.notif-btn-text {
+  background: none;
+  border: none;
+  color: #f47b20;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+.notif-btn-text:hover { text-decoration: underline; }
+.notif-list {
+  overflow-y: auto;
+  max-height: 360px;
+}
+.notif-item {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line, #e2e8e5);
+  position: relative;
+  transition: background 0.15s;
+}
+.notif-item:last-child { border-bottom: none; }
+.notif-item.unread {
+  background: #fffcf8;
+}
+.notif-item.unread::before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  right: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f47b20;
+}
+.notif-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.notif-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #10231e;
+  margin: 0;
+}
+.notif-badge-pill {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 999px;
+  display: inline-block;
+}
+.notif-pill-important, .notif-pill-urgent { background: #feebe8; color: #d93829; }
+.notif-pill-warning { background: #fff5eb; color: #f47b20; }
+.notif-pill-info { background: #edf4fe; color: #1e60d5; }
+.notif-pill-success { background: #e8f7ee; color: #1f9d55; }
+.notif-pill-announcement { background: #f3ebff; color: #7f22fe; }
+.notif-msg {
+  font-size: 12px;
+  color: #52615c;
+  line-height: 1.5;
+  margin: 4px 0 6px;
+}
+.notif-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: #8fa099;
+}
+.notif-mark-single-btn {
+  background: none;
+  border: none;
+  color: #52615c;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+.notif-mark-single-btn:hover { color: #10231e; }
+.notif-empty {
+  padding: 30px 20px;
+  text-align: center;
+  color: #8fa099;
+  font-size: 13px;
+}
 </style>
 <style><!-- TELC Voll: unified homepage typography -->
 html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
@@ -20,7 +164,28 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <header class="top">
   <a class="brand" href="/dashboard.html"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
   <nav>
-    <a href="/self-test.html" id="mockExamNav" data-i18n="nav_mock">امتحان تجريبي</a><a href="/telc-chat.html" id="telcChatNav" data-i18n="nav_speaking">مساعد TELC</a><a href="/profile.html" id="profileLink" data-i18n="profile_link">ملفي</a><a href="#" id="logoutLink" data-i18n="nav_logout">خروج</a>
+    <a href="/self-test.html" id="mockExamNav" data-i18n="nav_mock">امتحان تجريبي</a>
+    <a href="/telc-chat.html" id="telcChatNav" data-i18n="nav_speaking">مساعد TELC</a>
+    <a href="/profile.html" id="profileLink" data-i18n="profile_link">ملفي</a>
+    <div class="notif-wrapper" style="position:relative;display:inline-flex;align-items:center;">
+      <button id="notifBellBtn" class="notif-bell-btn" type="button" aria-label="التنبيهات" title="التنبيهات">
+        <span style="font-size:16px;">🔔</span>
+        <span id="notifBadge" class="notif-badge" style="display:none;">0</span>
+      </button>
+      <div id="notifDropdown" class="notif-dropdown" style="display:none;">
+        <div class="notif-header">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-weight:900;font-size:14px;">التنبيهات</span>
+            <span id="notifCountTag" class="tag" style="padding:2px 8px;font-size:11px;">0</span>
+          </div>
+          <button type="button" id="markAllReadBtn" class="notif-btn-text">تحديد الكل كمقروء</button>
+        </div>
+        <div id="notifList" class="notif-list">
+          <div class="notif-empty">لا توجد تنبيهات جديدة</div>
+        </div>
+      </div>
+    </div>
+    <a href="#" id="logoutLink" data-i18n="nav_logout">خروج</a>
   </nav>
 </header>
 <main class="student-hub" id="content"><div class="student-loading">جارٍ التحميل…</div></main>
@@ -641,6 +806,116 @@ document.addEventListener('click',e=>{const a=e.target.closest('a[href*="/exerci
 const logoutBtn=$('logoutLink');
 if(logoutBtn) logoutBtn.onclick=async e=>{e.preventDefault();try{localStorage.removeItem('telc_student_token');}catch(_){}await api('auth-logout',{method:'POST'});location.href='/';};
 
+// Student Notifications
+let dashboardNotifications = [];
+const notifBellBtn = $('notifBellBtn');
+const notifBadge = $('notifBadge');
+const notifDropdown = $('notifDropdown');
+const notifList = $('notifList');
+const notifCountTag = $('notifCountTag');
+const markAllReadBtn = $('markAllReadBtn');
+
+function formatNotifDate(d) {
+  if (!d) return '';
+  const dt = new Date(d);
+  return dt.toLocaleDateString('ar-DZ', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function renderNotifications() {
+  const unreadCount = dashboardNotifications.filter(n => !n.read_at).length;
+  if (unreadCount > 0) {
+    notifBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+    notifBadge.style.display = 'inline-flex';
+  } else {
+    notifBadge.style.display = 'none';
+  }
+  if (notifCountTag) notifCountTag.textContent = dashboardNotifications.length;
+
+  if (!dashboardNotifications.length) {
+    notifList.innerHTML = `<div class="notif-empty">${text('لا توجد تنبيهات حالياً', 'Keine Benachrichtigungen vorhanden')}</div>`;
+    return;
+  }
+
+  notifList.innerHTML = dashboardNotifications.map(n => {
+    const isUnread = !n.read_at;
+    const typeClass = (n.type === 'important' || n.priority === 'urgent' || n.priority === 'high' || n.type === 'code_expired') ? 'notif-pill-important' :
+                      (n.type === 'warning' || n.type === 'code_expiry') ? 'notif-pill-warning' :
+                      (n.type === 'success') ? 'notif-pill-success' :
+                      (n.type === 'announcement') ? 'notif-pill-announcement' : 'notif-pill-info';
+
+    const typeName = (n.type === 'code_expiry' || n.type === 'code_expired') ? 'تنبيه اشتراك' :
+                     (n.type === 'important') ? 'هام' :
+                     (n.type === 'warning') ? 'تحذير' :
+                     (n.type === 'success') ? 'تأكيد' :
+                     (n.type === 'announcement') ? 'إعلان' : 'تنبيه';
+
+    return `
+      <div class="notif-item ${isUnread ? 'unread' : ''}" data-id="${esc(n.id)}" data-source="${esc(n.source || 'system')}">
+        <div class="notif-item-top">
+          <h4 class="notif-title">${esc(n.title)}</h4>
+          <span class="notif-badge-pill ${typeClass}">${typeName}</span>
+        </div>
+        <div class="notif-msg">${esc(n.message)}</div>
+        <div class="notif-meta">
+          <span>${formatNotifDate(n.created_at)}</span>
+          ${isUnread ? `<button type="button" class="notif-mark-single-btn" onclick="markNotificationRead('${esc(n.id)}', '${esc(n.source || 'system')}')">${text('تحديد كمقروء', 'Als gelesen markieren')}</button>` : '<span style="color:#a0b0a8;">✓ مقروء</span>'}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function loadNotifications() {
+  try {
+    const res = await api('notifications');
+    dashboardNotifications = Array.isArray(res?.notifications) ? res.notifications : [];
+    renderNotifications();
+  } catch (err) {
+    console.warn('[NOTIFICATIONS LOAD ERROR]', err);
+  }
+}
+
+async function markNotificationRead(id, source) {
+  try {
+    await api('notifications-read', {
+      method: 'POST',
+      body: source === 'admin' ? { admin_id: id } : { id: id }
+    });
+    const found = dashboardNotifications.find(n => String(n.id) === String(id) && (n.source || 'system') === source);
+    if (found) found.read_at = new Date().toISOString();
+    renderNotifications();
+  } catch (err) {
+    console.error('Failed to mark read', err);
+  }
+}
+window.markNotificationRead = markNotificationRead;
+
+if (notifBellBtn) {
+  notifBellBtn.onclick = (e) => {
+    e.stopPropagation();
+    const isShown = notifDropdown.style.display === 'flex';
+    notifDropdown.style.display = isShown ? 'none' : 'flex';
+  };
+}
+
+if (markAllReadBtn) {
+  markAllReadBtn.onclick = async () => {
+    try {
+      await api('notifications-read', { method: 'POST', body: { all: true } });
+      dashboardNotifications.forEach(n => { n.read_at = new Date().toISOString(); });
+      renderNotifications();
+    } catch (err) {
+      console.error('Failed to mark all read', err);
+    }
+  };
+}
+
+document.addEventListener('click', (e) => {
+  if (notifDropdown && notifDropdown.style.display === 'flex' && !notifDropdown.contains(e.target) && e.target !== notifBellBtn) {
+    notifDropdown.style.display = 'none';
+  }
+});
+
 (async()=>{
   try {
     const d = await api('me');
@@ -664,6 +939,7 @@ if(logoutBtn) logoutBtn.onclick=async e=>{e.preventDefault();try{localStorage.re
     render();
     if (window.__telcRestoreSearch && $('search')) $('search').value = window.__telcRestoreSearch;
     renderTopics();
+    loadNotifications();
     setTimeout(() => {
       if (window.__telcRestoreScroll) window.scrollTo(0, window.__telcRestoreScroll);
     }, 80);

@@ -75,9 +75,66 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
   </section>
 
   <section id="plans" class="landing-section landing-plans">
-    <div class="landing-heading-row"><div><span class="tag" data-i18n="nav_plans">الخطط</span><h2 data-i18n="plans_title">خطتك تبدأ من هنا</h2></div><p data-i18n="plans_desc">اختر الخطة المناسبة لك؛ الأسعار والمحتوى يحددهما المشرف.</p></div>
+    <div class="landing-heading-row"><div><span class="tag" data-i18n="nav_plans">الخطط</span><h2 data-i18n="plans_title">خطتك تبدأ من هنا</h2></div><p data-i18n="plans_desc">اختر الخطة المناسبة لك؛ تفعيل كامل لجميع مستويات المنصة B1 + B2 + C1.</p></div>
     <div id="plansGrid" class="landing-plan-grid"><div class="card"><p class="muted" data-i18n="plans_loading">جارٍ تحميل الخطط…</p></div></div>
   </section>
+
+  <!-- Checkout Modal -->
+  <div id="checkoutModal" class="checkout-backdrop" style="display:none;position:fixed;inset:0;background:rgba(12,24,19,.58);backdrop-filter:blur(4px);z-index:9999;align-items:center;justify-content:center;padding:16px;">
+    <div class="checkout-card" style="background:#fff;border-radius:24px;width:min(520px,100%);padding:26px;box-shadow:0 30px 80px rgba(0,0,0,.22);border:1px solid var(--line);position:relative;max-height:92vh;overflow:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+        <div>
+          <span class="tag" style="background:#fff1e5;color:#f47b20;font-weight:900;">اشتراك شامل B1 · B2 · C1</span>
+          <h2 id="checkoutTitle" style="margin:6px 0 0;font-size:22px;">إتمام الاشتراك</h2>
+        </div>
+        <button id="closeCheckout" type="button" style="border:1px solid var(--line);background:#f6f8f7;border-radius:10px;width:34px;height:34px;cursor:pointer;font-size:18px;font-weight:bold;">✕</button>
+      </div>
+
+      <div id="checkoutPlanSummary" style="background:#fbfdfc;border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:18px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <strong id="summaryPlanName" style="font-size:18px;color:#0d1310;">—</strong>
+          <span id="summaryPrice" style="font-size:22px;font-weight:900;color:#f47b20;">— دج</span>
+        </div>
+        <div style="margin-top:8px;font-size:13px;color:var(--muted);display:flex;gap:12px;flex-wrap:wrap;">
+          <span>⏳ المدة: <strong id="summaryDuration">—</strong></span>
+          <span>🔓 الوصول: <strong>B1 + B2 + C1 كاملة</strong></span>
+        </div>
+      </div>
+
+      <form id="checkoutForm">
+        <input type="hidden" id="checkoutPlanId" name="plan_id">
+        <div class="field" style="margin-bottom:14px;">
+          <label style="display:block;font-size:12px;font-weight:800;color:#495e55;margin-bottom:6px;">الاسم الكامل *</label>
+          <input type="text" id="custName" name="name" required placeholder="مثال: محمد بن علي" style="width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:11px;font-size:14px;">
+        </div>
+        <div class="field" style="margin-bottom:14px;">
+          <label style="display:block;font-size:12px;font-weight:800;color:#495e55;margin-bottom:6px;">البريد الإلكتروني (لتلقي رمز التفعيل) *</label>
+          <input type="email" id="custEmail" name="email" required placeholder="example@email.com" style="width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:11px;font-size:14px;direction:ltr;text-align:right;">
+        </div>
+        <div class="field" style="margin-bottom:14px;">
+          <label style="display:block;font-size:12px;font-weight:800;color:#495e55;margin-bottom:6px;">رقم الهاتف *</label>
+          <input type="tel" id="custPhone" name="phone" required placeholder="05 / 06 / 07XXXXXXXX" style="width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:11px;font-size:14px;direction:ltr;text-align:right;">
+        </div>
+
+        <div style="background:#f5f8f7;border-radius:12px;padding:12px;margin:16px 0;font-size:12px;color:#52685f;display:flex;align-items:center;gap:10px;">
+          <span style="font-size:20px;">💳</span>
+          <span>الدفع الإلكتروني الآمن بالدينار الجزائري عبر بوابة <strong>OneClick DZ Navio</strong> (البطاقة الذهبية / CIB).</span>
+        </div>
+
+        <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;margin:14px 0 18px;color:#2f463d;font-weight:700;">
+          <input type="checkbox" id="custTerms" name="terms" required style="width:17px;height:17px;accent-color:#f47b20;">
+          <span>أوافق على شروط وأحكام الاستخدام وسياسة الخصوصية لمنصة TELC Voll</span>
+        </label>
+
+        <div id="checkoutError" style="display:none;background:#fff0ee;color:#a33a2f;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:800;margin-bottom:14px;"></div>
+
+        <button type="submit" id="checkoutSubmitBtn" class="btn" style="width:100%;padding:14px;font-size:16px;display:flex;justify-content:center;align-items:center;gap:8px;">
+          <span>متابعة الدفع عبر OneClick DZ</span>
+          <span>←</span>
+        </button>
+      </form>
+    </div>
+  </div>
 
   <section id="access" class="landing-access">
     <div class="landing-access-copy"><span class="tag" data-i18n="access_tag">دخول الطالب</span><h2 data-i18n="access_title">جاهز للبدء؟</h2><p class="muted" data-i18n="access_desc">أدخل رمز الوصول الذي حصلت عليه من المشرف.</p></div>
@@ -94,6 +151,13 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 if (qs('error') === 'session') {
   msg.innerHTML = `<div class="alert bad">${getLang() === 'de' ? 'Ihre Sitzung ist abgelaufen oder wurde auf einem anderen Gerät geöffnet. Bitte geben Sie Ihren Code erneut ein.' : 'انتهت الجلسة أو تم تسجيل الدخول من جهاز آخر. يرجى إدخال رمز الوصول مرة أخرى.'}</div>`;
   try { history.replaceState(null, '', location.pathname); } catch (_) {}
+}
+const urlCode = qs('code');
+if (urlCode && loginForm.code) {
+  loginForm.code.value = urlCode;
+  setTimeout(() => {
+    loginForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 300);
 }
 loginForm.onsubmit = async (e) => {
   e.preventDefault(); msg.innerHTML = '';
@@ -125,19 +189,91 @@ loginForm.onsubmit = async (e) => {
     msg.innerHTML = `<div class="alert bad">${esc(errorMsg)}</div>`;
   }
 };
+
+// Checkout Modal Logic
+let publicPlansList = [];
+const checkoutModal = document.getElementById('checkoutModal');
+const closeCheckoutBtn = document.getElementById('closeCheckout');
+const checkoutForm = document.getElementById('checkoutForm');
+const checkoutError = document.getElementById('checkoutError');
+const checkoutSubmitBtn = document.getElementById('checkoutSubmitBtn');
+
+function openCheckout(plan) {
+  checkoutError.style.display = 'none';
+  checkoutError.textContent = '';
+  document.getElementById('checkoutPlanId').value = plan.id;
+  document.getElementById('summaryPlanName').textContent = plan.name;
+  const price = plan.price_dzd || (plan.duration_days <= 15 ? 1500 : plan.duration_days <= 30 ? 2500 : 6000);
+  document.getElementById('summaryPrice').textContent = Number(price).toLocaleString('fr-DZ') + ' دج';
+  document.getElementById('summaryDuration').textContent = plan.duration_days + ' يوماً';
+  checkoutModal.style.display = 'flex';
+}
+
+function closeCheckout() {
+  checkoutModal.style.display = 'none';
+}
+
+closeCheckoutBtn.onclick = closeCheckout;
+checkoutModal.onclick = (e) => { if (e.target === checkoutModal) closeCheckout(); };
+
+checkoutForm.onsubmit = async (e) => {
+  e.preventDefault();
+  checkoutError.style.display = 'none';
+  checkoutError.textContent = '';
+
+  const planId = parseInt(document.getElementById('checkoutPlanId').value, 10);
+  const name = document.getElementById('custName').value.trim();
+  const email = document.getElementById('custEmail').value.trim();
+  const phone = document.getElementById('custPhone').value.trim();
+  const terms = document.getElementById('custTerms').checked;
+
+  if (!planId || !name || !email || !phone || !terms) {
+    checkoutError.textContent = 'يرجى إكمال جميع الحقول والموافقة على الشروط.';
+    checkoutError.style.display = 'block';
+    return;
+  }
+
+  const oldBtnHtml = checkoutSubmitBtn.innerHTML;
+  checkoutSubmitBtn.disabled = true;
+  checkoutSubmitBtn.innerHTML = '<span>جارٍ تحضير بوابة OneClick DZ…</span>';
+
+  try {
+    const res = await api('payment-checkout', {
+      method: 'POST',
+      body: { plan_id: planId, name, email, phone, terms }
+    });
+
+    if (res.payment_url) {
+      location.href = res.payment_url;
+    } else {
+      throw new Error(res.error || 'تعذر الحصول على رابط الدفع.');
+    }
+  } catch (err) {
+    checkoutSubmitBtn.disabled = false;
+    checkoutSubmitBtn.innerHTML = oldBtnHtml;
+    checkoutError.textContent = err.data?.error || err.message || 'حدث خطأ أثناء الاتصال ببوابة الدفع.';
+    checkoutError.style.display = 'block';
+  }
+};
+
 (async () => {
   try {
     const { plans } = await api('public-plans');
-    plansGrid.innerHTML = plans.length ? plans.map((p,i) => `
+    publicPlansList = plans || [];
+    plansGrid.innerHTML = plans.length ? plans.map((p,i) => {
+      const price = p.price_dzd || (p.duration_days <= 15 ? 1500 : p.duration_days <= 30 ? 2500 : 6000);
+      return `
       <article class="landing-plan ${i===1 ? 'featured':''}">
         ${i===1 ? `<span class="plan-featured-badge">${t('plans_featured')}</span>` : ''}
         <div class="landing-plan-top"><span class="landing-plan-number">0${i+1}</span><span>${esc(p.duration_days)} ${t('plans_day')}</span></div>
         <h3>${esc(p.name)}</h3>
-        <div class="plan-price">${esc(p.duration_days)} <small>${t('plans_day')}</small></div>
+        <div class="plan-price">${Number(price).toLocaleString('fr-DZ')} <small>دج / DZD</small></div>
+        <p style="font-weight:bold;color:var(--green);margin:6px 0;">✓ تفعيل B1 + B2 + C1 كاملة</p>
         <p>${p.max_attempts ? t('plans_attempts',{n:esc(p.max_attempts)}) : t('plans_attempts_unlimited')}</p>
         <p>${p.ai_enabled ? t('plans_ai_included') : t('plans_basic')}</p>
-        <a class="btn light" href="/contact.html?plan=${encodeURIComponent(p.name)}">${t('plans_use_btn')}</a>
-      </article>`).join('') : `<div class="card"><h3>${t('plans_none_title')}</h3><p class="muted">${t('plans_none_desc')}</p></div>`;
+        <button type="button" class="btn ${i===1?'':'light'}" style="width:100%;margin-top:12px;font-weight:900;" onclick="openCheckout(publicPlansList[${i}])">Acheter · شراء الخطة ←</button>
+      </article>`;
+    }).join('') : `<div class="card"><h3>${t('plans_none_title')}</h3><p class="muted">${t('plans_none_desc')}</p></div>`;
   } catch(e) { plansGrid.innerHTML=`<div class="card"><h3>${t('plans_error_title')}</h3><p class="muted">${t('plans_none_desc')}</p></div>`; }
 })();
 document.addEventListener('langchange', () => location.reload());

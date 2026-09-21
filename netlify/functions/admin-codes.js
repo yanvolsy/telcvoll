@@ -31,13 +31,14 @@ exports.handler = async (event) => {
 
       const action = String(body.action || '');
 
-      // Create / update a plan. No schema changes.
+      // Create / update a plan.
       if (action === 'plan' || action === 'update-plan') {
         const planKey = String(body.plan_key || '').trim();
         const name = String(body.name || '').trim();
         const days = Math.max(1, parseInt(body.days || 1, 10));
         const attempts = Math.max(0, parseInt(body.attempts || 0, 10));
         const ai = !!body.ai;
+        const priceDzd = Math.max(0, parseFloat(body.price_dzd || body.price || 0));
 
         if (!planKey || !name) return json(422, { error: 'اسم الخطة ومعرفها مطلوبان.' });
 
@@ -47,16 +48,16 @@ exports.handler = async (event) => {
 
           await pool.query(
             `UPDATE plans
-             SET plan_key=$1,name=$2,duration_days=$3,max_attempts=$4,ai_enabled=$5
-             WHERE id=$6`,
-            [planKey, name, days, attempts, ai, id]
+             SET plan_key=$1,name=$2,duration_days=$3,max_attempts=$4,ai_enabled=$5,price_dzd=$6
+             WHERE id=$7`,
+            [planKey, name, days, attempts, ai, priceDzd, id]
           );
           return json(200, { ok: true });
         }
 
         await pool.query(
-          'INSERT INTO plans(plan_key,name,duration_days,max_attempts,ai_enabled) VALUES($1,$2,$3,$4,$5)',
-          [planKey, name, days, attempts, ai]
+          'INSERT INTO plans(plan_key,name,duration_days,max_attempts,ai_enabled,price_dzd) VALUES($1,$2,$3,$4,$5,$6)',
+          [planKey, name, days, attempts, ai, priceDzd]
         );
         return json(200, { ok: true });
       }

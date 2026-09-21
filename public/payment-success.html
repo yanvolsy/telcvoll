@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0d1310">
+  <title>نتيجة الدفع | TELC Voll</title>
+  <link rel="stylesheet" href="/assets/app.css?v=20260918-cairo-local-v2">
+  <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
+  <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <style>
+    html, html body, html body * { font-family: "Cairo", "Segoe UI", Arial, sans-serif !important; }
+    .payment-result-shell {
+      min-height: calc(100vh - 80px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 16px 60px;
+    }
+    .result-card {
+      background: var(--white, #fff);
+      border: 1px solid var(--line, #e2e8e5);
+      border-radius: 24px;
+      box-shadow: 0 15px 45px rgba(16, 35, 30, 0.08);
+      max-width: 580px;
+      width: 100%;
+      padding: clamp(24px, 5vw, 42px);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .result-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: #f47b20;
+    }
+    .result-icon-wrap {
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 38px;
+    }
+    .result-icon-success { background: #e8f7ee; color: #1f9d55; }
+    .result-icon-pending { background: #fff5eb; color: #f47b20; animation: spin-slow 2s linear infinite; }
+    .result-icon-failed { background: #feebe8; color: #d93829; }
+    @keyframes spin-slow { 100% { transform: rotate(360deg); } }
+
+    .result-title {
+      font-size: clamp(24px, 4vw, 30px);
+      font-weight: 900;
+      margin: 0 0 8px;
+      color: #10231e;
+      letter-spacing: -0.03em;
+    }
+    .result-subtitle {
+      font-size: 15px;
+      color: #61736b;
+      margin: 0 0 24px;
+      line-height: 1.6;
+    }
+
+    .details-box {
+      background: #f9fbfb;
+      border: 1px solid var(--line, #e2e8e5);
+      border-radius: 18px;
+      padding: 20px;
+      text-align: right;
+      margin-bottom: 24px;
+    }
+    .details-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 9px 0;
+      border-bottom: 1px dashed #e2e8e5;
+      font-size: 14px;
+    }
+    .details-row:last-child { border-bottom: none; }
+    .details-label { color: #61736b; font-weight: 700; }
+    .details-val { font-weight: 900; color: #10231e; }
+
+    .code-display-box {
+      background: #fff8f2;
+      border: 2px dashed #f47b20;
+      border-radius: 16px;
+      padding: 18px;
+      margin: 20px 0;
+      text-align: center;
+    }
+    .code-display-label {
+      font-size: 13px;
+      font-weight: 800;
+      color: #b35209;
+      margin-bottom: 8px;
+    }
+    .code-string {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+      font-size: clamp(22px, 5vw, 32px);
+      font-weight: 900;
+      color: #f47b20;
+      letter-spacing: 0.08em;
+      direction: ltr;
+      display: inline-block;
+      user-select: all;
+      margin-bottom: 12px;
+    }
+
+    .btn-group {
+      display: grid;
+      gap: 12px;
+      margin-top: 15px;
+    }
+    .btn-copy {
+      background: #f47b20;
+      color: #fff;
+      border: none;
+      padding: 13px 20px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background .2s, transform .15s;
+    }
+    .btn-copy:hover { background: #d96614; transform: translateY(-1px); }
+    .btn-direct {
+      background: #10231e;
+      color: #fff;
+      border: none;
+      padding: 13px 20px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: background .2s;
+    }
+    .btn-direct:hover { background: #1a3830; }
+
+    .toast-pop {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #10231e;
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+      z-index: 1000;
+    }
+    .toast-pop.show {
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="/" aria-label="TELC Voll">
+      <span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span>
+    </a>
+    <nav>
+      <a href="/" data-i18n="nav_home">الرئيسية</a>
+      <a href="/contact.html" data-i18n="nav_contact">تواصل معنا</a>
+    </nav>
+  </header>
+
+  <main class="payment-result-shell">
+    <div class="result-card" id="stateLoading">
+      <div class="result-icon-wrap result-icon-pending">⚙</div>
+      <h1 class="result-title">جارٍ التحقق من عملية الدفع…</h1>
+      <p class="result-subtitle">يرجى الانتظار لحظات ريثما يتم التحقق من بوابة OneClick DZ وتأكيد اشتراكك.</p>
+    </div>
+
+    <div class="result-card" id="stateConfirmed" style="display:none;">
+      <div class="result-icon-wrap result-icon-success">✓</div>
+      <h1 class="result-title">Paiement réussi / تم الدفع بنجاح</h1>
+      <p class="result-subtitle">Votre abonnement TELC Voll est activé.<br>تم تفعيل اشتراكك في منصة TELC Voll بنجاح، ويمكنك الآن التدرب على كافة المستويات.</p>
+
+      <div class="details-box">
+        <div class="details-row">
+          <span class="details-label">Plan / الخطة:</span>
+          <span class="details-val" id="confirmedPlanName">—</span>
+        </div>
+        <div class="details-row">
+          <span class="details-label">Durée / المدة:</span>
+          <span class="details-val" id="confirmedDuration">—</span>
+        </div>
+        <div class="details-row">
+          <span class="details-label">Accès / صلاحية الوصول:</span>
+          <span class="details-val" style="color:#1f9d55;">B1 + B2 + C1 (كاملة)</span>
+        </div>
+        <div class="details-row" id="confirmedExpiryRow" style="display:none;">
+          <span class="details-label">Expiration / تاريخ الانتهاء:</span>
+          <span class="details-val" id="confirmedExpiresAt">—</span>
+        </div>
+      </div>
+
+      <div class="code-display-box">
+        <div class="code-display-label">Votre code d'accès / رمز الدخول الخاص بك:</div>
+        <div class="code-string" id="accessCodeText">TV-XXXX-XXXX-XXXX</div>
+        <div>
+          <button type="button" class="btn-copy" id="copyCodeBtn">
+            <span>📋</span>
+            <span id="copyBtnLabel">Copier le code / نسخ الرمز</span>
+          </button>
+        </div>
+      </div>
+
+      <div style="font-size:13px;color:#61736b;margin:16px 0;line-height:1.7;">
+        ✉ تم إرسال نسخة من كود الاشتراك وتفاصيل الحساب إلى بريدك الإلكتروني.<br>
+        احتفظ بهذا الرمز، فهو مفتاح دخولك لمنصة TELC Voll في أي وقت ومن أي جهاز.
+      </div>
+
+      <div class="btn-group">
+        <button type="button" class="btn-direct" id="enterDashboardBtn">
+          <span>الدخول المباشر إلى المنصة</span>
+          <span>←</span>
+        </button>
+        <a href="/" class="btn light" style="text-decoration:none;padding:12px;font-weight:700;">العودة للصفحة الرئيسية</a>
+      </div>
+    </div>
+
+    <div class="result-card" id="statePending" style="display:none;">
+      <div class="result-icon-wrap result-icon-pending">⏳</div>
+      <h1 class="result-title">الدفع قيد المعالجة</h1>
+      <p class="result-subtitle" id="pendingMessage">عملية الدفع لا تزال قيد المراجعة والمعالجة من قبل البنك. يرجى الانتظار بضع لحظات ثم إعادة التحقق.</p>
+
+      <div class="btn-group">
+        <button type="button" class="btn" id="retryVerifyBtn" style="padding:13px 20px;">
+          <span>تحديث والتحقق الآن ⟳</span>
+        </button>
+        <a href="/" class="btn light" style="text-decoration:none;padding:12px;font-weight:700;">العودة للصفحة الرئيسية</a>
+      </div>
+    </div>
+
+    <div class="result-card" id="stateFailed" style="display:none;">
+      <div class="result-icon-wrap result-icon-failed">✕</div>
+      <h1 class="result-title">تعذر إتمام الدفع</h1>
+      <p class="result-subtitle" id="failedMessage">لم تكتمل عملية الدفع أو تم إلغاؤها من البنك أو بوابة الدفع.</p>
+
+      <div class="btn-group">
+        <a href="/" class="btn" style="text-decoration:none;padding:13px 20px;display:block;">
+          المحاولة مرة أخرى
+        </a>
+        <a href="/contact.html" class="btn light" style="text-decoration:none;padding:12px;font-weight:700;">
+          تواصل مع الدعم الفني
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast-pop" id="toastPop">تم نسخ الرمز بنجاح!</div>
+
+  <footer data-i18n="footer">TELC Voll — منصة تدريب B1 · B2 · C1</footer>
+
+  <script src="/assets/i18n.js"></script>
+  <script src="/assets/app.js"></script>
+  <script>
+    const stateLoading = document.getElementById('stateLoading');
+    const stateConfirmed = document.getElementById('stateConfirmed');
+    const statePending = document.getElementById('statePending');
+    const stateFailed = document.getElementById('stateFailed');
+    const toastPop = document.getElementById('toastPop');
+
+    function showToast(msg) {
+      toastPop.textContent = msg;
+      toastPop.classList.add('show');
+      setTimeout(() => toastPop.classList.remove('show'), 2500);
+    }
+
+    let currentCode = '';
+
+    async function verifyPayment() {
+      stateLoading.style.display = 'block';
+      stateConfirmed.style.display = 'none';
+      statePending.style.display = 'none';
+      stateFailed.style.display = 'none';
+
+      const paymentRef = qs('paymentRef') || qs('ref') || qs('payment_ref');
+      const orderId = qs('order_id') || qs('order');
+
+      if (!paymentRef && !orderId) {
+        stateLoading.style.display = 'none';
+        stateFailed.style.display = 'block';
+        document.getElementById('failedMessage').textContent = 'لم يتم العثور على مرجع عملية الدفع في الرابط.';
+        return;
+      }
+
+      try {
+        const query = new URLSearchParams();
+        if (paymentRef) query.set('paymentRef', paymentRef);
+        if (orderId) query.set('order_id', orderId);
+
+        const res = await api('payment-verify?' + query.toString());
+
+        stateLoading.style.display = 'none';
+
+        if (res.status === 'CONFIRMED') {
+          stateConfirmed.style.display = 'block';
+          currentCode = res.access_code || '';
+          document.getElementById('confirmedPlanName').textContent = res.plan_name || 'اشتراك كامل';
+          document.getElementById('confirmedDuration').textContent = (res.duration_days || '—') + ' يوماً';
+          document.getElementById('accessCodeText').textContent = currentCode;
+
+          if (res.expires_at) {
+            const expDate = new Date(res.expires_at);
+            document.getElementById('confirmedExpiresAt').textContent = expDate.toLocaleDateString('ar-DZ', { year:'numeric', month:'short', day:'numeric' });
+            document.getElementById('confirmedExpiryRow').style.display = 'flex';
+          }
+        } else if (res.status === 'PENDING') {
+          statePending.style.display = 'block';
+          if (res.message) document.getElementById('pendingMessage').textContent = res.message;
+        } else {
+          stateFailed.style.display = 'block';
+          if (res.message) document.getElementById('failedMessage').textContent = res.message;
+        }
+      } catch (err) {
+        stateLoading.style.display = 'none';
+        stateFailed.style.display = 'block';
+        document.getElementById('failedMessage').textContent = err.data?.error || err.message || 'حدث خطأ أثناء الاتصال بالخادم للتحقق من الدفع.';
+      }
+    }
+
+    document.getElementById('copyCodeBtn').onclick = async () => {
+      if (!currentCode) return;
+      try {
+        await navigator.clipboard.writeText(currentCode);
+        showToast('تم نسخ كود الدخول بنجاح! / Code copié');
+        const lbl = document.getElementById('copyBtnLabel');
+        const oldTxt = lbl.textContent;
+        lbl.textContent = '✓ Copié / تم النسخ!';
+        setTimeout(() => { lbl.textContent = oldTxt; }, 2000);
+      } catch {
+        showToast('يرجى نسخ الكود يدوياً: ' + currentCode);
+      }
+    };
+
+    document.getElementById('enterDashboardBtn').onclick = async () => {
+      if (!currentCode) {
+        location.href = '/';
+        return;
+      }
+      const btn = document.getElementById('enterDashboardBtn');
+      const oldHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span>جارٍ تسجيل الدخول وتفعيل المنصة…</span>';
+      try {
+        const authRes = await api('auth-login', { method: 'POST', body: { code: currentCode } });
+        if (authRes.token) {
+          try { localStorage.setItem('telc_student_token', authRes.token); } catch (_) {}
+        }
+        location.href = '/dashboard.html';
+      } catch (err) {
+        // Fallback: send user to home page with code in query
+        location.href = '/?code=' + encodeURIComponent(currentCode);
+      }
+    };
+
+    document.getElementById('retryVerifyBtn').onclick = () => {
+      verifyPayment();
+    };
+
+    // Trigger on load
+    verifyPayment();
+  </script>
+</body>
+</html>
