@@ -61,100 +61,182 @@ async function sendAccessCodeEmail({ to, name, planName, durationDays, expiresAt
     year: 'numeric', month: 'long', day: 'numeric'
   }) : `${durationDays} يوماً`;
 
-  const subject = `رمز الدخول إلى منصة TELC Voll — كود تفعيل B1 · B2 · C1`;
+  const safeName = escapeHtml(name || 'عزيزي المشترك');
+  const safePlan = escapeHtml(planName || 'الخطة المختارة');
+  const safeDays = escapeHtml(durationDays || '—');
+  const safeCode = escapeHtml(accessCode || '');
+  const subject = `رمز الدخول إلى منصة TELC Voll — كود تفعيل B1 · B2 · C1 (${safeCode})`;
   const codeLink = `${SITE_URL}/?code=${encodeURIComponent(accessCode || '')}`;
 
-  const html = `<!DOCTYPE html>
-<html lang="ar" dir="rtl">
+  const html = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${subject}</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f6f8f7; margin: 0; padding: 0; color: #1a2e26; direction: rtl; text-align: right; }
-    .container { max-width: 600px; margin: 25px auto; background: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); border: 1px solid #e1e8e5; }
-    .header { background: #0d1310; padding: 32px 30px; text-align: center; color: #ffffff; }
-    .brand { font-size: 26px; font-weight: 900; letter-spacing: -0.02em; color: #ffffff; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
-    .dot { width: 10px; height: 10px; background-color: #f47b20; border-radius: 50%; display: inline-block; }
-    .content { padding: 35px 30px; line-height: 1.7; }
-    .badge { display: inline-block; background: #fff1e5; color: #f47b20; padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 800; margin-bottom: 18px; }
-    h1 { font-size: 24px; margin: 0 0 12px; color: #0d1310; font-weight: 900; }
-    p { margin: 10px 0; color: #495e55; font-size: 15px; }
-    .order-box { background: #fbfdfc; border: 1px solid #e1e8e5; border-radius: 16px; padding: 18px 20px; margin: 24px 0; }
-    .order-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #e1e8e5; font-size: 14px; }
-    .order-row:last-child { border-bottom: none; }
-    .order-row span { color: #6b7f76; }
-    .order-row strong { color: #0d1310; }
-    .code-card { background: #fff7f0; border: 2px dashed #f47b20; border-radius: 18px; padding: 24px 20px 20px; text-align: center; margin: 28px 0; }
-    .code-label { font-size: 12px; font-weight: 900; color: #a4500b; margin-bottom: 10px; }
-    .code-val { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 30px; font-weight: 950; color: #f47b20; letter-spacing: 3px; direction: ltr; display: block; user-select: all; padding: 6px 0; }
-    .code-copy { display: inline-block; background: #f47b20; color: #ffffff !important; text-decoration: none; padding: 12px 22px; border-radius: 10px; font-size: 14px; font-weight: 900; margin-top: 14px; }
-    .code-help { font-size: 12px; color: #7b8c84; margin-top: 10px; line-height: 1.6; }
-    .btn-wrap { text-align: center; margin: 30px 0; }
-    .btn { display: inline-block; background: #f47b20; color: #ffffff !important; text-decoration: none; padding: 14px 34px; border-radius: 12px; font-size: 16px; font-weight: 800; }
-    .steps { background: #f7faf9; border-radius: 14px; padding: 18px 22px; margin: 24px 0; font-size: 14px; color: #3d5249; }
-    .steps ol { margin: 8px 0 0 20px; padding: 0; }
-    .steps li { margin: 6px 0; }
-    .footer { background: #fbfdfc; border-top: 1px solid #e1e8e5; padding: 22px; text-align: center; font-size: 12px; color: #83978f; line-height: 1.6; }
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="supported-color-schemes" content="light dark" />
+  <title>${escapeHtml(subject)}</title>
+  <style type="text/css">
+    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
+    body { margin: 0; padding: 0; width: 100% !important; background-color: #0b0f0e; font-family: 'Segoe UI', Tahoma, Arial, sans-serif; direction: rtl; text-align: right; }
+    @media only screen and (max-width: 620px) {
+      .email-shell { width: 100% !important; }
+      .code-text { font-size: 24px !important; letter-spacing: 2px !important; }
+      .mobile-padding { padding-left: 18px !important; padding-right: 18px !important; }
+    }
   </style>
 </head>
-<body>
-  <div class="container">
-    <div class="header">
-      <div class="brand"><span class="dot"></span> TELC Voll</div>
-    </div>
-    <div class="content">
-      <div class="badge">تم تأكيد الدفع بنجاح ✓</div>
-      <h1>مرحباً ${escapeHtml(name || 'عزيزي المشترك')}</h1>
-      <p>شكراً لثقتك في منصة TELC Voll. تم تفعيل اشتراكك بنجاح لجميع مستويات المنصة <strong>B1 + B2 + C1</strong>.</p>
-      
-      <div class="order-box">
-        <div class="order-row">
-          <span>الخطة المفعلة:</span>
-          <strong>${escapeHtml(planName)}</strong>
-        </div>
-        <div class="order-row">
-          <span>مدة الاشتراك:</span>
-          <strong>${escapeHtml(durationDays)} يوماً</strong>
-        </div>
-        <div class="order-row">
-          <span>نطاق الوصول:</span>
-          <strong>المنصة كاملة (B1 + B2 + C1)</strong>
-        </div>
-        <div class="order-row">
-          <span>تاريخ انتهاء الصلاحية:</span>
-          <strong>${formattedDate}</strong>
-        </div>
-      </div>
+<body style="margin: 0; padding: 0; background-color: #0b0f0e; color: #151d19;">
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #0b0f0e; padding: 24px 0 36px 0;">
+    <tr>
+      <td align="center">
+        <!--[if (gte mso 9)|(IE)]>
+        <table align="center" border="0" cellspacing="0" cellpadding="0" width="600">
+        <tr>
+        <td align="center" valign="top" width="600">
+        <![endif]-->
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="email-shell" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,0.3); border: 1px solid #1f2a24;">
+          
+          <!-- Header -->
+          <tr>
+            <td align="center" style="background-color: #0b0f0e; padding: 34px 24px 30px; border-bottom: 2px solid #ff7a00;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center" valign="middle">
+                    <span style="display: inline-block; width: 12px; height: 12px; background-color: #ff7a00; border-radius: 50%; margin-inline-end: 8px; vertical-align: middle;"></span>
+                    <span style="color: #ffffff; font-size: 26px; font-weight: 900; letter-spacing: -0.5px; vertical-align: middle;">TELC Voll</span>
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" style="padding-top: 6px;">
+                    <span style="color: #a0b2aa; font-size: 13px; font-weight: 600; letter-spacing: 0.5px;">منصة التحضير لامتحانات اللغة الألمانية · B1 · B2 · C1</span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
 
-      <div class="code-card">
-        <div class="code-label">رمز الدخول الخاص بك · ACCESS CODE</div>
-        <div class="code-val">${escapeHtml(accessCode)}</div>
-        <a class="code-copy" href="${escapeHtml(codeLink)}">فتح صفحة الدخول ونسخ الكود ←</a>
-        <div class="code-help">يمكنك أيضًا تحديد الكود أعلاه ونسخه مباشرة. زر النسخ يفتح TELC Voll والكود مملوء تلقائيًا.</div>
-      </div>
+          <!-- Main Content -->
+          <tr>
+            <td class="mobile-padding" style="padding: 34px 32px 28px; background-color: #ffffff;" dir="rtl" align="right">
+              
+              <!-- Success Badge -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 18px;">
+                <tr>
+                  <td style="background-color: #fff4ec; border: 1px solid #fed7aa; border-radius: 999px; padding: 6px 16px;">
+                    <span style="color: #ff7a00; font-size: 13px; font-weight: 800;">تم تأكيد الدفع بنجاح ✓</span>
+                  </td>
+                </tr>
+              </table>
 
-      <div class="steps">
-        <strong>كيفية استخدام رمز الدخول:</strong>
-        <ol>
-          <li>توجه إلى الموقع الرسمي: <a href="${SITE_URL}" style="color:#f47b20;">${SITE_URL}</a></li>
-          <li>في قسم <strong>دخول الطالب</strong>، ضع رمز الوصول الموضح أعلاه.</li>
-          <li>اضغط على <strong>دخول إلى المنصة</strong> للبدء فوراً في التدريب على كافة الأقسام.</li>
-        </ol>
-      </div>
+              <h1 style="color: #0b0f0e; font-size: 23px; font-weight: 900; margin: 0 0 12px 0; line-height: 1.35;">مرحباً ${safeName}</h1>
+              <p style="color: #3b4d45; font-size: 15px; line-height: 1.75; margin: 0 0 24px 0;">
+                شكراً لاشتراكك في منصة <strong>TELC Voll</strong>. تم تفعيل حسابك بنجاح، ورمز الدخول الخاص بك جاهز للاستخدام الفوري لجميع مستويات المنصة <strong>(B1 + B2 + C1)</strong> دون أي قيود.
+              </p>
 
-      <div class="btn-wrap">
-        <a href="${SITE_URL}" class="btn">الدخول إلى المنصة الآن ←</a>
-      </div>
+              <!-- Order Summary Table -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f7faf9; border: 1px solid #e1e8e5; border-radius: 16px; margin: 0 0 28px 0;">
+                <tr>
+                  <td style="padding: 16px 20px;">
+                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <tr>
+                        <td align="right" style="padding: 9px 0; border-bottom: 1px dashed #e1e8e5; color: #6b7f76; font-size: 14px;">الخطة المفعلة:</td>
+                        <td align="left" dir="ltr" style="padding: 9px 0; border-bottom: 1px dashed #e1e8e5; color: #0b0f0e; font-size: 14px; font-weight: 800;">${safePlan}</td>
+                      </tr>
+                      <tr>
+                        <td align="right" style="padding: 9px 0; border-bottom: 1px dashed #e1e8e5; color: #6b7f76; font-size: 14px;">مدة الاشتراك:</td>
+                        <td align="left" style="padding: 9px 0; border-bottom: 1px dashed #e1e8e5; color: #0b0f0e; font-size: 14px; font-weight: 800;">${safeDays} يوماً</td>
+                      </tr>
+                      <tr>
+                        <td align="right" style="padding: 9px 0; border-bottom: 1px dashed #e1e8e5; color: #6b7f76; font-size: 14px;">نطاق الوصول:</td>
+                        <td align="left" style="padding: 9px 0; border-bottom: 1px dashed #e1e8e5; color: #ff7a00; font-size: 14px; font-weight: 800;">المنصة كاملة (B1 + B2 + C1)</td>
+                      </tr>
+                      <tr>
+                        <td align="right" style="padding: 9px 0; color: #6b7f76; font-size: 14px;">تاريخ انتهاء الصلاحية:</td>
+                        <td align="left" style="padding: 9px 0; color: #0b0f0e; font-size: 14px; font-weight: 800;">${escapeHtml(formattedDate)}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
 
-      <p style="font-size:13px; color:#83978f; text-align:center;">احتفظ بهذا البريد الإلكتروني للرجوع إلى رمز الوصول الخاص بك في أي وقت.</p>
-    </div>
-    <div class="footer">
-      <strong>TELC Voll</strong><br>
-      German Exam Preparation Platform · B1 · B2 · C1<br>
-      <a href="${SITE_URL}" style="color:#f47b20; text-decoration:none;">${SITE_URL}</a>
-    </div>
-  </div>
+              <!-- Access Code Card -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #fff9f4; border: 2px dashed #ff7a00; border-radius: 18px; margin: 0 0 28px 0;">
+                <tr>
+                  <td align="center" style="padding: 26px 20px;">
+                    <div style="color: #92400e; font-size: 12px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px;">
+                      رمز الدخول الخاص بك · ACCESS CODE
+                    </div>
+                    <div class="code-text" style="font-family: Consolas, 'Courier New', monospace; font-size: 32px; font-weight: 900; color: #ff7a00; letter-spacing: 4px; padding: 6px 0; direction: ltr; display: inline-block;">
+                      ${safeCode}
+                    </div>
+                    <div style="color: #6b7f76; font-size: 13px; line-height: 1.6; margin-top: 10px; max-width: 440px;">
+                      احفظ هذا الكود. يمكنك نسخه واستخدامه للدخول في أي وقت، أو الضغط مباشرة على الزر أدناه للدخول الفوري.
+                    </div>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Primary CTA Button -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 0 0 28px 0;">
+                <tr>
+                  <td align="center">
+                    <a href="${escapeHtml(codeLink)}" target="_blank" style="display: inline-block; background-color: #ff7a00; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 900; padding: 16px 38px; border-radius: 14px; box-shadow: 0 6px 20px rgba(255,122,0,0.35); text-align: center;">
+                      الدخول إلى المنصة وتفعيل الكود تلقائياً ←
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Instructions / Steps -->
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f7faf9; border-radius: 14px; margin: 0 0 20px 0;">
+                <tr>
+                  <td style="padding: 18px 22px;" align="right" dir="rtl">
+                    <strong style="color: #0b0f0e; font-size: 14px; display: block; margin-bottom: 8px;">خطوات تفعيل الدخول:</strong>
+                    <ol style="margin: 0; padding-right: 20px; color: #3b4d45; font-size: 13px; line-height: 1.8;">
+                      <li>اضغط على زر <strong>الدخول إلى المنصة</strong> أعلاه، أو توجه مباشرة إلى <a href="${SITE_URL}" target="_blank" style="color: #ff7a00; text-decoration: none; font-weight: 700;">telcvoll.de</a>.</li>
+                      <li>سيتم ملء رمز الدخول تلقائياً (أو الصق الكود <strong>${safeCode}</strong> في خانة كود الدخول).</li>
+                      <li>اضغط <strong>دخول إلى المنصة</strong> للبدء فوراً في جميع نماذج وامتحانات B1 و B2 و C1.</li>
+                    </ol>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="color: #83978f; font-size: 12px; text-align: center; margin: 20px 0 0 0; line-height: 1.6;">
+                إذا واجهتك أي صعوبة في الدخول، يمكنك التواصل معنا مباشرة عبر صفحة <a href="${SITE_URL}/contact.html" target="_blank" style="color: #ff7a00; text-decoration: none; font-weight: 700;">تواصل معنا</a>.
+              </p>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="background-color: #f7faf9; border-top: 1px solid #e1e8e5; padding: 22px 24px;">
+              <table role="presentation" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td align="center">
+                    <strong style="color: #0b0f0e; font-size: 13px;">TELC Voll</strong><br />
+                    <span style="color: #83978f; font-size: 12px; line-height: 1.7;">
+                      German Exam Preparation Platform · B1 · B2 · C1<br />
+                      <a href="${SITE_URL}" target="_blank" style="color: #ff7a00; text-decoration: none; font-weight: 600;">${SITE_URL}</a>
+                    </span>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+        </table>
+        <!--[if (gte mso 9)|(IE)]>
+        </td>
+        </tr>
+        </table>
+        <![endif]-->
+      </td>
+    </tr>
+  </table>
 </body>
 </html>`;
 

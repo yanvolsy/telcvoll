@@ -297,7 +297,7 @@ checkoutForm.onsubmit = async (e) => {
         <p>${p.max_attempts ? t('plans_attempts',{n:esc(p.max_attempts)}) : t('plans_attempts_unlimited')}</p>
         <p>${p.ai_enabled ? t('plans_ai_included') : t('plans_basic')}</p>
         ${isFree ?
-          `<a href="/contact.html?plan=trial" class="btn light" style="display:block;width:100%;box-sizing:border-box;margin-top:12px;font-weight:900;text-decoration:none;text-align:center;">طلب الرمز المجاني · تواصل معنا ←</a>` :
+          `<a href="/contact.html?plan=trial" class="btn light" style="display:block;width:100%;box-sizing:border-box;margin-top:12px;font-weight:900;text-decoration:none;text-align:center;">تواصل معنا ←</a>` :
           `<button type="button" class="btn ${isFeatured?'':'light'}" style="width:100%;margin-top:12px;font-weight:900;" onclick="openCheckout(publicPlansList[${i}])">Acheter · شراء الخطة ←</button>`
         }
       </article>`;
