@@ -294,7 +294,7 @@ function render(){
       </div>
     </section>
     <section class="level-switch" aria-label="TELC Voll Niveau">
-      ${['B1','B2','C1'].map(l=>`<button class="level-btn ${state.level===l?'active':''} ${!levelAvailable(l)?'empty':''}" data-level="${l}">Telc ${l}</button>`).join('')}
+      ${['B1','B2','C1'].map(l=>`<button type="button" class="level-btn ${String(state.level).toUpperCase()===l?'active':''} ${!levelAvailable(l)?'empty':''}" data-level="${l}" aria-pressed="${String(state.level).toUpperCase()===l?'true':'false'}">Telc ${l}</button>`).join('')}
     </section>
     <nav class="section-switch" aria-label="Prüfungsteile">
       ${SECTION_ORDER.map(s=>{const count=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===s).length;return `<button class="section-btn ${state.section===s?'active':''}" data-section="${s}"><span>${sectionIcon(s)}</span><span class="section-btn-copy"><b>${s}</b><small>${count} ${text('تمرين','Übungen')}</small></span></button>`}).join('')}
@@ -320,7 +320,7 @@ function render(){
       </div>
       <a class="btn self-test-btn" href="/self-test.html?level=${encodeURIComponent(state.level)}">${text('ابدأ امتحان عشوائي','Zufällige Prüfung starten')} <span>←</span></a>
     </section>`;
-  document.querySelectorAll('[data-level]').forEach(b=>b.onclick=()=>{state.level=b.dataset.level;state.section='Lesen';selectedTeil=availableTeileFor('Lesen',state.level)[0]||'';render();});
+  document.querySelectorAll('.level-switch .level-btn[data-level]').forEach(b=>b.onclick=()=>{state.level=String(b.dataset.level||'B2').toUpperCase();state.section='Lesen';selectedTeil=availableTeileFor('Lesen',state.level)[0]||'';render();});
   document.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>{state.section=b.dataset.section;selectedTeil=availableTeileFor(state.section)[0]||'';render();});
   document.querySelectorAll('[data-teil]').forEach(b=>b.onclick=()=>{selectedTeil=b.dataset.teil;renderTopics();});
   const nav=$('telcChatNav'); if(nav) nav.href='/telc-chat.html';
@@ -942,11 +942,11 @@ document.addEventListener('click', (e) => {
     state.subscription = d?.subscription || null;
     remainingDays = calcRemainingDays();
     const urlLevel = qs('level');
-    if (['B1','B2','C1'].includes(urlLevel)) state.level = urlLevel;
+    if (['B1','B2','C1'].includes(String(urlLevel||'').toUpperCase())) state.level = String(urlLevel).toUpperCase();
     try {
       const saved = JSON.parse(sessionStorage.getItem('telc_dashboard_return') || 'null');
       if (saved) {
-        if (['B1','B2','C1'].includes(saved.level)) state.level = saved.level;
+        if (['B1','B2','C1'].includes(String(saved.level||'').toUpperCase())) state.level = String(saved.level).toUpperCase();
         if (SECTION_ORDER.includes(saved.section)) state.section = saved.section;
         if (availableTeileFor(state.section).includes(saved.teil)) selectedTeil = saved.teil;
         window.__telcRestoreSearch = saved.search || '';

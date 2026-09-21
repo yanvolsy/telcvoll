@@ -2548,3 +2548,17 @@ html[data-theme="dark"] body.admin-shell .modal-box {
 html[data-theme="dark"] body.admin-shell .admin-footer {
   background: #0b0f0e !important;
 }
+
+/* Student level switcher: active state must remain visible for B1, B2 and C1 */
+.level-switch .level-btn.active,
+.level-switch .level-btn.active:hover,
+.level-switch .level-btn[aria-pressed="true"] {
+  background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%) !important;
+  color: #fff !important;
+  opacity: 1 !important;
+  box-shadow: 0 6px 18px rgba(244,123,32,.28) !important;
+}
+.level-switch .level-btn:not(.active):hover {
+  background: color-mix(in srgb, var(--green-soft) 70%, transparent) !important;
+  color: var(--ink) !important;
+}
