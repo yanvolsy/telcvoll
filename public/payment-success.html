@@ -216,7 +216,7 @@
 
       <div class="code-display-box">
         <div class="code-display-label">Votre code d'accès / رمز الدخول الخاص بك:</div>
-        <div class="code-string" id="accessCodeText">TV-XXXX-XXXX-XXXX</div>
+        <div class="code-string" id="accessCodeText">TV-54WJV8</div>
         <div>
           <button type="button" class="btn-copy" id="copyCodeBtn">
             <span>📋</span>
@@ -296,7 +296,7 @@
       stateFailed.style.display = 'none';
 
       const paymentRef = qs('paymentRef') || qs('ref') || qs('payment_ref');
-      const orderId = qs('order_id') || qs('order');
+      const orderId = qs('order_id') || qs('orderId') || qs('order');
 
       if (!paymentRef && !orderId) {
         stateLoading.style.display = 'none';

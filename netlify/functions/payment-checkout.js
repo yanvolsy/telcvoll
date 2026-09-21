@@ -112,7 +112,7 @@ exports.handler = async (event) => {
     );
 
     // 4. Prepare payload for gateway createLink
-    const returnUrl = `${siteUrl}/payment-success`;
+    const returnUrl = `${siteUrl}/payment-success?order_id=${encodeURIComponent(orderId)}`;
 
     const gatewayPayload = {
       productInfo: {
@@ -131,8 +131,7 @@ exports.handler = async (event) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Access-Token': apiKey.trim(),
-        'Authorization': `Bearer ${apiKey.trim()}`
+        'X-Access-Token': apiKey.trim()
       },
       body: JSON.stringify(gatewayPayload)
     });

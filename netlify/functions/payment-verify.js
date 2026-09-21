@@ -19,13 +19,13 @@ exports.handler = async (event) => {
 
   const url = new URL(event.rawUrl || 'http://localhost' + (event.path || '/'), 'http://localhost');
   let paymentRef = url.searchParams.get('paymentRef') || url.searchParams.get('ref') || url.searchParams.get('payment_ref');
-  let orderId = url.searchParams.get('order_id') || url.searchParams.get('order');
+  let orderId = url.searchParams.get('order_id') || url.searchParams.get('orderId') || url.searchParams.get('order');
 
   if (event.httpMethod === 'POST') {
     let body = {};
     try { body = JSON.parse(event.body || '{}'); } catch {}
     paymentRef = paymentRef || body.paymentRef || body.payment_ref || body.ref;
-    orderId = orderId || body.order_id || body.order;
+    orderId = orderId || body.order_id || body.orderId || body.order;
   }
 
   if (!paymentRef && !orderId) {
@@ -86,8 +86,7 @@ exports.handler = async (event) => {
     const checkRes = await fetch(`${baseUrl}/v3/ocpay/checkPayment/${encodeURIComponent(refToCheck)}`, {
       method: 'GET',
       headers: {
-        'X-Access-Token': apiKey.trim(),
-        'Authorization': `Bearer ${apiKey.trim()}`
+        'X-Access-Token': apiKey.trim()
       }
     });
 
