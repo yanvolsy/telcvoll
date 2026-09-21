@@ -14,10 +14,29 @@ exports.handler = async () => {
 
     // Never touch CONFIRMED orders. Only incomplete/failed payment attempts
     // older than two hours are eligible for cleanup.
+    // Detect optional legacy columns so the scheduled job remains compatible
+    // with databases that were created before code_id was added.
+    const colsRes = await client.query(`
+      SELECT column_name
+      FROM information_schema.columns
+      WHERE table_schema='public'
+        AND table_name='orders'
+        AND column_name IN ('code_id','access_code')
+    `);
+    const orderCols = new Set(colsRes.rows.map(r=>r.column_name));
+    const hasCodeId = orderCols.has('code_id');
+    const hasAccessCode = orderCols.has('access_code');
+
+    const selectCols = [
+      'id','order_id','status',
+      hasAccessCode ? 'access_code' : 'NULL::text AS access_code',
+      hasCodeId ? 'code_id' : 'NULL::bigint AS code_id'
+    ].join(', ');
+
     const ordersRes = await client.query(`
-      SELECT id, order_id, status, access_code, code_id
+      SELECT ${selectCols}
       FROM orders
-      WHERE status IN ('PENDING', 'FAILED', 'CANCELLED')
+      WHERE status IN ('PENDING','FAILED','CANCELLED')
         AND created_at < NOW() - INTERVAL '2 hours'
       FOR UPDATE
     `);
@@ -26,19 +45,32 @@ exports.handler = async () => {
     let deletedCodes = 0;
 
     for (const order of ordersRes.rows) {
-      // A non-confirmed order should normally have no access code, but clean
-      // one up defensively if an older/legacy record has one attached.
-      if (order.code_id) {
-        await client.query('DELETE FROM sessions WHERE code_id=$1', [order.code_id]);
+      const codeIds = new Set();
+      if (order.code_id) codeIds.add(String(order.code_id));
+
+      // Legacy/defensive cleanup: if a non-confirmed order contains a code
+      // string, remove the matching access code too.
+      if (order.access_code) {
+        const codeRows = await client.query(
+          'SELECT id FROM access_codes WHERE code=$1',
+          [String(order.access_code)]
+        );
+        for (const row of codeRows.rows) codeIds.add(String(row.id));
+      }
+
+      for (const codeId of codeIds) {
+        await client.query('DELETE FROM sessions WHERE code_id=$1', [codeId]);
         const codeDel = await client.query(
           'DELETE FROM access_codes WHERE id=$1 RETURNING id',
-          [order.code_id]
+          [codeId]
         );
         if (codeDel.rowCount) deletedCodes += 1;
       }
 
       const delOrder = await client.query(
-        'DELETE FROM orders WHERE id=$1 AND status IN (\'PENDING\',\'FAILED\',\'CANCELLED\') RETURNING id',
+        `DELETE FROM orders
+         WHERE id=$1 AND status IN ('PENDING','FAILED','CANCELLED')
+         RETURNING id`,
         [order.id]
       );
       if (delOrder.rowCount) {

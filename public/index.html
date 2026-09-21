@@ -106,7 +106,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
         <input type="hidden" id="checkoutPlanId" name="plan_id">
         <div class="field" style="margin-bottom:14px;">
           <label style="display:block;font-size:12px;font-weight:800;color:var(--muted);margin-bottom:6px;">الاسم الكامل *</label>
-          <input type="text" id="custName" name="name" required placeholder="مثال: محمد بن علي" style="width:100%;box-sizing:border-box;padding:11px 14px;border:1px solid var(--line);border-radius:11px;font-size:14px;background:var(--bg);color:var(--ink);">
+          <input type="text" id="custName" name="name" required placeholder="مثال: اسم ولقبك" style="width:100%;box-sizing:border-box;padding:11px 14px;border:1px solid var(--line);border-radius:11px;font-size:14px;background:var(--bg);color:var(--ink);">
         </div>
         <div class="field" style="margin-bottom:14px;">
           <label style="display:block;font-size:12px;font-weight:800;color:var(--muted);margin-bottom:6px;">البريد الإلكتروني (لتلقي رمز التفعيل فوراً) *</label>
@@ -275,12 +275,11 @@ checkoutForm.onsubmit = async (e) => {
   try {
     const { plans } = await api('public-plans');
     publicPlansList = plans || [];
-    // The featured badge must reflect the admin-selected plan only.
-    // Never assign it by duration or array position.
-    const featuredIndex = publicPlansList.findIndex(p => p.is_featured === true || p.is_featured === 1 || p.is_featured === 'true');
+    // The featured badge is controlled only by the admin's explicit
+    // is_featured flag. Never infer it from duration or card position.
     plansGrid.innerHTML = plans.length ? plans.map((p,i) => {
       const isFree = isPlanFree(p);
-      const isFeatured = (i === featuredIndex);
+      const isFeatured = p.is_featured === true || p.is_featured === 'true';
       const price = isFree ? 0 : (p.price_dzd || (p.duration_days <= 15 ? 1500 : p.duration_days <= 30 ? 2500 : 6000));
       return `
       <article class="landing-plan ${isFeatured ? 'featured':''}">

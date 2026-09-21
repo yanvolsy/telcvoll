@@ -255,8 +255,12 @@ document.addEventListener('DOMContentLoaded', initAdminLoginTools);
     return false;
   }
 
-  // Block right-click context menu (except on allow-copy elements if needed, but contextmenu is blocked to prevent inspect/save)
+  // Keep the context menu enabled inside editable fields so students can use
+  // Paste / Copy with the mouse (especially for TELC Voll access codes).
+  // Keep the anti-copy protection everywhere else.
   document.addEventListener('contextmenu', function(e) {
+    var t = e.target;
+    if (isAllowedCopy(t)) return;
     e.preventDefault();
     return false;
   }, { capture: true });
