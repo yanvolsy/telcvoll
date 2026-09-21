@@ -386,7 +386,7 @@ html[data-theme="dark"] .landing-image-frame{box-shadow:0 28px 70px rgba(0,0,0,.
 .landing-section{padding:54px 0}.landing-heading-row{display:flex;align-items:end;justify-content:space-between;gap:30px;margin-bottom:25px}.landing-heading-row h2{font-size:clamp(32px,4vw,52px);line-height:1.05;letter-spacing:-.05em;margin:11px 0 0}.landing-heading-row>p{max-width:430px;color:var(--muted);margin:0;line-height:1.8}
 .landing-service-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.landing-service{min-height:210px;padding:20px;border:1px solid var(--line);border-radius:18px;background:var(--white);box-shadow:var(--shadow);display:flex;flex-direction:column;justify-content:space-between;transition:transform .18s,border-color .18s}.landing-service:hover{transform:translateY(-5px);border-color:var(--green)}.landing-service>span{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:var(--green-soft);color:var(--green);font-weight:950}.landing-service h3{font-size:17px;margin:25px 0 8px}.landing-service p{font-size:12px;line-height:1.75;color:var(--muted);margin:0}
 .landing-showcase{display:grid;grid-template-columns:1.05fr .95fr;gap:45px;align-items:center;padding:70px 0}.landing-showcase-image{padding:14px;border:1px solid var(--line);border-radius:28px;background:var(--white);box-shadow:var(--shadow)}.landing-showcase-image img{border-radius:18px}.landing-showcase-copy h2{font-size:clamp(34px,4vw,54px);line-height:1.04;letter-spacing:-.05em;margin:12px 0 15px}.landing-showcase-copy>p{font-size:16px;line-height:1.9}.landing-mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:22px}.landing-mini-grid>div{border:1px solid var(--line);border-radius:13px;padding:12px;background:var(--white)}.landing-mini-grid b{display:block;font-size:20px;color:var(--green)}.landing-mini-grid span{font-size:10px;color:var(--muted)}.landing-mini-grid .featured{border-color:var(--green);box-shadow:0 8px 20px rgba(244,123,32,.09)}
-.landing-plan-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.landing-plan{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--shadow);min-height:275px;display:flex;flex-direction:column}.landing-plan.featured{border:1px solid var(--line);position:relative}.plan-featured-badge{position:absolute;top:12px;right:12px;background:var(--exercise-accent-soft);color:var(--exercise-accent);padding:6px 10px;border-radius:999px;font-size:11px;font-weight:900}.landing-plan.featured .landing-plan-top{padding-top:30px}.landing-plan-top{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;font-weight:800}.landing-plan-number{color:var(--green);font-size:15px}.landing-plan h3{font-size:20px;margin:18px 0 4px}.landing-plan .plan-price{margin:0}.landing-plan p{font-size:12px;color:var(--muted);margin:4px 0}.landing-plan .btn{margin-top:auto;width:100%}.landing-plan button.btn{font:inherit;cursor:pointer}
+.landing-plan-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.landing-plan{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--shadow);min-height:275px;display:flex;flex-direction:column;transition:transform .2s,box-shadow .2s,border-color .2s}.landing-plan:hover{transform:translateY(-3px);box-shadow:var(--shadow-md)}.landing-plan.featured{border:2px solid var(--green);box-shadow:0 14px 40px rgba(244,123,32,.15);position:relative}html[data-theme="dark"] .landing-plan.featured{border-color:var(--green);box-shadow:0 14px 40px rgba(251,146,60,.16)}.landing-plan-top{display:flex;justify-content:space-between;align-items:center;gap:8px;color:var(--muted);font-size:11px;font-weight:800;margin-bottom:8px}.landing-plan-number{color:var(--green);font-size:16px;font-weight:900}.landing-plan-duration{color:var(--muted);font-size:11px;font-weight:800;white-space:nowrap}.plan-featured-badge-inline{background:linear-gradient(135deg,var(--green) 0%,var(--green-dark) 100%);color:#fff;font-size:11px;font-weight:900;padding:3px 11px;border-radius:999px;box-shadow:0 4px 14px rgba(244,123,32,.35);white-space:nowrap;animation:pulseBadge 3s ease-in-out infinite}@keyframes pulseBadge{0%,100%{transform:scale(1);box-shadow:0 4px 14px rgba(244,123,32,.35)}50%{transform:scale(1.04);box-shadow:0 6px 20px rgba(244,123,32,.55)}}.landing-plan h3{font-size:20px;margin:12px 0 4px}.landing-plan .plan-price{margin:0}.landing-plan p{font-size:12px;color:var(--muted);margin:4px 0}.landing-plan .btn{margin-top:auto;width:100%}.landing-plan button.btn{font:inherit;cursor:pointer}
 .landing-access{display:grid;grid-template-columns:1fr 1.2fr;gap:25px;align-items:center;margin:38px 0 30px;padding:28px 30px;border:1px solid var(--line);border-radius:24px;background:linear-gradient(135deg,var(--white),var(--green-soft));box-shadow:var(--shadow)}.landing-access h2{font-size:34px;margin:8px 0}.landing-access p{margin:0}.landing-access-form{display:flex;gap:9px}.landing-access-form input{margin:0;min-width:0}.landing-access-form .btn{white-space:nowrap}.landing-access #msg{grid-column:1/-1}
 .landing-about{text-align:center;padding:48px 20px 25px;max-width:800px;margin:auto}.landing-about h2{font-size:30px;margin:12px 0 8px}.landing-about p{margin:0}
 html[data-theme="dark"] .landing-image-frame,html[data-theme="dark"] .landing-access{background:var(--white)}
@@ -998,35 +998,46 @@ html[data-theme="dark"] .admin-shell .admin-nav{background:rgba(22,31,27,.90)!im
 .admin-mobile-menu .admin-mobile-divider{height:1px;background:var(--line);margin:4px 0}
 .admin-shell .admin-mobile-toggle{display:none}
 .admin-shell .admin-dashboard,.admin-shell .wrap{position:relative}
-.admin-shell .admin-stat,.admin-shell .admin-tool,.admin-shell .student-stat,.admin-shell .stat,.admin-shell .plan-item,.admin-shell .exam-card,.admin-shell .code-table-wrap,.admin-shell .table-wrap,.admin-shell .panel,.admin-shell .card,.admin-shell .modal,.admin-shell .modal-box{background:var(--white)!important;color:var(--ink)}
-.admin-shell .code-table th,.admin-shell .exercise-table th,.admin-shell .table th{background:var(--green)!important;color:#fff!important}
-.admin-shell .code-table tr:hover td{background:var(--green-soft)!important}
-.admin-shell .field-label,.admin-shell label{color:var(--ink)}
-.admin-shell input,.admin-shell textarea,.admin-shell select{background:var(--white);color:var(--ink);border-color:var(--line)}
-.admin-shell input::placeholder,.admin-shell textarea::placeholder{color:var(--muted);opacity:.9}
+.admin-shell .admin-stat,.admin-shell .admin-tool,.admin-shell .student-stat,.admin-shell .stat,.admin-shell .plan-item,.admin-shell .exam-card,.admin-shell .code-table-wrap,.admin-shell .table-wrap,.admin-shell .table-card,.admin-shell .toolbar-panel,.admin-shell .panel,.admin-shell .card,.admin-shell .modal,.admin-shell .modal-box,.admin-shell .editor-wrapper,.admin-shell .preview-frame{background:var(--white)!important;color:var(--ink);border-color:var(--line)!important}
+.admin-shell .code-table th,.admin-shell .exercise-table th,.admin-shell .table th,.admin-shell .data-table th{background:var(--green)!important;color:#fff!important}
+.admin-shell .code-table tr:hover td,.admin-shell .data-table tr:hover td,.admin-shell .table tr:hover td{background:var(--green-soft)!important}
+.admin-shell .field-label,.admin-shell label,.admin-shell h1,.admin-shell h2,.admin-shell h3,.admin-shell strong,.admin-shell b{color:var(--ink)}
+.admin-shell input,.admin-shell textarea,.admin-shell select{background:var(--bg);color:var(--ink);border-color:var(--line)}
+.admin-shell input::placeholder,.admin-shell textarea::placeholder{color:var(--muted);opacity:.85}
 .admin-shell .modal-backdrop,.admin-shell .modal{color:var(--ink)}
-html[data-theme="dark"] .admin-shell .admin-nav{box-shadow:0 5px 24px rgba(0,0,0,.28)}
-html[data-theme="dark"] .admin-shell .code-table-wrap,html[data-theme="dark"] .admin-shell .table-wrap{background:var(--white)!important}
-html[data-theme="dark"] .admin-shell .code-table tr:hover td{background:rgba(255,173,102,.09)!important}
-html[data-theme="dark"] .admin-shell .code-status.disabled{background:#242c29;color:#aebbb6}
-html[data-theme="dark"] .admin-shell .code-status.expired{background:#321b18;color:#f0aaa2}
-html[data-theme="dark"] .admin-shell .remove-btn,html[data-theme="dark"] .admin-shell .btn.red{background:#321b18!important;color:#f0aaa2!important;border-color:#63342e!important}
-html[data-theme="dark"] .admin-shell .section-box{background:rgba(255,173,102,.06)!important}
-html[data-theme="dark"] .admin-shell .item-row{background:#141d19!important;border-color:var(--line)!important}
-html[data-theme="dark"] .admin-shell .code-pill{background:rgba(255,173,102,.10)!important;border-color:#6a4a30!important}
+.admin-shell .editor-toolbar,.admin-shell .preview-frame-wrap,.admin-shell .audience-card,.admin-shell .meta,.admin-shell .code-chip{background:var(--bg)!important;border-color:var(--line)!important;color:var(--ink)}
+.admin-shell .editor-btn,.admin-shell .btn-action,.admin-shell .device-btn{background:var(--white)!important;color:var(--ink)!important;border-color:var(--line)!important}
+.admin-shell .editor-btn:hover,.admin-shell .btn-action:hover{background:var(--green-soft)!important;border-color:var(--green)!important;color:var(--green)!important}
+
+html[data-theme="dark"] .admin-shell .admin-nav{box-shadow:0 5px 24px rgba(0,0,0,.35)}
+html[data-theme="dark"] .admin-shell .code-table-wrap,html[data-theme="dark"] .admin-shell .table-wrap,html[data-theme="dark"] .admin-shell .table-card{background:var(--white)!important}
+html[data-theme="dark"] .admin-shell .code-table tr:hover td,html[data-theme="dark"] .admin-shell .data-table tr:hover td{background:rgba(255,173,102,.10)!important}
+html[data-theme="dark"] .admin-shell .code-status.disabled{background:var(--bg);color:var(--muted);border:1px solid var(--line)}
+html[data-theme="dark"] .admin-shell .code-status.expired{background:rgba(239,68,68,.14);color:var(--danger)}
+html[data-theme="dark"] .admin-shell .remove-btn,html[data-theme="dark"] .admin-shell .btn.red{background:rgba(239,68,68,.15)!important;color:var(--danger)!important;border-color:rgba(239,68,68,.3)!important}
+html[data-theme="dark"] .admin-shell .section-box{background:var(--green-soft)!important;border-color:var(--line)!important}
+html[data-theme="dark"] .admin-shell .item-row{background:var(--bg)!important;border-color:var(--line)!important}
+html[data-theme="dark"] .admin-shell .code-pill{background:var(--green-soft)!important;border-color:var(--green)!important}
+html[data-theme="dark"] .admin-shell input,html[data-theme="dark"] .admin-shell textarea,html[data-theme="dark"] .admin-shell select{background:var(--bg)!important;color:var(--ink)!important;border-color:var(--line)!important}
+html[data-theme="dark"] .admin-shell .data-table td,html[data-theme="dark"] .admin-shell .code-table td,html[data-theme="dark"] .admin-shell .table td{border-color:var(--line)!important;color:var(--ink)!important}
+html[data-theme="dark"] .admin-shell .data-table th,html[data-theme="dark"] .admin-shell .code-table th,html[data-theme="dark"] .admin-shell .table th{background:var(--green)!important;color:#fff!important}
+html[data-theme="dark"] .admin-shell .customer-info b,html[data-theme="dark"] .admin-shell .stat strong,html[data-theme="dark"] .admin-shell .plan-name{color:var(--ink)!important}
+html[data-theme="dark"] .admin-shell .customer-info small,html[data-theme="dark"] .admin-shell .stat small,html[data-theme="dark"] .admin-shell .order-id{color:var(--muted)!important}
+
 .admin-login-tools{position:fixed;top:18px;inset-inline-end:18px;display:flex;gap:7px;z-index:20}
 .admin-login-tools .icon-btn{width:40px;height:40px}
+
 @media(max-width:760px){
-  .admin-shell .admin-nav{padding:0 13px;min-height:64px}
+  .admin-shell .admin-nav{padding:0 12px;min-height:60px}
   .admin-shell .admin-nav nav{display:none}
   .admin-shell .admin-nav .header-actions{margin-inline-start:auto}
-  .admin-shell .admin-mobile-toggle{display:inline-flex;order:3;width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:var(--white);color:var(--ink);align-items:center;justify-content:center;cursor:pointer;padding:0}
+  .admin-shell .admin-mobile-toggle{display:inline-flex;order:3;width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--white);color:var(--ink);align-items:center;justify-content:center;cursor:pointer;padding:0;flex:none}
   .admin-shell .admin-mobile-toggle:hover{border-color:var(--green);background:var(--green-soft);color:var(--green)}
-  .admin-shell .admin-nav .brand{font-size:19px}
+  .admin-shell .admin-nav .brand{font-size:18px}
   .admin-shell .admin-nav .header-actions{gap:5px}
   .admin-shell .admin-nav .header-actions .icon-btn{width:36px;height:36px}
-  .admin-mobile-menu{top:70px}
-  .admin-shell .admin-dashboard-head{padding-top:18px}
+  .admin-mobile-menu{top:68px}
+  .admin-shell .admin-dashboard-head{padding-top:16px}
   .admin-shell .admin-section-head{align-items:flex-start;flex-direction:column}
   .admin-shell .browser-toolbar,.admin-shell .code-toolbar,.admin-shell .code-hero,.admin-shell .exam-head,.admin-shell .student-head{align-items:stretch;flex-direction:column}
   .admin-shell .browser-filters{grid-template-columns:1fr!important}
@@ -1037,7 +1048,13 @@ html[data-theme="dark"] .admin-shell .code-pill{background:rgba(255,173,102,.10)
   .admin-shell .part-row{grid-template-columns:1fr!important;gap:6px}
   .admin-shell .row3,.admin-shell .row2{grid-template-columns:1fr!important}
   .admin-shell .code-create-form{grid-template-columns:1fr!important}
-  .admin-shell .code-table-wrap,.admin-shell .table-wrap{border-radius:14px}
+  .admin-shell .code-table-wrap,.admin-shell .table-wrap,.admin-shell .table-card{border-radius:14px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .admin-shell .modal-box,.admin-shell .modal{width:min(96vw,100%)!important;padding:16px!important;border-radius:18px!important}
+  .admin-shell .stats{grid-template-columns:1fr 1fr!important;gap:10px!important}
+}
+@media(max-width:480px){
+  .admin-shell .stats{grid-template-columns:1fr!important}
+  .admin-shell .stat strong,.admin-shell .admin-stat strong{font-size:24px!important}
 }
 
 

@@ -42,13 +42,13 @@
     bar.id = 'adminBar';
     bar.innerHTML = `
       <b>ADMIN</b>
-      <a href="/admin/content.html">Content Management</a>
-      <a href="/admin/code-generator.html">Code Generator</a>
+      <a href="/admin/questions.html">Übungen</a>
       <a href="/admin/codes.html">Codes</a>
-      <a href="/admin/students.html">Users</a>
-      <a href="/admin/statistics.html">Analytics</a>
-      <a href="/admin/settings.html">Settings</a>
-      <a href="/admin/index.html">Weitere Tools</a>
+      <a href="/admin/plans.html">Pläne</a>
+      <a href="/admin/students.html">Schüler & Statistiken</a>
+      <a href="/admin/orders.html">Bestellungen</a>
+      <a href="/admin/settings.html">Einstellungen</a>
+      <a href="/admin/index.html">Alle Werkzeuge</a>
       <a href="${location.pathname}${location.search ? location.search + '&' : '?'}preview=1">Vorschau als Schüler</a>
       <a href="#" id="adminBarLogout" style="margin-inline-start:auto">Abmelden</a>
     `;
@@ -93,7 +93,7 @@
         <span class="meta">Status: <b>${exercise.status === 'published' ? 'Veröffentlicht' : 'Entwurf'}</b>
           · Zugriff: ${exercise.access_mode === 'free' ? 'Frei' : 'Code erforderlich'}
           · Niveau: ${exercise.level} · Bereich: ${exercise.section}</span>
-        <a class="btn-a" href="/admin/content.html?id=${id}">Bearbeiten</a>
+        <a class="btn-a" href="/admin/questions.html?id=${id}">Bearbeiten</a>
         <button data-act="duplicate">Duplizieren</button>
         <button data-act="publish">${exercise.status === 'published' ? 'Zurückziehen' : 'Veröffentlichen'}</button>
         <button data-act="delete" class="danger">Löschen</button>
@@ -106,7 +106,7 @@
         body: JSON.stringify({ action: 'duplicate', id }),
       });
       const d = await r.json();
-      if (d.ok) location.href = `/admin/content.html?id=${d.id}`;
+      if (d.ok) location.href = `/admin/questions.html?id=${d.id}`;
     };
     box.querySelector('[data-act="publish"]').onclick = async () => {
       await fetch('/api/admin-topic', {

@@ -3,15 +3,14 @@ const { db } = require('./_lib/db');
 const { json } = require('./_lib/auth');
 const { sendAccessCodeEmail } = require('./_lib/email');
 const { requireSameOrigin, requestSize } = require('./_lib/request');
+const { safeLog } = require('./_lib/security');
 
 function makeSecureAccessCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  const buf = crypto.randomBytes(12);
-  let p1 = '', p2 = '', p3 = '';
-  for (let i = 0; i < 4; i++) p1 += chars[buf[i] % chars.length];
-  for (let i = 4; i < 8; i++) p2 += chars[buf[i] % chars.length];
-  for (let i = 8; i < 12; i++) p3 += chars[buf[i] % chars.length];
-  return `TV-${p1}-${p2}-${p3}`;
+  const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const buf = crypto.randomBytes(6);
+  let code = '';
+  for (let i = 0; i < 6; i++) code += chars[buf[i] % chars.length];
+  return `TV-${code}`;
 }
 
 exports.handler = async (event) => {
@@ -51,7 +50,9 @@ exports.handler = async (event) => {
     }
 
     // 2. IDEMPOTENCY CHECK: If order was already confirmed, return existing result immediately!
+    // Never create a duplicate code or extra subscription.
     if (order.status === 'CONFIRMED' && order.access_code) {
+      safeLog('IDEMPOTENT_VERIFY_HIT', { orderId: order.order_id, paymentRef: order.payment_ref });
       return json(200, {
         ok: true,
         status: 'CONFIRMED',
@@ -70,6 +71,7 @@ exports.handler = async (event) => {
     // 3. Payment gateway status check
     const apiKey = process.env.ONECLICK_API_KEY;
     if (!apiKey) {
+      safeLog('CONFIG_ERROR', { error: 'ONECLICK_API_KEY not configured' });
       return json(500, { error: 'بوابة الدفع الإلكتروني غير مهيأة على الخادم.' });
     }
 
@@ -84,29 +86,31 @@ exports.handler = async (event) => {
     const checkRes = await fetch(`${baseUrl}/v3/ocpay/checkPayment/${encodeURIComponent(refToCheck)}`, {
       method: 'GET',
       headers: {
-        'X-Access-Token': apiKey.trim()
+        'X-Access-Token': apiKey.trim(),
+        'Authorization': `Bearer ${apiKey.trim()}`
       }
     });
 
     const checkData = await checkRes.json().catch(() => ({}));
     if (!checkRes.ok) {
-      console.error('[PAYMENT CHECK ERROR]', {
-        httpStatus: checkRes.status,
-        code: checkData?.error?.code || null,
-        message: checkData?.error?.message || checkData?.message || null,
-        requestId: checkData?.meta?.requestId || null
+      safeLog('PAYMENT_CHECK_GATEWAY_ERROR', {
+        ref: refToCheck,
+        status: checkRes.status,
+        reason: checkData.message || checkData.error
       });
-      return json(502, { error: 'تعذر التحقق من حالة الدفع الإلكتروني حالياً.' });
+      // Safe response without leaking gateway internals
+      return json(502, { error: 'تعذر التحقق من حالة الدفع الإلكتروني حالياً. يرجى المحاولة لاحقاً.' });
     }
 
-    // Official OneClick v3 response shape: { success, data: { status, message, paymentRef }, meta }
-    const rawStatus = checkData?.data?.status || checkData?.status || checkData?.paymentStatus || '';
+    // Extract status string from response (handles { status: 'CONFIRMED' } or { data: { status: 'CONFIRMED' } })
+    const rawStatus = checkData.status || checkData.data?.status || checkData.paymentStatus || '';
     const status = String(rawStatus).trim().toUpperCase();
 
+    // 4. Access Code is ONLY created when gateway status is CONFIRMED
     if (status === 'CONFIRMED') {
       await client.query('BEGIN');
 
-      // Double check inside transaction for concurrency safety
+      // Double check inside locked transaction for concurrency safety (Idempotency)
       const lockRes = await client.query('SELECT status, access_code FROM orders WHERE id=$1 FOR UPDATE', [order.id]);
       if (lockRes.rows[0]?.status === 'CONFIRMED' && lockRes.rows[0]?.access_code) {
         await client.query('ROLLBACK');
@@ -121,7 +125,7 @@ exports.handler = async (event) => {
         });
       }
 
-      // Generate cryptographically unique TELC Voll code
+      // Generate cryptographically unique TELC Voll code (TV-XXXXXX)
       let code;
       for (;;) {
         code = makeSecureAccessCode();
@@ -165,6 +169,13 @@ exports.handler = async (event) => {
 
       await client.query('COMMIT');
 
+      safeLog('PAYMENT_CONFIRMED_SUCCESS', {
+        orderId: order.order_id,
+        paymentRef: order.payment_ref,
+        planId: order.plan_id,
+        durationDays: order.duration_days
+      });
+
       // Send confirmation email through Resend (asynchronously, does not block return)
       try {
         const emailResult = await sendAccessCodeEmail({
@@ -179,7 +190,7 @@ exports.handler = async (event) => {
           await pool.query('UPDATE orders SET email_sent=TRUE WHERE id=$1', [order.id]);
         }
       } catch (emailErr) {
-        console.error('[EMAIL SENDING FAILED NON-FATAL]', emailErr);
+        safeLog('EMAIL_SEND_FAILED', { orderId: order.order_id, error: emailErr.message });
       }
 
       return json(200, {
@@ -197,6 +208,7 @@ exports.handler = async (event) => {
     }
 
     if (status === 'PENDING') {
+      safeLog('PAYMENT_CHECK_PENDING', { orderId: order.order_id, ref: refToCheck });
       return json(200, {
         ok: true,
         status: 'PENDING',
@@ -206,12 +218,14 @@ exports.handler = async (event) => {
       });
     }
 
-    // If FAILED, CANCELLED, or EXPIRED
+    // If FAILED, CANCELLED, or EXPIRED — NEVER create access code
     const finalFailStatus = status === 'CANCELLED' ? 'CANCELLED' : 'FAILED';
     await client.query(
       'UPDATE orders SET status=$1, updated_at=NOW() WHERE id=$2',
       [finalFailStatus, order.id]
     );
+
+    safeLog('PAYMENT_CHECK_FAILED', { orderId: order.order_id, ref: refToCheck, status: finalFailStatus });
 
     return json(200, {
       ok: true,
@@ -223,8 +237,9 @@ exports.handler = async (event) => {
 
   } catch (err) {
     try { await client.query('ROLLBACK'); } catch (_) {}
-    console.error('[VERIFY EXCEPTION]', err);
-    return json(500, { error: 'حدث خطأ أثناء التحقق من الدفع: ' + err.message });
+    safeLog('VERIFY_EXCEPTION', { orderId, error: err.message });
+    // Shield internal errors: do NOT send err.message to client
+    return json(500, { error: 'حدث خطأ أثناء التحقق من الدفع. يرجى المحاولة لاحقاً.' });
   } finally {
     client.release();
   }

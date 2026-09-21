@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS plans(
   duration_days INT NOT NULL,
   max_attempts INT DEFAULT 0,
   ai_enabled BOOLEAN DEFAULT TRUE,
+  is_featured BOOLEAN DEFAULT FALSE,
   active BOOLEAN DEFAULT TRUE
 );
 
@@ -235,6 +236,7 @@ CREATE TABLE IF NOT EXISTS orders(
   paid_at TIMESTAMP NULL,
   expires_at TIMESTAMP NULL,
   email_sent BOOLEAN DEFAULT FALSE,
+  ip_address VARCHAR(45),
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );
@@ -242,6 +244,18 @@ CREATE INDEX IF NOT EXISTS idx_orders_ref ON orders(payment_ref);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_orders_email ON orders(customer_email);
 CREATE INDEX IF NOT EXISTS idx_orders_created ON orders(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_orders_ip ON orders(ip_address);
+
+CREATE TABLE IF NOT EXISTS payment_attempts (
+  id BIGSERIAL PRIMARY KEY,
+  ip_address VARCHAR(45) NOT NULL,
+  email VARCHAR(190) NOT NULL,
+  plan_id INT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_payment_attempts_ip_time ON payment_attempts(ip_address, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_payment_attempts_email_time ON payment_attempts(email, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_payment_attempts_dup ON payment_attempts(email, plan_id, created_at DESC);
 
 CREATE TABLE IF NOT EXISTS admin_notifications(
   id BIGSERIAL PRIMARY KEY,

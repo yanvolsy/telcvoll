@@ -1,13 +1,15 @@
 -- TELC Voll: OneClick DZ Payments, Resend Emails, Notifications & Campaigns Migration
 -- Non-destructive: safe to execute multiple times on Postgres/Supabase
 
--- 1. Add price_dzd to plans if not exists
+-- 1. Add price_dzd and is_featured to plans if not exists
 ALTER TABLE plans ADD COLUMN IF NOT EXISTS price_dzd NUMERIC(10,2) DEFAULT 0;
+ALTER TABLE plans ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT FALSE;
 
 -- Update default prices for existing plans (ensure >= 500 DZD for paid plans)
 UPDATE plans SET price_dzd = 1500 WHERE plan_key = '15d' AND (price_dzd IS NULL OR price_dzd = 0);
 UPDATE plans SET price_dzd = 2500 WHERE plan_key = '30d' AND (price_dzd IS NULL OR price_dzd = 0);
 UPDATE plans SET price_dzd = 6000 WHERE plan_key = '90d' AND (price_dzd IS NULL OR price_dzd = 0);
+UPDATE plans SET is_featured = TRUE WHERE plan_key = '15d' AND NOT EXISTS (SELECT 1 FROM plans WHERE is_featured = TRUE);
 
 -- 2. Orders and Payments table
 CREATE TABLE IF NOT EXISTS orders(

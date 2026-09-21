@@ -2,6 +2,13 @@ const crypto = require('crypto');
 const { db } = require('./_lib/db');
 const { json } = require('./_lib/auth');
 const { requireSameOrigin, requestSize } = require('./_lib/request');
+const {
+  getClientIp,
+  normalizeEmail,
+  checkPaymentRateLimit,
+  recordPaymentAttempt,
+  safeLog
+} = require('./_lib/security');
 
 exports.handler = async (event) => {
   if (!requireSameOrigin(event)) return json(403, { error: 'Cross-origin request blocked.' });
@@ -12,50 +19,82 @@ exports.handler = async (event) => {
   try { body = JSON.parse(event.body || '{}'); }
   catch { return json(400, { error: 'طلب غير صالح.' }); }
 
+  const clientIp = getClientIp(event);
   const planId = parseInt(body.plan_id, 10);
   const name = String(body.name || '').trim();
-  const email = String(body.email || '').trim().toLowerCase();
-  const phone = String(body.phone || '').trim();
-  const termsAccepted = !!body.terms;
+  const email = normalizeEmail(body.email);
+  const rawPhone = String(body.phone || '').trim();
+  const cleanPhone = rawPhone.replace(/[\s\-\(\)]/g, '');
+  const termsAccepted = body.terms === true || body.terms === 'true' || body.terms === 1;
 
-  if (!planId) return json(422, { error: 'يرجى اختيار الخطة المطلوبة.' });
-  if (!name || name.length < 2) return json(422, { error: 'يرجى إدخال الاسم الكامل.' });
-  if (!email || !email.includes('@') || !email.includes('.')) return json(422, { error: 'يرجى إدخال بريد إلكتروني صحيح.' });
-  if (!phone || phone.length < 6) return json(422, { error: 'يرجى إدخال رقم هاتف صحيح.' });
-  if (!termsAccepted) return json(422, { error: 'يجب الموافقة على شروط الاستخدام للمتابعة.' });
+  // Strict server-side validation against direct API calls & malformed payloads
+  if (!planId || planId <= 0) return json(422, { error: 'يرجى اختيار الخطة المطلوبة.' });
+  if (!name || name.length < 2 || name.length > 100) return json(422, { error: 'يرجى إدخال الاسم الكامل بشكل صحيح.' });
+  
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email || email.length > 190 || !emailRegex.test(email)) {
+    return json(422, { error: 'يرجى إدخال بريد إلكتروني صحيح.' });
+  }
+
+  if (!cleanPhone || cleanPhone.length < 6 || cleanPhone.length > 25 || !/^\+?[0-9]+$/.test(cleanPhone)) {
+    return json(422, { error: 'يرجى إدخال رقم هاتف صحيح.' });
+  }
+
+  if (!termsAccepted) {
+    return json(422, { error: 'يجب الموافقة على شروط الاستخدام للمتابعة.' });
+  }
 
   const pool = db();
+
+  // 1. Enforce Rate Limiting & Fast Duplicate Prevention (IP & Email limits)
+  const rateLimit = await checkPaymentRateLimit(pool, { ip: clientIp, email, planId });
+  if (!rateLimit.allowed) {
+    return json(rateLimit.status || 429, { error: rateLimit.message });
+  }
+
+  // 2. Fetch Plan strictly from Database (NEVER trust frontend amount or plan data)
   const planRes = await pool.query('SELECT * FROM plans WHERE id=$1 AND active=TRUE', [planId]);
   const plan = planRes.rows[0];
   if (!plan) return json(404, { error: 'الخطة المحددة غير موجودة أو معطلة.' });
 
-  const isFree = plan.plan_key === 'trial' || plan.duration_days <= 2 || (plan.name && (plan.name.toLowerCase().includes('trial') || plan.name.includes('مجاني') || plan.name.toLowerCase().includes('free'))) || (plan.price_dzd !== null && Number(plan.price_dzd) === 0);
-  if (isFree) {
-    return json(400, { error: 'هذه الخطة تجريبية مجانية. يرجى مراسلة الإدارة عبر صفحة "تواصل معنا" للحصول على رمز الوصول المجاني دون الحاجة للدفع.' });
+  if (!plan.duration_days || plan.duration_days <= 0) {
+    return json(422, { error: 'مدة الخطة غير صالحة. يرجى التواصل مع الإدارة.' });
   }
 
-  // Server-side price resolution — NEVER trust price from browser
+  const isFree = plan.plan_key === 'trial' || plan.duration_days <= 2 ||
+    (plan.name && (plan.name.toLowerCase().includes('trial') || plan.name.includes('مجاني') || plan.name.toLowerCase().includes('free'))) ||
+    (plan.price_dzd !== null && Number(plan.price_dzd) === 0);
+
+  if (isFree) {
+    return json(400, {
+      error: 'هذه الخطة تجريبية مجانية. يرجى مراسلة الإدارة عبر صفحة "تواصل معنا" للحصول على رمز الوصول المجاني دون الحاجة للدفع.'
+    });
+  }
+
+  // Server-side price resolution — NEVER trust price from browser. body.amount is strictly ignored!
   let amount = Number(plan.price_dzd);
   if (!amount || isNaN(amount) || amount <= 0) {
-    // Fallback default pricing based on duration if not configured
     if (plan.duration_days <= 15) amount = 1500;
     else if (plan.duration_days <= 30) amount = 2500;
     else if (plan.duration_days <= 90) amount = 6000;
     else amount = 10000;
   }
 
-  // Enforce minimum payment amount (500 DZD)
-  if (amount < 500) {
+  // Enforce payment amount boundaries (500 DZD <= amount <= 500,000 DZD)
+  if (amount < 500 || amount > 500000) {
     return json(422, {
-      error: 'الحد الأدنى لمبلغ الدفع الإلكتروني هو 500 دج. يرجى التحقق من إعدادات الخطة.'
+      error: 'مبلغ الدفع يجب أن يكون بين 500 و 500,000 دج. يرجى التحقق من إعدادات الخطة.'
     });
   }
 
   const apiKey = process.env.ONECLICK_API_KEY;
   if (!apiKey) {
-    console.error('Payment API key is not set in environment.');
+    safeLog('CONFIG_ERROR', { error: 'ONECLICK_API_KEY not configured' });
     return json(500, { error: 'بوابة الدفع غير مهيأة على الخادم حالياً. يرجى التواصل مع الإدارة.' });
   }
+
+  // Record payment attempt (advances IP & Email counters)
+  await recordPaymentAttempt(pool, { ip: clientIp, email, planId });
 
   const rawBaseUrl = process.env.ONECLICK_API_BASE_URL || 'https://api.oneclickdz.com';
   const baseUrl = rawBaseUrl.replace(/\/+$/, '');
@@ -65,15 +104,15 @@ exports.handler = async (event) => {
 
   const client = await pool.connect();
   try {
-    // 1. Insert order record in database with PENDING status
+    // 3. Insert order record with PENDING status and client IP for audit trails
     await client.query(
-      `INSERT INTO orders(order_id, plan_id, plan_name, customer_name, customer_email, customer_phone, amount, currency, status)
-       VALUES($1, $2, $3, $4, $5, $6, $7, 'DZD', 'PENDING')`,
-      [orderId, plan.id, plan.name, name, email, phone, Math.round(amount)]
+      `INSERT INTO orders(order_id, plan_id, plan_name, customer_name, customer_email, customer_phone, amount, currency, status, ip_address)
+       VALUES($1, $2, $3, $4, $5, $6, $7, 'DZD', 'PENDING', $8)`,
+      [orderId, plan.id, plan.name, name, email, cleanPhone, Math.round(amount), clientIp]
     );
 
-    // 2. Prepare payload for gateway createLink
-    const returnUrl = `${siteUrl}/payment-success?order_id=${encodeURIComponent(orderId)}`;
+    // 4. Prepare payload for gateway createLink
+    const returnUrl = `${siteUrl}/payment-success`;
 
     const gatewayPayload = {
       productInfo: {
@@ -86,36 +125,34 @@ exports.handler = async (event) => {
       redirectUrl: returnUrl
     };
 
+    safeLog('GATEWAY_REQUEST', { orderId, planId: plan.id, amount: Math.round(amount) });
+
     const gatewayRes = await fetch(`${baseUrl}/v3/ocpay/createLink`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Access-Token': apiKey.trim()
+        'X-Access-Token': apiKey.trim(),
+        'Authorization': `Bearer ${apiKey.trim()}`
       },
       body: JSON.stringify(gatewayPayload)
     });
 
     const gatewayData = await gatewayRes.json().catch(() => ({}));
-    const gatewayResult = gatewayData?.data || {};
-    const paymentUrl = gatewayResult.paymentUrl;
-    const paymentRef = gatewayResult.paymentRef;
+    const paymentUrl = gatewayData.data?.paymentUrl || gatewayData.paymentUrl || gatewayData.url;
+    const paymentRef = gatewayData.data?.paymentRef || gatewayData.paymentRef || gatewayData.ref || gatewayData.id;
 
-    if (!gatewayRes.ok || !gatewayData?.success || !paymentUrl || !paymentRef) {
-      const gatewayError = gatewayData?.error || {};
-      const errMsg = gatewayError?.message || gatewayData?.message || `Payment gateway responded with status ${gatewayRes.status}`;
-      const requestId = gatewayData?.meta?.requestId || null;
-      console.error('[PAYMENT GATEWAY CREATE_LINK ERROR]', {
+    if (!gatewayRes.ok || !paymentUrl) {
+      safeLog('GATEWAY_CREATE_LINK_FAILED', {
+        orderId,
         httpStatus: gatewayRes.status,
-        code: gatewayError?.code || null,
-        message: errMsg,
-        details: gatewayError?.details || null,
-        requestId
+        reason: gatewayData.message || gatewayData.error || 'Gateway returned empty paymentUrl'
       });
       await client.query('UPDATE orders SET status=$1, updated_at=NOW() WHERE order_id=$2', ['FAILED', orderId]);
+      // Return safe message without leaking gateway internals or secrets
       return json(502, { error: 'تعذر إنشاء رابط الدفع الإلكتروني حالياً. يرجى المحاولة لاحقاً.' });
     }
 
-    // 3. Store paymentRef & paymentUrl in the order
+    // 5. Store paymentRef & paymentUrl in the order
     await client.query(
       `UPDATE orders
        SET payment_ref=$1, payment_url=$2, updated_at=NOW()
@@ -123,15 +160,26 @@ exports.handler = async (event) => {
       [paymentRef, paymentUrl, orderId]
     );
 
+    safeLog('ORDER_CREATED_SUCCESS', { orderId, paymentRef, planId: plan.id });
+
+    let finalPaymentUrl = paymentUrl;
+    try {
+      const u = new URL(paymentUrl);
+      if (name) { u.searchParams.set('name', name); u.searchParams.set('client_name', name); }
+      if (cleanPhone) { u.searchParams.set('phone', cleanPhone); }
+      finalPaymentUrl = u.toString();
+    } catch (_) {}
+
     return json(200, {
       ok: true,
       order_id: orderId,
       payment_ref: paymentRef,
-      payment_url: paymentUrl
+      payment_url: finalPaymentUrl
     });
   } catch (err) {
-    console.error('[CHECKOUT EXCEPTION]', err);
-    return json(500, { error: 'حدث خطأ أثناء معالجة الطلب: ' + err.message });
+    safeLog('CHECKOUT_EXCEPTION', { orderId, error: err.message });
+    // Shield internal errors: do NOT send err.message to client
+    return json(500, { error: 'حدث خطأ غير متوقع أثناء معالجة عملية الدفع. يرجى المحاولة لاحقاً.' });
   } finally {
     client.release();
   }

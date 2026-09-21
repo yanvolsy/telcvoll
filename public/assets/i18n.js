@@ -267,8 +267,13 @@ function initHeaderActions() {
   const nav = document.querySelector('.top nav');
   if (!nav || document.getElementById('langSwitchBtn')) return;
 
-  const wrap = document.createElement('span');
-  wrap.className = 'header-actions';
+  const top = nav.closest('.top');
+  let wrap = top?.querySelector('.header-actions');
+  const isNew = !wrap;
+  if (!wrap) {
+    wrap = document.createElement('span');
+    wrap.className = 'header-actions';
+  }
 
   const langBtn = document.createElement('button');
   langBtn.id = 'langSwitchBtn';
@@ -285,8 +290,9 @@ function initHeaderActions() {
   themeBtn.onclick = () => setTheme(getTheme() === 'dark' ? 'light' : 'dark');
   wrap.appendChild(themeBtn);
 
-  const top = nav.closest('.top');
-  if (top?.classList.contains('exercise-topbar')) { nav.appendChild(wrap); } else { (top || nav).appendChild(wrap); }
+  if (isNew) {
+    if (top?.classList.contains('exercise-topbar')) { nav.appendChild(wrap); } else { (top || nav).appendChild(wrap); }
+  }
   updateLangBtnLabel();
   applyTheme();
 }

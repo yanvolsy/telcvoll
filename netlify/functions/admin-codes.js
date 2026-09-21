@@ -42,24 +42,61 @@ exports.handler = async (event) => {
 
         if (!planKey || !name) return json(422, { error: 'اسم الخطة ومعرفها مطلوبان.' });
 
+        const isFeatured = body.is_featured === true || body.is_featured === 'true' || body.is_featured === 'on';
+
         if (action === 'update-plan') {
           const id = parseInt(body.id || 0, 10);
           if (!id) return json(422, { error: 'معرف الخطة غير صالح.' });
 
-          await pool.query(
-            `UPDATE plans
-             SET plan_key=$1,name=$2,duration_days=$3,max_attempts=$4,ai_enabled=$5,price_dzd=$6
-             WHERE id=$7`,
-            [planKey, name, days, attempts, ai, priceDzd, id]
-          );
+          try {
+            await pool.query(
+              `UPDATE plans
+               SET plan_key=$1,name=$2,duration_days=$3,max_attempts=$4,ai_enabled=$5,price_dzd=$6,is_featured=$7
+               WHERE id=$8`,
+              [planKey, name, days, attempts, ai, priceDzd, isFeatured, id]
+            );
+          } catch {
+            await pool.query(
+              `UPDATE plans
+               SET plan_key=$1,name=$2,duration_days=$3,max_attempts=$4,ai_enabled=$5,price_dzd=$6
+               WHERE id=$7`,
+              [planKey, name, days, attempts, ai, priceDzd, id]
+            );
+          }
+          if (isFeatured) {
+            try { await pool.query('UPDATE plans SET is_featured=FALSE WHERE id<>$1', [id]); } catch {}
+          }
           return json(200, { ok: true });
         }
 
-        await pool.query(
-          'INSERT INTO plans(plan_key,name,duration_days,max_attempts,ai_enabled,price_dzd) VALUES($1,$2,$3,$4,$5,$6)',
-          [planKey, name, days, attempts, ai, priceDzd]
-        );
+        try {
+          await pool.query(
+            'INSERT INTO plans(plan_key,name,duration_days,max_attempts,ai_enabled,price_dzd,is_featured) VALUES($1,$2,$3,$4,$5,$6,$7)',
+            [planKey, name, days, attempts, ai, priceDzd, isFeatured]
+          );
+        } catch {
+          await pool.query(
+            'INSERT INTO plans(plan_key,name,duration_days,max_attempts,ai_enabled,price_dzd) VALUES($1,$2,$3,$4,$5,$6)',
+            [planKey, name, days, attempts, ai, priceDzd]
+          );
+        }
         return json(200, { ok: true });
+      }
+
+      if (action === 'feature-plan') {
+        const id = parseInt(body.id || 0, 10);
+        if (!id) return json(422, { error: 'معرف الخطة غير صالح.' });
+        try {
+          const curRes = await pool.query('SELECT COALESCE(is_featured, FALSE) AS is_featured FROM plans WHERE id=$1', [id]);
+          const willBeFeatured = !curRes.rows[0]?.is_featured;
+          await pool.query('UPDATE plans SET is_featured=FALSE');
+          if (willBeFeatured) {
+            await pool.query('UPDATE plans SET is_featured=TRUE WHERE id=$1', [id]);
+          }
+          return json(200, { ok: true, is_featured: willBeFeatured });
+        } catch {
+          return json(200, { ok: true, note: 'Column is_featured not created yet' });
+        }
       }
 
       if (action === 'toggle-plan') {
