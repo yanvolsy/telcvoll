@@ -73,7 +73,7 @@ exports.handler = async (event) => {
     );
 
     // 2. Prepare payload for gateway createLink
-    const returnUrl = `${siteUrl}/payment-success`;
+    const returnUrl = `${siteUrl}/payment-success?order_id=${encodeURIComponent(orderId)}`;
 
     const gatewayPayload = {
       productInfo: {
@@ -90,23 +90,30 @@ exports.handler = async (event) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Access-Token': apiKey.trim(),
-        'Authorization': `Bearer ${apiKey.trim()}`
+        'X-Access-Token': apiKey.trim()
       },
       body: JSON.stringify(gatewayPayload)
     });
 
     const gatewayData = await gatewayRes.json().catch(() => ({}));
+    const gatewayResult = gatewayData?.data || {};
+    const paymentUrl = gatewayResult.paymentUrl;
+    const paymentRef = gatewayResult.paymentRef;
 
-    if (!gatewayRes.ok || (!gatewayData.paymentUrl && !gatewayData.url)) {
-      const errMsg = gatewayData.message || gatewayData.error || `Payment gateway responded with status ${gatewayRes.status}`;
-      console.error('[PAYMENT GATEWAY CREATE_LINK ERROR]', errMsg, gatewayData);
+    if (!gatewayRes.ok || !gatewayData?.success || !paymentUrl || !paymentRef) {
+      const gatewayError = gatewayData?.error || {};
+      const errMsg = gatewayError?.message || gatewayData?.message || `Payment gateway responded with status ${gatewayRes.status}`;
+      const requestId = gatewayData?.meta?.requestId || null;
+      console.error('[PAYMENT GATEWAY CREATE_LINK ERROR]', {
+        httpStatus: gatewayRes.status,
+        code: gatewayError?.code || null,
+        message: errMsg,
+        details: gatewayError?.details || null,
+        requestId
+      });
       await client.query('UPDATE orders SET status=$1, updated_at=NOW() WHERE order_id=$2', ['FAILED', orderId]);
-      return json(502, { error: 'تعذر إنشاء رابط الدفع الإلكتروني حالياً. يرجى المحاولة لاحقاً.', details: errMsg });
+      return json(502, { error: 'تعذر إنشاء رابط الدفع الإلكتروني حالياً. يرجى المحاولة لاحقاً.' });
     }
-
-    const paymentUrl = gatewayData.paymentUrl || gatewayData.url;
-    const paymentRef = gatewayData.paymentRef || gatewayData.ref || gatewayData.id;
 
     // 3. Store paymentRef & paymentUrl in the order
     await client.query(

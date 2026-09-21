@@ -84,19 +84,23 @@ exports.handler = async (event) => {
     const checkRes = await fetch(`${baseUrl}/v3/ocpay/checkPayment/${encodeURIComponent(refToCheck)}`, {
       method: 'GET',
       headers: {
-        'X-Access-Token': apiKey.trim(),
-        'Authorization': `Bearer ${apiKey.trim()}`
+        'X-Access-Token': apiKey.trim()
       }
     });
 
     const checkData = await checkRes.json().catch(() => ({}));
     if (!checkRes.ok) {
-      console.error('[PAYMENT CHECK ERROR]', checkRes.status, checkData);
-      return json(502, { error: 'تعذر التحقق من حالة الدفع الإلكتروني حالياً.', details: checkData });
+      console.error('[PAYMENT CHECK ERROR]', {
+        httpStatus: checkRes.status,
+        code: checkData?.error?.code || null,
+        message: checkData?.error?.message || checkData?.message || null,
+        requestId: checkData?.meta?.requestId || null
+      });
+      return json(502, { error: 'تعذر التحقق من حالة الدفع الإلكتروني حالياً.' });
     }
 
-    // Extract status string from response (handles { status: 'CONFIRMED' } or { data: { status: 'CONFIRMED' } })
-    const rawStatus = checkData.status || checkData.data?.status || checkData.paymentStatus || '';
+    // Official OneClick v3 response shape: { success, data: { status, message, paymentRef }, meta }
+    const rawStatus = checkData?.data?.status || checkData?.status || checkData?.paymentStatus || '';
     const status = String(rawStatus).trim().toUpperCase();
 
     if (status === 'CONFIRMED') {
