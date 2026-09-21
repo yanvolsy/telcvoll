@@ -29,6 +29,11 @@ exports.handler = async (event) => {
   const plan = planRes.rows[0];
   if (!plan) return json(404, { error: 'الخطة المحددة غير موجودة أو معطلة.' });
 
+  const isFree = plan.plan_key === 'trial' || plan.duration_days <= 2 || (plan.name && (plan.name.toLowerCase().includes('trial') || plan.name.includes('مجاني') || plan.name.toLowerCase().includes('free'))) || (plan.price_dzd !== null && Number(plan.price_dzd) === 0);
+  if (isFree) {
+    return json(400, { error: 'هذه الخطة تجريبية مجانية. يرجى مراسلة الإدارة عبر صفحة "تواصل معنا" للحصول على رمز الوصول المجاني دون الحاجة للدفع.' });
+  }
+
   // Server-side price resolution — NEVER trust price from browser
   let amount = Number(plan.price_dzd);
   if (!amount || isNaN(amount) || amount <= 0) {
@@ -39,16 +44,16 @@ exports.handler = async (event) => {
     else amount = 10000;
   }
 
-  // Enforce OneClick DZ minimum amount (500 DZD)
+  // Enforce minimum payment amount (500 DZD)
   if (amount < 500) {
     return json(422, {
-      error: 'الحد الأدنى لمبلغ الدفع عبر OneClick DZ هو 500 دج. يرجى التحقق من إعدادات الخطة.'
+      error: 'الحد الأدنى لمبلغ الدفع الإلكتروني هو 500 دج. يرجى التحقق من إعدادات الخطة.'
     });
   }
 
   const apiKey = process.env.ONECLICK_API_KEY;
   if (!apiKey) {
-    console.error('ONECLICK_API_KEY is not set in environment.');
+    console.error('Payment API key is not set in environment.');
     return json(500, { error: 'بوابة الدفع غير مهيأة على الخادم حالياً. يرجى التواصل مع الإدارة.' });
   }
 
@@ -67,10 +72,10 @@ exports.handler = async (event) => {
       [orderId, plan.id, plan.name, name, email, phone, Math.round(amount)]
     );
 
-    // 2. Prepare payload for OneClick DZ createLink
+    // 2. Prepare payload for gateway createLink
     const returnUrl = `${siteUrl}/payment-success`;
 
-    const oneClickPayload = {
+    const gatewayPayload = {
       productInfo: {
         title: `TELC Voll — ${plan.name}`,
         amount: Math.round(amount),
@@ -81,27 +86,27 @@ exports.handler = async (event) => {
       redirectUrl: returnUrl
     };
 
-    const oneClickRes = await fetch(`${baseUrl}/v3/ocpay/createLink`, {
+    const gatewayRes = await fetch(`${baseUrl}/v3/ocpay/createLink`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-Access-Token': apiKey.trim(),
         'Authorization': `Bearer ${apiKey.trim()}`
       },
-      body: JSON.stringify(oneClickPayload)
+      body: JSON.stringify(gatewayPayload)
     });
 
-    const oneClickData = await oneClickRes.json().catch(() => ({}));
+    const gatewayData = await gatewayRes.json().catch(() => ({}));
 
-    if (!oneClickRes.ok || (!oneClickData.paymentUrl && !oneClickData.url)) {
-      const errMsg = oneClickData.message || oneClickData.error || `OneClick API responded with status ${oneClickRes.status}`;
-      console.error('[ONECLICK CREATE_LINK ERROR]', errMsg, oneClickData);
+    if (!gatewayRes.ok || (!gatewayData.paymentUrl && !gatewayData.url)) {
+      const errMsg = gatewayData.message || gatewayData.error || `Payment gateway responded with status ${gatewayRes.status}`;
+      console.error('[PAYMENT GATEWAY CREATE_LINK ERROR]', errMsg, gatewayData);
       await client.query('UPDATE orders SET status=$1, updated_at=NOW() WHERE order_id=$2', ['FAILED', orderId]);
-      return json(502, { error: 'تعذر إنشاء رابط الدفع من بوابة OneClick DZ. يرجى المحاولة لاحقاً.', details: errMsg });
+      return json(502, { error: 'تعذر إنشاء رابط الدفع الإلكتروني حالياً. يرجى المحاولة لاحقاً.', details: errMsg });
     }
 
-    const paymentUrl = oneClickData.paymentUrl || oneClickData.url;
-    const paymentRef = oneClickData.paymentRef || oneClickData.ref || oneClickData.id;
+    const paymentUrl = gatewayData.paymentUrl || gatewayData.url;
+    const paymentRef = gatewayData.paymentRef || gatewayData.ref || gatewayData.id;
 
     // 3. Store paymentRef & paymentUrl in the order
     await client.query(

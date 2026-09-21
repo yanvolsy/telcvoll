@@ -67,15 +67,15 @@ exports.handler = async (event) => {
       });
     }
 
-    // 3. OneClick DZ status check
+    // 3. Payment gateway status check
     const apiKey = process.env.ONECLICK_API_KEY;
     if (!apiKey) {
-      return json(500, { error: 'مفتاح OneClick API غير مهيأ على الخادم.' });
+      return json(500, { error: 'بوابة الدفع الإلكتروني غير مهيأة على الخادم.' });
     }
 
     const refToCheck = paymentRef || order.payment_ref;
     if (!refToCheck) {
-      return json(400, { error: 'مرجع OneClick DZ غير مسجل لهذا الطلب.' });
+      return json(400, { error: 'مرجع عملية الدفع غير مسجل لهذا الطلب.' });
     }
 
     const rawBaseUrl = process.env.ONECLICK_API_BASE_URL || 'https://api.oneclickdz.com';
@@ -91,8 +91,8 @@ exports.handler = async (event) => {
 
     const checkData = await checkRes.json().catch(() => ({}));
     if (!checkRes.ok) {
-      console.error('[ONECLICK CHECK ERROR]', checkRes.status, checkData);
-      return json(502, { error: 'تعذر التحقق من حالة الدفع مع OneClick DZ حالياً.', details: checkData });
+      console.error('[PAYMENT CHECK ERROR]', checkRes.status, checkData);
+      return json(502, { error: 'تعذر التحقق من حالة الدفع الإلكتروني حالياً.', details: checkData });
     }
 
     // Extract status string from response (handles { status: 'CONFIRMED' } or { data: { status: 'CONFIRMED' } })

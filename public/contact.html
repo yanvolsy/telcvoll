@@ -51,6 +51,14 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
     <p>للاستفسارات، المساعدة، الخطط أو أي مشكلة في المنصة، اختر وسيلة التواصل المناسبة لك وسنتابع معك مباشرة.</p>
   </section>
 
+  <div id="trialBanner" style="display:none;background:#fff8f2;border:2px dashed #f47b20;border-radius:20px;padding:20px 24px;margin:24px auto 0;max-width:650px;text-align:center;">
+    <div style="font-size:32px;margin-bottom:6px;">🎁</div>
+    <h3 style="margin:0 0 8px;font-size:20px;color:#10231e;">طلب كود الخطة المجانية التجريبية (Trial)</h3>
+    <p style="margin:0;color:#52615c;font-size:14px;line-height:1.7;">
+      تواصل مع المشرف عبر أي من الوسائل أدناه واطلب <strong>"كود تجريبي مجاني"</strong> ليتم تزويدك برمز الدخول فوراً وبدون أي دفع.
+    </p>
+  </div>
+
   <section class="contact-grid-new" aria-label="وسائل التواصل">
     <a class="contact-card-new" href="https://www.facebook.com/TELCVoll" target="_blank" rel="noopener noreferrer">
       <span class="contact-card-icon" aria-hidden="true">
@@ -89,5 +97,18 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <footer>TELC Voll — منصة تدريب B1 · B2 · C1</footer>
 <script src="/assets/i18n.js"></script>
 <script src="/assets/app.js"></script>
+<script>
+if (qs('plan')) {
+  const tb = document.getElementById('trialBanner');
+  if (tb) {
+    tb.style.display = 'block';
+    tb.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  const mailLink = document.querySelector('a[href^="mailto:"]');
+  if (mailLink) {
+    mailLink.href = 'mailto:telcvoll@gmail.com?subject=' + encodeURIComponent('طلب رمز الخطة التجريبية المجانية - TELC Voll');
+  }
+}
+</script>
 </body>
 </html>

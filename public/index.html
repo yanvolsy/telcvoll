@@ -118,7 +118,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 
         <div style="background:#f5f8f7;border-radius:12px;padding:12px;margin:16px 0;font-size:12px;color:#52685f;display:flex;align-items:center;gap:10px;">
           <span style="font-size:20px;">💳</span>
-          <span>الدفع الإلكتروني الآمن بالدينار الجزائري عبر بوابة <strong>OneClick DZ Navio</strong> (البطاقة الذهبية / CIB).</span>
+          <span>الدفع الإلكتروني الآمن بالدينار الجزائري (البطاقة الذهبية / CIB).</span>
         </div>
 
         <label style="display:flex;align-items:center;gap:8px;font-size:12px;cursor:pointer;margin:14px 0 18px;color:#2f463d;font-weight:700;">
@@ -129,7 +129,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
         <div id="checkoutError" style="display:none;background:#fff0ee;color:#a33a2f;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:800;margin-bottom:14px;"></div>
 
         <button type="submit" id="checkoutSubmitBtn" class="btn" style="width:100%;padding:14px;font-size:16px;display:flex;justify-content:center;align-items:center;gap:8px;">
-          <span>متابعة الدفع عبر OneClick DZ</span>
+          <span>متابعة الدفع الإلكتروني</span>
           <span>←</span>
         </button>
       </form>
@@ -198,7 +198,21 @@ const checkoutForm = document.getElementById('checkoutForm');
 const checkoutError = document.getElementById('checkoutError');
 const checkoutSubmitBtn = document.getElementById('checkoutSubmitBtn');
 
+function isPlanFree(p) {
+  if (!p) return false;
+  if (p.plan_key === 'trial') return true;
+  if (p.duration_days <= 2) return true;
+  const nameLower = (p.name || '').toLowerCase();
+  if (nameLower.includes('trial') || nameLower.includes('مجاني') || nameLower.includes('تجريب') || nameLower.includes('free') || nameLower.includes('gratuit')) return true;
+  if (p.price_dzd !== null && p.price_dzd !== undefined && Number(p.price_dzd) === 0) return true;
+  return false;
+}
+
 function openCheckout(plan) {
+  if (isPlanFree(plan)) {
+    location.href = '/contact.html?plan=' + encodeURIComponent(plan.plan_key || 'trial');
+    return;
+  }
   checkoutError.style.display = 'none';
   checkoutError.textContent = '';
   document.getElementById('checkoutPlanId').value = plan.id;
@@ -235,7 +249,7 @@ checkoutForm.onsubmit = async (e) => {
 
   const oldBtnHtml = checkoutSubmitBtn.innerHTML;
   checkoutSubmitBtn.disabled = true;
-  checkoutSubmitBtn.innerHTML = '<span>جارٍ تحضير بوابة OneClick DZ…</span>';
+  checkoutSubmitBtn.innerHTML = '<span>جارٍ تحضير بوابة الدفع الآمن…</span>';
 
   try {
     const res = await api('payment-checkout', {
@@ -261,17 +275,24 @@ checkoutForm.onsubmit = async (e) => {
     const { plans } = await api('public-plans');
     publicPlansList = plans || [];
     plansGrid.innerHTML = plans.length ? plans.map((p,i) => {
-      const price = p.price_dzd || (p.duration_days <= 15 ? 1500 : p.duration_days <= 30 ? 2500 : 6000);
+      const isFree = isPlanFree(p);
+      const price = isFree ? 0 : (p.price_dzd || (p.duration_days <= 15 ? 1500 : p.duration_days <= 30 ? 2500 : 6000));
       return `
       <article class="landing-plan ${i===1 ? 'featured':''}">
         ${i===1 ? `<span class="plan-featured-badge">${t('plans_featured')}</span>` : ''}
         <div class="landing-plan-top"><span class="landing-plan-number">0${i+1}</span><span>${esc(p.duration_days)} ${t('plans_day')}</span></div>
         <h3>${esc(p.name)}</h3>
-        <div class="plan-price">${Number(price).toLocaleString('fr-DZ')} <small>دج / DZD</small></div>
+        ${isFree ?
+          `<div class="plan-price" style="color:#1f9d55;">مجاناً <small style="color:#1f9d55;">/ Gratuit</small></div>` :
+          `<div class="plan-price">${Number(price).toLocaleString('fr-DZ')} <small>دج / DZD</small></div>`
+        }
         <p style="font-weight:bold;color:var(--green);margin:6px 0;">✓ تفعيل B1 + B2 + C1 كاملة</p>
         <p>${p.max_attempts ? t('plans_attempts',{n:esc(p.max_attempts)}) : t('plans_attempts_unlimited')}</p>
         <p>${p.ai_enabled ? t('plans_ai_included') : t('plans_basic')}</p>
-        <button type="button" class="btn ${i===1?'':'light'}" style="width:100%;margin-top:12px;font-weight:900;" onclick="openCheckout(publicPlansList[${i}])">Acheter · شراء الخطة ←</button>
+        ${isFree ?
+          `<a href="/contact.html?plan=trial" class="btn light" style="display:block;width:100%;box-sizing:border-box;margin-top:12px;font-weight:900;text-decoration:none;text-align:center;">طلب الرمز المجاني · تواصل معنا ←</a>` :
+          `<button type="button" class="btn ${i===1?'':'light'}" style="width:100%;margin-top:12px;font-weight:900;" onclick="openCheckout(publicPlansList[${i}])">Acheter · شراء الخطة ←</button>`
+        }
       </article>`;
     }).join('') : `<div class="card"><h3>${t('plans_none_title')}</h3><p class="muted">${t('plans_none_desc')}</p></div>`;
   } catch(e) { plansGrid.innerHTML=`<div class="card"><h3>${t('plans_error_title')}</h3><p class="muted">${t('plans_none_desc')}</p></div>`; }

@@ -86,7 +86,7 @@
     <section class="orders-head">
       <div>
         <span class="tag">الإدارة المالية</span>
-        <h1>طلبات الدفع (OneClick DZ)</h1>
+        <h1>طلبات الدفع الإلكتروني</h1>
         <p class="muted">متابعة كافة المعاملات المالية، حالة الدفع بالدينار الجزائري، وتتبع تسليم أكواد الاشتراك عبر البريد الإلكتروني.</p>
       </div>
       <div>
@@ -140,7 +140,7 @@
               <th>رقم الطلب</th>
               <th>بيانات العميل</th>
               <th>الخطة والمبلغ</th>
-              <th>مرجع OneClick DZ</th>
+              <th>مرجع عملية الدفع</th>
               <th>الحالة</th>
               <th>كود الاشتراك</th>
               <th>البريد</th>
@@ -157,7 +157,7 @@
   </main>
 
   <div class="toast" id="toast"></div>
-  <footer class="admin-footer">TELC Voll — لوحة إدارة المعاملات المالية · OneClick DZ</footer>
+  <footer class="admin-footer">TELC Voll — لوحة إدارة المعاملات المالية</footer>
 
   <script src="/assets/i18n.js"></script>
   <script src="/assets/app.js"></script>
@@ -240,7 +240,7 @@
               <div style="font-family:ui-monospace;font-size:11px;color:#52615c;">
                 ${esc(o.payment_ref || '—')}
               </div>
-              <span class="muted" style="font-size:10px;">OneClick DZ</span>
+              <span class="muted" style="font-size:10px;">دفع إلكتروني</span>
             </td>
             <td>${statusBadge(o.status)}</td>
             <td>
