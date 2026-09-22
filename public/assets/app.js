@@ -72,6 +72,11 @@ document.addEventListener('click', (e) => {
 
 
 
+function norm(v) {
+  return String(v || '').trim().toLowerCase().replace(/\s+/g, '');
+}
+window.norm = window.norm || norm;
+
 // Local exercise completion marker — cookie only, no database dependency.
 const TELC_COMPLETED_COOKIE = 'telc_completed_v1';
 const TELC_COMPLETED_MAX = 180;

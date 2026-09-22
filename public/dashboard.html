@@ -207,7 +207,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
   </span>
 </header>
 <main class="student-hub" id="content"><div class="student-loading">جارٍ التحميل…</div></main>
-<script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
+<script src="/assets/i18n.js?v=20260922"></script><script src="/assets/app.js?v=20260922"></script>
 <script>
 const SECTION_ORDER=['Lesen','Hören','Sprachbausteine','Schreiben','Sprechen'];
 const TEIL_ORDER={Lesen:['Teil 1','Teil 2','Teil 3'],Hören:['Teil 1','Teil 2','Teil 3'],Sprachbausteine:['Teil 1','Teil 2'],Schreiben:['Teil 1'],Sprechen:['Teil 1','Teil 2','Teil 3']};
@@ -218,6 +218,8 @@ let shuffleEnabled=true;
 let shuffleOrderKey='';
 let shuffleOrder=[];
 let selectedTeil='';
+let renderedTopicGroups=[];
+function norm(v){return String(v||'').trim().toLowerCase().replace(/\s+/g,'');}
 function calcRemainingDays(){const raw=state.subscription?.expires_at;if(!raw)return 0;const ms=new Date(raw).getTime()-Date.now();return Math.max(0,Math.ceil(ms/86400000));}
 const $=id=>document.getElementById(id);
 function lang(){return getLang();}
@@ -927,8 +929,6 @@ function parseVariationInfo(rawTitle, settings = {}) {
     label: text('الأساسي', 'Standard')
   };
 }
-
-let renderedTopicGroups = [];
 
 function groupTopicExercises(exercisesList) {
   const groupsMap = new Map();
