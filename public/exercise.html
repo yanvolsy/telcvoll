@@ -317,9 +317,10 @@ function renderTF(){
     ${resultPanel}`;
 
   // 2. Theme-aware audio player. Keep native audio hidden as the playback engine.
-  const audioBox = model.exercise.audio_url ? `
-    <div class="hoeren-audio-player-card" data-hoeren-player>
-      <audio class="hoeren-native-audio" preload="metadata" src="${esc(model.exercise.audio_url)}"></audio>
+  const hasAudio = Boolean(String(model.exercise.audio_url || '').trim());
+  const audioBox = `
+    <div class="hoeren-audio-player-card ${hasAudio ? '' : 'is-unavailable'}" data-hoeren-player>
+      ${hasAudio ? `<audio class="hoeren-native-audio" preload="metadata" src="${esc(model.exercise.audio_url)}"></audio>
       <button type="button" class="hoeren-audio-play" data-audio-play aria-label="${text('تشغيل الصوت','Audio abspielen')}" title="${text('تشغيل','Abspielen')}"><span class="hoeren-audio-play-icon" aria-hidden="true">▶</span></button>
       <div class="hoeren-audio-main">
         <div class="hoeren-audio-topline"><span class="hoeren-audio-label">${text('الملف الصوتي','Audiodatei')}</span><span class="hoeren-audio-time"><span data-audio-current>0:00</span><span> / </span><span data-audio-duration>0:00</span></span></div>
@@ -328,8 +329,8 @@ function renderTF(){
       <div class="hoeren-audio-actions">
         <button type="button" class="hoeren-audio-icon-btn" data-audio-mute aria-label="${text('كتم الصوت','Stummschalten')}" title="${text('كتم الصوت','Stummschalten')}"><span data-audio-volume-icon aria-hidden="true">🔊</span></button>
         <input class="hoeren-audio-volume" data-audio-volume type="range" min="0" max="1" value="1" step="0.05" aria-label="${text('مستوى الصوت','Lautstärke')}">
-      </div>
-    </div>` : '';
+      </div>` : `<div class="hoeren-audio-unavailable" role="status"><span class="hoeren-audio-unavailable-icon" aria-hidden="true">♪</span><div><strong>${text('الصوت غير متوفر','Audio nicht verfügbar')}</strong><small>${text('لا يوجد ملف صوتي لهذا التمرين حالياً.','Für diese Übung ist derzeit keine Audiodatei verfügbar.')}</small></div></div>`}
+    </div>`;
 
   // 3. Question Rows matching media_1790111329552.png
   const questionRows = orderedItems.map((it, idx) => {
@@ -387,8 +388,8 @@ function renderTF(){
         <div class="hoeren-th hoeren-th-f">${text('خطأ','FALSCH')}</div>
         <div class="hoeren-th hoeren-th-statement">${text('العبارة','AUSSAGE')}</div>
         <div class="hoeren-table-toolbar">
-          <button type="button" class="hoeren-toolbar-btn" id="hoerenShuffleBtn" title="${text('خلط ترتيب العبارات','Aussagen mischen')}" aria-label="${text('خلط ترتيب العبارات','Aussagen mischen')}">
-            <span class="hoeren-toolbar-icon">🔀</span>
+          <button type="button" class="side-icon hoeren-toolbar-btn" id="hoerenShuffleBtn" title="${text('خلط ترتيب العبارات','Aussagen mischen')}" aria-label="${text('خلط ترتيب العبارات','Aussagen mischen')}">
+            <span class="hoeren-toolbar-icon" aria-hidden="true">⤨</span>
           </button>
         </div>
       </div>
@@ -448,7 +449,12 @@ function bindHoerenAudioPlayer(){
   const volume=card.querySelector('[data-audio-volume]');
   const volumeIcon=card.querySelector('[data-audio-volume-icon]');
   if(!audio||!play)return;
-  const sync=()=>{
+  const markUnavailable=()=>{
+    card.classList.add('is-unavailable');
+    card.innerHTML = `<div class="hoeren-audio-unavailable" role="status"><span class="hoeren-audio-unavailable-icon" aria-hidden="true">♪</span><div><strong>${text('الصوت غير متوفر','Audio nicht verfügbar')}</strong><small>${text('تعذر تحميل الملف الصوتي لهذا التمرين.','Die Audiodatei für diese Übung konnte nicht geladen werden.')}</small></div></div>`;
+  };
+  audio.addEventListener('error', markUnavailable, {once:true});
+  const sync=()=>{ if(card.classList.contains('is-unavailable')) return;
     const dur=Number.isFinite(audio.duration)?audio.duration:0;
     current.textContent=formatAudioTime(audio.currentTime);
     durationEl.textContent=formatAudioTime(dur);

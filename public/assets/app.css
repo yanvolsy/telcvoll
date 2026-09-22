@@ -4165,3 +4165,174 @@ html[data-theme="dark"] .exercise-page:has(.hoeren-workspace-shell) .hoeren-audi
 .hoeren-audio-volume{width:78px}
 html[data-theme="dark"] .exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-player-card{box-shadow:0 10px 30px rgba(0,0,0,.20)}
 @media(max-width:700px){.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-player-card{padding:12px;gap:10px;border-radius:15px}.hoeren-audio-play{width:42px!important;height:42px!important}.hoeren-audio-actions{min-width:40px}.hoeren-audio-volume{display:none}}
+
+/* ========================================================
+   FINAL POLISH — HÖREN + VARIATIONS MODAL
+   Scoped changes only; existing functionality preserved.
+   ======================================================== */
+
+/* Hören shuffle: use the same compact control language as the rest of TELC Voll. */
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-table-toolbar .hoeren-toolbar-btn.side-icon {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  min-height: 36px !important;
+  border-radius: 10px !important;
+  border: 1.5px solid var(--line) !important;
+  background: var(--white) !important;
+  color: var(--ink) !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,.04) !important;
+  transform: none !important;
+}
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-table-toolbar .hoeren-toolbar-btn.side-icon:hover {
+  border-color: var(--exercise-accent, #ff7a00) !important;
+  color: var(--exercise-accent, #ff7a00) !important;
+  background: rgba(244,123,32,.12) !important;
+  transform: none !important;
+}
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-toolbar-icon {
+  font-size: 17px;
+  line-height: 1;
+  display: block;
+  transform: none;
+}
+
+/* Audio is always a left-to-right control surface, independent of page language/direction. */
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-player-card.is-unavailable {
+  min-height: 76px;
+  justify-content: center;
+  padding: 14px 18px;
+}
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-unavailable {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  direction: ltr;
+  text-align: left;
+  color: var(--muted);
+}
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-unavailable-icon {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--muted);
+  font-size: 18px;
+}
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-unavailable div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-unavailable strong {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 900;
+}
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-unavailable small {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-player-card {
+  direction: ltr !important;
+  text-align: left !important;
+  min-height: 82px;
+  padding: 14px 16px;
+  gap: 14px;
+  border-radius: 18px;
+  align-items: center;
+}
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-play {
+  order: 1;
+  flex: 0 0 46px;
+}
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-main {
+  order: 2;
+  direction: ltr !important;
+}
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-topline {
+  direction: ltr !important;
+  justify-content: space-between;
+}
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-label {
+  direction: rtl;
+  unicode-bidi: plaintext;
+  text-align: left;
+}
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-time {
+  direction: ltr !important;
+  unicode-bidi: isolate;
+}
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-actions {
+  order: 3;
+  direction: ltr !important;
+  justify-content: flex-end;
+  min-width: 126px;
+}
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-progress,
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-volume {
+  direction: ltr !important;
+}
+@media (max-width:700px) {
+  .exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-player-card {
+    min-height: 74px;
+    padding: 11px 12px;
+  }
+  .exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-play {
+    flex-basis: 42px;
+  }
+}
+
+/* Keep the Hören title/header fixed while its exercise content scrolls. */
+.exercise-page:has(.hoeren-workspace-shell) .exercise-heading {
+  position: sticky !important;
+  top: 60px !important;
+  z-index: 80 !important;
+}
+
+/* Variations modal: remove the oversized decorative icon and keep the topic/title hierarchy compact. */
+.variation-modal-header {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.variation-modal-icon {
+  display: none !important;
+}
+.variation-topic-header {
+  margin-top: 0 !important;
+  margin-bottom: 10px !important;
+  min-height: 36px;
+  box-sizing: border-box;
+}
+.variation-modal-title {
+  margin-top: 0 !important;
+}
+
+/* Close button: exact geometric centering of the X inside its button. */
+.variation-modal-close {
+  display: grid !important;
+  place-items: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  padding: 0 !important;
+  line-height: 0 !important;
+  font-family: Arial, sans-serif !important;
+  font-size: 22px !important;
+  font-weight: 400 !important;
+  text-align: center !important;
+  transform: none !important;
+}
+.variation-modal-close:hover {
+  transform: rotate(90deg) !important;
+}
