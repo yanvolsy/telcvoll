@@ -18,7 +18,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
 <script>
 const id=qs('id'); const duration=Number(qs('duration')||0); const sessionId=qs('session'); const mockMode=qs('mock')==='1' && !!sessionId; let model=null; let answers={}; let activeItem=null; let submitted=false; let resultData=null;
-let matchingOrder=null; let headingOrder=null; let optionOrders={}; let showModelAnswers=false; let titleRevealed=false; const translationCache=new Map();
+let matchingOrder=null; let headingOrder=null; let optionOrders={}; let showModelAnswers=false; let titleRevealed=false; let hoerenOrder=null; let hoerenAllTranslated=false; const translationCache=new Map();
 const TELC_DUR = {
   B1: { Lesen: { 'Teil 1': 20, 'Teil 2': 20, 'Teil 3': 15, _default: 20 }, Sprachbausteine: { 'Teil 1': 10, 'Teil 2': 10, _default: 10 }, Hören: { 'Teil 1': 10, 'Teil 2': 10, 'Teil 3': 10, _default: 10 }, Schreiben: { 'Teil 1': 30, _default: 30 }, Sprechen: { 'Teil 1': 4, 'Teil 2': 5, 'Teil 3': 5, _default: 5 } },
   B2: { Lesen: { 'Teil 1': 20, 'Teil 2': 25, 'Teil 3': 20, _default: 20 }, Sprachbausteine: { 'Teil 1': 15, 'Teil 2': 10, _default: 15 }, Hören: { 'Teil 1': 6, 'Teil 2': 8, 'Teil 3': 6, _default: 7 }, Schreiben: { 'Teil 1': 30, _default: 30 }, Sprechen: { 'Teil 1': 5, 'Teil 2': 5, 'Teil 3': 5, _default: 5 } },
@@ -118,7 +118,8 @@ function renderMatching(){
  }).join('');
  const answeredCount=Object.keys(answers).filter(k=>answers[k]).length;
  const resultHtml='';
- document.getElementById('content').innerHTML=layout(main,`<div class="side-title side-title-large"><div><b>ÜBERSCHRIFTEN</b><small>FÜR TEXT</small></div><span>${answeredCount}/${items.length}</span></div><div class="matching-controls"><button type="button" class="side-icon shuffle-all" aria-label="${text('خلط العناوين والفقرات','Überschriften und Texte mischen')}" title="${text('خلط العناوين والفقرات','Überschriften und Texte mischen')}">⤨</button></div><div class="heading-list">${side}</div>`);
+  const meta=matchingMeta();
+  document.getElementById('content').innerHTML=layout(main,`<div class="exam-side-sticky-header"><div class="side-title side-title-large"><div class="side-title-text"><b>${esc(meta.title)}</b><small>${esc(meta.sub)}</small></div><div class="side-title-actions"><button type="button" class="side-icon shuffle-all" aria-label="${text('خلط العناوين والفقرات','Überschriften und Texte mischen')}" title="${text('خلط العناوين والفقرات','Überschriften und Texte mischen')}">⤨</button><span class="side-counter-pill">${answeredCount} / ${items.length}</span></div></div></div><div class="heading-list">${side}</div>`);
  document.querySelectorAll('[data-item]').forEach(c=>{
    c.onmousedown=e=>{if(e.target.closest('select,.text-tools,.mini-tool,.clear-selection'))return;e.preventDefault();};
    c.onclick=e=>{if(e.target.closest('select,.text-tools,.mini-tool,.clear-selection'))return;activeItem=String(c.dataset.item);document.querySelectorAll('[data-item]').forEach(x=>x.classList.toggle('active-item',String(x.dataset.item)===activeItem));};
@@ -139,7 +140,7 @@ function renderMatching(){
 function renderSprachbausteine1(){
  const items=(model.items||[]); const longTextId='spb1-text';
  const main=`<div class="long-text"><div class="long-text-tools">${textTools(model.exercise.body||'',longTextId)}</div><div id="${longTextId}" data-content-id="${longTextId}" data-source="${esc(model.exercise.body||'')}">${renderBody(model.exercise.body)}</div>${translationBox(longTextId+'-translation')}</div>`;
- let side=`<div class="side-title side-title-large"><div><b>AUFGABEN</b><small>SPRACHBAUSTEINE TEIL 1</small></div><div class="matching-controls"><button type="button" class="side-icon shuffle-spb1" aria-label="${text('خلط الاختيارات','Antworten mischen')}" title="${text('خلط الاختيارات','Antworten mischen')}">⤨</button></div><span>${Object.keys(answers).length}/${items.length}</span></div>`;
+  let side=`<div class="exam-side-sticky-header"><div class="side-title side-title-large"><div class="side-title-text"><b>AUFGABEN</b><small>SPRACHBAUSTEINE TEIL 1</small></div><div class="side-title-actions"><button type="button" class="side-icon shuffle-spb1" aria-label="${text('خلط الاختيارات','Antworten mischen')}" title="${text('خلط الاختيارات','Antworten mischen')}">⤨</button><span class="side-counter-pill">${Object.keys(answers).length} / ${items.length}</span></div></div></div>`;
  side+=items.map(it=>{
    const n=String(it.position_no), examNo=Number(n)+20, chosen=answerValue(n);
    const detail=resultData?.details?.find(d=>String(d.prompt)===String(it.prompt));
@@ -168,9 +169,9 @@ function renderChoiceQuestions(){
  let side='';
  if(gap2){
    const opts=sharedOptions();
-   side=`<div class="side-title"><b>WÖRTER</b><span>${Object.keys(answers).length}/${items.length}</span></div><div class="word-bank">${opts.map(([k,v],oi)=>{const wid='wordbank-'+oi;const isCorrect=(resultData?.details||[]).some(d=>String(d.correct_answer)===String(k));return `<div class="word-card-wrap"><button class="word-card ${Object.values(answers).includes(k)?'used':''} ${showModelAnswers&&isCorrect?'model-correct':''}" data-word="${esc(k)}"><small>${String.fromCharCode(65+oi)}</small><b>${esc(v)}</b></button>${textTools(v,wid)}${translationBox(wid+'-translation')}</div>`;}).join('')}</div>`;
- } else if(isLesen2){
-   side=`<div class="side-title side-title-large"><div><b>LESEN TEIL 2</b></div><div class="matching-controls"><button type="button" class="side-icon shuffle-options" aria-label="${text('خلط الاختيارات','Antworten mischen')}" title="${text('خلط الاختيارات','Antworten mischen')}">⤨</button></div><span>${Object.keys(answers).length}/${items.length}</span></div>`+
+    side=`<div class="exam-side-sticky-header"><div class="side-title"><div class="side-title-text"><b>WÖRTER</b><small>${text('بنك الكلمات','Wortauswahl')}</small></div><div class="side-title-actions"><span class="side-counter-pill">${Object.keys(answers).length} / ${items.length}</span></div></div></div><div class="word-bank">${opts.map(([k,v],oi)=>{const wid='wordbank-'+oi;const isCorrect=(resultData?.details||[]).some(d=>String(d.correct_answer)===String(k));return `<div class="word-card-wrap"><button class="word-card ${Object.values(answers).includes(k)?'used':''} ${showModelAnswers&&isCorrect?'model-correct':''}" data-word="${esc(k)}"><small>${String.fromCharCode(65+oi)}</small><b>${esc(v)}</b></button>${textTools(v,wid)}${translationBox(wid+'-translation')}</div>`;}).join('')}</div>`;
+  } else if(isLesen2){
+    side=`<div class="exam-side-sticky-header"><div class="side-title side-title-large"><div class="side-title-text"><b>LESEN TEIL 2</b><small>${text('أسئلة الاختيار من متعدد','Multiple Choice')}</small></div><div class="side-title-actions"><button type="button" class="side-icon shuffle-options" aria-label="${text('خلط الاختيارات','Antworten mischen')}" title="${text('خلط الاختيارات','Antworten mischen')}">⤨</button><span class="side-counter-pill">${Object.keys(answers).length} / ${items.length}</span></div></div></div>`+
      items.map((it,i)=>{
        const n=String(it.position_no);
        const chosen=answerValue(n);
@@ -188,7 +189,7 @@ function renderChoiceQuestions(){
        </div>`;
      }).join('');
  } else {
-   side=`<div class="side-title"><b>${model.exercise.task_type==='MCQ'?'AUFGABEN':'LÜCKEN'}</b><span>${Object.keys(answers).length}/${items.length}</span></div>`+items.map((it,i)=>{const qid='generic-q-'+it.position_no;return `<div class="side-question ${(()=>{const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));return d?(d.ok?'result-correct':'result-wrong'):''})()}"><div class="question-prompt question-text-tools">${textTools(it.prompt||'',qid)}<div id="${qid}" data-content-id="${qid}" data-source="${esc(it.prompt||'')}">${esc(it.prompt||'')}</div>${translationBox(qid+'-translation')}</div><div class="side-options">${(it.options||[]).map((o,oi)=>{const oid=`generic-o-${it.position_no}-${oi}`;const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));const isChosen=answerValue(it.position_no)===o.option_key;const isCorrect=showModelAnswers&&String(d?.correct_answer||'')===String(o.option_key);const resultClass=d&&isChosen?(d.ok?'result-correct':'result-wrong'):'';return `<div class="option-tool-wrap"><button class="side-option ${isChosen?'selected':''} ${resultClass} ${isCorrect?'model-correct':''}" data-q="${it.position_no}" data-o="${esc(o.option_key)}">${esc(o.option_text)}</button>${textTools(o.option_text||'',oid)}${translationBox(oid+'-translation')}</div>`;}).join('')}</div></div>`;}).join('');
+    side=`<div class="exam-side-sticky-header"><div class="side-title"><div class="side-title-text"><b>${model.exercise.task_type==='MCQ'?'AUFGABEN':'LÜCKEN'}</b><small>${text('قائمة الأسئلة','Fragenliste')}</small></div><div class="side-title-actions"><span class="side-counter-pill">${Object.keys(answers).length} / ${items.length}</span></div></div></div>`+items.map((it,i)=>{const qid='generic-q-'+it.position_no;return `<div class="side-question ${(()=>{const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));return d?(d.ok?'result-correct':'result-wrong'):''})()}"><div class="question-prompt question-text-tools">${textTools(it.prompt||'',qid)}<div id="${qid}" data-content-id="${qid}" data-source="${esc(it.prompt||'')}">${esc(it.prompt||'')}</div>${translationBox(qid+'-translation')}</div><div class="side-options">${(it.options||[]).map((o,oi)=>{const oid=`generic-o-${it.position_no}-${oi}`;const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));const isChosen=answerValue(it.position_no)===o.option_key;const isCorrect=showModelAnswers&&String(d?.correct_answer||'')===String(o.option_key);const resultClass=d&&isChosen?(d.ok?'result-correct':'result-wrong'):'';return `<div class="option-tool-wrap"><button class="side-option ${isChosen?'selected':''} ${resultClass} ${isCorrect?'model-correct':''}" data-q="${it.position_no}" data-o="${esc(o.option_key)}">${esc(o.option_text)}</button>${textTools(o.option_text||'',oid)}${translationBox(oid+'-translation')}</div>`;}).join('')}</div></div>`;}).join('');
  }
  document.getElementById('content').innerHTML=layout(main,side,isLesen2?'lesen2':'');
  if(gap2)document.querySelectorAll('[data-word]').forEach(b=>b.onclick=()=>{const first=items.find(it=>!answerValue(it.position_no));if(first)selectAnswer(first.position_no,b.dataset.word);});
@@ -239,7 +240,197 @@ function escapeRegExp(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}functio
  rerenderExerciseStable(scrollState);
 }
 function sharedOptions(){const map=new Map();(model.items||[]).forEach(it=>(it.options||[]).forEach(o=>{if(o.option_text&&!map.has(o.option_key))map.set(o.option_key,o.option_text);}));return [...map.entries()];}
-function renderTF(){const main=`${renderAudio()}<div class="tf-list">${model.items.map(it=>{const qid='tf-main-'+it.position_no;return `<article class="tf-row"><div class="item-number">${it.position_no}</div><div class="tf-text"><div class="question-text-tools">${textTools(it.prompt||'',qid)}<div id="${qid}" data-content-id="${qid}" data-source="${esc(it.prompt||'')}">${escBody(it.prompt)}</div>${translationBox(qid+'-translation')}</div></div><div class="tf-actions"><button class="side-option ${answerValue(it.position_no)==='Richtig'?'selected':''} ${(()=>{const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));return d&&answerValue(it.position_no)==='Richtig'?(d.ok?'result-correct':'result-wrong'):''})()} ${(()=>{const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));return showModelAnswers&&String(d?.correct_answer||'')==='Richtig'?'model-correct':''})()}" data-q="${it.position_no}" data-o="Richtig">Richtig</button><button class="side-option ${answerValue(it.position_no)==='Falsch'?'selected':''} ${(()=>{const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));return d&&answerValue(it.position_no)==='Falsch'?(d.ok?'result-correct':'result-wrong'):''})()} ${(()=>{const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));return showModelAnswers&&String(d?.correct_answer||'')==='Falsch'?'model-correct':''})()}" data-q="${it.position_no}" data-o="Falsch">Falsch</button></div></article>`;}).join('')}</div>`;const side=`<div class="side-title"><b>RICHTIG / FALSCH</b><span>${Object.keys(answers).length}/${model.items.length}</span></div>${model.items.map(it=>{const qid='tf-side-'+it.position_no;return `<div class="side-question compact"><div class="question-text-tools">${textTools(it.prompt||'',qid)}<div id="${qid}" data-content-id="${qid}" data-source="${esc(it.prompt||'')}">${esc(it.prompt||'')}</div>${translationBox(qid+'-translation')}</div><div class="side-options"><button class="side-option ${answerValue(it.position_no)==='Richtig'?'selected':''} ${(()=>{const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));return d&&answerValue(it.position_no)==='Richtig'?(d.ok?'result-correct':'result-wrong'):''})()} ${(()=>{const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));return showModelAnswers&&String(d?.correct_answer||'')==='Richtig'?'model-correct':''})()}" data-q="${it.position_no}" data-o="Richtig">Richtig</button><button class="side-option ${answerValue(it.position_no)==='Falsch'?'selected':''} ${(()=>{const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));return d&&answerValue(it.position_no)==='Falsch'?(d.ok?'result-correct':'result-wrong'):''})()} ${(()=>{const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));return showModelAnswers&&String(d?.correct_answer||'')==='Falsch'?'model-correct':''})()}" data-q="${it.position_no}" data-o="Falsch">Falsch</button></div></div>`;}).join('')}`;document.getElementById('content').innerHTML=layout(main,side,'tf-workspace');document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>selectAnswer(b.dataset.q,b.dataset.o));bindTextTools();}
+function getHoerenDisplayNumber(item, index, teil){
+  const p = Number(item.position_no);
+  if(p >= 41 && p <= 65) return p;
+  const t = String(teil || '').toLowerCase();
+  if(t.includes('teil 1') || t.includes('1')) return 41 + index;
+  if(t.includes('teil 2') || t.includes('2')) return 46 + index;
+  if(t.includes('teil 3') || t.includes('3')) return 56 + index;
+  return p || (index + 1);
+}
+function renderTF(){
+  const items = model.items || [];
+  if(!hoerenOrder || hoerenOrder.length !== items.length){
+    hoerenOrder = items.map((_, i) => i);
+  }
+  const orderedItems = hoerenOrder.map(idx => items[idx]).filter(Boolean);
+  const activeDuration = duration || (model?.exercise ? getTelcDurationSeconds(model.exercise) : 600);
+  const initialMin = String(Math.floor(activeDuration / 60)).padStart(2, '0');
+  const timer = (mockMode || activeDuration) ? `<div class="progress-pill ${mockMode ? 'mock-global-timer' : ''}" id="timerEl">${initialMin}:00</div>` : '';
+  const resultPanel = resultData ? `<div class="inline-result-panel ${resultData.percent >= 60 ? 'pass' : 'fail'}"><div class="result-panel-main"><span class="result-panel-label">${text('النتيجة','Ergebnis')}</span><strong>${resultData.score} / ${resultData.max}</strong></div><div class="result-panel-meta"><span>${resultData.percent}%</span><b>${esc(resultData.result || '')}</b></div></div>` : '';
+
+  const audioBox = model.exercise.audio_url ? `
+    <div class="hoeren-audio-card">
+      <div class="hoeren-audio-title-row">
+        <div class="hoeren-audio-title-left">
+          <span class="hoeren-audio-headphone" aria-hidden="true">🎧</span>
+          <h1 id="thema-title" class="${titleRevealed ? '' : 'thema-title-hidden'}" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}">${esc(model.exercise.title)}</h1>
+        </div>
+        <button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen')}" title="${text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen')}">
+          <span class="eye-icon ${titleRevealed ? 'eye-on' : 'eye-off'}" aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="hoeren-audio-player-wrap">
+        <audio controls preload="metadata" src="${esc(model.exercise.audio_url)}"></audio>
+      </div>
+    </div>` : `
+    <div class="hoeren-title-only-row">
+      <h1 id="thema-title" class="${titleRevealed ? '' : 'thema-title-hidden'}" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}">${esc(model.exercise.title)}</h1>
+      <button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen')}" title="${text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen')}">
+        <span class="eye-icon ${titleRevealed ? 'eye-on' : 'eye-off'}" aria-hidden="true"></span>
+      </button>
+    </div>`;
+
+  const questionCards = orderedItems.map((it) => {
+    const origIdx = items.indexOf(it);
+    const dispNo = getHoerenDisplayNumber(it, origIdx, model.exercise.teil);
+    const qid = 'hoeren-q-' + it.position_no;
+    const chosen = answerValue(it.position_no);
+    const detail = resultData?.details?.find(d => String(d.prompt) === String(it.prompt));
+    const correct = detail?.correct_answer || '';
+    const showCorrect = showModelAnswers && correct;
+
+    const isRChosen = chosen === 'Richtig';
+    const isFChosen = chosen === 'Falsch';
+
+    let rClass = isRChosen ? 'selected' : '';
+    let fClass = isFChosen ? 'selected' : '';
+
+    if (detail && isRChosen) rClass += detail.ok ? ' result-correct' : ' result-wrong';
+    if (detail && isFChosen) fClass += detail.ok ? ' result-correct' : ' result-wrong';
+
+    if (showCorrect) {
+      if (correct === 'Richtig') rClass += ' model-correct';
+      if (correct === 'Falsch') fClass += ' model-correct';
+    }
+
+    const cardStatusClass = detail ? (detail.ok ? 'item-correct' : 'item-wrong') : '';
+
+    return `
+      <article class="hoeren-item-card ${cardStatusClass}" data-item="${it.position_no}">
+        <div class="hoeren-item-num">${dispNo}.</div>
+        <div class="hoeren-radio-group">
+          <button type="button" class="hoeren-radio-btn ${rClass}" data-q="${it.position_no}" data-o="Richtig" aria-label="${dispNo} Richtig" title="Richtig">
+            <span class="hoeren-radio-circle"></span>
+          </button>
+          <button type="button" class="hoeren-radio-btn ${fClass}" data-q="${it.position_no}" data-o="Falsch" aria-label="${dispNo} Falsch" title="Falsch">
+            <span class="hoeren-radio-circle"></span>
+          </button>
+        </div>
+        <div class="hoeren-item-body">
+          <div class="hoeren-item-text" id="${qid}" data-content-id="${qid}" data-source="${esc(it.prompt||'')}">${esc(it.prompt)}</div>
+          <div class="hoeren-item-tools">${textTools(it.prompt||'', qid)}</div>
+          <div class="inline-translation ${hoerenAllTranslated ? 'visible' : ''}" id="${qid}-translation"></div>
+        </div>
+      </article>`;
+  }).join('');
+
+  document.getElementById('content').innerHTML = `
+    <div class="hoeren-exercise-shell">
+      <div class="hoeren-top-nav">
+        <a class="hoeren-menu-btn" href="/dashboard.html" aria-label="${text('قائمة تمارين الاستماع','Hören Menü')}">
+          <span class="hoeren-menu-icon" aria-hidden="true">▦</span>
+          <span>${text('قائمة تمارين الاستماع','Hören Menü')}</span>
+        </a>
+        <div class="hoeren-top-right">
+          ${timer}
+        </div>
+      </div>
+
+      ${resultPanel}
+
+      <div class="hoeren-card">
+        ${audioBox}
+
+        <div class="hoeren-tools-row">
+          <button type="button" class="hoeren-tool-btn ${hoerenAllTranslated ? 'active' : ''}" id="hoerenTransAll" title="${text('ترجمة جميع الأسئلة','Alle Fragen übersetzen')}" aria-label="${text('ترجمة جميع الأسئلة','Alle Fragen übersetzen')}">
+            <span class="hoeren-tool-icon">🌐</span>
+          </button>
+          <button type="button" class="hoeren-tool-btn ${showModelAnswers ? 'active' : ''}" id="hoerenKeyBtn" title="${text('عرض الإجابة النموذجية','Musterlösung anzeigen')}" aria-label="${text('عرض الإجابة النموذجية','Musterlösung anzeigen')}">
+            <span class="hoeren-tool-icon">🔑</span>
+          </button>
+          <button type="button" class="hoeren-tool-btn" id="hoerenShuffleBtn" title="${text('خلط ترتيب الأسئلة','Reihenfolge mischen')}" aria-label="${text('خلط ترتيب الأسئلة','Reihenfolge mischen')}">
+            <span class="hoeren-tool-icon">🔀</span>
+          </button>
+        </div>
+
+        <div class="hoeren-columns-head" aria-hidden="true">
+          <span class="hoeren-col-r">R</span>
+          <span class="hoeren-col-f">F</span>
+        </div>
+
+        <div class="hoeren-items-list">
+          ${questionCards}
+        </div>
+      </div>
+
+      <div class="exercise-actions">
+        <div class="exercise-nav">
+          <button class="btn" id="checkBtn">${text(mockMode ? 'إنهاء الجزء' : 'تحقق من الإجابات', mockMode ? 'Teil beenden' : 'Antworten prüfen')}</button>
+          ${mockMode ? '' : `<button class="btn model-btn" id="modelBtn">${text('الإجابة النموذجية','Musterlösung')}</button>`}
+        </div>
+      </div>
+    </div>`;
+
+  document.querySelectorAll('.hoeren-radio-btn[data-q]').forEach(b => {
+    b.onclick = () => selectAnswer(b.dataset.q, b.dataset.o);
+  });
+
+  const transAllBtn = document.getElementById('hoerenTransAll');
+  if (transAllBtn) {
+    transAllBtn.onclick = async () => {
+      hoerenAllTranslated = !hoerenAllTranslated;
+      transAllBtn.classList.toggle('active', hoerenAllTranslated);
+      const boxes = document.querySelectorAll('.hoeren-item-card .inline-translation');
+      if (hoerenAllTranslated) {
+        for (const box of boxes) {
+          box.classList.add('visible');
+          if (!box.textContent.trim()) {
+            const card = box.closest('.hoeren-item-card');
+            const textEl = card?.querySelector('.hoeren-item-text');
+            const source = textEl?.dataset.source || textEl?.textContent || '';
+            if (source) {
+              box.classList.add('loading');
+              const out = await translateText(source, 'ar');
+              box.classList.remove('loading');
+              box.textContent = out || text('تعذرت الترجمة.', 'Übersetzung nicht verfügbar.');
+            }
+          }
+        }
+      } else {
+        boxes.forEach(b => b.classList.remove('visible'));
+      }
+    };
+  }
+
+  const keyBtn = document.getElementById('hoerenKeyBtn');
+  if (keyBtn) {
+    keyBtn.onclick = async () => {
+      const st = captureExerciseScroll();
+      try {
+        if (!submitted) await submit();
+        if (!resultData) return;
+        showModelAnswers = !showModelAnswers;
+        rerenderExerciseStable(st);
+      } catch (e) {
+        document.getElementById('content').insertAdjacentHTML('beforeend', `<div class="alert bad">${esc(e.message)}</div>`);
+        restoreExerciseScroll(st);
+      }
+    };
+  }
+
+  const shuffleBtn = document.getElementById('hoerenShuffleBtn');
+  if (shuffleBtn) {
+    shuffleBtn.onclick = () => {
+      const st = captureExerciseScroll();
+      hoerenOrder = shuffle(hoerenOrder);
+      rerenderExerciseStable(st);
+    };
+  }
+
+  bindTextTools();
+}
 function renderWriting(){
  const settings=parseSettings(model.exercise);
  const situationRaw=settings.situation_text||model.exercise.body||'';
@@ -826,12 +1017,38 @@ function bindActions(){
      rerenderExerciseStable(st);
    }catch(e){document.getElementById('content').insertAdjacentHTML('beforeend',`<div class="alert bad">${esc(e.message)}</div>`);restoreExerciseScroll(st);}
  };
- const tr=document.getElementById('titleReveal');
- if(tr)tr.onclick=()=>{titleRevealed=!titleRevealed;const h=document.getElementById('thema-title');if(h)h.classList.toggle('thema-title-hidden',!titleRevealed);tr.setAttribute('aria-label',text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen'));};
- if(mockMode){startMockTimer();}else{startExerciseTimer();}
+  const tr=document.getElementById('titleReveal');
+  if(tr)tr.onclick=()=>{
+    titleRevealed=!titleRevealed;
+    const h=document.getElementById('thema-title');
+    if(h)h.classList.toggle('thema-title-hidden',!titleRevealed);
+    const eye=tr.querySelector('.eye-icon');
+    if(eye){
+      eye.classList.toggle('eye-on',titleRevealed);
+      eye.classList.toggle('eye-off',!titleRevealed);
+    }
+    tr.setAttribute('aria-label',text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen'));
+  };
+  if(mockMode){startMockTimer();}else{startExerciseTimer();}
 }
 
-function renderWorkspace(){stopSpeaking();const t=model.exercise.task_type;const isSpb1=model.exercise.section==='Sprachbausteine'&&model.exercise.teil==='Teil 1';const isMatching=(t==='MATCHING')||(model.exercise.section==='Lesen'&&['Teil 1','Teil 3'].includes(model.exercise.teil))||(model.exercise.section==='Hören'&&model.exercise.teil==='Teil 3');if(t==='WRITING')return renderWriting();if(t==='SPEAKING')return renderSpeaking();if(t==='AUDIO_TF')return renderTF();if(isSpb1)return renderSprachbausteine1();if(isMatching)return renderMatching();return renderChoiceQuestions();}
+function renderWorkspace(){
+  stopSpeaking();
+  const t=model.exercise.task_type;
+  const isSpb1=model.exercise.section==='Sprachbausteine'&&model.exercise.teil==='Teil 1';
+  const isMatching=(t==='MATCHING')||(model.exercise.section==='Lesen'&&['Teil 1','Teil 3'].includes(model.exercise.teil))||(model.exercise.section==='Hören'&&model.exercise.teil==='Teil 3');
+  const isHoerenTF=(t==='AUDIO_TF')||(model.exercise.section==='Hören'&&['Teil 1','Teil 2','Teil 3'].includes(model.exercise.teil)&&(model.items||[]).length>0&&(model.items||[]).every(it=>{
+    const keys=(it.options||[]).map(o=>String(o.option_text||o.option_key).toLowerCase());
+    const sol=String(it.correct_answer||'').toLowerCase();
+    return keys.includes('richtig')||keys.includes('falsch')||sol==='richtig'||sol==='falsch'||keys.length===0;
+  }));
+  if(t==='WRITING')return renderWriting();
+  if(t==='SPEAKING')return renderSpeaking();
+  if(isHoerenTF||t==='AUDIO_TF')return renderTF();
+  if(isSpb1)return renderSprachbausteine1();
+  if(isMatching)return renderMatching();
+  return renderChoiceQuestions();
+}
 function renderResult(r){const st=captureExerciseScroll();submitted=true;resultData=r;rerenderExerciseStable(st);}
 async function submit(){if(submitted)return;if(!model.items.length){if(mockMode){goNextMock();}return;}try{const r=await api('exercise-submit',{method:'POST',body:{exercise_id:id,answers}});localStorage.setItem('last_exercise_result_'+id,JSON.stringify(r));markExerciseCompleted(id);if(mockMode){const s=getMockSession();if(s){s.results=s.results||[];s.results.push({id,title:model.exercise.title,section:model.exercise.section,teil:model.exercise.teil,score:r.score,max:r.max,percent:r.percent,result:r.result});s.index=(s.ids||[]).findIndex(x=>String(x)===String(id));localStorage.setItem('telc_self_test',JSON.stringify(s));}goNextMock();return;}renderResult(r);}catch(e){document.getElementById('content').insertAdjacentHTML('beforeend',`<div class="alert bad">${esc(e.message)}</div>`);}}
 (async()=>{

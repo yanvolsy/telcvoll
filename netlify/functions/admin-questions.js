@@ -9,15 +9,24 @@ function parseBody(event) {
 }
 
 function normalizePayload(body) {
+  const audio_url = String(
+    body.audio_url || body.audioUrl || body.audio ||
+    body.sound_url || body.sound || body.audio_file ||
+    body.media_url || body.mediaUrl || body.audio_path ||
+    body.audioLink || body.audio_link || body.soundUrl || ''
+  ).trim();
+
+  const task_type = String(body.task_type || '').trim();
+
   return {
     level: ['B1','B2','C1'].includes(String(body.level || '').trim()) ? String(body.level).trim() : 'B2',
     section: String(body.section || '').trim(),
     teil: String(body.teil || '').trim(),
     title: String(body.title || '').trim(),
-    task_type: String(body.task_type || '').trim(),
+    task_type,
     body: String(body.body || ''),
     translation: String(body.translation || ''),
-    audio_url: String(body.audio_url || ''),
+    audio_url,
     allow_replay: !!body.allow_replay,
     writing_situation: String(body.writing_situation || ''),
     writing_task: String(body.writing_task || ''),
@@ -25,13 +34,25 @@ function normalizePayload(body) {
     // Buchstaben-Index (A,B,C…) gegenüber dem, was im Admin-Formular angezeigt wurde.
     headings: Array.isArray(body.headings) ? body.headings.map(String).map(x => x.trim()) : [],
     settings: body.settings && typeof body.settings === 'object' ? body.settings : {},
-    items: Array.isArray(body.items) ? body.items.map(it => ({
-      prompt: String(it.prompt || '').trim(),
-      correct: String(it.correct || '').trim(),
-      points: Number.parseFloat(it.points ?? 1) || 1,
-      explanation: String(it.explanation || ''),
-      options: it.options && typeof it.options === 'object' ? it.options : {},
-    })).filter(it => it.prompt) : [],
+    items: Array.isArray(body.items) ? body.items.map(it => {
+      let options = it.options && typeof it.options === 'object' ? it.options : {};
+      let correct = String(it.correct || it.correct_answer || '').trim();
+      const prompt = String(it.prompt || it.text || it.question || '').trim();
+
+      if (task_type === 'AUDIO_TF' || (!Object.keys(options).length && /^(richtig|falsch|true|false|r|f|0|1)$/i.test(correct))) {
+        options = { Richtig: 'Richtig', Falsch: 'Falsch' };
+        if (/^(falsch|false|f|0)$/i.test(correct)) correct = 'Falsch';
+        else if (/^(richtig|true|r|1)$/i.test(correct)) correct = 'Richtig';
+      }
+
+      return {
+        prompt,
+        correct,
+        points: Number.parseFloat(it.points ?? 1) || 1,
+        explanation: String(it.explanation || ''),
+        options,
+      };
+    }).filter(it => it.prompt) : [],
   };
 }
 

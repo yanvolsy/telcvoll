@@ -134,14 +134,14 @@ function renderDynamic(type,data={}){const c=state.activeModalContext||currentCo
  else if(type==='WRITING') renderSimpleText(data,'نص الموضوع / Situation','اكتب نص الموضوع الذي سيظهر للطالب.');
  else renderSimpleText(data,'موضوع التحدث / Aufgabenstellung','اكتب موضوع أو تعليمات التحدث.');
 }
-function renderMatching(data){$('dynamic').innerHTML=`<div class="section-box"><h3>العناوين / الخيارات</h3><p class="help">أضف العناوين أولاً. يمكنك إضافة أي عدد من العناوين، ثم ستظهر تلقائياً في قائمة اختيار الإجابة الصحيحة لكل فقرة.</p><div id="heads"></div><button type="button" class="small-btn add-btn" id="addHead">+ إضافة عنوان</button></div><div class="section-box"><h3>الفقرات</h3><p class="help">لكل فقرة اكتب النص ثم اختر العنوان الصحيح من القائمة.</p><div id="paras"></div><button type="button" class="small-btn add-btn" id="addPara">+ إضافة فقرة</button></div>`;
+function renderMatching(data){const c=state.activeModalContext||currentContext();const isHoeren=c.section==='Hören'||!!data.audio_url;$('dynamic').innerHTML=`${isHoeren?`<div class="section-box"><h3>ملف الصوت</h3><div class="audio-box"><input id="audioFile" type="file" accept="audio/*"><input id="audioUrl" placeholder="رابط الصوت (اختياري)" value="${esc(data.audio_url||'')}"></div>${data.audio_url?`<div style="margin-top:8px"><audio controls src="${esc(data.audio_url)}" style="width:100%;height:36px"></audio></div>`:''}</div>`:''}<div class="section-box"><h3>العناوين / الخيارات</h3><p class="help">أضف العناوين أولاً. يمكنك إضافة أي عدد من العناوين، ثم ستظهر تلقائياً في قائمة اختيار الإجابة الصحيحة لكل فقرة.</p><div id="heads"></div><button type="button" class="small-btn add-btn" id="addHead">+ إضافة عنوان</button></div><div class="section-box"><h3>الفقرات</h3><p class="help">لكل فقرة اكتب النص ثم اختر العنوان الصحيح من القائمة.</p><div id="paras"></div><button type="button" class="small-btn add-btn" id="addPara">+ إضافة فقرة</button></div>`;
  const heads=(data.headings||[]);(heads.length?heads:['']).forEach(x=>addHead(x));const items=data.items||[];(items.length?items:[{}]).forEach(x=>addPara(x));$('addHead').onclick=()=>addHead('');$('addPara').onclick=()=>addPara({});refreshHeadingSelects();}
 function addHead(value){const wrap=$('heads');if(!wrap)return;const row=document.createElement('div');row.className='dynamic-row';row.innerHTML=`<input class="head-input" value="${esc(value)}" placeholder="عنوان / Überschrift"><button type="button" class="remove-btn">حذف</button>`;wrap.appendChild(row);row.querySelector('.remove-btn').onclick=()=>{row.remove();refreshHeadingSelects();};row.querySelector('input').oninput=refreshHeadingSelects;}
 function refreshHeadingSelects(){const heads=[...document.querySelectorAll('.head-input')].map(x=>x.value.trim());document.querySelectorAll('.correct-head').forEach(sel=>{const cur=sel.value;sel.innerHTML='<option value="">اختر العنوان الصحيح…</option>'+heads.map((h,i)=>`<option value="${String.fromCharCode(65+i)}">${String.fromCharCode(65+i)} — ${esc(h||'عنوان فارغ')}</option>`).join('');if([...sel.options].some(o=>o.value===cur))sel.value=cur;});}
 function addPara(data){const wrap=$('paras');const n=wrap.children.length+1;const row=document.createElement('div');row.className='para-card';row.innerHTML=`<div class="row-title"><span>الفقرة ${n}</span><button type="button" class="remove-btn">حذف</button></div><textarea class="para-text" placeholder="اكتب الفقرة هنا">${esc(data.prompt||'')}</textarea><label class="field-label">العنوان الصحيح للفقرة</label><select class="correct-head" data-value="${esc(data.correct||'')}"><option value="">اختر العنوان الصحيح…</option></select>`;wrap.appendChild(row);row.querySelector('.remove-btn').onclick=()=>{row.remove();[...wrap.children].forEach((x,i)=>x.querySelector('.row-title span').textContent='الفقرة '+(i+1));};refreshHeadingSelects();const sel=row.querySelector('.correct-head');if(data.correct)sel.value=data.correct;}
-function renderMCQ(data,audio){$('dynamic').innerHTML=`${audio?`<div class="section-box"><h3>ملف الصوت</h3><p class="help">اختر ملف MP3 إن وجد. يمكن أيضاً وضع رابط الصوت إذا كان الملف مستضافاً مسبقاً.</p><div class="audio-box"><input id="audioFile" type="file" accept="audio/*"><input id="audioUrl" placeholder="رابط الصوت (اختياري)" value="${esc(data.audio_url||'')}"></div><div class="audio-preview">سيتم حفظ ملف الصوت المختار مباشرة مع الموضوع (حتى 5MB). ويمكنك بدلاً منه استعمال رابط مستضاف.</div></div>`:''}<div class="section-box"><h3>${audio?'الأسئلة والاختيارات':'النص الطويل والأسئلة'}</h3>${!audio?`<div class="field"><label>النص الطويل</label><textarea id="mainBody" placeholder="أدخل النص الطويل هنا">${esc(data.body||'')}</textarea></div>`:''}<div id="questions"></div><button type="button" class="small-btn add-btn" id="addQuestion">+ إضافة سؤال</button></div>`;const items=data.items||[];(items.length?items:[{}]).forEach(x=>addQuestion(x));$('addQuestion').onclick=()=>addQuestion({});}
+function renderMCQ(data,audio){$('dynamic').innerHTML=`${audio?`<div class="section-box"><h3>ملف الصوت</h3><p class="help">اختر ملف MP3 إن وجد. يمكن أيضاً وضع رابط الصوت إذا كان الملف مستضافاً مسبقاً.</p><div class="audio-box"><input id="audioFile" type="file" accept="audio/*"><input id="audioUrl" placeholder="رابط الصوت (اختياري)" value="${esc(data.audio_url||'')}"></div>${data.audio_url?`<div style="margin-top:8px"><audio controls src="${esc(data.audio_url)}" style="width:100%;height:36px"></audio></div>`:''}<div class="audio-preview">سيتم حفظ ملف الصوت المختار مباشرة مع الموضوع (حتى 5MB). ويمكنك بدلاً منه استعمال رابط مستضاف.</div></div>`:''}<div class="section-box"><h3>${audio?'الأسئلة والاختيارات':'النص الطويل والأسئلة'}</h3>${!audio?`<div class="field"><label>النص الطويل</label><textarea id="mainBody" placeholder="أدخل النص الطويل هنا">${esc(data.body||'')}</textarea></div>`:''}<div id="questions"></div><button type="button" class="small-btn add-btn" id="addQuestion">+ إضافة سؤال</button></div>`;const items=data.items||[];(items.length?items:[{}]).forEach(x=>addQuestion(x));$('addQuestion').onclick=()=>addQuestion({});}
 function addQuestion(data){const wrap=$('questions');const n=wrap.children.length+1;const opts=data.options||{};const row=document.createElement('div');row.className='question-card';row.innerHTML=`<div class="row-title"><span>السؤال ${n}</span><button type="button" class="remove-btn">حذف</button></div><textarea class="q-prompt" placeholder="نص السؤال">${esc(data.prompt||'')}</textarea><div class="choice-grid">${['A','B','C'].map(k=>`<label class="choice"><div class="choice-head"><input class="correct-radio" type="radio" name="correct-${n}" value="${k}" ${data.correct===k?'checked':''}> ${k} <span>الإجابة</span></div><input type="text" class="q-opt" data-key="${k}" value="${esc(opts[k]||'')}" placeholder="نص الاختيار"></label>`).join('')}</div>`;wrap.appendChild(row);row.querySelector('.remove-btn').onclick=()=>{row.remove();[...wrap.children].forEach((x,i)=>x.querySelector('.row-title span').textContent='السؤال '+(i+1));};}
-function renderTF(data){$('dynamic').innerHTML=`<div class="section-box"><h3>ملف الصوت</h3><div class="audio-box"><input id="audioFile" type="file" accept="audio/*"><input id="audioUrl" placeholder="رابط الصوت (اختياري)" value="${esc(data.audio_url||'')}"></div></div><div class="section-box"><h3>العبارات</h3><p class="help">لكل عبارة حدد هل الإجابة النموذجية Richtig أم Falsch.</p><div id="questions"></div><button type="button" class="small-btn add-btn" id="addQuestion">+ إضافة عبارة</button></div>`;(data.items?.length?data.items:[{}]).forEach(x=>addTF(x));$('addQuestion').onclick=()=>addTF({});}
+function renderTF(data){$('dynamic').innerHTML=`<div class="section-box"><h3>ملف الصوت</h3><div class="audio-box"><input id="audioFile" type="file" accept="audio/*"><input id="audioUrl" placeholder="رابط الصوت (اختياري)" value="${esc(data.audio_url||'')}"></div>${data.audio_url?`<div style="margin-top:8px"><audio controls src="${esc(data.audio_url)}" style="width:100%;height:36px"></audio></div>`:''}</div><div class="section-box"><h3>العبارات</h3><p class="help">لكل عبارة حدد هل الإجابة النموذجية Richtig أم Falsch.</p><div id="questions"></div><button type="button" class="small-btn add-btn" id="addQuestion">+ إضافة عبارة</button></div>`;(data.items?.length?data.items:[{}]).forEach(x=>addTF(x));$('addQuestion').onclick=()=>addTF({});}
 function addTF(data){const wrap=$('questions'),n=wrap.children.length+1,row=document.createElement('div');row.className='question-card';row.innerHTML=`<div class="row-title"><span>العبارة ${n}</span><button type="button" class="remove-btn">حذف</button></div><textarea class="q-prompt" placeholder="اكتب العبارة">${esc(data.prompt||'')}</textarea><div class="choice-grid"><label class="choice"><div class="choice-head"><input class="correct-radio" type="radio" name="tf-${n}" value="Richtig" ${data.correct==='Richtig'?'checked':''}> Richtig</div></label><label class="choice"><div class="choice-head"><input class="correct-radio" type="radio" name="tf-${n}" value="Falsch" ${data.correct==='Falsch'?'checked':''}> Falsch</div></label></div>`;wrap.appendChild(row);row.querySelector('.remove-btn').onclick=()=>{row.remove();[...wrap.children].forEach((x,i)=>x.querySelector('.row-title span').textContent='العبارة '+(i+1));};}
 function renderGap1(data){
   const items=data.items||[];
@@ -255,13 +255,16 @@ function renderBrowser(){
 
   const q=$('browserSearch').value.trim().toLowerCase();
   if(q){
-    rows=rows.filter(x=>(String(x.id||'')+' '+String(x.title||'')+' '+String(x.section||'')+' '+String(x.teil||'')+' '+String(x.body||'')).toLowerCase().includes(q));
+    rows=rows.filter(x=>{
+      const hasAudio = (q==='صوت'||q==='صوتي'||q==='audio') && !!x.audio_url;
+      return hasAudio || (String(x.id||'')+' '+String(x.title||'')+' '+String(x.section||'')+' '+String(x.teil||'')+' '+String(x.task_type||'')+' '+String(x.body||'')).toLowerCase().includes(q);
+    });
   }
 
   const badge=$('exerciseCountBadge');
   if(badge) badge.textContent=`(المعروض: ${rows.length} من إجمالي ${state.exercises.length} تمرين)`;
 
-  $('browserList').innerHTML=rows.length?rows.map((r,i)=>`<article class="student-card" data-edit-card="${r.id}"><div class="student-card-top"><span class="tag">Telc ${esc(r.level||'B2')}</span><span class="tag" style="background:#f4f6f8;color:var(--muted)">#${r.id}</span></div><h3>${esc(r.title)}</h3><div class="student-meta"><span class="tag" style="font-size:10px">${esc(sectionNames[r.section]||r.section)}</span><span>${esc(r.teil)}</span><span>${Number(r.item_count||0)} عناصر</span><span class="status ${r.status==='disabled'?'disabled':'published'}">${r.status==='disabled'?'معطل':'منشور'}</span></div><div class="open-like">فتح التمرين للتعديل ✎</div><div class="admin-actions"><button class="icon-btn" title="تعديل" data-edit="${r.id}">✎</button><button class="icon-btn" title="مضاعفة" data-clone="${r.id}">⧉</button><button class="icon-btn danger" title="حذف" data-delete="${r.id}">⌫</button></div></article>`).join(''):`<div class="empty">لا توجد تمارين تطابق التصفية الحالية.<br><small style="display:inline-block;margin-top:6px;color:var(--muted)">إجمالي التمارين المحمّلة في المنصة: ${state.exercises.length} تمرين</small><br><button class="small-btn" style="margin-top:12px" id="emptyAdd">+ إضافة موضوع جديد</button></div>`;
+  $('browserList').innerHTML=rows.length?rows.map((r,i)=>`<article class="student-card" data-edit-card="${r.id}"><div class="student-card-top"><span class="tag">Telc ${esc(r.level||'B2')}</span><span class="tag" style="background:#f4f6f8;color:var(--muted)">#${r.id}</span></div><h3>${esc(r.title)}</h3><div class="student-meta"><span class="tag" style="font-size:10px">${esc(sectionNames[r.section]||r.section)}</span><span>${esc(r.teil)}</span><span>${Number(r.item_count||0)} عناصر</span>${r.audio_url ? `<span class="tag tag-audio">🎧 صوتي</span>` : ''}<span class="status ${r.status==='disabled'?'disabled':'published'}">${r.status==='disabled'?'معطل':'منشور'}</span></div><div class="open-like">فتح التمرين للتعديل ✎</div><div class="admin-actions"><button class="icon-btn" title="تعديل" data-edit="${r.id}">✎</button><button class="icon-btn" title="مضاعفة" data-clone="${r.id}">⧉</button><button class="icon-btn danger" title="حذف" data-delete="${r.id}">⌫</button></div></article>`).join(''):`<div class="empty">لا توجد تمارين تطابق التصفية الحالية.<br><small style="display:inline-block;margin-top:6px;color:var(--muted)">إجمالي التمارين المحمّلة في المنصة: ${state.exercises.length} تمرين</small><br><button class="small-btn" style="margin-top:12px" id="emptyAdd">+ إضافة موضوع جديد</button></div>`;
 
   async function openForEdit(id){
     try{
@@ -324,28 +327,48 @@ function normalizeImportBatch(pack) {
     else if (ctx.teil !== 'ALL' && teilMap[section]?.includes(ctx.teil)) teil = ctx.teil;
     else teil = (teilMap[section] || ['Teil 1'])[0];
 
+    // Items (Questions / Gaps)
+    const rawItems = Array.isArray(raw.items) ? raw.items :
+      (Array.isArray(raw.questions) ? raw.questions :
+      (Array.isArray(raw.gaps) ? raw.gaps : []));
+
+    // Translation & Audio (support all aliases!)
+    const translation = String(raw.translation || raw.arabic_translation || raw.translation_ar || '').trim();
+    const audio_url = String(
+      raw.audio_url || raw.audioUrl || raw.audio ||
+      raw.sound_url || raw.sound || raw.audio_file ||
+      raw.media_url || raw.mediaUrl || raw.audio_path ||
+      raw.audioLink || raw.audio_link || raw.soundUrl ||
+      raw.settings?.audio_url || ''
+    ).trim();
+
+    // True/False auto-detection
+    const isTF = rawItems.length > 0 && rawItems.every(it => {
+      const sol = String(it.correct || it.correct_answer || it.answer || '').trim().toLowerCase();
+      const opts = Array.isArray(it.options) ? it.options : Array.isArray(it.choices) ? it.choices : Object.values(it.options || it.choices || {});
+      const hasTFOpts = opts.length === 2 && opts.some(o => /richtig|true/i.test(String(o?.text || o?.option_text || o))) && opts.some(o => /falsch|false/i.test(String(o?.text || o?.option_text || o)));
+      return hasTFOpts || /^(richtig|falsch|true|false|r|f|0|1)$/i.test(sol);
+    });
+
     // Task type detection
     let task_type = String(raw.task_type || raw.type || raw.format || '').toUpperCase().trim();
-    if (!['MATCHING', 'MCQ', 'AUDIO_MCQ', 'AUDIO_TF', 'GAP', 'WRITING', 'SPEAKING'].includes(task_type)) {
-      task_type = taskMap[section]?.[teil] || (section === 'Schreiben' ? 'WRITING' : section === 'Sprechen' ? 'SPEAKING' : section === 'Sprachbausteine' ? 'GAP' : 'MCQ');
+    if (isTF || (section === 'Hören' && (rawTeil.includes('2') || teil === 'Teil 2'))) {
+      task_type = 'AUDIO_TF';
+    } else if (!['MATCHING', 'MCQ', 'AUDIO_MCQ', 'AUDIO_TF', 'GAP', 'WRITING', 'SPEAKING'].includes(task_type)) {
+      if (section === 'Hören') {
+        task_type = (teil === 'Teil 3') ? 'MATCHING' : (audio_url ? 'AUDIO_MCQ' : 'MCQ');
+      } else {
+        task_type = taskMap[section]?.[teil] || (section === 'Schreiben' ? 'WRITING' : section === 'Sprechen' ? 'SPEAKING' : section === 'Sprachbausteine' ? 'GAP' : 'MCQ');
+      }
     }
 
     // Body / Passage text
     let body = String(raw.body || raw.passage || raw.text || raw.content || raw.reading_text || raw.situation || '').trim();
 
-    // Translation & Audio
-    const translation = String(raw.translation || raw.arabic_translation || raw.translation_ar || '').trim();
-    const audio_url = String(raw.audio_url || raw.audioUrl || raw.audio || raw.sound_url || '').trim();
-
     // Headings (for MATCHING)
     const headings = Array.isArray(raw.headings) ? raw.headings :
       (Array.isArray(raw.headings_list) ? raw.headings_list :
       (Array.isArray(raw.settings?.headings) ? raw.settings.headings : []));
-
-    // Items (Questions / Gaps)
-    const rawItems = Array.isArray(raw.items) ? raw.items :
-      (Array.isArray(raw.questions) ? raw.questions :
-      (Array.isArray(raw.gaps) ? raw.gaps : []));
 
     const items = rawItems.map((it, iIdx) => {
       let prompt = String(it.prompt || it.question || it.statement || it.text || it.word || it.correctText || '').trim();
@@ -377,6 +400,14 @@ function normalizeImportBatch(pack) {
             break;
           }
         }
+      }
+
+      if (task_type === 'AUDIO_TF' || isTF) {
+        let normCorrect = 'Richtig';
+        if (/^(falsch|false|f|0)$/i.test(correct)) normCorrect = 'Falsch';
+        else if (/^(richtig|true|r|1)$/i.test(correct)) normCorrect = 'Richtig';
+        correct = normCorrect;
+        options = { Richtig: 'Richtig', Falsch: 'Falsch' };
       }
 
       return {
@@ -464,6 +495,8 @@ function openImportPreview(list, filename = '') {
   });
   const summaryTags = Object.entries(summaryMap).map(([k, v]) => `<span class="tag" style="margin:2px 4px 2px 0;">${k}: ${v}</span>`).join('');
 
+  const audioCount = list.filter(x => !!x.audio_url).length;
+
   const previewEl = $('importPreviewContent');
   if (previewEl) {
     previewEl.innerHTML = `
@@ -476,6 +509,10 @@ function openImportPreview(list, filename = '') {
         <div class="import-summary-item">
           <span>إجمالي الأسئلة / الفقرات</span>
           <strong>${totalQuestions} سؤال</strong>
+        </div>
+        <div class="import-summary-item">
+          <span>تمارين بملف صوتي</span>
+          <strong style="color:#0284c7;">${audioCount} 🎧</strong>
         </div>
         <div class="import-summary-item">
           <span>التمارين الجديدة</span>

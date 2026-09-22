@@ -814,8 +814,33 @@ function renderTopics(){
     }
     let list=shuffleOrder.slice();
     if(teil) list=list.filter(x=>x.teil===teil);
-    if(q) list=list.filter(x=>((x.title||'')+' '+(x.body||'')).toLowerCase().includes(q));
-    gridEl.innerHTML=list.length?list.map((x,i)=>`<article class="topic-card"><div class="topic-card-head"><span class="topic-index">${String(i+1).padStart(2,'0')}</span><span class="tag">Telc ${esc(x.level||'B2')}</span></div><h3 class="topic-card-title"><span class="topic-status-dot ${isExerciseCompleted(x.id)?'is-done':'is-new'}" title="${isExerciseCompleted(x.id)?text('تم التدريب على هذا الموضوع من قبل','Bereits trainiert'):text('لم يتم التدريب على هذا الموضوع بعد','Noch nicht trainiert')}" aria-label="${isExerciseCompleted(x.id)?text('تم التدريب من قبل','Bereits trainiert'):text('لم يتم التدريب بعد','Noch nicht trainiert')}"></span><span>${esc(x.title)}</span></h3><div class="topic-meta"><span>${esc(x.teil)}</span><span>${esc(taskTypeLabel(x.task_type))}</span><span>${exerciseDuration(x)} ${text('دقيقة','Min.')}</span></div><a class="btn light" href="/exercise.html?id=${x.id}&duration=${exerciseDuration(x)*60}">${text('فتح التمرين','Übung öffnen')} →</a></article>`).join(''):`<div class="empty-panel"><h3>${text('لا توجد تمارين منشورة هنا','Keine veröffentlichten Übungen')}</h3><p class="muted">${text('يمكن للمشرف إضافة الموضوع من لوحة الإدارة.','Der Administrator kann Aufgaben im Adminbereich hinzufügen.')}</p></div>`;
+    if(q) list=list.filter(x=>{
+      const isAudioQuery = (q === 'صوت' || q === 'صوتي' || q === 'audio' || q === 'hör') && (!!x.audio_url || x.section === 'Hören');
+      return isAudioQuery || ((x.title||'')+' '+(x.body||'')+' '+(x.teil||'')+' '+(taskTypeLabel(x.task_type)||'')).toLowerCase().includes(q);
+    });
+    gridEl.innerHTML=list.length?list.map((x,i)=>{
+      const isCompleted=isExerciseCompleted(x.id);
+      const dur=exerciseDuration(x);
+      return `<article class="topic-card">
+        <div class="topic-card-head">
+          <span class="topic-index">${String(i+1).padStart(2,'0')}</span>
+          <div class="topic-card-tags">
+            <span class="tag">Telc ${esc(x.level||'B2')}</span>
+            ${x.audio_url ? `<span class="tag tag-audio">🎧 ${text('تسجيل صوتي','Audio')}</span>` : ''}
+          </div>
+        </div>
+        <h3 class="topic-card-title">
+          <span class="topic-status-dot ${isCompleted?'is-done':'is-new'}" title="${isCompleted?text('تم التدريب على هذا الموضوع من قبل','Bereits trainiert'):text('لم يتم التدريب على هذا الموضوع بعد','Noch nicht trainiert')}" aria-label="${isCompleted?text('تم التدريب من قبل','Bereits trainiert'):text('لم يتم التدريب بعد','Noch nicht trainiert')}"></span>
+          <span>${esc(x.title)}</span>
+        </h3>
+        <div class="topic-meta">
+          <span class="topic-meta-pill">${esc(x.teil)}</span>
+          <span class="topic-meta-pill">${esc(taskTypeLabel(x.task_type))}</span>
+          <span class="topic-meta-pill">⏱ ${dur} ${text('دقيقة','Min.')}</span>
+        </div>
+        <a class="btn light topic-open-btn" href="/exercise.html?id=${x.id}&duration=${dur*60}">${text('فتح التمرين','Übung öffnen')} →</a>
+      </article>`;
+    }).join(''):`<div class="empty-panel"><h3>${text('لا توجد تمارين منشورة هنا','Keine veröffentlichten Übungen')}</h3><p class="muted">${text('يمكن للمشرف إضافة الموضوع من لوحة الإدارة.','Der Administrator kann Aufgaben im Adminbereich hinzufügen.')}</p></div>`;
   }
 }
 
