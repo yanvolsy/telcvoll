@@ -160,6 +160,38 @@ function renderSprachbausteine1(){
  bindTextTools();
 }
 
+function renderHoerenChoiceQuestions(){
+ const items=model.items||[];
+ const activeDuration=duration || (model?.exercise ? getTelcDurationSeconds(model.exercise) : 600);
+ const initialMin=String(Math.floor(activeDuration/60)).padStart(2,'0');
+ const timer=(mockMode||activeDuration)?`<div class="progress-pill ${mockMode?'mock-global-timer':''}" id="timerEl">${initialMin}:00</div>`:'';
+ const title=mockMode?'':`<div class="thema-title-row"><h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}" class="${titleRevealed?'':'thema-title-hidden'}">${esc(model.exercise.title||'')}</h1><div class="thema-tools">${textTools(model.exercise.title||'','thema-title')}<div class="inline-translation" id="thema-title-translation"></div><button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen')}" title="${text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen')}"><span class="eye-icon ${titleRevealed?'eye-on':'eye-off'}"></span></button></div></div>`;
+ const heading=`<div class="exercise-heading hoeren-choice-heading"><div class="exercise-heading-title"><span class="tag">Telc ${esc(model.exercise.level||'B2')} · Hören</span>${title}<small>${esc(model.exercise.teil||'')}</small></div>${timer}</div>`;
+ const audio=model.exercise.audio_url?`<div class="hoeren-choice-audio"><div class="hoeren-choice-audio-icon" aria-hidden="true">🔊</div><div class="hoeren-choice-audio-player"><audio controls preload="metadata" src="${esc(model.exercise.audio_url)}"></audio></div></div>`:'';
+ const rows=items.map((it,index)=>{
+   const n=String(it.position_no), chosen=answerValue(n);
+   const detail=resultData?.details?.find(d=>String(d.prompt)===String(it.prompt));
+   const correct=detail?.correct_answer||'';
+   const qid=`hoeren-choice-q-${n}`;
+   const options=(it.options||[]).slice(0,4);
+   if(!optionOrders[n])optionOrders[n]=options.map(o=>o.option_key);
+   const byKey=new Map(options.map(o=>[String(o.option_key),o]));
+   const ordered=optionOrders[n].map(k=>byKey.get(String(k))).filter(Boolean);
+   return `<article class="hoeren-choice-card ${detail?(detail.ok?'result-correct':'result-wrong'):''}" data-item="${esc(n)}">
+     <div class="hoeren-choice-question-row"><span class="hoeren-choice-number">${index+1}.</span><div class="hoeren-choice-question" id="${qid}" data-content-id="${qid}" data-source="${esc(it.prompt||'')}">${esc(it.prompt||'')}</div><div class="hoeren-choice-question-tools">${textTools(it.prompt||'',qid)}</div></div>
+     <div class="hoeren-choice-options">${ordered.map((o,oi)=>{const oid=`hoeren-choice-o-${n}-${oi}`;const selected=String(chosen)===String(o.option_key);const isCorrect=showModelAnswers&&String(correct)===String(o.option_key);const resultClass=detail&&selected?(detail.ok?'result-correct':'result-wrong'):'';return `<div class="hoeren-choice-option-wrap"><button type="button" class="hoeren-choice-option ${selected?'selected':''} ${resultClass} ${isCorrect?'model-correct':''}" data-q="${esc(n)}" data-o="${esc(o.option_key)}"><span class="hoeren-choice-radio"></span><span class="hoeren-choice-option-text" id="${oid}" data-content-id="${oid}" data-source="${esc(o.option_text||'')}">${esc(o.option_text||'')}</span></button>${textTools(o.option_text||'',oid)}${translationBox(oid+'-translation')}</div>`;}).join('')}</div>
+     <div class="inline-translation hoeren-choice-question-translation" id="${qid}-translation"></div>
+   </article>`;
+ }).join('');
+ const toolbar=`<div class="hoeren-choice-toolbar"><span class="hoeren-choice-count">${Object.keys(answers).length} / ${items.length}</span><button type="button" class="hoeren-toolbar-btn" id="hoerenChoiceShuffle" title="${text('خلط الاختيارات','Antworten mischen')}">🔀</button></div>`;
+ const actions=`<div class="exercise-actions"><div class="exercise-nav"><button class="btn" id="checkBtn">${text(mockMode?'إنهاء الجزء':'تحقق من الإجابات',mockMode?'Teil beenden':'Antworten prüfen')}</button>${mockMode?'':`<button class="btn model-btn" id="modelBtn">${text('الإجابة النموذجية','Musterlösung')}</button>`}</div></div>`;
+ document.getElementById('content').innerHTML=`${heading}<main class="hoeren-choice-page">${audio}<div class="hoeren-choice-list-head"><div><b>AUFGABEN</b><small>${text('اختر الإجابة الصحيحة لكل سؤال','Wählen Sie die richtige Antwort für jede Frage.')}</small></div>${toolbar}</div><section class="hoeren-choice-list">${rows}</section></main>${actions}`;
+ document.querySelectorAll('.hoeren-choice-option[data-q]').forEach(b=>b.onclick=()=>selectAnswer(b.dataset.q,b.dataset.o));
+ const sh=document.getElementById('hoerenChoiceShuffle');
+ if(sh)sh.onclick=e=>{e.preventDefault();e.stopPropagation();const st=captureExerciseScroll();items.forEach(it=>{const n=String(it.position_no);optionOrders[n]=shuffle((it.options||[]).slice(0,4).map(o=>o.option_key));});rerenderExerciseStable(st);};
+ bindTextTools();
+}
+
 function renderChoiceQuestions(){
  const isLesen2=model.exercise.section==='Lesen'&&model.exercise.teil==='Teil 2';
  const gap2=model.exercise.section==='Sprachbausteine'&&model.exercise.teil==='Teil 2';
@@ -1073,7 +1105,9 @@ function renderWorkspace(){
   }));
   if(t==='WRITING')return renderWriting();
   if(t==='SPEAKING')return renderSpeaking();
-  if(isHoerenTF||t==='AUDIO_TF')return renderTF();
+  // Hören always uses the dedicated TELC True/False layout: audio above the questions,
+  // RICHTIG / FALSCH / AUSSAGE table in the middle, with the existing header and bottom actions unchanged.
+  if(model.exercise.section==='Hören')return renderTF();
   if(isSpb1)return renderSprachbausteine1();
   if(isMatching)return renderMatching();
   return renderChoiceQuestions();

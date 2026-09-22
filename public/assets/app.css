@@ -3975,3 +3975,22 @@ html[data-theme="dark"] .tag-variation {
 
 
 
+
+/* HÖREN — full-width question layout. Scoped only to the Hören choice renderer. */
+.hoeren-choice-heading{position:relative}
+.hoeren-choice-page{width:min(1120px,calc(100% - 40px));margin:0 auto;padding:24px 0 120px}
+.hoeren-choice-audio{display:flex;align-items:center;gap:14px;background:var(--white);border:1.5px solid var(--line);border-radius:18px;padding:12px 18px;margin-bottom:18px;box-shadow:var(--shadow-sm)}
+.hoeren-choice-audio-icon{width:42px;height:42px;display:grid;place-items:center;flex:0 0 42px;border-radius:50%;background:var(--green-soft);color:var(--green);font-size:19px}
+.hoeren-choice-audio-player{min-width:0;flex:1}.hoeren-choice-audio-player audio{width:100%;height:42px;display:block}
+.hoeren-choice-list-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 18px;background:var(--white);border:1.5px solid var(--line);border-radius:16px;margin-bottom:12px;box-shadow:var(--shadow-sm)}
+.hoeren-choice-list-head>div:first-child{display:flex;flex-direction:column;gap:2px}.hoeren-choice-list-head b{font-size:13px;letter-spacing:.08em}.hoeren-choice-list-head small{font-size:11px;color:var(--muted);font-weight:700}
+.hoeren-choice-toolbar{display:flex;align-items:center;gap:8px}.hoeren-choice-count{min-width:46px;padding:5px 10px;border-radius:999px;background:var(--green-soft);color:var(--green-dark);border:1px solid color-mix(in srgb,var(--green) 25%,transparent);font-size:12px;font-weight:900;text-align:center}
+.hoeren-choice-list{display:flex;flex-direction:column;gap:10px}
+.hoeren-choice-card{background:var(--white);border:1.5px solid var(--line);border-radius:18px;padding:16px 18px;box-shadow:var(--shadow-sm);transition:border-color .18s ease,background .18s ease,box-shadow .18s ease}
+.hoeren-choice-card:hover{box-shadow:var(--shadow)}
+.hoeren-choice-card.result-correct{border-color:#2d9b68;background:rgba(45,155,104,.055)}.hoeren-choice-card.result-wrong{border-color:#c94a43;background:rgba(201,74,67,.055)}
+.hoeren-choice-question-row{display:grid;grid-template-columns:30px minmax(0,1fr) auto;align-items:start;gap:8px;margin-bottom:12px}.hoeren-choice-number{font-size:16px;font-weight:900;color:var(--green);line-height:1.65}.hoeren-choice-question{font-size:15px;line-height:1.7;font-weight:800;color:var(--ink);direction:ltr;text-align:left}.hoeren-choice-question-tools{display:flex;align-items:center;gap:5px}
+.hoeren-choice-options{display:grid;grid-template-columns:1fr;gap:7px;margin-left:38px}.hoeren-choice-option-wrap{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;align-items:center}.hoeren-choice-option{width:100%;min-height:48px;display:flex;align-items:center;gap:11px;text-align:left;direction:ltr;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);padding:10px 13px;cursor:pointer;font:inherit;transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .18s ease}.hoeren-choice-option:hover{border-color:var(--green);background:var(--green-soft);transform:translateY(-1px)}
+.hoeren-choice-radio{width:18px;height:18px;min-width:18px;border:2px solid #64748b;border-radius:50%;display:inline-block}.hoeren-choice-option.selected{border-color:var(--green);background:var(--green-soft);box-shadow:0 0 0 2px color-mix(in srgb,var(--green) 20%,transparent)}.hoeren-choice-option.selected .hoeren-choice-radio{border-color:var(--green);background:var(--green);box-shadow:inset 0 0 0 4px var(--white)}.hoeren-choice-option.result-correct,.hoeren-choice-option.model-correct{border-color:#22c55e;background:rgba(34,197,94,.09)}.hoeren-choice-option.result-wrong{border-color:#ef4444;background:rgba(239,68,68,.08)}.hoeren-choice-option-text{font-size:14px;line-height:1.55;font-weight:650;flex:1}.hoeren-choice-question-translation{margin:8px 0 0 38px}
+html[data-theme="dark"] .hoeren-choice-option{background:rgba(255,255,255,.025)}
+@media(max-width:760px){.hoeren-choice-page{width:calc(100% - 20px);padding:14px 0 110px}.hoeren-choice-list-head{padding:12px}.hoeren-choice-question-row{grid-template-columns:26px minmax(0,1fr);}.hoeren-choice-question-tools{grid-column:2}.hoeren-choice-options{margin-left:0}.hoeren-choice-option-wrap{grid-template-columns:minmax(0,1fr) auto}.hoeren-choice-card{padding:14px}.hoeren-choice-audio{padding:10px 12px}.hoeren-choice-audio-icon{width:38px;height:38px;flex-basis:38px}}
