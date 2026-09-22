@@ -67,8 +67,8 @@ function bindTextTools(){const registry=toolRegistry();document.querySelectorAll
 function renderAudio(){return model.exercise.audio_url?`<div class="audio-box"><audio controls preload="metadata" src="${esc(model.exercise.audio_url)}"></audio><span>${text('الملف الصوتي','Audiodatei')}</span></div>`:'';}
 function matchingMeta(){return model.exercise.section==='Lesen'&&model.exercise.teil==='Teil 1'?{title:'ÜBERSCHRIFTEN',sub:'FÜR TEXT',ar:'العناوين'}:model.exercise.section==='Lesen'&&model.exercise.teil==='Teil 3'?{title:'SITUATIONEN',sub:'ZUORDNUNG',ar:'المواقف'}:model.exercise.section==='Hören'&&model.exercise.teil==='Teil 3'?{title:'AUSSAGEN',sub:'ZUORDNUNG',ar:'العبارات'}:{title:'AUSWAHL',sub:'ZUORDNUNG',ar:'الاختيارات'};}
 function captureExerciseScroll(){
- const anchor=document.querySelector('.exam-main .active-item, .exam-main .exam-text-card, .exam-main .tf-row, .exam-side .side-question');
- return {main:document.querySelector('.exam-main')?.scrollTop||0,side:document.querySelector('.exam-side')?.scrollTop||0,workspace:document.querySelector('.exam-workspace')?.scrollTop||0,x:window.scrollX||0,y:window.scrollY||0,anchorTop:anchor?.getBoundingClientRect().top??null};
+ const anchor=document.querySelector('.exam-main .active-item, .exam-main .exam-text-card, .exam-main .tf-row, .exam-side .side-question, .hoeren-table-row');
+ return {main:document.querySelector('.exam-main')?.scrollTop||0,side:document.querySelector('.exam-side')?.scrollTop||0,workspace:document.querySelector('.exam-workspace, .hoeren-workspace-shell')?.scrollTop||0,x:window.scrollX||0,y:window.scrollY||0,anchorTop:anchor?.getBoundingClientRect().top??null};
 }
 function restoreExerciseScroll(state){if(!state)return;const restore=()=>{const m=document.querySelector('.exam-main'),sd=document.querySelector('.exam-side'),ws=document.querySelector('.exam-workspace');if(m)m.scrollTop=state.main;if(sd)sd.scrollTop=state.side;if(ws)ws.scrollTop=state.workspace;window.scrollTo(state.x,state.y);if(state.anchorTop!==null){const anchor=document.querySelector('.exam-main .active-item, .exam-main .exam-text-card, .exam-main .tf-row, .exam-side .side-question');if(anchor){const delta=anchor.getBoundingClientRect().top-state.anchorTop;if(Math.abs(delta)>1)window.scrollTo(state.x,window.scrollY+delta);}}};restore();requestAnimationFrame(restore);requestAnimationFrame(()=>requestAnimationFrame(restore));setTimeout(restore,40);}
 function rerenderExerciseStable(state){renderWorkspace(false);bindActions();restoreExerciseScroll(state);}
@@ -260,34 +260,48 @@ function renderTF(){
   const timer = (mockMode || activeDuration) ? `<div class="progress-pill ${mockMode ? 'mock-global-timer' : ''}" id="timerEl">${initialMin}:00</div>` : '';
   const resultPanel = resultData ? `<div class="inline-result-panel ${resultData.percent >= 60 ? 'pass' : 'fail'}"><div class="result-panel-main"><span class="result-panel-label">${text('النتيجة','Ergebnis')}</span><strong>${resultData.score} / ${resultData.max}</strong></div><div class="result-panel-meta"><span>${resultData.percent}%</span><b>${esc(resultData.result || '')}</b></div></div>` : '';
 
-  const audioBox = model.exercise.audio_url ? `
-    <div class="hoeren-audio-card">
-      <div class="hoeren-audio-top-row">
-        <span class="hoeren-audio-pill-label">
-          <span class="hoeren-audio-headphone" aria-hidden="true">🎧</span>
-          <b>Hören</b>
-        </span>
+  // 1. Standard Top Heading identical to other sections
+  const mockTitle = mockMode ? '' : `
+    <div class="thema-title-row">
+      <h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}" class="${titleRevealed?'':'thema-title-hidden'}">${esc(model.exercise.title)}</h1>
+      <div class="thema-tools">
+        ${textTools(model.exercise.title||'', 'thema-title')}
+        <div class="inline-translation" id="thema-title-translation"></div>
         <button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen')}" title="${text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen')}">
           <span class="eye-icon ${titleRevealed ? 'eye-on' : 'eye-off'}" aria-hidden="true"></span>
         </button>
+      </div>
+    </div>`;
+
+  const headingBlock = `
+    <div class="exercise-heading">
+      <div class="exercise-heading-title">
+        <span class="tag">Telc ${esc(model.exercise.level||'B2')} · ${esc(model.exercise.section)}</span>
+        ${mockTitle}
+        <small>${esc(model.exercise.teil)}</small>
+      </div>
+      ${timer}
+    </div>
+    ${resultPanel}`;
+
+  // 2. Audio Player Card below title
+  const audioBox = model.exercise.audio_url ? `
+    <div class="hoeren-audio-player-card">
+      <div class="hoeren-audio-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+        </svg>
       </div>
       <div class="hoeren-audio-player-wrap">
         <audio controls preload="metadata" src="${esc(model.exercise.audio_url)}"></audio>
       </div>
     </div>` : '';
 
-  const titleBox = `
-    <div class="hoeren-topic-header">
-      <h2 id="thema-title" class="hoeren-topic-title ${titleRevealed ? '' : 'thema-title-hidden'}" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}">${esc(model.exercise.title)}</h2>
-      <div class="hoeren-topic-tools">
-        ${textTools(model.exercise.title||'', 'thema-title')}
-        <div class="inline-translation" id="thema-title-translation"></div>
-      </div>
-    </div>`;
-
-  const questionCards = orderedItems.map((it) => {
+  // 3. Question Rows matching media_1790111329552.png
+  const questionRows = orderedItems.map((it, idx) => {
     const origIdx = items.indexOf(it);
-    const dispNo = getHoerenDisplayNumber(it, origIdx, model.exercise.teil);
+    const dispNo = (origIdx >= 0) ? (origIdx + 1) : (idx + 1);
     const qid = 'hoeren-q-' + it.position_no;
     const chosen = answerValue(it.position_no);
     const detail = resultData?.details?.find(d => String(d.prompt) === String(it.prompt));
@@ -308,76 +322,75 @@ function renderTF(){
       if (correct === 'Falsch') fClass += ' model-correct';
     }
 
-    const cardStatusClass = detail ? (detail.ok ? 'item-correct' : 'item-wrong') : '';
+    const rowStatusClass = detail ? (detail.ok ? 'row-correct' : 'row-wrong') : '';
 
     return `
-      <article class="hoeren-item-card ${cardStatusClass}" data-item="${it.position_no}">
-        <div class="hoeren-item-num">${dispNo}.</div>
-        <div class="hoeren-radio-group">
-          <button type="button" class="hoeren-radio-btn ${rClass}" data-q="${it.position_no}" data-o="Richtig" aria-label="${dispNo} Richtig" title="Richtig">
-            <span class="hoeren-radio-circle"></span>
-          </button>
-          <button type="button" class="hoeren-radio-btn ${fClass}" data-q="${it.position_no}" data-o="Falsch" aria-label="${dispNo} Falsch" title="Falsch">
-            <span class="hoeren-radio-circle"></span>
+      <div class="hoeren-table-row ${rowStatusClass}" data-item="${it.position_no}">
+        <div class="hoeren-cell hoeren-cell-r">
+          <button type="button" class="hoeren-circle-radio-btn ${rClass}" data-q="${it.position_no}" data-o="Richtig" aria-label="${dispNo} Richtig" title="Richtig">
+            <span class="hoeren-circle-radio"></span>
           </button>
         </div>
-        <div class="hoeren-item-body">
-          <div class="hoeren-item-text" id="${qid}" data-content-id="${qid}" data-source="${esc(it.prompt||'')}">${esc(it.prompt)}</div>
-          <div class="hoeren-item-tools">${textTools(it.prompt||'', qid)}</div>
+        <div class="hoeren-cell hoeren-cell-f">
+          <button type="button" class="hoeren-circle-radio-btn ${fClass}" data-q="${it.position_no}" data-o="Falsch" aria-label="${dispNo} Falsch" title="Falsch">
+            <span class="hoeren-circle-radio"></span>
+          </button>
+        </div>
+        <div class="hoeren-cell hoeren-cell-statement">
+          <div class="hoeren-stmt-content">
+            <span class="hoeren-stmt-num">${dispNo}.</span>
+            <span class="hoeren-stmt-text" id="${qid}" data-content-id="${qid}" data-source="${esc(it.prompt||'')}">${esc(it.prompt)}</span>
+            <div class="hoeren-stmt-tools">${textTools(it.prompt||'', qid)}</div>
+          </div>
           <div class="inline-translation ${hoerenAllTranslated ? 'visible' : ''}" id="${qid}-translation"></div>
         </div>
-      </article>`;
+      </div>`;
   }).join('');
 
-  document.getElementById('content').innerHTML = `
-    <div class="hoeren-exercise-shell">
-      <div class="hoeren-top-nav">
-        <a class="hoeren-menu-btn" href="/dashboard.html" aria-label="${text('قائمة تمارين الاستماع','Hören Menü')}">
-          <span class="hoeren-menu-icon" aria-hidden="true">▦</span>
-          <span>${text('قائمة تمارين الاستماع','Hören Menü')}</span>
-        </a>
-        <div class="hoeren-top-right">
-          ${timer}
+  const tableCard = `
+    <div class="hoeren-table-card">
+      <div class="hoeren-table-head">
+        <div class="hoeren-th hoeren-th-r">RICHTIG</div>
+        <div class="hoeren-th hoeren-th-f">FALSCH</div>
+        <div class="hoeren-th hoeren-th-statement">AUSSAGE</div>
+        <div class="hoeren-table-toolbar">
+          <button type="button" class="hoeren-toolbar-btn ${hoerenAllTranslated ? 'active' : ''}" id="hoerenTransAll" title="${text('ترجمة جميع الجمل','Alle Aussagen übersetzen')}" aria-label="${text('ترجمة جميع الجمل','Alle Aussagen übersetzen')}">
+            <span class="hoeren-toolbar-icon">文A</span>
+          </button>
+          <button type="button" class="hoeren-toolbar-btn ${showModelAnswers ? 'active' : ''}" id="hoerenKeyBtn" title="${text('عرض الإجابة النموذجية','Musterlösung anzeigen')}" aria-label="${text('عرض الإجابة النموذجية','Musterlösung anzeigen')}">
+            <span class="hoeren-toolbar-icon">🔑</span>
+          </button>
+          <button type="button" class="hoeren-toolbar-btn" id="hoerenShuffleBtn" title="${text('خلط ترتيب الجمل','Reihenfolge mischen')}" aria-label="${text('خلط ترتيب الجمل','Reihenfolge mischen')}">
+            <span class="hoeren-toolbar-icon">🔀</span>
+          </button>
+          <button type="button" class="hoeren-toolbar-btn" id="hoerenResetBtn" title="${text('إعادة تعيين الاختيارات','Auswahl zurücksetzen')}" aria-label="${text('إعادة تعيين الاختيارات','Auswahl zurücksetzen')}">
+            <span class="hoeren-toolbar-icon">↺</span>
+          </button>
         </div>
       </div>
-
-      ${resultPanel}
-
-      <div class="hoeren-card">
-        ${audioBox}
-        ${titleBox}
-
-        <div class="hoeren-tools-row">
-          <button type="button" class="hoeren-tool-btn ${hoerenAllTranslated ? 'active' : ''}" id="hoerenTransAll" title="${text('ترجمة جميع الأسئلة','Alle Fragen übersetzen')}" aria-label="${text('ترجمة جميع الأسئلة','Alle Fragen übersetzen')}">
-            <span class="hoeren-tool-icon">🌐</span>
-          </button>
-          <button type="button" class="hoeren-tool-btn ${showModelAnswers ? 'active' : ''}" id="hoerenKeyBtn" title="${text('عرض الإجابة النموذجية','Musterlösung anzeigen')}" aria-label="${text('عرض الإجابة النموذجية','Musterlösung anzeigen')}">
-            <span class="hoeren-tool-icon">🔑</span>
-          </button>
-          <button type="button" class="hoeren-tool-btn" id="hoerenShuffleBtn" title="${text('خلط ترتيب الأسئلة','Reihenfolge mischen')}" aria-label="${text('خلط ترتيب الأسئلة','Reihenfolge mischen')}">
-            <span class="hoeren-tool-icon">🔀</span>
-          </button>
-        </div>
-
-        <div class="hoeren-columns-head" aria-hidden="true">
-          <span class="hoeren-col-r">R</span>
-          <span class="hoeren-col-f">F</span>
-        </div>
-
-        <div class="hoeren-items-list">
-          ${questionCards}
-        </div>
-      </div>
-
-      <div class="exercise-actions">
-        <div class="exercise-nav">
-          <button class="btn" id="checkBtn">${text(mockMode ? 'إنهاء الجزء' : 'تحقق من الإجابات', mockMode ? 'Teil beenden' : 'Antworten prüfen')}</button>
-          ${mockMode ? '' : `<button class="btn model-btn" id="modelBtn">${text('الإجابة النموذجية','Musterlösung')}</button>`}
-        </div>
+      <div class="hoeren-table-body">
+        ${questionRows}
       </div>
     </div>`;
 
-  document.querySelectorAll('.hoeren-radio-btn[data-q]').forEach(b => {
+  // 4. Standard Bottom Actions identical to other sections
+  const actionsBlock = `
+    <div class="exercise-actions">
+      <div class="exercise-nav">
+        <button class="btn" id="checkBtn">${text(mockMode ? 'إنهاء الجزء' : 'تحقق من الإجابات', mockMode ? 'Teil beenden' : 'Antworten prüfen')}</button>
+        ${mockMode ? '' : `<button class="btn model-btn" id="modelBtn">${text('الإجابة النموذجية','Musterlösung')}</button>`}
+      </div>
+    </div>`;
+
+  document.getElementById('content').innerHTML = `
+    ${headingBlock}
+    <div class="hoeren-workspace-shell">
+      ${audioBox}
+      ${tableCard}
+    </div>
+    ${actionsBlock}`;
+
+  document.querySelectorAll('.hoeren-circle-radio-btn[data-q]').forEach(b => {
     b.onclick = () => selectAnswer(b.dataset.q, b.dataset.o);
   });
 
@@ -386,13 +399,13 @@ function renderTF(){
     transAllBtn.onclick = async () => {
       hoerenAllTranslated = !hoerenAllTranslated;
       transAllBtn.classList.toggle('active', hoerenAllTranslated);
-      const boxes = document.querySelectorAll('.hoeren-item-card .inline-translation');
+      const boxes = document.querySelectorAll('.hoeren-table-row .inline-translation');
       if (hoerenAllTranslated) {
         for (const box of boxes) {
           box.classList.add('visible');
           if (!box.textContent.trim()) {
-            const card = box.closest('.hoeren-item-card');
-            const textEl = card?.querySelector('.hoeren-item-text');
+            const card = box.closest('.hoeren-table-row');
+            const textEl = card?.querySelector('.hoeren-stmt-text');
             const source = textEl?.dataset.source || textEl?.textContent || '';
             if (source) {
               box.classList.add('loading');
@@ -429,6 +442,18 @@ function renderTF(){
     shuffleBtn.onclick = () => {
       const st = captureExerciseScroll();
       hoerenOrder = shuffle(hoerenOrder);
+      rerenderExerciseStable(st);
+    };
+  }
+
+  const resetBtn = document.getElementById('hoerenResetBtn');
+  if (resetBtn) {
+    resetBtn.onclick = () => {
+      const st = captureExerciseScroll();
+      answers = {};
+      submitted = false;
+      resultData = null;
+      showModelAnswers = false;
       rerenderExerciseStable(st);
     };
   }

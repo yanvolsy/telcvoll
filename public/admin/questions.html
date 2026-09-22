@@ -79,7 +79,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <script>
 const state={editId:null,cloneMode:false,exercises:[],activeModalContext:null};
 const teilMap={Lesen:['Teil 1','Teil 2','Teil 3'],Hören:['Teil 1','Teil 2','Teil 3'],Sprachbausteine:['Teil 1','Teil 2'],Schreiben:['Teil 1'],Sprechen:['Teil 1','Teil 2','Teil 3']};
-const taskMap={Lesen:{'Teil 1':'MATCHING','Teil 2':'MCQ','Teil 3':'MATCHING'},Hören:{'Teil 1':'AUDIO_MCQ','Teil 2':'AUDIO_TF','Teil 3':'MATCHING'},Sprachbausteine:{'Teil 1':'GAP','Teil 2':'GAP'},Schreiben:{'Teil 1':'WRITING'},Sprechen:{'Teil 1':'SPEAKING','Teil 2':'SPEAKING','Teil 3':'SPEAKING'}};
+const taskMap={Lesen:{'Teil 1':'MATCHING','Teil 2':'MCQ','Teil 3':'MATCHING'},Hören:{'Teil 1':'AUDIO_TF','Teil 2':'AUDIO_TF','Teil 3':'AUDIO_TF'},Sprachbausteine:{'Teil 1':'GAP','Teil 2':'GAP'},Schreiben:{'Teil 1':'WRITING'},Sprechen:{'Teil 1':'SPEAKING','Teil 2':'SPEAKING','Teil 3':'SPEAKING'}};
 const sectionNames={Lesen:'Lesen — القراءة',Hören:'Hören — الاستماع',Sprachbausteine:'Sprachbausteine — القواعد والمفردات',Schreiben:'Schreiben — الكتابة',Sprechen:'Sprechen — التحدث'};
 const $=id=>document.getElementById(id); const modal=$('editorModal');
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
@@ -141,8 +141,8 @@ function refreshHeadingSelects(){const heads=[...document.querySelectorAll('.hea
 function addPara(data){const wrap=$('paras');const n=wrap.children.length+1;const row=document.createElement('div');row.className='para-card';row.innerHTML=`<div class="row-title"><span>الفقرة ${n}</span><button type="button" class="remove-btn">حذف</button></div><textarea class="para-text" placeholder="اكتب الفقرة هنا">${esc(data.prompt||'')}</textarea><label class="field-label">العنوان الصحيح للفقرة</label><select class="correct-head" data-value="${esc(data.correct||'')}"><option value="">اختر العنوان الصحيح…</option></select>`;wrap.appendChild(row);row.querySelector('.remove-btn').onclick=()=>{row.remove();[...wrap.children].forEach((x,i)=>x.querySelector('.row-title span').textContent='الفقرة '+(i+1));};refreshHeadingSelects();const sel=row.querySelector('.correct-head');if(data.correct)sel.value=data.correct;}
 function renderMCQ(data,audio){$('dynamic').innerHTML=`${audio?`<div class="section-box"><h3>ملف الصوت</h3><p class="help">اختر ملف MP3 إن وجد. يمكن أيضاً وضع رابط الصوت إذا كان الملف مستضافاً مسبقاً.</p><div class="audio-box"><input id="audioFile" type="file" accept="audio/*"><input id="audioUrl" placeholder="رابط الصوت (اختياري)" value="${esc(data.audio_url||'')}"></div>${data.audio_url?`<div style="margin-top:8px"><audio controls src="${esc(data.audio_url)}" style="width:100%;height:36px"></audio></div>`:''}<div class="audio-preview">سيتم حفظ ملف الصوت المختار مباشرة مع الموضوع (حتى 5MB). ويمكنك بدلاً منه استعمال رابط مستضاف.</div></div>`:''}<div class="section-box"><h3>${audio?'الأسئلة والاختيارات':'النص الطويل والأسئلة'}</h3>${!audio?`<div class="field"><label>النص الطويل</label><textarea id="mainBody" placeholder="أدخل النص الطويل هنا">${esc(data.body||'')}</textarea></div>`:''}<div id="questions"></div><button type="button" class="small-btn add-btn" id="addQuestion">+ إضافة سؤال</button></div>`;const items=data.items||[];(items.length?items:[{}]).forEach(x=>addQuestion(x));$('addQuestion').onclick=()=>addQuestion({});}
 function addQuestion(data){const wrap=$('questions');const n=wrap.children.length+1;const opts=data.options||{};const row=document.createElement('div');row.className='question-card';row.innerHTML=`<div class="row-title"><span>السؤال ${n}</span><button type="button" class="remove-btn">حذف</button></div><textarea class="q-prompt" placeholder="نص السؤال">${esc(data.prompt||'')}</textarea><div class="choice-grid">${['A','B','C'].map(k=>`<label class="choice"><div class="choice-head"><input class="correct-radio" type="radio" name="correct-${n}" value="${k}" ${data.correct===k?'checked':''}> ${k} <span>الإجابة</span></div><input type="text" class="q-opt" data-key="${k}" value="${esc(opts[k]||'')}" placeholder="نص الاختيار"></label>`).join('')}</div>`;wrap.appendChild(row);row.querySelector('.remove-btn').onclick=()=>{row.remove();[...wrap.children].forEach((x,i)=>x.querySelector('.row-title span').textContent='السؤال '+(i+1));};}
-function renderTF(data){$('dynamic').innerHTML=`<div class="section-box"><h3>ملف الصوت</h3><div class="audio-box"><input id="audioFile" type="file" accept="audio/*"><input id="audioUrl" placeholder="رابط الصوت (اختياري)" value="${esc(data.audio_url||'')}"></div>${data.audio_url?`<div style="margin-top:8px"><audio controls src="${esc(data.audio_url)}" style="width:100%;height:36px"></audio></div>`:''}</div><div class="section-box"><h3>العبارات</h3><p class="help">لكل عبارة حدد هل الإجابة النموذجية Richtig أم Falsch.</p><div id="questions"></div><button type="button" class="small-btn add-btn" id="addQuestion">+ إضافة عبارة</button></div>`;(data.items?.length?data.items:[{}]).forEach(x=>addTF(x));$('addQuestion').onclick=()=>addTF({});}
-function addTF(data){const wrap=$('questions'),n=wrap.children.length+1,row=document.createElement('div');row.className='question-card';row.innerHTML=`<div class="row-title"><span>العبارة ${n}</span><button type="button" class="remove-btn">حذف</button></div><textarea class="q-prompt" placeholder="اكتب العبارة">${esc(data.prompt||'')}</textarea><div class="choice-grid"><label class="choice"><div class="choice-head"><input class="correct-radio" type="radio" name="tf-${n}" value="Richtig" ${data.correct==='Richtig'?'checked':''}> Richtig</div></label><label class="choice"><div class="choice-head"><input class="correct-radio" type="radio" name="tf-${n}" value="Falsch" ${data.correct==='Falsch'?'checked':''}> Falsch</div></label></div>`;wrap.appendChild(row);row.querySelector('.remove-btn').onclick=()=>{row.remove();[...wrap.children].forEach((x,i)=>x.querySelector('.row-title span').textContent='العبارة '+(i+1));};}
+function renderTF(data){$('dynamic').innerHTML=`<div class="section-box"><h3>ملف الصوت</h3><div class="audio-box"><input id="audioFile" type="file" accept="audio/*"><input id="audioUrl" placeholder="رابط الصوت (اختياري)" value="${esc(data.audio_url||'')}"></div>${data.audio_url?`<div style="margin-top:8px"><audio controls src="${esc(data.audio_url)}" style="width:100%;height:36px"></audio></div>`:''}</div><div class="section-box"><h3>الأسئلة والعبارات (صحيح أو خطأ / Richtig & Falsch)</h3><p class="help">لكل عبارة اكتب النص وحدد الإجابة النموذجية (Richtig أم Falsch).</p><div id="questions"></div><button type="button" class="small-btn add-btn" id="addQuestion">+ إضافة سؤال / عبارة</button></div>`;(data.items?.length?data.items:[{}]).forEach(x=>addTF(x));$('addQuestion').onclick=()=>addTF({});}
+function addTF(data){const wrap=$('questions'),n=wrap.children.length+1,row=document.createElement('div');row.className='question-card';const isFalsch=/^(falsch|false|f|0|خاطئ|خطأ|b)$/i.test(String(data.correct||''));const isRichtig=/^(richtig|true|r|1|صحيح|صح|a)$/i.test(String(data.correct||''))||(!isFalsch&&!!data.correct);row.innerHTML=`<div class="row-title"><span>السؤال / العبارة ${n}</span><button type="button" class="remove-btn">حذف</button></div><textarea class="q-prompt" placeholder="اكتب العبارة أو نص السؤال هنا">${esc(data.prompt||data.question||data.statement||data.text||'')}</textarea><div class="choice-grid"><label class="choice"><div class="choice-head"><input class="correct-radio" type="radio" name="tf-${n}" value="Richtig" ${isRichtig?'checked':''}> Richtig (صحيح)</div></label><label class="choice"><div class="choice-head"><input class="correct-radio" type="radio" name="tf-${n}" value="Falsch" ${isFalsch?'checked':''}> Falsch (خطأ)</div></label></div>`;wrap.appendChild(row);row.querySelector('.remove-btn').onclick=()=>{row.remove();[...wrap.children].forEach((x,i)=>x.querySelector('.row-title span').textContent='السؤال / العبارة '+(i+1));};}
 function renderGap1(data){
   const items=data.items||[];
   const drafts=items.map((x,i)=>({correctText:x.correctText||x.prompt||'',correct:x.correct||'',options:{...(x.options||{})}}));
@@ -419,14 +419,10 @@ function normalizeImportBatch(pack) {
 
     // Task type detection
     let task_type = String(raw.task_type || raw.type || raw.format || '').toUpperCase().trim();
-    if (isTF || (section === 'Hören' && (rawTeil.includes('2') || teil === 'Teil 2'))) {
+    if (section === 'Hören' || isTF) {
       task_type = 'AUDIO_TF';
     } else if (!['MATCHING', 'MCQ', 'AUDIO_MCQ', 'AUDIO_TF', 'GAP', 'WRITING', 'SPEAKING'].includes(task_type)) {
-      if (section === 'Hören') {
-        task_type = (teil === 'Teil 3') ? 'MATCHING' : (audio_url ? 'AUDIO_MCQ' : 'MCQ');
-      } else {
-        task_type = taskMap[section]?.[teil] || (section === 'Schreiben' ? 'WRITING' : section === 'Sprechen' ? 'SPEAKING' : section === 'Sprachbausteine' ? 'GAP' : 'MCQ');
-      }
+      task_type = taskMap[section]?.[teil] || (section === 'Schreiben' ? 'WRITING' : section === 'Sprechen' ? 'SPEAKING' : section === 'Sprachbausteine' ? 'GAP' : 'MCQ');
     }
 
     // Body / Passage text
@@ -469,10 +465,19 @@ function normalizeImportBatch(pack) {
         }
       }
 
-      if (task_type === 'AUDIO_TF' || isTF) {
+      if (task_type === 'AUDIO_TF' || isTF || section === 'Hören') {
         let normCorrect = 'Richtig';
-        if (/^(falsch|false|f|0)$/i.test(correct)) normCorrect = 'Falsch';
-        else if (/^(richtig|true|r|1)$/i.test(correct)) normCorrect = 'Richtig';
+        if (/^(falsch|false|f|0|nein|خاطئ|خطأ|b)$/i.test(correct)) normCorrect = 'Falsch';
+        else if (/^(richtig|true|r|1|ja|صحيح|صح|a)$/i.test(correct)) normCorrect = 'Richtig';
+        else {
+          for (const [k, v] of Object.entries(options)) {
+            if (/^(falsch|false|f|0|خاطئ|خطأ)$/i.test(String(v).trim())) {
+              if (correct.toLowerCase() === k.toLowerCase()) normCorrect = 'Falsch';
+            } else if (/^(richtig|true|r|1|صحيح|صح)$/i.test(String(v).trim())) {
+              if (correct.toLowerCase() === k.toLowerCase()) normCorrect = 'Richtig';
+            }
+          }
+        }
         correct = normCorrect;
         options = { Richtig: 'Richtig', Falsch: 'Falsch' };
       }

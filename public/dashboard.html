@@ -207,6 +207,24 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
   </span>
 </header>
 <main class="student-hub" id="content"><div class="student-loading">جارٍ التحميل…</div></main>
+<div id="variationModal" class="variation-modal-overlay" hidden aria-hidden="true">
+  <div class="variation-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="variationModalTitle">
+    <button type="button" class="variation-modal-close" id="closeVariationModal" onclick="closeVariationModal()" aria-label="إغلاق">×</button>
+    <div class="variation-modal-header">
+      <div class="variation-modal-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+      </div>
+      <div class="variation-topic-header" id="variationTopicBadge">
+        <span class="variation-topic-icon" id="variationTopicIcon" aria-hidden="true">📖</span>
+        <strong class="variation-topic-name" id="variationTopicName"></strong>
+        <span class="variation-topic-trans" id="variationTopicTrans"></span>
+      </div>
+      <h2 class="variation-modal-title" id="variationModalTitle">التعديلات المتاحة</h2>
+      <p class="variation-modal-subtitle" id="variationModalSub"></p>
+    </div>
+    <div class="variation-modal-list" id="variationList"></div>
+  </div>
+</div>
 <script src="/assets/i18n.js?v=20260922"></script><script src="/assets/app.js?v=20260922"></script>
 <script>
 const SECTION_ORDER=['Lesen','Hören','Sprachbausteine','Schreiben','Sprechen'];
@@ -980,13 +998,19 @@ function openVariationModal(group) {
   const titleEl = $('variationModalTitle');
   const subEl = $('variationModalSub');
   const listEl = $('variationList');
+  const topicNameEl = $('variationTopicName');
+  const topicTransEl = $('variationTopicTrans');
+  const topicIconEl = $('variationTopicIcon');
 
   const primaryEx = group.items[0]?.ex;
   const translation = primaryEx?.translation || primaryEx?.settings_json?.translation || '';
-  const subText = translation ? `${group.baseTitle} (${translation})` : group.baseTitle;
+
+  if (topicNameEl) topicNameEl.textContent = group.baseTitle;
+  if (topicTransEl) topicTransEl.textContent = translation ? `(${translation})` : '';
+  if (topicIconEl) topicIconEl.textContent = sectionIcon(primaryEx?.section || state.section);
 
   if (titleEl) titleEl.textContent = text('التعديلات المتاحة', 'Verfügbare Versionen');
-  if (subEl) subEl.textContent = subText;
+  if (subEl) subEl.textContent = text(`اختر من النسخ الـ ${group.items.length} المتاحة لهذا التمرين`, `Wähle aus den ${group.items.length} verfügbaren Versionen`);
 
   if (listEl) {
     listEl.innerHTML = group.items.map((it, idx) => {
@@ -1016,10 +1040,14 @@ function closeVariationModal() {
   if (modalEl) modalEl.hidden = true;
   document.body.classList.remove('modal-open');
 }
+window.closeVariationModal = closeVariationModal;
 
-$('closeVariationModal')?.addEventListener('click', closeVariationModal);
-$('variationModal')?.addEventListener('click', (e) => {
-  if (e.target === $('variationModal')) closeVariationModal();
+document.addEventListener('click', (e) => {
+  if (e.target && (e.target.id === 'closeVariationModal' || e.target.closest('#closeVariationModal') || e.target.classList?.contains('variation-modal-close'))) {
+    closeVariationModal();
+  } else if (e.target && (e.target.id === 'variationModal' || e.target.classList?.contains('variation-modal-overlay'))) {
+    closeVariationModal();
+  }
 });
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !$('variationModal')?.hidden) closeVariationModal();
@@ -1191,17 +1219,4 @@ document.addEventListener('click', (e) => {
 })();
 document.addEventListener('langchange', render);
 </script>
-<div id="variationModal" class="variation-modal-overlay" hidden aria-hidden="true">
-  <div class="variation-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="variationModalTitle">
-    <button type="button" class="variation-modal-close" id="closeVariationModal" aria-label="إغلاق">×</button>
-    <div class="variation-modal-header">
-      <div class="variation-modal-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-      </div>
-      <h2 class="variation-modal-title" id="variationModalTitle">التعديلات المتاحة</h2>
-      <p class="variation-modal-subtitle" id="variationModalSub"></p>
-    </div>
-    <div class="variation-modal-list" id="variationList"></div>
-  </div>
-</div>
 </body></html>
