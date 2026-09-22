@@ -206,9 +206,9 @@ html[data-theme="dark"]{--exercise-accent:var(--green);--exercise-accent-soft:va
 .side-result-slot:empty{display:none}
 .side-result{margin:0 0 12px}
 .matching-controls{justify-content:flex-start;margin:6px 0 12px}
-.exercise-actions{direction:ltr;justify-content:space-between;padding:12px 22px}
-.exercise-actions .topics-back{order:0}
-.exercise-actions .exercise-nav{order:1;margin-left:auto}
+.exercise-actions{direction:ltr;justify-content:center;padding:12px 22px}
+.exercise-actions .topics-back{display:none!important}
+.exercise-actions .exercise-nav{order:0;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:10px}
 .exercise-actions .model-btn{background:var(--white);color:var(--ink);border-color:var(--line)}
 .exercise-actions .model-btn:hover{border-color:var(--exercise-accent);color:var(--exercise-accent)}
 @media(max-width:1050px){.exam-workspace{grid-template-columns:minmax(0,1fr) 330px}.exam-main{padding-inline:20px}}
@@ -298,9 +298,9 @@ html[data-theme="dark"]{--exercise-accent:var(--green);--exercise-accent-soft:va
 .exercise-page:has(.exam-workspace) .thema-title-hidden{filter:blur(10px);opacity:.72}
 .exercise-page:has(.exam-workspace) .thema-tools{position:relative;display:flex;align-items:center;gap:6px}
 .exercise-page:has(.exam-workspace) .thema-tools .inline-translation{position:absolute;top:42px;left:50%;transform:translateX(-50%);width:min(760px,80vw);z-index:20}
-.exercise-actions{direction:ltr!important;display:flex!important;align-items:center!important;justify-content:space-between!important}
-.exercise-actions .topics-back{order:0!important}
-.exercise-actions .exercise-nav{order:1!important;margin-left:auto!important;display:flex!important;gap:10px!important}
+.exercise-actions{direction:ltr!important;display:flex!important;align-items:center!important;justify-content:center!important}
+.exercise-actions .topics-back{display:none!important}
+.exercise-actions .exercise-nav{order:0!important;margin:0 auto!important;display:flex!important;gap:10px!important;justify-content:center!important}
 .exercise-actions .btn{white-space:nowrap}
 
 @media(max-width:1050px){
@@ -2747,4 +2747,338 @@ html[data-theme="dark"] .exercise-actions {
   -webkit-backdrop-filter: blur(14px) !important;
   box-shadow: 0 8px 24px rgba(244, 123, 32, 0.38) !important;
 }
+
+/* ==========================================================================
+   TELC Voll — Centered Exercise Bottom Action Bar & Mobile Responsive Layout
+   ========================================================================== */
+
+/* 1. Global Bottom Action Bar: Centered, Compact & Translucent */
+.exercise-actions {
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 70 !important;
+  min-height: 64px !important;
+  padding: 10px 20px !important;
+  direction: ltr !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(18px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(180%) !important;
+  border-top: 1px solid var(--line) !important;
+  box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.04) !important;
+}
+
+html[data-theme="dark"] .exercise-actions {
+  background: rgba(11, 15, 14, 0.90) !important;
+  border-top-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+.exercise-actions .topics-back {
+  display: none !important;
+}
+
+.exercise-actions .exercise-nav {
+  order: 0 !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  width: auto !important;
+}
+
+.exercise-actions .btn {
+  height: 44px !important;
+  padding: 0 20px !important;
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+  border-radius: 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  white-space: nowrap !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+}
+
+.exercise-actions .btn:hover {
+  transform: translateY(-1px) !important;
+}
+
+/* 2. Responsive Exercise Layout for Mobile Screens (<= 768px) */
+@media (max-width: 768px) {
+  /* Outer Page: Reset fixed locked heights and eliminate empty space */
+  .exercise-page,
+  .exercise-page:has(.exam-workspace) {
+    height: auto !important;
+    min-height: 100vh !important;
+    overflow-y: visible !important;
+    overflow-x: hidden !important;
+    padding-bottom: 84px !important;
+  }
+
+  /* Exercise Heading: Clean centered mobile banner */
+  .exercise-heading,
+  .exercise-page:has(.exam-workspace) .exercise-heading {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    height: auto !important;
+    min-height: auto !important;
+    flex: none !important;
+    padding: 16px 14px 12px 14px !important;
+    gap: 8px !important;
+    text-align: center !important;
+    border-bottom: 1px solid var(--line) !important;
+  }
+
+  .exercise-heading-title {
+    margin: 0 !important;
+    margin-inline-start: 0 !important;
+    text-align: center !important;
+    width: 100% !important;
+    flex: none !important;
+  }
+
+  .exercise-heading h1,
+  .exercise-page:has(.exam-workspace) .thema-title-row h1 {
+    font-size: clamp(22px, 5.8vw, 32px) !important;
+    line-height: 1.25 !important;
+    margin: 4px 0 6px 0 !important;
+  }
+
+  .exercise-heading .tag {
+    font-size: 11px !important;
+    padding: 3px 10px !important;
+  }
+
+  .exercise-heading small {
+    font-size: 11px !important;
+    display: inline-block !important;
+  }
+
+  /* In mobile, if main has audio player, suppress duplicate header audio player */
+  .exercise-page:has(.exam-main .audio-box) .exercise-heading > .audio-box {
+    display: none !important;
+  }
+
+  /* Workspace: Single-column full width, no trapped scroll or locked heights */
+  .exam-workspace,
+  .exercise-page:has(.exam-workspace) .exam-workspace {
+    display: block !important;
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    border-top: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Exercise Main Area: Full width, comfortable padding */
+  .exam-main,
+  .exercise-page:has(.exam-workspace) .exam-main {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding: 12px 14px 84px 14px !important;
+    margin: 0 !important;
+  }
+
+  /* Hören / True-False: Suppress duplicated sidebar on mobile */
+  .exam-workspace.tf-workspace .exam-side,
+  .exam-workspace.hoeren-workspace.tf-workspace .exam-side {
+    display: none !important;
+  }
+
+  /* Other exercises: Stack sidebar neatly below main content without overflow */
+  .exam-workspace:not(.tf-workspace) .exam-side {
+    position: static !important;
+    height: auto !important;
+    max-height: none !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    border-inline-start: 0 !important;
+    border-top: 1px solid var(--line) !important;
+    padding: 16px 14px 84px 14px !important;
+    overflow: visible !important;
+  }
+
+  /* Centered, Clean Audio Box */
+  .audio-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 4px auto 16px auto !important;
+    padding: 12px 14px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    border-radius: 16px !important;
+    text-align: center !important;
+  }
+
+  .audio-box audio {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .audio-box span {
+    font-size: 13px !important;
+    font-weight: 850 !important;
+    justify-content: center !important;
+  }
+
+  /* Hören True/False Cards: Clean vertical cards with full-width Richtig/Falsch buttons */
+  .tf-list {
+    margin-top: 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    width: 100% !important;
+  }
+
+  .tf-row {
+    display: grid !important;
+    grid-template-columns: 34px minmax(0, 1fr) !important;
+    gap: 10px 12px !important;
+    padding: 14px 14px 16px !important;
+    border-radius: 16px !important;
+    border: 1.5px solid var(--line) !important;
+    background: var(--white) !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    align-items: start !important;
+    margin-bottom: 0 !important;
+  }
+
+  html[data-theme="dark"] .tf-row {
+    background: rgba(18, 26, 22, 0.75) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+  }
+
+  .tf-row .item-number {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    border-radius: 10px !important;
+    font-size: 13.5px !important;
+    font-weight: 950 !important;
+    margin: 0 !important;
+    display: grid !important;
+    place-items: center !important;
+  }
+
+  .tf-row .tf-text {
+    min-width: 0 !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+    font-size: 14.5px !important;
+    line-height: 1.6 !important;
+    font-weight: 700 !important;
+    color: var(--ink) !important;
+    padding-top: 2px !important;
+  }
+
+  .tf-row .tf-actions {
+    grid-column: 1 / -1 !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin-top: 6px !important;
+  }
+
+  .tf-row .tf-actions .side-option {
+    width: 100% !important;
+    min-height: 44px !important;
+    height: 44px !important;
+    padding: 0 12px !important;
+    font-size: 13.5px !important;
+    font-weight: 850 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    border-radius: 12px !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    border: 1.5px solid var(--line) !important;
+    background: var(--bg) !important;
+    color: var(--ink) !important;
+    transition: all 0.15s ease !important;
+  }
+
+  .tf-row .tf-actions .side-option.selected {
+    border-color: var(--green) !important;
+    background: var(--green-soft) !important;
+    color: var(--green-dark) !important;
+    box-shadow: 0 0 0 2px var(--green) !important;
+  }
+
+  /* Compact Mobile Action Bar */
+  .exercise-actions {
+    min-height: 60px !important;
+    padding: 8px 14px !important;
+    justify-content: center !important;
+  }
+
+  .exercise-actions .btn {
+    height: 42px !important;
+    padding: 0 16px !important;
+    font-size: 12.5px !important;
+  }
+
+  .exercise-actions .exercise-nav {
+    gap: 8px !important;
+    justify-content: center !important;
+  }
+
+  /* General Exercise Mobile Safeguards */
+  .exam-text-card {
+    padding: 16px 14px !important;
+    border-radius: 16px !important;
+  }
+
+  .paragraph-assignment {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .paragraph-assignment select {
+    width: 100% !important;
+    max-width: 100% !important;
+    font-size: 13px !important;
+  }
+
+  .writing-workspace {
+    grid-template-columns: 1fr !important;
+  }
+
+  .writing-editor {
+    border-inline-start: 0 !important;
+    border-top: 1px solid var(--line) !important;
+    padding: 16px 14px 84px !important;
+  }
+
+  .speaking-layout {
+    grid-template-columns: 1fr !important;
+  }
+
+  .speaking-chat {
+    max-height: 45vh !important;
+  }
+}
+
 
