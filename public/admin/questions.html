@@ -20,7 +20,7 @@
 @media(max-width:600px){.exercise-admin{padding:20px 13px 55px}.admin-head{align-items:flex-start;flex-direction:column}.browser-filters{grid-template-columns:1fr}.modal{padding:8px}.modal-box{max-height:96vh;border-radius:18px}.modal-body{padding:15px}.modal-head{padding:15px}.modal-footer{padding:12px 15px}.dynamic-row{align-items:stretch}.dynamic-row .remove-btn{align-self:center}}
 
 .browser.drag-over{outline:2px dashed var(--green) !important;outline-offset:-4px;background:color-mix(in srgb,var(--green-soft) 45%,transparent) !important}
-.import-summary-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}
+.import-summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:14px 0}
 .import-summary-item{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
 .import-summary-item span{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}
 .import-summary-item strong{font-size:16px;color:var(--ink)}
@@ -236,6 +236,67 @@ async function collect(){const c=state.activeModalContext||currentContext();cons
 function validate(data){if(!data.title)throw Error('اكتب عنوان الموضوع.');if(data.task_type==='MATCHING'){if(data.headings.length<2)throw Error('أضف عنوانين على الأقل.');if(!data.items.length)throw Error('أضف فقرة واحدة على الأقل.');if(data.items.some(x=>!x.prompt.trim()||!x.correct))throw Error('أكمل نص كل فقرة وحدد عنوانها الصحيح.');}if(['MCQ','AUDIO_MCQ'].includes(data.task_type)){if(!data.items.length)throw Error('أضف سؤالاً واحداً على الأقل.');if(data.items.some(x=>!x.prompt.trim()||!x.correct||Object.keys(x.options).length!==3||Object.values(x.options).some(v=>!String(v).trim())))throw Error('كل سؤال يجب أن يحتوي على سؤال و3 اختيارات وتحديد الإجابة الصحيحة.');}if(data.task_type==='AUDIO_TF'&&data.items.some(x=>!x.prompt.trim()||!x.correct))throw Error('أكمل كل عبارة وحدد Richtig أو Falsch.');if(data.task_type==='GAP'){if(!data.body.trim())throw Error('أدخل النص.');if(!data.items.length)throw Error('أضف فراغاً واحداً على الأقل.');if(data.section==='Sprachbausteine'&&data.teil==='Teil 1'&&data.items.some(x=>!x.correctText.trim()||!['A','B','C'].includes(x.correct)||Object.keys(x.options).length!==3||Object.values(x.options).some(v=>!String(v).trim())))throw Error('أكمل كل فراغ بكلمة صحيحة و3 اختيارات وحدد الصحيحة.');if(data.section==='Sprachbausteine'&&data.teil==='Teil 2'&&data.items.some(x=>!x.correctText.trim()||!x.correct))throw Error('أكمل الكلمات الصحيحة لكل الفراغات.');}if(['WRITING','SPEAKING'].includes(data.task_type)&&!data.body.trim())throw Error('أدخل نص الموضوع.');}
 async function save(){try{const data=await collect();validate(data);await api('admin-questions',{method:state.editId&&!state.cloneMode?'PUT':'POST',body:data});closeModal();showToast(state.editId&&!state.cloneMode?'تم تعديل الموضوع بنجاح':'تمت إضافة الموضوع بنجاح');await load();}catch(e){showToast(e.message||'حدث خطأ',true);}}
 function showToast(msg,bad=false){const t=$('toast');t.textContent=msg;t.className='toast show'+(bad?' bad':'');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.className='toast',2600);}
+
+function parseVariationInfo(rawTitle, settings = {}) {
+  const str = String(rawTitle || '').trim();
+  if (settings && settings.variation_label) {
+    return {
+      baseTitle: String(settings.base_title || str).trim(),
+      isVariation: true,
+      variationNumber: Number(settings.variation_no || 1),
+      label: String(settings.variation_label).trim()
+    };
+  }
+
+  // 1. Explicit Arabic variation keywords: "معدل", "تعديل", "نسخة"
+  const arabicMatch = str.match(/^(.*?)(?:[\s\-_–—]+|\s*[\(\[])(?:معدل|تعديل|نسخة|النسخة المعدلة)[\s\-_–—]*(\d+)?[\)\]]?$/i);
+  if (arabicMatch && arabicMatch[1].trim()) {
+    const base = arabicMatch[1].trim();
+    const num = arabicMatch[2] ? parseInt(arabicMatch[2], 10) : 1;
+    return {
+      baseTitle: base,
+      isVariation: true,
+      variationNumber: num,
+      label: num > 1 ? `المعدل ${num}` : (arabicMatch[2] ? `المعدل ${num}` : 'المعدل 1')
+    };
+  }
+
+  // 2. Explicit Latin variation keywords: "modifiziert", "variant", "variation", "v1", "v2"
+  const latinMatch = str.match(/^(.*?)(?:[\s\-_–—]+|\s*[\(\[])(?:modifiziert|variant|variation|var\.?|v\.?)[\s\-_–—]*(\d+)?[\)\]]?$/i);
+  if (latinMatch && latinMatch[1].trim()) {
+    const base = latinMatch[1].trim();
+    const num = latinMatch[2] ? parseInt(latinMatch[2], 10) : 1;
+    return {
+      baseTitle: base,
+      isVariation: true,
+      variationNumber: num,
+      label: num > 1 ? `المعدل ${num}` : `المعدل 1`
+    };
+  }
+
+  // 3. Trailing number after hyphen or space e.g. "Sport ist gesund - 1", "Sport ist gesund 1", "Sport ist gesund (1)"
+  const numMatch = str.match(/^(.*?)(?:[\s\-_–—]+|\s*[\(\[])(\d+)[\)\]]?$/);
+  if (numMatch && numMatch[1].trim()) {
+    const base = numMatch[1].trim();
+    const num = parseInt(numMatch[2], 10);
+    if (base.length >= 3 && num >= 1 && num <= 20) {
+      return {
+        baseTitle: base,
+        isVariation: true,
+        variationNumber: num,
+        label: `المعدل ${num}`
+      };
+    }
+  }
+
+  return {
+    baseTitle: str,
+    isVariation: false,
+    variationNumber: 0,
+    label: 'الأساسي'
+  };
+}
+
 function renderBrowser(){
   const c=currentContext();
   const cLvl=norm(c.level);
@@ -257,14 +318,20 @@ function renderBrowser(){
   if(q){
     rows=rows.filter(x=>{
       const hasAudio = (q==='صوت'||q==='صوتي'||q==='audio') && !!x.audio_url;
-      return hasAudio || (String(x.id||'')+' '+String(x.title||'')+' '+String(x.section||'')+' '+String(x.teil||'')+' '+String(x.task_type||'')+' '+String(x.body||'')).toLowerCase().includes(q);
+      const isVarQuery = (q==='معدل'||q==='تعديل'||q==='تعديلات') && parseVariationInfo(x.title, x.settings_json).isVariation;
+      return hasAudio || isVarQuery || (String(x.id||'')+' '+String(x.title||'')+' '+String(x.section||'')+' '+String(x.teil||'')+' '+String(x.task_type||'')+' '+String(x.body||'')).toLowerCase().includes(q);
     });
   }
 
   const badge=$('exerciseCountBadge');
   if(badge) badge.textContent=`(المعروض: ${rows.length} من إجمالي ${state.exercises.length} تمرين)`;
 
-  $('browserList').innerHTML=rows.length?rows.map((r,i)=>`<article class="student-card" data-edit-card="${r.id}"><div class="student-card-top"><span class="tag">Telc ${esc(r.level||'B2')}</span><span class="tag" style="background:#f4f6f8;color:var(--muted)">#${r.id}</span></div><h3>${esc(r.title)}</h3><div class="student-meta"><span class="tag" style="font-size:10px">${esc(sectionNames[r.section]||r.section)}</span><span>${esc(r.teil)}</span><span>${Number(r.item_count||0)} عناصر</span>${r.audio_url ? `<span class="tag tag-audio">🎧 صوتي</span>` : ''}<span class="status ${r.status==='disabled'?'disabled':'published'}">${r.status==='disabled'?'معطل':'منشور'}</span></div><div class="open-like">فتح التمرين للتعديل ✎</div><div class="admin-actions"><button class="icon-btn" title="تعديل" data-edit="${r.id}">✎</button><button class="icon-btn" title="مضاعفة" data-clone="${r.id}">⧉</button><button class="icon-btn danger" title="حذف" data-delete="${r.id}">⌫</button></div></article>`).join(''):`<div class="empty">لا توجد تمارين تطابق التصفية الحالية.<br><small style="display:inline-block;margin-top:6px;color:var(--muted)">إجمالي التمارين المحمّلة في المنصة: ${state.exercises.length} تمرين</small><br><button class="small-btn" style="margin-top:12px" id="emptyAdd">+ إضافة موضوع جديد</button></div>`;
+  $('browserList').innerHTML=rows.length?rows.map((r,i)=>{
+    const vInfo = parseVariationInfo(r.title, r.settings_json);
+    const isVar = vInfo.isVariation || (r.settings_json && r.settings_json.is_variation);
+    const varBadge = isVar ? `<span class="tag tag-variation" style="font-size:10px;">📚 ${esc(vInfo.label || 'معدل')}</span>` : '';
+    return `<article class="student-card" data-edit-card="${r.id}"><div class="student-card-top"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="tag">Telc ${esc(r.level||'B2')}</span>${varBadge}</div><span class="tag" style="background:#f4f6f8;color:var(--muted)">#${r.id}</span></div><h3>${esc(r.title)}</h3><div class="student-meta"><span class="tag" style="font-size:10px">${esc(sectionNames[r.section]||r.section)}</span><span>${esc(r.teil)}</span><span>${Number(r.item_count||0)} عناصر</span>${r.audio_url ? `<span class="tag tag-audio">🎧 صوتي</span>` : ''}<span class="status ${r.status==='disabled'?'disabled':'published'}">${r.status==='disabled'?'معطل':'منشور'}</span></div><div class="open-like">فتح التمرين للتعديل ✎</div><div class="admin-actions"><button class="icon-btn" title="تعديل" data-edit="${r.id}">✎</button><button class="icon-btn" title="مضاعفة" data-clone="${r.id}">⧉</button><button class="icon-btn danger" title="حذف" data-delete="${r.id}">⌫</button></div></article>`;
+  }).join(''):`<div class="empty">لا توجد تمارين تطابق التصفية الحالية.<br><small style="display:inline-block;margin-top:6px;color:var(--muted)">إجمالي التمارين المحمّلة في المنصة: ${state.exercises.length} تمرين</small><br><button class="small-btn" style="margin-top:12px" id="emptyAdd">+ إضافة موضوع جديد</button></div>`;
 
   async function openForEdit(id){
     try{
@@ -445,15 +512,39 @@ function normalizeImportBatch(pack) {
     };
   });
 
-  // Duplicate detection against existing state.exercises
+  // Duplicate detection & variation classification
+  const seenInBatch = new Set();
   normalized.forEach(ex => {
-    const isDup = state.exercises.some(existing =>
+    const varInfo = parseVariationInfo(ex.title, ex.settings);
+    const exKey = `${ex.level}|${ex.section.toLowerCase()}|${ex.teil.toLowerCase().replace(/\s+/g, '')}|${norm(ex.title)}`;
+
+    const exactInDb = state.exercises.some(existing =>
       String(existing.level || '').toUpperCase() === ex.level &&
       String(existing.section || '').toLowerCase() === ex.section.toLowerCase() &&
       String(existing.teil || '').toLowerCase().replace(/\s+/g, '') === ex.teil.toLowerCase().replace(/\s+/g, '') &&
       norm(existing.title) === norm(ex.title)
     );
-    ex._isDuplicate = isDup;
+    const exactInBatch = seenInBatch.has(exKey);
+    seenInBatch.add(exKey);
+    const isExactDup = exactInDb || exactInBatch;
+
+    if (varInfo.isVariation) {
+      ex._isVariation = true;
+      ex._variationInfo = varInfo;
+      // It is a variation: not a duplicate unless the exact variation already exists
+      ex._isDuplicate = isExactDup;
+      ex.settings = {
+        ...(ex.settings || {}),
+        is_variation: true,
+        base_title: varInfo.baseTitle,
+        variation_label: varInfo.label,
+        variation_no: varInfo.variationNumber
+      };
+    } else {
+      ex._isVariation = false;
+      ex._variationInfo = varInfo;
+      ex._isDuplicate = isExactDup;
+    }
   });
 
   return normalized;
@@ -485,6 +576,7 @@ async function handleImportFile(file) {
 function openImportPreview(list, filename = '') {
   pendingImportList = list;
   const dupCount = list.filter(x => x._isDuplicate).length;
+  const varCount = list.filter(x => x._isVariation).length;
   const totalQuestions = list.reduce((sum, x) => sum + (x.items?.length || 0), 0);
 
   // Group by level and section
@@ -517,6 +609,10 @@ function openImportPreview(list, filename = '') {
         <div class="import-summary-item">
           <span>التمارين الجديدة</span>
           <strong style="color:var(--green);">${list.length - dupCount} موضوع</strong>
+        </div>
+        <div class="import-summary-item">
+          <span>التعديلات المكتشفة</span>
+          <strong style="color:#6366f1;">${varCount} تعديلات 📚</strong>
         </div>
         <div class="import-summary-item">
           <span>التمارين المكررة</span>

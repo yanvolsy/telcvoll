@@ -2147,25 +2147,84 @@ html[data-theme="dark"] .exercise-actions {
   cursor: pointer;
   font-weight: 850;
   font-size: 12px;
+  color: var(--ink);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 5px;
 }
+.pres-cat-btn span {
+  color: inherit;
+}
+.pres-cat-btn small {
+  color: var(--muted);
+  font-size: 10.5px;
+}
 .pres-cat-btn span:first-child {
   font-size: 20px;
 }
 .pres-cat-btn:hover {
-  border-color: var(--green);
+  border-color: #ff7a00;
   transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(16, 35, 30, 0.06);
+  box-shadow: 0 6px 18px rgba(255, 122, 0, 0.18);
 }
 .pres-cat-btn.active {
-  background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
-  color: #fff;
-  border-color: var(--green);
-  box-shadow: 0 6px 18px rgba(249, 115, 22, 0.35);
+  background: linear-gradient(135deg, #ff7a00 0%, #ea580c 100%) !important;
+  color: #ffffff !important;
+  border-color: #ff7a00 !important;
+  box-shadow: 0 4px 18px rgba(255, 122, 0, 0.48), 0 0 12px rgba(255, 122, 0, 0.35) !important;
+}
+.pres-cat-btn.active span,
+.pres-cat-btn.active small {
+  color: #ffffff !important;
+}
+
+/* Sprechen Studio Dark Mode: white crisp text */
+html[data-theme="dark"] .pres-input-panel {
+  background: #111815 !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  color: #F5F7F6 !important;
+}
+html[data-theme="dark"] .pres-input-panel h3 {
+  color: #F5F7F6 !important;
+}
+html[data-theme="dark"] .pres-input-panel small.muted {
+  color: #A7B0AB !important;
+}
+html[data-theme="dark"] .pres-input-panel label {
+  color: #E2E8F0 !important;
+}
+html[data-theme="dark"] .pres-input-panel textarea {
+  background: #0B0F0E !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  color: #F5F7F6 !important;
+}
+html[data-theme="dark"] .pres-cat-btn {
+  background: #111815 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #F5F7F6 !important;
+}
+html[data-theme="dark"] .pres-cat-btn span {
+  color: #F5F7F6 !important;
+}
+html[data-theme="dark"] .pres-cat-btn small {
+  color: #CBD5E1 !important;
+}
+html[data-theme="dark"] .pres-cat-btn:hover {
+  background: #151D19 !important;
+  border-color: #ff7a00 !important;
+  color: #ffffff !important;
+}
+html[data-theme="dark"] .pres-cat-btn.active {
+  background: linear-gradient(135deg, #ff7a00 0%, #ea580c 100%) !important;
+  color: #ffffff !important;
+  border-color: #ff7a00 !important;
+  box-shadow: 0 4px 18px rgba(255, 122, 0, 0.48), 0 0 12px rgba(255, 122, 0, 0.35) !important;
+}
+html[data-theme="dark"] .pres-cat-btn.active span,
+html[data-theme="dark"] .pres-cat-btn.active small {
+  color: #ffffff !important;
 }
 .pres-input-panel {
   border: 1.5px solid var(--line);
@@ -2549,18 +2608,40 @@ html[data-theme="dark"] body.admin-shell .admin-footer {
   background: #0b0f0e !important;
 }
 
-/* Student level switcher: active state must remain visible for B1, B2 and C1 */
+/* Student level switcher & section buttons: active state radiant orange and glowing in light & dark mode */
 .level-switch .level-btn.active,
 .level-switch .level-btn.active:hover,
 .level-switch .level-btn[aria-pressed="true"] {
-  background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%) !important;
-  color: #fff !important;
+  background: linear-gradient(135deg, #ff7a00 0%, #ea580c 100%) !important;
+  color: #ffffff !important;
   opacity: 1 !important;
-  box-shadow: 0 6px 18px rgba(244,123,32,.28) !important;
+  border-radius: 999px !important;
+  box-shadow: 0 4px 18px rgba(255, 122, 0, 0.48), 0 0 12px rgba(255, 122, 0, 0.35) !important;
 }
 .level-switch .level-btn:not(.active):hover {
-  background: color-mix(in srgb, var(--green-soft) 70%, transparent) !important;
-  color: var(--ink) !important;
+  background: rgba(255, 122, 0, 0.12) !important;
+  color: #ff7a00 !important;
+}
+
+.section-switch .section-btn.active,
+.section-switch .section-btn.active:hover {
+  background: linear-gradient(135deg, #ff7a00 0%, #ea580c 100%) !important;
+  color: #ffffff !important;
+  border-color: #ff7a00 !important;
+  box-shadow: 0 4px 18px rgba(255, 122, 0, 0.48), 0 0 12px rgba(255, 122, 0, 0.35) !important;
+}
+.section-switch .section-btn.active span,
+.section-switch .section-btn.active b,
+.section-switch .section-btn.active small {
+  color: #ffffff !important;
+}
+
+.teil-tab.active,
+.topic-toolbar .teil-tab.active {
+  background: linear-gradient(135deg, #ff7a00 0%, #ea580c 100%) !important;
+  color: #ffffff !important;
+  border-color: #ff7a00 !important;
+  box-shadow: 0 4px 18px rgba(255, 122, 0, 0.45) !important;
 }
 
 /* TELC Voll admin dark-mode consistency */
@@ -3281,7 +3362,7 @@ html[data-theme="dark"] .side-icon {
   background: rgba(240, 246, 252, 0.7);
   border: 1px solid color-mix(in srgb, var(--line) 80%, #38bdf8);
   border-radius: 18px;
-  padding: 16px 20px;
+  padding: 14px 20px 18px;
   margin-bottom: 20px;
   display: flex;
   flex-direction: column;
@@ -3293,37 +3374,38 @@ html[data-theme="dark"] .hoeren-audio-card {
   border-color: rgba(255, 255, 255, 0.1);
 }
 
-.hoeren-audio-title-row,
-.hoeren-title-only-row {
+.hoeren-audio-top-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 14px;
+  justify-content: center;
+  position: relative;
+  width: 100%;
 }
 
-.hoeren-audio-title-left {
-  display: flex;
+.hoeren-audio-pill-label {
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  flex: 1;
-  min-width: 0;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 850;
+  color: var(--ink);
 }
 
 .hoeren-audio-headphone {
-  font-size: 20px;
+  font-size: 18px;
   flex-shrink: 0;
 }
 
-.hoeren-audio-card h1,
-.hoeren-title-only-row h1 {
-  font-size: 20px;
-  font-weight: 800;
-  margin: 0;
-  color: var(--ink);
-  letter-spacing: -0.02em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.hoeren-audio-top-row .title-reveal {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+body[dir="rtl"] .hoeren-audio-top-row .title-reveal {
+  right: auto;
+  left: 0;
 }
 
 .hoeren-audio-player-wrap {
@@ -3335,6 +3417,38 @@ html[data-theme="dark"] .hoeren-audio-card {
   height: 40px;
   border-radius: 10px;
   outline: none;
+}
+
+/* Topic Title below Audio */
+.hoeren-topic-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 10px 0 16px;
+  gap: 14px;
+  direction: ltr !important;
+}
+
+.hoeren-topic-title {
+  font-size: 26px;
+  font-weight: 850;
+  margin: 0;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  text-align: left;
+  direction: ltr !important;
+}
+
+.hoeren-topic-title.thema-title-hidden {
+  filter: blur(8px);
+  user-select: none;
+  opacity: 0.35;
+}
+
+.hoeren-topic-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 /* Toolbar Row */
@@ -3605,6 +3719,234 @@ html[data-theme="dark"] .topic-meta-pill {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.08);
 }
+
+/* ========================================================
+   AVAILABLE VARIATIONS MODAL (التعديلات المتاحة)
+   ======================================================== */
+.variation-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(5, 10, 16, 0.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  animation: fadeInVarModal 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.variation-modal-overlay[hidden] {
+  display: none !important;
+}
+
+@keyframes fadeInVarModal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.variation-modal-dialog {
+  background: #141b27;
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 22px;
+  max-width: 440px;
+  width: 100%;
+  padding: 28px 24px 24px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  position: relative;
+  text-align: center;
+  animation: scaleInVarModal 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html[data-theme="light"] .variation-modal-dialog {
+  background: #ffffff;
+  color: #10231e;
+  border-color: rgba(16, 35, 30, 0.12);
+  box-shadow: 0 20px 50px rgba(16, 35, 30, 0.15);
+}
+
+@keyframes scaleInVarModal {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.variation-modal-close {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 24px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+body[dir="ltr"] .variation-modal-close {
+  left: auto;
+  right: 14px;
+}
+
+.variation-modal-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+html[data-theme="light"] .variation-modal-close:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: #10231e;
+}
+
+.variation-modal-header {
+  margin-bottom: 22px;
+}
+
+.variation-modal-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: rgba(59, 130, 246, 0.16);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.28);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.variation-modal-title {
+  font-size: 19px;
+  font-weight: 850;
+  margin: 0 0 4px;
+  letter-spacing: -0.01em;
+}
+
+.variation-modal-subtitle {
+  font-size: 13.5px;
+  color: #94a3b8;
+  margin: 0;
+  font-weight: 500;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+html[data-theme="light"] .variation-modal-subtitle {
+  color: #65736f;
+}
+
+.variation-modal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.variation-item-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-radius: 12px;
+  background: #1c2433;
+  border: 1.5px solid rgba(255, 255, 255, 0.07);
+  color: #f1f5f9;
+  text-decoration: none;
+  font-size: 15.5px;
+  font-weight: 750;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  direction: rtl;
+}
+
+body[dir="ltr"] .variation-item-btn {
+  direction: ltr;
+}
+
+html[data-theme="light"] .variation-item-btn {
+  background: #f8fafc;
+  color: #10231e;
+  border-color: #e2e8f0;
+}
+
+.variation-item-btn:hover {
+  background: #242f44;
+  border-color: rgba(96, 165, 250, 0.55);
+  transform: translateY(-1.5px);
+  color: #ffffff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+html[data-theme="light"] .variation-item-btn:hover {
+  background: #ffffff;
+  border-color: var(--green);
+  color: var(--green-dark);
+  box-shadow: 0 4px 14px rgba(16, 35, 30, 0.08);
+}
+
+.variation-play-icon {
+  font-size: 15px;
+  color: #94a3b8;
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.15s ease;
+}
+
+.variation-item-btn:hover .variation-play-icon {
+  color: #60a5fa;
+}
+
+html[data-theme="light"] .variation-item-btn:hover .variation-play-icon {
+  color: var(--green);
+}
+
+.variation-item-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.variation-audio-badge {
+  font-size: 14px;
+}
+
+.variation-done-badge {
+  color: #22c55e;
+  font-weight: 900;
+  font-size: 13px;
+  background: rgba(34, 197, 94, 0.15);
+  padding: 1px 6px;
+  border-radius: 999px;
+}
+
+.tag-variation {
+  background: rgba(99, 102, 241, 0.12) !important;
+  color: #6366f1 !important;
+  border: 1px solid rgba(99, 102, 241, 0.28) !important;
+  font-weight: 800 !important;
+}
+
+html[data-theme="dark"] .tag-variation {
+  background: rgba(129, 140, 248, 0.15) !important;
+  color: #a5b4fc !important;
+  border-color: rgba(129, 140, 248, 0.3) !important;
+}
+
+.topic-card.has-variations {
+  border-color: color-mix(in srgb, #6366f1 22%, var(--line));
+}
+
+.topic-card.has-variations:hover {
+  border-color: color-mix(in srgb, #6366f1 45%, var(--line));
+}
+
 
 
 

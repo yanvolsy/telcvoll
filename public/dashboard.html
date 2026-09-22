@@ -816,33 +816,214 @@ function renderTopics(){
     if(teil) list=list.filter(x=>x.teil===teil);
     if(q) list=list.filter(x=>{
       const isAudioQuery = (q === 'صوت' || q === 'صوتي' || q === 'audio' || q === 'hör') && (!!x.audio_url || x.section === 'Hören');
-      return isAudioQuery || ((x.title||'')+' '+(x.body||'')+' '+(x.teil||'')+' '+(taskTypeLabel(x.task_type)||'')).toLowerCase().includes(q);
+      const isVarQuery = (q === 'معدل' || q === 'تعديل' || q === 'تعديلات') && (parseVariationInfo(x.title, x.settings_json).isVariation);
+      return isAudioQuery || isVarQuery || ((x.title||'')+' '+(x.body||'')+' '+(x.teil||'')+' '+(taskTypeLabel(x.task_type)||'')).toLowerCase().includes(q);
     });
-    gridEl.innerHTML=list.length?list.map((x,i)=>{
-      const isCompleted=isExerciseCompleted(x.id);
-      const dur=exerciseDuration(x);
-      return `<article class="topic-card">
+
+    const groups = groupTopicExercises(list);
+    renderedTopicGroups = groups;
+
+    gridEl.innerHTML = groups.length ? groups.map((g, i) => {
+      const primaryItem = g.items[0];
+      const primaryEx = primaryItem.ex;
+      const anyDone = g.items.some(it => isExerciseCompleted(it.ex.id));
+      const hasAudio = g.items.some(it => !!it.ex.audio_url);
+      const dur = exerciseDuration(primaryEx);
+      const isMulti = g.items.length > 1;
+
+      return `<article class="topic-card ${isMulti ? 'has-variations' : ''}">
         <div class="topic-card-head">
           <span class="topic-index">${String(i+1).padStart(2,'0')}</span>
           <div class="topic-card-tags">
-            <span class="tag">Telc ${esc(x.level||'B2')}</span>
-            ${x.audio_url ? `<span class="tag tag-audio">🎧 ${text('تسجيل صوتي','Audio')}</span>` : ''}
+            <span class="tag">Telc ${esc(primaryEx.level||'B2')}</span>
+            ${isMulti ? `<span class="tag tag-variation" title="${g.items.length} ${text('تعديلات متاحة لهذا التمرين','Versionen verfügbar')}">📚 ${g.items.length} ${text('تعديلات','Versionen')}</span>` : ''}
           </div>
         </div>
         <h3 class="topic-card-title">
-          <span class="topic-status-dot ${isCompleted?'is-done':'is-new'}" title="${isCompleted?text('تم التدريب على هذا الموضوع من قبل','Bereits trainiert'):text('لم يتم التدريب على هذا الموضوع بعد','Noch nicht trainiert')}" aria-label="${isCompleted?text('تم التدريب من قبل','Bereits trainiert'):text('لم يتم التدريب بعد','Noch nicht trainiert')}"></span>
-          <span>${esc(x.title)}</span>
+          <span class="topic-status-dot ${anyDone?'is-done':'is-new'}" title="${anyDone?text('تم التدريب على هذا الموضوع من قبل','Bereits trainiert'):text('لم يتم التدريب على هذا الموضوع بعد','Noch nicht trainiert')}" aria-label="${anyDone?text('تم التدريب من قبل','Bereits trainiert'):text('لم يتم التدريب بعد','Noch nicht trainiert')}"></span>
+          <span>${esc(g.baseTitle)}</span>
         </h3>
         <div class="topic-meta">
-          <span class="topic-meta-pill">${esc(x.teil)}</span>
-          <span class="topic-meta-pill">${esc(taskTypeLabel(x.task_type))}</span>
+          <span class="topic-meta-pill">${esc(primaryEx.teil)}</span>
+          <span class="topic-meta-pill">${esc(taskTypeLabel(primaryEx.task_type))}</span>
           <span class="topic-meta-pill">⏱ ${dur} ${text('دقيقة','Min.')}</span>
         </div>
-        <a class="btn light topic-open-btn" href="/exercise.html?id=${x.id}&duration=${dur*60}">${text('فتح التمرين','Übung öffnen')} →</a>
+        ${isMulti ? `
+          <button type="button" class="btn light topic-open-btn topic-variation-btn" data-group-idx="${i}">
+            ${text('فتح التمرين','Übung öffnen')} ▾
+          </button>
+        ` : `
+          <a class="btn light topic-open-btn" href="/exercise.html?id=${primaryEx.id}&duration=${dur*60}">${text('فتح التمرين','Übung öffnen')} →</a>
+        `}
       </article>`;
-    }).join(''):`<div class="empty-panel"><h3>${text('لا توجد تمارين منشورة هنا','Keine veröffentlichten Übungen')}</h3><p class="muted">${text('يمكن للمشرف إضافة الموضوع من لوحة الإدارة.','Der Administrator kann Aufgaben im Adminbereich hinzufügen.')}</p></div>`;
+    }).join('') : `<div class="empty-panel"><h3>${text('لا توجد تمارين منشورة هنا','Keine veröffentlichten Übungen')}</h3><p class="muted">${text('يمكن للمشرف إضافة الموضوع من لوحة الإدارة.','Der Administrator kann Aufgaben im Adminbereich hinzufügen.')}</p></div>`;
+
+    gridEl.querySelectorAll('.topic-variation-btn[data-group-idx]').forEach(btn => {
+      btn.onclick = () => {
+        const idx = Number(btn.dataset.groupIdx);
+        const group = renderedTopicGroups[idx];
+        if (group) openVariationModal(group);
+      };
+    });
   }
 }
+
+function parseVariationInfo(rawTitle, settings = {}) {
+  const str = String(rawTitle || '').trim();
+  if (settings && settings.variation_label) {
+    return {
+      baseTitle: String(settings.base_title || str).trim(),
+      isVariation: true,
+      variationNumber: Number(settings.variation_no || 1),
+      label: String(settings.variation_label).trim()
+    };
+  }
+
+  // 1. Explicit Arabic variation keywords: "معدل", "تعديل", "نسخة"
+  const arabicMatch = str.match(/^(.*?)(?:[\s\-_–—]+|\s*[\(\[])(?:معدل|تعديل|نسخة|النسخة المعدلة)[\s\-_–—]*(\d+)?[\)\]]?$/i);
+  if (arabicMatch && arabicMatch[1].trim()) {
+    const base = arabicMatch[1].trim();
+    const num = arabicMatch[2] ? parseInt(arabicMatch[2], 10) : 1;
+    return {
+      baseTitle: base,
+      isVariation: true,
+      variationNumber: num,
+      label: num > 1 ? `المعدل ${num}` : (arabicMatch[2] ? `المعدل ${num}` : 'المعدل 1')
+    };
+  }
+
+  // 2. Explicit Latin variation keywords: "modifiziert", "variant", "variation", "v1", "v2"
+  const latinMatch = str.match(/^(.*?)(?:[\s\-_–—]+|\s*[\(\[])(?:modifiziert|variant|variation|var\.?|v\.?)[\s\-_–—]*(\d+)?[\)\]]?$/i);
+  if (latinMatch && latinMatch[1].trim()) {
+    const base = latinMatch[1].trim();
+    const num = latinMatch[2] ? parseInt(latinMatch[2], 10) : 1;
+    return {
+      baseTitle: base,
+      isVariation: true,
+      variationNumber: num,
+      label: num > 1 ? `المعدل ${num}` : `المعدل 1`
+    };
+  }
+
+  // 3. Trailing number after hyphen or space e.g. "Sport ist gesund - 1", "Sport ist gesund 1", "Sport ist gesund (1)"
+  const numMatch = str.match(/^(.*?)(?:[\s\-_–—]+|\s*[\(\[])(\d+)[\)\]]?$/);
+  if (numMatch && numMatch[1].trim()) {
+    const base = numMatch[1].trim();
+    const num = parseInt(numMatch[2], 10);
+    if (base.length >= 3 && num >= 1 && num <= 20) {
+      return {
+        baseTitle: base,
+        isVariation: true,
+        variationNumber: num,
+        label: `المعدل ${num}`
+      };
+    }
+  }
+
+  return {
+    baseTitle: str,
+    isVariation: false,
+    variationNumber: 0,
+    label: text('الأساسي', 'Standard')
+  };
+}
+
+let renderedTopicGroups = [];
+
+function groupTopicExercises(exercisesList) {
+  const groupsMap = new Map();
+
+  exercisesList.forEach(ex => {
+    const settings = ex.settings_json && typeof ex.settings_json === 'object' ? ex.settings_json : {};
+    const info = parseVariationInfo(ex.title, settings);
+    const groupKey = norm(info.baseTitle);
+
+    if (!groupsMap.has(groupKey)) {
+      groupsMap.set(groupKey, {
+        groupKey,
+        baseTitle: info.baseTitle,
+        items: []
+      });
+    }
+    groupsMap.get(groupKey).items.push({ ex, info });
+  });
+
+  const grouped = [];
+  groupsMap.forEach(group => {
+    group.items.sort((a, b) => {
+      if (!a.info.isVariation && b.info.isVariation) return -1;
+      if (a.info.isVariation && !b.info.isVariation) return 1;
+      return (a.info.variationNumber - b.info.variationNumber) || (a.ex.id - b.ex.id);
+    });
+
+    if (group.items.length > 1) {
+      const hasBase = group.items.some(x => !x.info.isVariation);
+      if (!hasBase) {
+        group.items[0].info.label = text('الأساسي', 'Standard');
+        for (let j = 1; j < group.items.length; j++) {
+          group.items[j].info.label = (typeof getLang === 'function' && getLang() === 'de') ? `Modifiziert ${j}` : `المعدل ${j}`;
+        }
+      }
+    }
+
+    grouped.push(group);
+  });
+
+  return grouped;
+}
+
+function openVariationModal(group) {
+  if (!group || !group.items || !group.items.length) return;
+  const modalEl = $('variationModal');
+  if (!modalEl) return;
+
+  const titleEl = $('variationModalTitle');
+  const subEl = $('variationModalSub');
+  const listEl = $('variationList');
+
+  const primaryEx = group.items[0]?.ex;
+  const translation = primaryEx?.translation || primaryEx?.settings_json?.translation || '';
+  const subText = translation ? `${group.baseTitle} (${translation})` : group.baseTitle;
+
+  if (titleEl) titleEl.textContent = text('التعديلات المتاحة', 'Verfügbare Versionen');
+  if (subEl) subEl.textContent = subText;
+
+  if (listEl) {
+    listEl.innerHTML = group.items.map((it, idx) => {
+      const ex = it.ex;
+      const dur = exerciseDuration(ex);
+      const isCompleted = isExerciseCompleted(ex.id);
+      const label = it.info.label || (idx === 0 ? text('الأساسي', 'Standard') : ((typeof getLang === 'function' && getLang() === 'de') ? `Modifiziert ${idx}` : `المعدل ${idx}`));
+      return `
+        <a href="/exercise.html?id=${ex.id}&duration=${dur * 60}" class="variation-item-btn">
+          <span class="variation-item-content">
+            <span class="variation-item-label">${esc(label)}</span>
+            ${ex.audio_url ? `<span class="variation-audio-badge" title="${text('ملف صوتي','Audio')}">🎧</span>` : ''}
+            ${isCompleted ? `<span class="variation-done-badge" title="${text('تم التدريب مسبقاً','Bereits trainiert')}">✓</span>` : ''}
+          </span>
+          <span class="variation-play-icon" aria-hidden="true">▷</span>
+        </a>
+      `;
+    }).join('');
+  }
+
+  modalEl.hidden = false;
+  document.body.classList.add('modal-open');
+}
+
+function closeVariationModal() {
+  const modalEl = $('variationModal');
+  if (modalEl) modalEl.hidden = true;
+  document.body.classList.remove('modal-open');
+}
+
+$('closeVariationModal')?.addEventListener('click', closeVariationModal);
+$('variationModal')?.addEventListener('click', (e) => {
+  if (e.target === $('variationModal')) closeVariationModal();
+});
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !$('variationModal')?.hidden) closeVariationModal();
+});
 
 document.addEventListener('click',e=>{const a=e.target.closest('a[href*="/exercise.html"]');if(!a)return;try{sessionStorage.setItem('telc_dashboard_return',JSON.stringify({level:state.level,section:state.section,teil:selectedTeil,search:$('search')?.value||'',scrollY:window.scrollY}));}catch{}});
 
@@ -1006,7 +1187,20 @@ document.addEventListener('click', (e) => {
           </div>`;
       }
     }
-  }
 })();
-document.addEventListener('langchange',render);
-</script></body></html>
+document.addEventListener('langchange', render);
+</script>
+<div id="variationModal" class="variation-modal-overlay" hidden aria-hidden="true">
+  <div class="variation-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="variationModalTitle">
+    <button type="button" class="variation-modal-close" id="closeVariationModal" aria-label="إغلاق">×</button>
+    <div class="variation-modal-header">
+      <div class="variation-modal-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+      </div>
+      <h2 class="variation-modal-title" id="variationModalTitle">التعديلات المتاحة</h2>
+      <p class="variation-modal-subtitle" id="variationModalSub"></p>
+    </div>
+    <div class="variation-modal-list" id="variationList"></div>
+  </div>
+</div>
+</body></html>

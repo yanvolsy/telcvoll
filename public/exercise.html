@@ -18,7 +18,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
 <script>
 const id=qs('id'); const duration=Number(qs('duration')||0); const sessionId=qs('session'); const mockMode=qs('mock')==='1' && !!sessionId; let model=null; let answers={}; let activeItem=null; let submitted=false; let resultData=null;
-let matchingOrder=null; let headingOrder=null; let optionOrders={}; let showModelAnswers=false; let titleRevealed=false; let hoerenOrder=null; let hoerenAllTranslated=false; const translationCache=new Map();
+let matchingOrder=null; let headingOrder=null; let optionOrders={}; let showModelAnswers=false; let titleRevealed=true; let hoerenOrder=null; let hoerenAllTranslated=false; const translationCache=new Map();
 const TELC_DUR = {
   B1: { Lesen: { 'Teil 1': 20, 'Teil 2': 20, 'Teil 3': 15, _default: 20 }, Sprachbausteine: { 'Teil 1': 10, 'Teil 2': 10, _default: 10 }, Hören: { 'Teil 1': 10, 'Teil 2': 10, 'Teil 3': 10, _default: 10 }, Schreiben: { 'Teil 1': 30, _default: 30 }, Sprechen: { 'Teil 1': 4, 'Teil 2': 5, 'Teil 3': 5, _default: 5 } },
   B2: { Lesen: { 'Teil 1': 20, 'Teil 2': 25, 'Teil 3': 20, _default: 20 }, Sprachbausteine: { 'Teil 1': 15, 'Teil 2': 10, _default: 15 }, Hören: { 'Teil 1': 6, 'Teil 2': 8, 'Teil 3': 6, _default: 7 }, Schreiben: { 'Teil 1': 30, _default: 30 }, Sprechen: { 'Teil 1': 5, 'Teil 2': 5, 'Teil 3': 5, _default: 5 } },
@@ -262,11 +262,11 @@ function renderTF(){
 
   const audioBox = model.exercise.audio_url ? `
     <div class="hoeren-audio-card">
-      <div class="hoeren-audio-title-row">
-        <div class="hoeren-audio-title-left">
+      <div class="hoeren-audio-top-row">
+        <span class="hoeren-audio-pill-label">
           <span class="hoeren-audio-headphone" aria-hidden="true">🎧</span>
-          <h1 id="thema-title" class="${titleRevealed ? '' : 'thema-title-hidden'}" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}">${esc(model.exercise.title)}</h1>
-        </div>
+          <b>Hören</b>
+        </span>
         <button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen')}" title="${text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen')}">
           <span class="eye-icon ${titleRevealed ? 'eye-on' : 'eye-off'}" aria-hidden="true"></span>
         </button>
@@ -274,12 +274,15 @@ function renderTF(){
       <div class="hoeren-audio-player-wrap">
         <audio controls preload="metadata" src="${esc(model.exercise.audio_url)}"></audio>
       </div>
-    </div>` : `
-    <div class="hoeren-title-only-row">
-      <h1 id="thema-title" class="${titleRevealed ? '' : 'thema-title-hidden'}" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}">${esc(model.exercise.title)}</h1>
-      <button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen')}" title="${text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen')}">
-        <span class="eye-icon ${titleRevealed ? 'eye-on' : 'eye-off'}" aria-hidden="true"></span>
-      </button>
+    </div>` : '';
+
+  const titleBox = `
+    <div class="hoeren-topic-header">
+      <h2 id="thema-title" class="hoeren-topic-title ${titleRevealed ? '' : 'thema-title-hidden'}" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}">${esc(model.exercise.title)}</h2>
+      <div class="hoeren-topic-tools">
+        ${textTools(model.exercise.title||'', 'thema-title')}
+        <div class="inline-translation" id="thema-title-translation"></div>
+      </div>
     </div>`;
 
   const questionCards = orderedItems.map((it) => {
@@ -342,6 +345,7 @@ function renderTF(){
 
       <div class="hoeren-card">
         ${audioBox}
+        ${titleBox}
 
         <div class="hoeren-tools-row">
           <button type="button" class="hoeren-tool-btn ${hoerenAllTranslated ? 'active' : ''}" id="hoerenTransAll" title="${text('ترجمة جميع الأسئلة','Alle Fragen übersetzen')}" aria-label="${text('ترجمة جميع الأسئلة','Alle Fragen übersetzen')}">
