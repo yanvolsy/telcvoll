@@ -316,17 +316,18 @@ function renderTF(){
     </div>
     ${resultPanel}`;
 
-  // 2. Audio Player Card below title
+  // 2. Theme-aware audio player. Keep native audio hidden as the playback engine.
   const audioBox = model.exercise.audio_url ? `
-    <div class="hoeren-audio-player-card">
-      <div class="hoeren-audio-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-        </svg>
+    <div class="hoeren-audio-player-card" data-hoeren-player>
+      <audio class="hoeren-native-audio" preload="metadata" src="${esc(model.exercise.audio_url)}"></audio>
+      <button type="button" class="hoeren-audio-play" data-audio-play aria-label="${text('تشغيل الصوت','Audio abspielen')}" title="${text('تشغيل','Abspielen')}"><span class="hoeren-audio-play-icon" aria-hidden="true">▶</span></button>
+      <div class="hoeren-audio-main">
+        <div class="hoeren-audio-topline"><span class="hoeren-audio-label">${text('الملف الصوتي','Audiodatei')}</span><span class="hoeren-audio-time"><span data-audio-current>0:00</span><span> / </span><span data-audio-duration>0:00</span></span></div>
+        <input class="hoeren-audio-progress" data-audio-progress type="range" min="0" max="100" value="0" step="0.1" aria-label="${text('تقدم الصوت','Audiofortschritt')}">
       </div>
-      <div class="hoeren-audio-player-wrap">
-        <audio controls preload="metadata" src="${esc(model.exercise.audio_url)}"></audio>
+      <div class="hoeren-audio-actions">
+        <button type="button" class="hoeren-audio-icon-btn" data-audio-mute aria-label="${text('كتم الصوت','Stummschalten')}" title="${text('كتم الصوت','Stummschalten')}"><span data-audio-volume-icon aria-hidden="true">🔊</span></button>
+        <input class="hoeren-audio-volume" data-audio-volume type="range" min="0" max="1" value="1" step="0.05" aria-label="${text('مستوى الصوت','Lautstärke')}">
       </div>
     </div>` : '';
 
@@ -359,12 +360,12 @@ function renderTF(){
     return `
       <div class="hoeren-table-row ${rowStatusClass}" data-item="${it.position_no}">
         <div class="hoeren-cell hoeren-cell-r">
-          <button type="button" class="hoeren-circle-radio-btn ${rClass}" data-q="${it.position_no}" data-o="Richtig" aria-label="${dispNo} Richtig" title="Richtig">
+          <button type="button" class="hoeren-circle-radio-btn ${rClass}" data-q="${it.position_no}" data-o="Richtig" aria-label="${dispNo} ${text('صحيح','Richtig')}" title="${text('صحيح','Richtig')}">
             <span class="hoeren-circle-radio"></span>
           </button>
         </div>
         <div class="hoeren-cell hoeren-cell-f">
-          <button type="button" class="hoeren-circle-radio-btn ${fClass}" data-q="${it.position_no}" data-o="Falsch" aria-label="${dispNo} Falsch" title="Falsch">
+          <button type="button" class="hoeren-circle-radio-btn ${fClass}" data-q="${it.position_no}" data-o="Falsch" aria-label="${dispNo} ${text('خطأ','Falsch')}" title="${text('خطأ','Falsch')}">
             <span class="hoeren-circle-radio"></span>
           </button>
         </div>
@@ -382,21 +383,12 @@ function renderTF(){
   const tableCard = `
     <div class="hoeren-table-card">
       <div class="hoeren-table-head">
-        <div class="hoeren-th hoeren-th-r">RICHTIG</div>
-        <div class="hoeren-th hoeren-th-f">FALSCH</div>
-        <div class="hoeren-th hoeren-th-statement">AUSSAGE</div>
+        <div class="hoeren-th hoeren-th-r">${text('صحيح','RICHTIG')}</div>
+        <div class="hoeren-th hoeren-th-f">${text('خطأ','FALSCH')}</div>
+        <div class="hoeren-th hoeren-th-statement">${text('العبارة','AUSSAGE')}</div>
         <div class="hoeren-table-toolbar">
-          <button type="button" class="hoeren-toolbar-btn ${hoerenAllTranslated ? 'active' : ''}" id="hoerenTransAll" title="${text('ترجمة جميع الجمل','Alle Aussagen übersetzen')}" aria-label="${text('ترجمة جميع الجمل','Alle Aussagen übersetzen')}">
-            <span class="hoeren-toolbar-icon">文A</span>
-          </button>
-          <button type="button" class="hoeren-toolbar-btn ${showModelAnswers ? 'active' : ''}" id="hoerenKeyBtn" title="${text('عرض الإجابة النموذجية','Musterlösung anzeigen')}" aria-label="${text('عرض الإجابة النموذجية','Musterlösung anzeigen')}">
-            <span class="hoeren-toolbar-icon">🔑</span>
-          </button>
-          <button type="button" class="hoeren-toolbar-btn" id="hoerenShuffleBtn" title="${text('خلط ترتيب الجمل','Reihenfolge mischen')}" aria-label="${text('خلط ترتيب الجمل','Reihenfolge mischen')}">
+          <button type="button" class="hoeren-toolbar-btn" id="hoerenShuffleBtn" title="${text('خلط ترتيب العبارات','Aussagen mischen')}" aria-label="${text('خلط ترتيب العبارات','Aussagen mischen')}">
             <span class="hoeren-toolbar-icon">🔀</span>
-          </button>
-          <button type="button" class="hoeren-toolbar-btn" id="hoerenResetBtn" title="${text('إعادة تعيين الاختيارات','Auswahl zurücksetzen')}" aria-label="${text('إعادة تعيين الاختيارات','Auswahl zurücksetzen')}">
-            <span class="hoeren-toolbar-icon">↺</span>
           </button>
         </div>
       </div>
@@ -426,49 +418,6 @@ function renderTF(){
     b.onclick = () => selectAnswer(b.dataset.q, b.dataset.o);
   });
 
-  const transAllBtn = document.getElementById('hoerenTransAll');
-  if (transAllBtn) {
-    transAllBtn.onclick = async () => {
-      hoerenAllTranslated = !hoerenAllTranslated;
-      transAllBtn.classList.toggle('active', hoerenAllTranslated);
-      const boxes = document.querySelectorAll('.hoeren-table-row .inline-translation');
-      if (hoerenAllTranslated) {
-        for (const box of boxes) {
-          box.classList.add('visible');
-          if (!box.textContent.trim()) {
-            const card = box.closest('.hoeren-table-row');
-            const textEl = card?.querySelector('.hoeren-stmt-text');
-            const source = textEl?.dataset.source || textEl?.textContent || '';
-            if (source) {
-              box.classList.add('loading');
-              const out = await translateText(source, 'ar');
-              box.classList.remove('loading');
-              box.textContent = out || text('تعذرت الترجمة.', 'Übersetzung nicht verfügbar.');
-            }
-          }
-        }
-      } else {
-        boxes.forEach(b => b.classList.remove('visible'));
-      }
-    };
-  }
-
-  const keyBtn = document.getElementById('hoerenKeyBtn');
-  if (keyBtn) {
-    keyBtn.onclick = async () => {
-      const st = captureExerciseScroll();
-      try {
-        if (!submitted) await submit();
-        if (!resultData) return;
-        showModelAnswers = !showModelAnswers;
-        rerenderExerciseStable(st);
-      } catch (e) {
-        document.getElementById('content').insertAdjacentHTML('beforeend', `<div class="alert bad">${esc(e.message)}</div>`);
-        restoreExerciseScroll(st);
-      }
-    };
-  }
-
   const shuffleBtn = document.getElementById('hoerenShuffleBtn');
   if (shuffleBtn) {
     shuffleBtn.onclick = () => {
@@ -478,19 +427,47 @@ function renderTF(){
     };
   }
 
-  const resetBtn = document.getElementById('hoerenResetBtn');
-  if (resetBtn) {
-    resetBtn.onclick = () => {
-      const st = captureExerciseScroll();
-      answers = {};
-      submitted = false;
-      resultData = null;
-      showModelAnswers = false;
-      rerenderExerciseStable(st);
-    };
-  }
-
   bindTextTools();
+  bindHoerenAudioPlayer();
+}
+function formatAudioTime(seconds){
+  const n=Number(seconds);
+  if(!Number.isFinite(n)||n<0)return '0:00';
+  return Math.floor(n/60)+':'+Math.floor(n%60).toString().padStart(2,'0');
+}
+function bindHoerenAudioPlayer(){
+  const card=document.querySelector('[data-hoeren-player]');
+  if(!card)return;
+  const audio=card.querySelector('.hoeren-native-audio');
+  const play=card.querySelector('[data-audio-play]');
+  const icon=card.querySelector('.hoeren-audio-play-icon');
+  const progress=card.querySelector('[data-audio-progress]');
+  const current=card.querySelector('[data-audio-current]');
+  const durationEl=card.querySelector('[data-audio-duration]');
+  const mute=card.querySelector('[data-audio-mute]');
+  const volume=card.querySelector('[data-audio-volume]');
+  const volumeIcon=card.querySelector('[data-audio-volume-icon]');
+  if(!audio||!play)return;
+  const sync=()=>{
+    const dur=Number.isFinite(audio.duration)?audio.duration:0;
+    current.textContent=formatAudioTime(audio.currentTime);
+    durationEl.textContent=formatAudioTime(dur);
+    progress.value=dur?audio.currentTime/dur*100:0;
+    icon.textContent=audio.paused?'▶':'❚❚';
+    card.classList.toggle('is-playing',!audio.paused);
+    play.setAttribute('aria-label',audio.paused?text('تشغيل الصوت','Audio abspielen'):text('إيقاف مؤقت','Pause'));
+  };
+  const syncVolume=()=>{
+    const v=audio.muted?0:audio.volume;
+    volume.value=v;
+    volumeIcon.textContent=v===0?'🔇':v<.5?'🔉':'🔊';
+  };
+  play.onclick=()=>audio.paused?audio.play().catch(()=>{}):audio.pause();
+  audio.addEventListener('loadedmetadata',sync); audio.addEventListener('timeupdate',sync); audio.addEventListener('play',sync); audio.addEventListener('pause',sync); audio.addEventListener('ended',sync);
+  progress.oninput=()=>{if(Number.isFinite(audio.duration))audio.currentTime=Number(progress.value)/100*audio.duration;};
+  volume.oninput=()=>{audio.muted=false;audio.volume=Number(volume.value);syncVolume();};
+  mute.onclick=()=>{audio.muted=!audio.muted;syncVolume();};
+  sync(); syncVolume();
 }
 function renderWriting(){
  const settings=parseSettings(model.exercise);
@@ -1114,6 +1091,13 @@ function renderWorkspace(){
 }
 function renderResult(r){const st=captureExerciseScroll();submitted=true;resultData=r;rerenderExerciseStable(st);}
 async function submit(){if(submitted)return;if(!model.items.length){if(mockMode){goNextMock();}return;}try{const r=await api('exercise-submit',{method:'POST',body:{exercise_id:id,answers}});localStorage.setItem('last_exercise_result_'+id,JSON.stringify(r));markExerciseCompleted(id);if(mockMode){const s=getMockSession();if(s){s.results=s.results||[];s.results.push({id,title:model.exercise.title,section:model.exercise.section,teil:model.exercise.teil,score:r.score,max:r.max,percent:r.percent,result:r.result});s.index=(s.ids||[]).findIndex(x=>String(x)===String(id));localStorage.setItem('telc_self_test',JSON.stringify(s));}goNextMock();return;}renderResult(r);}catch(e){document.getElementById('content').insertAdjacentHTML('beforeend',`<div class="alert bad">${esc(e.message)}</div>`);}}
+document.addEventListener('langchange', () => {
+  if (!model?.exercise || model.exercise.section !== 'Hören') return;
+  const st = captureExerciseScroll();
+  renderTF();
+  bindActions();
+  restoreExerciseScroll(st);
+});
 (async()=>{
   try{
     if(!id){

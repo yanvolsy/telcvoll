@@ -3994,3 +3994,174 @@ html[data-theme="dark"] .tag-variation {
 .hoeren-choice-radio{width:18px;height:18px;min-width:18px;border:2px solid #64748b;border-radius:50%;display:inline-block}.hoeren-choice-option.selected{border-color:var(--green);background:var(--green-soft);box-shadow:0 0 0 2px color-mix(in srgb,var(--green) 20%,transparent)}.hoeren-choice-option.selected .hoeren-choice-radio{border-color:var(--green);background:var(--green);box-shadow:inset 0 0 0 4px var(--white)}.hoeren-choice-option.result-correct,.hoeren-choice-option.model-correct{border-color:#22c55e;background:rgba(34,197,94,.09)}.hoeren-choice-option.result-wrong{border-color:#ef4444;background:rgba(239,68,68,.08)}.hoeren-choice-option-text{font-size:14px;line-height:1.55;font-weight:650;flex:1}.hoeren-choice-question-translation{margin:8px 0 0 38px}
 html[data-theme="dark"] .hoeren-choice-option{background:rgba(255,255,255,.025)}
 @media(max-width:760px){.hoeren-choice-page{width:calc(100% - 20px);padding:14px 0 110px}.hoeren-choice-list-head{padding:12px}.hoeren-choice-question-row{grid-template-columns:26px minmax(0,1fr);}.hoeren-choice-question-tools{grid-column:2}.hoeren-choice-options{margin-left:0}.hoeren-choice-option-wrap{grid-template-columns:minmax(0,1fr) auto}.hoeren-choice-card{padding:14px}.hoeren-choice-audio{padding:10px 12px}.hoeren-choice-audio-icon{width:38px;height:38px;flex-basis:38px}}
+
+/* ========================================================
+   TELC VOLL — HÖREN FINAL LAYOUT
+   Language-aware labels, single shuffle control, fixed exercise title.
+   Scoped to Hören only; other exercise sections are untouched.
+   ======================================================== */
+.exercise-page:has(.hoeren-workspace-shell) {
+  min-height: calc(100vh - 60px) !important;
+  height: auto !important;
+  overflow: visible !important;
+  padding-bottom: 88px !important;
+}
+
+.exercise-page:has(.hoeren-workspace-shell) .exercise-heading {
+  position: sticky !important;
+  top: 60px !important;
+  z-index: 55 !important;
+  min-height: 145px !important;
+  background: var(--white) !important;
+  border-bottom: 1px solid var(--line) !important;
+  box-shadow: 0 4px 20px rgba(16,35,30,.04) !important;
+}
+
+html[data-theme="dark"] .exercise-page:has(.hoeren-workspace-shell) .exercise-heading {
+  background: rgba(13,19,16,.96) !important;
+}
+
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-workspace-shell {
+  width: min(1120px, calc(100% - 40px));
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 0 120px;
+}
+
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-player-card {
+  margin-bottom: 20px;
+}
+
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-table-card {
+  width: 100%;
+}
+
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-table-head {
+  grid-template-columns: 100px 100px minmax(0,1fr) auto;
+}
+
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-table-toolbar {
+  justify-content: flex-end;
+  min-width: 48px;
+}
+
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-table-row {
+  grid-template-columns: 100px 100px minmax(0,1fr);
+  min-height: 76px;
+}
+
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-th,
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-stmt-text {
+  transition: none;
+}
+
+@media (max-width: 768px) {
+  .exercise-page:has(.hoeren-workspace-shell) .exercise-heading {
+    top: 60px !important;
+    min-height: 135px !important;
+  }
+
+  .exercise-page:has(.hoeren-workspace-shell) .hoeren-workspace-shell {
+    width: calc(100% - 20px);
+    padding: 14px 0 110px;
+  }
+
+  .exercise-page:has(.hoeren-workspace-shell) .hoeren-table-head {
+    grid-template-columns: 58px 58px minmax(0,1fr) auto;
+    padding: 12px 12px;
+  }
+
+  .exercise-page:has(.hoeren-workspace-shell) .hoeren-table-row {
+    grid-template-columns: 58px 58px minmax(0,1fr);
+    padding: 14px 12px;
+    min-height: 64px;
+  }
+}
+
+/* TELC Voll — Hören audio player: theme-aware, responsive, independent of browser-native controls */
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-player-card{
+  width:100%;
+  box-sizing:border-box;
+  min-height:76px;
+  margin:0 0 20px;
+  padding:14px 16px;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  background:var(--white);
+  color:var(--ink);
+  border:1px solid var(--line);
+  border-radius:18px;
+  box-shadow:var(--shadow-sm,0 8px 24px rgba(0,0,0,.08));
+  transition:background .2s ease,border-color .2s ease,box-shadow .2s ease;
+}
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-native-audio{
+  position:absolute;
+  width:1px;
+  height:1px;
+  opacity:0;
+  pointer-events:none;
+}
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-play,
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-icon-btn{
+  appearance:none;
+  border:1px solid var(--line);
+  background:var(--bg);
+  color:var(--ink);
+  cursor:pointer;
+  font:inherit;
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+  transition:background .18s ease,border-color .18s ease,color .18s ease,transform .12s ease;
+}
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-play{
+  width:46px;height:46px;border-radius:50%;
+  background:var(--green);
+  border-color:var(--green);
+  color:#fff;
+  box-shadow:0 6px 16px color-mix(in srgb,var(--green) 24%,transparent);
+}
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-play:hover,
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-icon-btn:hover{filter:brightness(1.06);}
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-play:active,
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-icon-btn:active{transform:scale(.96);}
+.hoeren-audio-play-icon{font-size:15px;line-height:1;transform:translateX(1px);}
+.hoeren-audio-main{min-width:0;flex:1;display:flex;flex-direction:column;gap:9px;}
+.hoeren-audio-topline{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0;}
+.hoeren-audio-label{font-size:12px;font-weight:900;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hoeren-audio-time{font-size:11px;font-weight:800;color:var(--muted);direction:ltr;white-space:nowrap;}
+.hoeren-audio-progress,.hoeren-audio-volume{appearance:none;width:100%;height:5px;border-radius:999px;background:var(--line);outline:none;cursor:pointer;accent-color:var(--green);}
+.hoeren-audio-progress::-webkit-slider-thumb,.hoeren-audio-volume::-webkit-slider-thumb{appearance:none;width:13px;height:13px;border-radius:50%;background:var(--green);border:2px solid var(--white);box-shadow:0 0 0 1px var(--green);}
+.hoeren-audio-progress::-moz-range-thumb,.hoeren-audio-volume::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--green);border:2px solid var(--white);}
+.hoeren-audio-actions{display:flex;align-items:center;gap:9px;min-width:126px;}
+.hoeren-audio-icon-btn{width:38px;height:38px;border-radius:11px;font-size:15px;}
+.hoeren-audio-volume{width:78px;}
+html[data-theme="dark"] .exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-player-card{box-shadow:0 10px 30px rgba(0,0,0,.20);}
+@media(max-width:700px){
+  .exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-player-card{padding:12px;gap:10px;border-radius:15px;}
+  .hoeren-audio-play{width:42px!important;height:42px!important;}
+  .hoeren-audio-actions{min-width:40px;}
+  .hoeren-audio-volume{display:none;}
+}
+
+/* TELC Voll — Hören audio player, fully integrated with site themes */
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-player-card{width:100%;box-sizing:border-box;min-height:76px;margin:0 0 20px;padding:14px 16px;display:flex;align-items:center;gap:14px;background:var(--white);color:var(--ink);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow-sm,0 8px 24px rgba(0,0,0,.08));transition:background .2s,border-color .2s,box-shadow .2s}
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-native-audio{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-play,.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-icon-btn{appearance:none;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;font:inherit;display:grid;place-items:center;flex:0 0 auto;transition:filter .18s,transform .12s}
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-play{width:46px;height:46px;border-radius:50%;background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 6px 16px color-mix(in srgb,var(--green) 24%,transparent)}
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-play:hover,.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-icon-btn:hover{filter:brightness(1.06)}
+.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-play:active,.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-icon-btn:active{transform:scale(.96)}
+.hoeren-audio-play-icon{font-size:15px;line-height:1;transform:translateX(1px)}
+.hoeren-audio-main{min-width:0;flex:1;display:flex;flex-direction:column;gap:9px}
+.hoeren-audio-topline{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+.hoeren-audio-label{font-size:12px;font-weight:900;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hoeren-audio-time{font-size:11px;font-weight:800;color:var(--muted);direction:ltr;white-space:nowrap}
+.hoeren-audio-progress,.hoeren-audio-volume{appearance:none;width:100%;height:5px;border-radius:999px;background:var(--line);outline:none;cursor:pointer;accent-color:var(--green)}
+.hoeren-audio-progress::-webkit-slider-thumb,.hoeren-audio-volume::-webkit-slider-thumb{appearance:none;width:13px;height:13px;border-radius:50%;background:var(--green);border:2px solid var(--white);box-shadow:0 0 0 1px var(--green)}
+.hoeren-audio-progress::-moz-range-thumb,.hoeren-audio-volume::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--green);border:2px solid var(--white)}
+.hoeren-audio-actions{display:flex;align-items:center;gap:9px;min-width:126px}
+.hoeren-audio-icon-btn{width:38px;height:38px;border-radius:11px;font-size:15px}
+.hoeren-audio-volume{width:78px}
+html[data-theme="dark"] .exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-player-card{box-shadow:0 10px 30px rgba(0,0,0,.20)}
+@media(max-width:700px){.exercise-page:has(.hoeren-workspace-shell) .hoeren-audio-player-card{padding:12px;gap:10px;border-radius:15px}.hoeren-audio-play{width:42px!important;height:42px!important}.hoeren-audio-actions{min-width:40px}.hoeren-audio-volume{display:none}}
