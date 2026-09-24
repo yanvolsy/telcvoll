@@ -70,6 +70,8 @@ exports.handler = async (event) => {
       exercise,
       items,
       is_free: access.is_free === true,
+      is_paid: student.is_paid === true,
+      ai_enabled: student.ai_enabled === true,
     });
   } catch (err) {
     console.error('Fatal error in exercise-get.js:', err);

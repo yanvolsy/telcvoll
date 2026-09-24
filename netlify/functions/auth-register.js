@@ -20,13 +20,13 @@ exports.handler = async (event) => {
   let body;
   try { body = JSON.parse(event.body || '{}'); } catch { return json(400, { error: 'Bad request' }); }
 
-  const firstName = String(body.first_name || '').trim();
-  const lastName = String(body.last_name || '').trim();
-  const rawName = String(body.name || `${firstName} ${lastName}`).trim();
+  const firstName = String(body.first_name || body.firstName || '').trim();
+  const lastName = String(body.last_name || body.lastName || '').trim();
+  const rawName = String(body.name || [firstName, lastName].filter(Boolean).join(' ') || firstName).trim();
   const email = String(body.email || '').toLowerCase().trim();
   const phone = String(body.phone || '').trim();
   const password = String(body.password || '');
-  const confirmPassword = String(body.confirm_password || body.password_confirm || '');
+  const confirmPassword = String(body.confirm_password || body.password_confirm || body.confirmPassword || '');
 
   // Validation
   if (!rawName || rawName.length < 2) {
@@ -50,11 +50,17 @@ exports.handler = async (event) => {
   const client = await pool.connect();
 
   try {
+    // Generate secure email verification token
+    const verificationToken = crypto.randomBytes(32).toString('hex');
+
     // Check if email already registered
     const existingRes = await client.query(
-      'SELECT id, password_hash, auth_provider FROM students WHERE LOWER(TRIM(email)) = $1 LIMIT 1',
+      'SELECT id, password_hash, auth_provider, email_verified FROM students WHERE LOWER(TRIM(email)) = $1 LIMIT 1',
       [email]
     );
+
+    let studentId;
+    let isNewAccount = false;
 
     if (existingRes.rows.length > 0) {
       const existing = existingRes.rows[0];
@@ -71,55 +77,57 @@ exports.handler = async (event) => {
              phone = COALESCE(NULLIF($4, ''), phone),
              password_hash = $5,
              auth_provider = 'email',
-             email_verified = TRUE,
+             verification_token = $6,
+             verification_expires_at = NOW() + INTERVAL '24 hours',
              last_login_at = NOW(),
              updated_at = NOW()
-         WHERE id = $6`,
-        [rawName, firstName, lastName, phone, passwordHash, existing.id]
+         WHERE id = $7`,
+        [rawName, firstName, lastName, phone, passwordHash, verificationToken, existing.id]
+      );
+      studentId = existing.id;
+    } else {
+      isNewAccount = true;
+      // Hash password securely with bcrypt
+      const passwordHash = await hashPassword(password);
+
+      // Create student account
+      const insertRes = await client.query(
+        `INSERT INTO students(
+           name, first_name, last_name, email, phone,
+           password_hash, auth_provider, email_verified, profile_completed,
+           verification_token, verification_expires_at,
+           created_at, updated_at, last_login_at
+         ) VALUES ($1, $2, $3, $4, $5, $6, 'email', FALSE, TRUE, $7, NOW() + INTERVAL '24 hours', NOW(), NOW(), NOW())
+         RETURNING id, name, first_name, last_name, email, phone, email_verified`,
+        [rawName, firstName, lastName, email, phone, passwordHash, verificationToken]
       );
 
-      const token = sign({
-        student_id: existing.id,
-        email,
-        name: rawName || 'Student',
-      });
-
-      return json(200, {
-        ok: true,
-        student: { id: existing.id, name: rawName, email, phone },
-        token,
-      }, {
-        'Set-Cookie': setCookie('student_token', token, 60 * 60 * 24 * 30),
-      });
+      studentId = insertRes.rows[0].id;
     }
 
-    // Hash password securely with bcrypt
-    const passwordHash = await hashPassword(password);
-
-    // Create student account
-    const insertRes = await client.query(
-      `INSERT INTO students(
-         name, first_name, last_name, email, phone,
-         password_hash, auth_provider, email_verified, profile_completed,
-         created_at, updated_at, last_login_at
-       ) VALUES ($1, $2, $3, $4, $5, $6, 'email', TRUE, TRUE, NOW(), NOW(), NOW())
-       RETURNING id, name, email, phone`,
-      [rawName, firstName, lastName, email, phone, passwordHash]
-    );
-
-    const student = insertRes.rows[0];
+    // Send verification email via Resend
+    const siteUrl = process.env.SITE_URL || 'https://telcvoll.de';
+    const verificationUrl = `${siteUrl}/verify-email.html?token=${verificationToken}`;
+    try {
+      const { sendVerificationEmail } = require('./_lib/email');
+      await sendVerificationEmail({ to: email, name: rawName, verificationUrl });
+    } catch (mailErr) {
+      console.warn('[AUTH REGISTER] Verification email non-fatal notice:', mailErr?.message);
+    }
 
     // Generate authenticated session token
     const token = sign({
-      student_id: student.id,
-      email: student.email,
-      name: student.name,
+      student_id: studentId,
+      email,
+      name: rawName,
     });
 
     return json(200, {
       ok: true,
-      student,
+      student: { id: studentId, name: rawName, email, phone, email_verified: false },
       token,
+      verification_sent: true,
+      message: 'تم إنشاء الحساب بنجاح وإرسال رابط التفعيل إلى بريدك الإلكتروني.'
     }, {
       'Set-Cookie': setCookie('student_token', token, 60 * 60 * 24 * 30),
     });

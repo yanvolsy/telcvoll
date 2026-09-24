@@ -309,6 +309,72 @@ async function sendPasswordResetEmail({ to, name, resetUrl, expiresMinutes = 60 
   return sendEmail({ to, subject, html });
 }
 
+/**
+ * Send email verification link
+ */
+async function sendVerificationEmail({ to, name, verificationUrl, expiresHours = 24 }) {
+  const safeName = escapeHtml(name || 'عزيزي الطالب');
+  const safeUrl = escapeHtml(verificationUrl || `${SITE_URL}/verify-email.html`);
+  const subject = 'تفعيل حسابك في منصة TELC Voll — رابط التحقق من البريد';
+
+  const html = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ar" dir="rtl">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${escapeHtml(subject)}</title>
+  <style type="text/css">
+    body { margin: 0; padding: 0; width: 100% !important; background-color: #0b0f0e; font-family: 'Segoe UI', Tahoma, Arial, sans-serif; direction: rtl; text-align: right; }
+    @media only screen and (max-width: 620px) {
+      .email-shell { width: 100% !important; }
+      .mobile-padding { padding-left: 18px !important; padding-right: 18px !important; }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #0b0f0e; color: #151d19;">
+  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #0b0f0e; padding: 24px 0 36px 0;">
+    <tr>
+      <td align="center">
+        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="email-shell" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,0.3); border: 1px solid #1f2a24;">
+          <tr>
+            <td align="center" style="background-color: #0b0f0e; padding: 32px 24px; border-bottom: 2px solid #ff7a00;">
+              <span style="display: inline-block; width: 12px; height: 12px; background-color: #ff7a00; border-radius: 50%; margin-inline-end: 8px; vertical-align: middle;"></span>
+              <span style="color: #ffffff; font-size: 26px; font-weight: 900; vertical-align: middle;">TELC Voll</span>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 34px 32px 26px;" class="mobile-padding">
+              <h2 style="font-size: 22px; color: #0b0f0e; margin: 0 0 14px 0; font-weight: 900;">تأكيد البريد الإلكتروني وتفعيل الحساب</h2>
+              <p style="font-size: 15px; color: #43544c; line-height: 1.8; margin: 0 0 20px 0;">
+                مرحباً <strong>${safeName}</strong>،<br />
+                شكراً لتسجيلك في منصة <strong>TELC Voll</strong> للتحضير لامتحانات اللغة الألمانية. يرجى الضغط على الزر أدناه لتأكيد بريدك الإلكتروني وتفعيل حسابك:
+              </p>
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${safeUrl}" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #ff7a00 0%, #e06800 100%); color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 900; padding: 15px 36px; border-radius: 12px; box-shadow: 0 6px 18px rgba(255,122,0,0.35);">
+                  تأكيد بريدي وتفعيل الحساب ←
+                </a>
+              </div>
+              <p style="font-size: 13px; color: #83978f; line-height: 1.6; margin: 24px 0 0 0; border-top: 1px solid #eef2f0; padding-top: 16px;">
+                ⏱ هذا الرابط صالح لمدة <strong>${expiresHours} ساعة</strong>.<br />
+                إذا لم تكن أنت من أنشأ الحساب، يمكنك تجاهل هذا البريد بأمان.
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color: #f7faf8; padding: 20px 32px; border-top: 1px solid #eef2f0; text-align: center;">
+              <span style="color: #83978f; font-size: 12px;">TELC Voll — German Exam Preparation Platform · <a href="${SITE_URL}" target="_blank" style="color: #ff7a00; text-decoration: none;">${SITE_URL}</a></span>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+
+  return sendEmail({ to, subject, html });
+}
+
 function escapeHtml(str) {
   return String(str ?? '').replace(/[&<>"']/g, c => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -319,5 +385,6 @@ module.exports = {
   sendEmail,
   sendAccessCodeEmail,
   sendPasswordResetEmail,
+  sendVerificationEmail,
 };
 

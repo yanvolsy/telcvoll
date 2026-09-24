@@ -99,6 +99,12 @@ exports.handler=async(event)=>{
 
   // Mode 1: Teil 1 Presentation Generator (7 Official TELC B2 Categories)
   if(mode==='generate-presentation'){
+    if(!student.is_paid || !student.ai_enabled) {
+      return json(403, {
+        error: 'paid_only',
+        message: 'توليد العرض التقديمي بالذكاء الاصطناعي متاح في الباقات المدفوعة فقط. يرجى ترقية حسابك.'
+      });
+    }
     const category=String(b.category||'Reise').trim();
     const notes=String(b.notes||b.userInput||'').trim();
     const targetLevel=String(b.level||'B2').trim().toUpperCase();
