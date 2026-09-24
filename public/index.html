@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#f47b20">
 <title>TELC Voll — منصة تدريب B1 B2 C1</title>
-<link rel="stylesheet" href="/assets/app.css?v=20260925-final-layout-v3">
+<link rel="stylesheet" href="/assets/app.css?v=20260918-cairo-local-v2">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
@@ -188,10 +188,6 @@ let currentUser = null;
 api('me').then(res => {
   if (res && res.student && res.student.id) {
     currentUser = res.student;
-    if (location.pathname === '/' || location.pathname === '/index.html') {
-      location.replace('/dashboard.html');
-      return;
-    }
     const navSlot = document.getElementById('navAuthSlot');
     if (navSlot) navSlot.innerHTML = `<a class="btn small-btn" href="/dashboard.html">لوحة الطالب ←</a>`;
     const heroSlot = document.getElementById('heroActionsSlot');

@@ -22,8 +22,8 @@
 .table-toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
 .filter-tabs{display:flex;gap:8px;flex-wrap:wrap}
 .table-wrap{background:var(--white);border:1px solid var(--line);border-radius:18px;overflow:auto;box-shadow:var(--shadow)}
-.table{margin:0;min-width:1100px;width:100%;border-collapse:collapse}
-.table th{background:var(--green);color:#fff;padding:12px 14px;font-size:13px;font-weight:800;text-align:right}
+.table{margin:0;min-width:1180px;width:100%;border-collapse:collapse;table-layout:auto}
+.table th{background:var(--green);color:#fff;padding:12px 14px;font-size:13px;font-weight:800;text-align:right;white-space:nowrap}.table th:last-child,.table td:last-child{min-width:260px}.action-group{justify-content:flex-start}
 .table td{color:var(--ink);border-bottom:1px solid var(--line);padding:12px 14px;font-size:13px;vertical-align:middle;text-align:right}
 .table tr:hover td{background:var(--green-soft)}
 .empty-row{text-align:center;padding:35px;color:var(--muted)}
@@ -320,10 +320,10 @@ function renderStudents() {
         <td style="font-weight:800;color:${Number(s.avg_score||0)>=60?'var(--green)':'var(--muted)'};">${Number(s.avg_score||0).toFixed(1)}%</td>
         <td>
           <div class="action-group">
-            <button type="button" class="btn small-btn" style="padding:5px 9px;font-size:11px;font-weight:800;background:var(--green);border-color:var(--green);color:#fff;" onclick="openSubModal(${s.id})" title="تفعيل أو تمديد الخطة">
+            <button type="button" class="btn small-btn" style="padding:5px 9px;font-size:11px;font-weight:800;background:var(--green);border-color:var(--green);color:#fff;" data-open-sub="${s.id}" title="تفعيل أو تمديد الخطة">
               🔑 تفعيل الخطة
             </button>
-            <button type="button" class="btn small-btn light" style="padding:5px 9px;font-size:11px;font-weight:800;" onclick="openEditModal(${s.id})" title="تعديل بيانات الحساب">
+            <button type="button" class="btn small-btn light" style="padding:5px 9px;font-size:11px;font-weight:800;" data-open-edit="${s.id}" title="تعديل بيانات الحساب">
               ✏️ تعديل
             </button>
             <button type="button" class="btn-toggle-block ${s.is_blocked ? 'is-blocked' : ''}" data-student-id="${s.id}" data-blocked="${s.is_blocked}">
@@ -334,6 +334,14 @@ function renderStudents() {
       </tr>
     `;
   }).join('');
+
+  // Wire student action buttons through one delegated handler so rerenders never lose click behavior.
+  tbody.querySelectorAll('[data-open-sub]').forEach(btn => {
+    btn.addEventListener('click', () => openSubModal(Number(btn.dataset.openSub)));
+  });
+  tbody.querySelectorAll('[data-open-edit]').forEach(btn => {
+    btn.addEventListener('click', () => openEditModal(Number(btn.dataset.openEdit)));
+  });
 
   // Wire block/unblock buttons
   tbody.querySelectorAll('[data-student-id]').forEach(btn => {
@@ -425,10 +433,10 @@ function openSubModal(studentId) {
 
   // Populate plans dropdown
   const planSelect = $('subPlanSelect');
-  planSelect.innerHTML = allPlans.map(p => {
-    const isSelected = s.plan_id === p.id || p.name.includes('B1-B2-C1');
+  planSelect.innerHTML = allPlans.length ? allPlans.map(p => {
+    const isSelected = Number(s.plan_id) === Number(p.id) || /B1[- ]B2[- ]C1/i.test(String(p.name||''));
     return `<option value="${p.id}" data-days="${p.duration_days}" ${isSelected ? 'selected' : ''}>${esc(p.name)} (${p.duration_days} يوم)</option>`;
-  }).join('');
+  }).join('') : '<option value="">لا توجد خطط نشطة</option>';
 
   $('subDurationPreset').value = 'preset_plan';
   $('customDateRow').style.display = 'none';
@@ -478,6 +486,7 @@ $('manageSubForm').onsubmit = async (e) => {
 
     if (isActive) {
       const planId = Number($('subPlanSelect').value);
+      if (!planId) throw new Error('لا توجد خطة نشطة يمكن تفعيلها.');
       payload.plan_id = planId;
       const preset = $('subDurationPreset').value;
 

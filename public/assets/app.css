@@ -4709,406 +4709,83 @@ html[data-theme="dark"] .hoeren-audio-player-card {
   }
 }
 
-/* ========================================================
-   TELC VOLL — EXERCISE DISPLAY CORRECTION
-   Based on the uploaded latest exercise presentation reference.
-   Scoped strictly to exercise pages; authentication, dashboard,
-   payment, admin and database logic remain untouched.
-   ======================================================== */
 
-/* Exercise header: one clean horizontal bar. */
-.exercise-topbar {
-  min-height: 62px !important;
-  height: 62px !important;
-  padding: 0 18px !important;
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 12px !important;
-  direction: ltr !important;
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 120 !important;
-}
-.exercise-topbar .back-link {
-  flex: 0 0 40px !important;
-  margin: 0 !important;
-}
-.exercise-header-actions {
-  margin-inline-start: auto !important;
-  margin-inline-end: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-end !important;
-  gap: 8px !important;
-  flex-wrap: nowrap !important;
-}
-.exercise-header-actions .icon-btn,
-.exercise-header-actions button,
-.exercise-header-actions a {
-  flex: 0 0 auto !important;
-}
-
-/* Exercise title: centered independently from RTL/LTR body direction. */
-.exercise-heading {
-  min-height: 144px !important;
-  padding: 24px 22px 18px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  position: relative !important;
-  direction: ltr !important;
-}
-.exercise-heading-title {
-  margin: 0 !important;
-  width: min(760px, 100%) !important;
-  flex: 0 1 760px !important;
-  text-align: center !important;
-  direction: ltr !important;
-}
-.exercise-heading-title h1,
-.thema-title-row h1 {
-  text-align: center !important;
-  direction: ltr !important;
-}
-.exercise-heading-title small {
-  display: block !important;
-  text-align: center !important;
-}
-.exercise-heading .progress-pill,
-.exercise-heading > .timer {
-  position: absolute !important;
-  inset-inline-end: 20px !important;
-  top: 20px !important;
-}
-
-/* Stable two-column exercise workspace. Main content remains readable,
-   right answer panel stays fixed and independently scrollable. */
-.exam-workspace {
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) 360px !important;
-  direction: ltr !important;
-  align-items: stretch !important;
-  width: 100% !important;
-  max-width: none !important;
-  min-height: calc(100vh - 206px) !important;
-}
-.exam-main {
-  min-width: 0 !important;
-  width: 100% !important;
-  max-width: none !important;
-  margin: 0 !important;
-  padding: 18px clamp(24px, 5vw, 76px) 110px 24px !important;
-  direction: rtl !important;
-  overflow: auto !important;
-}
-.exam-side {
-  width: 360px !important;
-  min-width: 360px !important;
-  max-width: 360px !important;
-  height: calc(100vh - 62px) !important;
-  max-height: calc(100vh - 62px) !important;
-  position: sticky !important;
-  top: 62px !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  direction: ltr !important;
-  border-inline-start: 1px solid var(--line) !important;
-}
-
-/* Lesen Teil 1 assignment row: Arabic labels follow RTL correctly. */
-.exam-main .paragraph-assignment {
-  direction: rtl !important;
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  justify-content: stretch !important;
-  gap: 12px !important;
-  width: 100% !important;
-  text-align: right !important;
-}
-.exam-main .paragraph-assignment .assignment-label {
-  order: 1 !important;
-  flex: 0 0 auto !important;
-  white-space: nowrap !important;
-  text-align: right !important;
-}
-.exam-main .paragraph-assignment select {
-  order: 2 !important;
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-  direction: rtl !important;
-  text-align: right !important;
-  margin: 0 !important;
-}
-.exam-main .paragraph-assignment .assignment-selected,
-.exam-main .paragraph-assignment .assignment-empty {
-  order: 3 !important;
-  flex: 0 0 auto !important;
-  white-space: nowrap !important;
-  text-align: left !important;
-}
-
-/* Cards: consistent width, spacing and text direction. */
-.exam-main .exam-text-card,
-.exam-main .question-card,
-.exam-main .lesen2-question {
-  width: 100% !important;
-  max-width: none !important;
-  direction: rtl !important;
-  text-align: right !important;
-}
-.exam-main .exam-text-card {
-  padding: 22px 28px !important;
-  margin-bottom: 16px !important;
-}
-.exam-main .exam-text {
-  direction: ltr !important;
-  text-align: left !important;
-  unicode-bidi: plaintext !important;
-  font-size: 17px !important;
-  line-height: 1.95 !important;
-}
-.exam-main .exam-card-top {
-  display: flex !important;
-  justify-content: flex-end !important;
-  direction: ltr !important;
-}
-
-/* Right-side headings panel. */
-.exam-side .side-title,
-.exam-side .heading-list,
-.exam-side .choice-list,
-.exam-side .side-question {
-  direction: ltr !important;
-}
-.exam-side .side-title-large {
-  text-align: left !important;
-}
-.exam-side .side-title-large small {
-  display: block !important;
-  text-align: left !important;
-}
-
-/* Keep tool buttons compact and aligned. */
-.exercise-page .mini-tool,
-.exercise-page .side-icon {
-  flex: 0 0 auto !important;
-}
-
-@media (max-width: 900px) {
-  .exam-workspace {
-    grid-template-columns: 1fr !important;
-  }
-  .exam-side {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
+/* TELC Voll final exercise/admin stability fixes */
+@media (min-width: 769px) {
+  .exercise-page:has(.exam-workspace) {
     height: auto !important;
-    max-height: 360px !important;
-    position: relative !important;
-    top: auto !important;
-    border-inline-start: 0 !important;
-    border-top: 1px solid var(--line) !important;
+    min-height: calc(100vh - 60px) !important;
+    overflow: visible !important;
   }
-  .exam-main {
-    padding: 16px 14px 80px !important;
+  .exercise-page:has(.exam-workspace) .exam-workspace {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(330px, 390px) !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
   }
-  .exercise-heading {
+  .exercise-page:has(.exam-workspace) .exam-main {
+    min-width: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    direction: ltr !important;
+    text-align: left !important;
+    padding: 18px 24px 100px !important;
+    box-sizing: border-box !important;
+  }
+  .exercise-page:has(.exam-workspace) .exam-main .exam-text-card,
+  .exercise-page:has(.exam-workspace) .exam-main .exam-text,
+  .exercise-page:has(.exam-workspace) .exam-main .long-text,
+  .exercise-page:has(.exam-workspace) .exam-main .tf-text {
+    direction: ltr !important;
+    text-align: left !important;
+    unicode-bidi: plaintext !important;
+  }
+  .exercise-page:has(.exam-workspace) .exam-text-card {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+  }
+  .exercise-page:has(.exam-workspace) .exam-text {
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+  }
+  .exercise-page:has(.exam-workspace) .exam-side {
+    min-width: 330px !important;
+    max-width: 390px !important;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    position: sticky !important;
+    top: 60px !important;
+    align-self: start !important;
+    direction: rtl !important;
+    border-inline-start: 1px solid var(--line) !important;
+    box-sizing: border-box !important;
+  }
+  .exercise-page:has(.exam-workspace) .heading-list {
+    display: block !important;
     min-height: 120px !important;
+    padding: 8px 18px 30px !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  .exercise-page:has(.exam-workspace) .heading-option-wrap,
+  .exercise-page:has(.exam-workspace) .choice-card {
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 }
 
-@media (max-width: 600px) {
-  .exercise-topbar {
-    padding: 0 10px !important;
-  }
-  .exercise-heading {
-    padding: 18px 12px !important;
-  }
-  .exam-main .paragraph-assignment {
-    flex-wrap: wrap !important;
-  }
-  .exam-main .paragraph-assignment select {
-    flex-basis: 100% !important;
-    order: 3 !important;
-  }
-  .exam-main .paragraph-assignment .assignment-selected,
-  .exam-main .paragraph-assignment .assignment-empty {
-    order: 2 !important;
-  }
-}
-
-/* === Final site-wide layout correction ===
-   Keep the brand on the left, center the complete navigation group,
-   and reserve the right side for theme/language/account actions. */
-.top:not(.exercise-topbar),
-.admin-nav,
-.auth-nav{
-  display:grid !important;
-  grid-template-columns:minmax(180px,1fr) auto minmax(180px,1fr) !important;
-  align-items:center !important;
-  justify-content:initial !important;
-  gap:18px !important;
-  direction:ltr !important;
-}
-.top:not(.exercise-topbar) > .brand,
-.auth-nav > .brand,
-.admin-nav > .brand{grid-column:1;justify-self:start;margin:0 !important;}
-.top:not(.exercise-topbar) > nav,
-.admin-nav > nav,
-.top:not(.exercise-topbar) > .student-nav-links,
-.admin-nav > .admin-top-links{
-  grid-column:2;
-  justify-self:center !important;
-  justify-content:center !important;
-  flex:none !important;
-  width:max-content;
-  max-width:min(72vw,900px);
-  overflow:visible !important;
-}
-.top:not(.exercise-topbar) > .header-actions,
-.auth-nav > .header-actions,
-.admin-nav > .header-actions{
-  grid-column:3;
-  justify-self:end !important;
-  margin:0 !important;
-}
-
-/* Landing navigation: services through login stay as one centered group. */
-.landing-top > nav{
-  justify-content:center !important;
-  gap:7px !important;
-}
-.landing-top #navAuthSlot{
-  display:inline-flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  gap:8px !important;
-  margin-inline-start:2px !important;
-}
-.landing-top #navAuthSlot .btn{white-space:nowrap}
-
-/* Auth pages: keep the opposite action in the right-side action area. */
-.auth-nav .header-actions{display:flex !important;align-items:center !important;justify-content:flex-end !important;}
-
-/* Exercise pages: never crop the main exercise text. The main column grows
-   naturally while the question/heading rail remains independently scrollable. */
-.exercise-page:has(.exam-workspace){
-  height:auto !important;
-  min-height:calc(100vh - 60px) !important;
-  overflow:visible !important;
-  padding-bottom:88px !important;
-}
-.exercise-page:has(.exam-workspace) .exercise-heading{
-  height:auto !important;
-  min-height:145px !important;
-  flex:none !important;
-}
-.exercise-page:has(.exam-workspace) .exam-workspace{
-  height:auto !important;
-  min-height:calc(100vh - 205px) !important;
-  overflow:visible !important;
-  align-items:start !important;
-}
-.exercise-page:has(.exam-workspace) .exam-main{
-  height:auto !important;
-  min-height:0 !important;
-  max-width:none !important;
-  overflow:visible !important;
-  overflow-x:visible !important;
-  direction:ltr !important;
-  padding:20px clamp(24px,5vw,88px) 110px 24px !important;
-}
-.exercise-page:has(.exam-workspace) .exam-side{
-  height:calc(100vh - 205px) !important;
-  max-height:calc(100vh - 205px) !important;
-  position:sticky !important;
-  top:60px !important;
-  overflow-y:auto !important;
-  overflow-x:hidden !important;
-  direction:ltr !important;
-}
-/* German exercise text must remain fully visible and left-to-right. */
-.exercise-page:has(.exam-workspace) .exam-text,
-.exercise-page:has(.exam-workspace) .long-text,
-.exercise-page:has(.exam-workspace) .tf-text,
-.exercise-page:has(.exam-workspace) .hoeren-choice-question,
-.exercise-page:has(.exam-workspace) .hoeren-choice-option-text{
-  direction:ltr !important;
-  text-align:left !important;
-  unicode-bidi:plaintext;
-  overflow-wrap:anywhere;
-  word-break:normal;
-}
-.exercise-page:has(.exam-workspace) .exam-text-card{
-  width:100% !important;
-  max-width:none !important;
-}
-/* Keep Arabic controls RTL while the German paragraph remains LTR. */
-.exercise-page:has(.exam-workspace) .paragraph-assignment,
-.exercise-page:has(.exam-workspace) .assignment-label,
-.exercise-page:has(.exam-workspace) .assignment-empty,
-.exercise-page:has(.exam-workspace) .assignment-selected{
-  direction:rtl !important;
-  text-align:right !important;
-}
-.exercise-page:has(.exam-workspace) .paragraph-assignment select{
-  direction:ltr !important;
-  text-align:left !important;
-}
-
-/* Final CTA: login first, registration second, centered and visually grouped. */
-.landing-access .actions,
-.landing-access > div[style*="justify-content:center"]{
-  display:flex !important;
-  justify-content:center !important;
-  align-items:center !important;
-  gap:12px !important;
-  flex-wrap:wrap !important;
-}
-
-@media(max-width:1050px){
-  .top:not(.exercise-topbar),.admin-nav,.auth-nav{
-    grid-template-columns:minmax(120px,1fr) auto minmax(120px,1fr) !important;
-  }
-  .top:not(.exercise-topbar) > nav,
-  .admin-nav > nav,
-  .top:not(.exercise-topbar) > .student-nav-links,
-  .admin-nav > .admin-top-links{max-width:66vw}
-  .exercise-page:has(.exam-workspace) .exam-side{
-    height:auto !important;
-    max-height:none !important;
-    position:relative !important;
-    top:auto !important;
-  }
-}
-@media(max-width:720px){
-  .top:not(.exercise-topbar),.admin-nav,.auth-nav{
-    grid-template-columns:1fr auto !important;
-    grid-template-rows:auto auto !important;
-    min-height:64px;
-    padding-block:8px !important;
-  }
-  .top:not(.exercise-topbar) > .brand,
-  .auth-nav > .brand,
-  .admin-nav > .brand{grid-column:1;grid-row:1;}
-  .top:not(.exercise-topbar) > .header-actions,
-  .auth-nav > .header-actions,
-  .admin-nav > .header-actions{grid-column:2;grid-row:1;}
-  .top:not(.exercise-topbar) > nav,
-  .admin-nav > nav,
-  .top:not(.exercise-topbar) > .student-nav-links,
-  .admin-nav > .admin-top-links{
-    grid-column:1 / -1;
-    grid-row:2;
-    width:100%;
-    max-width:none;
-    justify-content:center !important;
-    overflow-x:auto !important;
-  }
-  .exercise-page:has(.exam-workspace) .exam-workspace{grid-template-columns:1fr !important;}
-  .exercise-page:has(.exam-workspace) .exam-main{padding:14px 12px 100px !important;}
-  .exercise-page:has(.exam-workspace) .exam-side{height:auto !important;max-height:55vh !important;}
-}
+/* Admin students: predictable RTL column order and usable action buttons */
+.students-page .table-wrap { direction: rtl !important; }
+.students-page .table { direction: rtl !important; }
+.students-page .table th:last-child,
+.students-page .table td:last-child { text-align: right !important; }
+.students-page .action-group button { pointer-events: auto !important; position: relative !important; z-index: 2 !important; }
