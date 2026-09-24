@@ -4709,83 +4709,233 @@ html[data-theme="dark"] .hoeren-audio-player-card {
   }
 }
 
+/* ========================================================
+   TELC VOLL — EXERCISE DISPLAY CORRECTION
+   Based on the uploaded latest exercise presentation reference.
+   Scoped strictly to exercise pages; authentication, dashboard,
+   payment, admin and database logic remain untouched.
+   ======================================================== */
 
-/* TELC Voll final exercise/admin stability fixes */
-@media (min-width: 769px) {
-  .exercise-page:has(.exam-workspace) {
-    height: auto !important;
-    min-height: calc(100vh - 60px) !important;
-    overflow: visible !important;
+/* Exercise header: one clean horizontal bar. */
+.exercise-topbar {
+  min-height: 62px !important;
+  height: 62px !important;
+  padding: 0 18px !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  direction: ltr !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 120 !important;
+}
+.exercise-topbar .back-link {
+  flex: 0 0 40px !important;
+  margin: 0 !important;
+}
+.exercise-header-actions {
+  margin-inline-start: auto !important;
+  margin-inline-end: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  flex-wrap: nowrap !important;
+}
+.exercise-header-actions .icon-btn,
+.exercise-header-actions button,
+.exercise-header-actions a {
+  flex: 0 0 auto !important;
+}
+
+/* Exercise title: centered independently from RTL/LTR body direction. */
+.exercise-heading {
+  min-height: 144px !important;
+  padding: 24px 22px 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  direction: ltr !important;
+}
+.exercise-heading-title {
+  margin: 0 !important;
+  width: min(760px, 100%) !important;
+  flex: 0 1 760px !important;
+  text-align: center !important;
+  direction: ltr !important;
+}
+.exercise-heading-title h1,
+.thema-title-row h1 {
+  text-align: center !important;
+  direction: ltr !important;
+}
+.exercise-heading-title small {
+  display: block !important;
+  text-align: center !important;
+}
+.exercise-heading .progress-pill,
+.exercise-heading > .timer {
+  position: absolute !important;
+  inset-inline-end: 20px !important;
+  top: 20px !important;
+}
+
+/* Stable two-column exercise workspace. Main content remains readable,
+   right answer panel stays fixed and independently scrollable. */
+.exam-workspace {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 360px !important;
+  direction: ltr !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-height: calc(100vh - 206px) !important;
+}
+.exam-main {
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 18px clamp(24px, 5vw, 76px) 110px 24px !important;
+  direction: rtl !important;
+  overflow: auto !important;
+}
+.exam-side {
+  width: 360px !important;
+  min-width: 360px !important;
+  max-width: 360px !important;
+  height: calc(100vh - 62px) !important;
+  max-height: calc(100vh - 62px) !important;
+  position: sticky !important;
+  top: 62px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  direction: ltr !important;
+  border-inline-start: 1px solid var(--line) !important;
+}
+
+/* Lesen Teil 1 assignment row: Arabic labels follow RTL correctly. */
+.exam-main .paragraph-assignment {
+  direction: rtl !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: stretch !important;
+  gap: 12px !important;
+  width: 100% !important;
+  text-align: right !important;
+}
+.exam-main .paragraph-assignment .assignment-label {
+  order: 1 !important;
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+  text-align: right !important;
+}
+.exam-main .paragraph-assignment select {
+  order: 2 !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  direction: rtl !important;
+  text-align: right !important;
+  margin: 0 !important;
+}
+.exam-main .paragraph-assignment .assignment-selected,
+.exam-main .paragraph-assignment .assignment-empty {
+  order: 3 !important;
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+  text-align: left !important;
+}
+
+/* Cards: consistent width, spacing and text direction. */
+.exam-main .exam-text-card,
+.exam-main .question-card,
+.exam-main .lesen2-question {
+  width: 100% !important;
+  max-width: none !important;
+  direction: rtl !important;
+  text-align: right !important;
+}
+.exam-main .exam-text-card {
+  padding: 22px 28px !important;
+  margin-bottom: 16px !important;
+}
+.exam-main .exam-text {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: plaintext !important;
+  font-size: 17px !important;
+  line-height: 1.95 !important;
+}
+.exam-main .exam-card-top {
+  display: flex !important;
+  justify-content: flex-end !important;
+  direction: ltr !important;
+}
+
+/* Right-side headings panel. */
+.exam-side .side-title,
+.exam-side .heading-list,
+.exam-side .choice-list,
+.exam-side .side-question {
+  direction: ltr !important;
+}
+.exam-side .side-title-large {
+  text-align: left !important;
+}
+.exam-side .side-title-large small {
+  display: block !important;
+  text-align: left !important;
+}
+
+/* Keep tool buttons compact and aligned. */
+.exercise-page .mini-tool,
+.exercise-page .side-icon {
+  flex: 0 0 auto !important;
+}
+
+@media (max-width: 900px) {
+  .exam-workspace {
+    grid-template-columns: 1fr !important;
   }
-  .exercise-page:has(.exam-workspace) .exam-workspace {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) minmax(330px, 390px) !important;
-    align-items: stretch !important;
+  .exam-side {
     width: 100% !important;
-    height: auto !important;
-    min-height: 0 !important;
-    overflow: visible !important;
-  }
-  .exercise-page:has(.exam-workspace) .exam-main {
     min-width: 0 !important;
-    width: 100% !important;
+    max-width: none !important;
     height: auto !important;
-    max-height: none !important;
-    overflow: visible !important;
-    direction: ltr !important;
-    text-align: left !important;
-    padding: 18px 24px 100px !important;
-    box-sizing: border-box !important;
+    max-height: 360px !important;
+    position: relative !important;
+    top: auto !important;
+    border-inline-start: 0 !important;
+    border-top: 1px solid var(--line) !important;
   }
-  .exercise-page:has(.exam-workspace) .exam-main .exam-text-card,
-  .exercise-page:has(.exam-workspace) .exam-main .exam-text,
-  .exercise-page:has(.exam-workspace) .exam-main .long-text,
-  .exercise-page:has(.exam-workspace) .exam-main .tf-text {
-    direction: ltr !important;
-    text-align: left !important;
-    unicode-bidi: plaintext !important;
+  .exam-main {
+    padding: 16px 14px 80px !important;
   }
-  .exercise-page:has(.exam-workspace) .exam-text-card {
-    width: 100% !important;
-    box-sizing: border-box !important;
-    overflow: visible !important;
-  }
-  .exercise-page:has(.exam-workspace) .exam-text {
-    white-space: normal !important;
-    overflow-wrap: anywhere !important;
-    word-break: normal !important;
-  }
-  .exercise-page:has(.exam-workspace) .exam-side {
-    min-width: 330px !important;
-    max-width: 390px !important;
-    width: 100% !important;
-    height: auto !important;
-    max-height: none !important;
-    overflow: visible !important;
-    position: sticky !important;
-    top: 60px !important;
-    align-self: start !important;
-    direction: rtl !important;
-    border-inline-start: 1px solid var(--line) !important;
-    box-sizing: border-box !important;
-  }
-  .exercise-page:has(.exam-workspace) .heading-list {
-    display: block !important;
+  .exercise-heading {
     min-height: 120px !important;
-    padding: 8px 18px 30px !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-  .exercise-page:has(.exam-workspace) .heading-option-wrap,
-  .exercise-page:has(.exam-workspace) .choice-card {
-    visibility: visible !important;
-    opacity: 1 !important;
   }
 }
 
-/* Admin students: predictable RTL column order and usable action buttons */
-.students-page .table-wrap { direction: rtl !important; }
-.students-page .table { direction: rtl !important; }
-.students-page .table th:last-child,
-.students-page .table td:last-child { text-align: right !important; }
-.students-page .action-group button { pointer-events: auto !important; position: relative !important; z-index: 2 !important; }
+@media (max-width: 600px) {
+  .exercise-topbar {
+    padding: 0 10px !important;
+  }
+  .exercise-heading {
+    padding: 18px 12px !important;
+  }
+  .exam-main .paragraph-assignment {
+    flex-wrap: wrap !important;
+  }
+  .exam-main .paragraph-assignment select {
+    flex-basis: 100% !important;
+    order: 3 !important;
+  }
+  .exam-main .paragraph-assignment .assignment-selected,
+  .exam-main .paragraph-assignment .assignment-empty {
+    order: 2 !important;
+  }
+}

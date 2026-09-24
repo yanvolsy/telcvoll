@@ -38,6 +38,18 @@ async function api(path, options = {}) {
   }
 }
 
+// Google Identity Services may load asynchronously. Wait for it instead of racing the script tag.
+window.waitForGoogle = window.waitForGoogle || function(timeout = 12000) {
+  if (window.google?.accounts?.id) return Promise.resolve(window.google);
+  return new Promise((resolve, reject) => {
+    const started = Date.now();
+    const timer = setInterval(() => {
+      if (window.google?.accounts?.id) { clearInterval(timer); resolve(window.google); return; }
+      if (Date.now() - started >= timeout) { clearInterval(timer); reject(new Error('Google Identity Services failed to load.')); }
+    }, 100);
+  });
+};
+
 function qs(name) {
   return new URLSearchParams(location.search).get(name);
 }
