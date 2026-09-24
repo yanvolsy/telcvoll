@@ -21,13 +21,21 @@ html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !impo
 html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}</style>
 </head>
 <body>
-<header class="top">
-  <a class="brand" href="/dashboard.html">TELC VOLL</a>
-  <nav>
-    <a href="/dashboard.html">الرئيسية</a>
-    <a href="/admin/content.html">Content Management</a>
-    <a href="/admin/codes.html">Codes</a>
-    <a href="#" id="logoutLink">خروج</a>
+<header class="top admin-nav">
+  <a class="brand" href="/admin/index.html" aria-label="TELC Voll">
+    <span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span>
+    <span class="admin-badge">Admin</span>
+  </a>
+  <nav class="admin-top-links" aria-label="لوحة الإدارة">
+    <a href="/admin/index.html">الرئيسية</a>
+    <a href="/admin/questions.html">التمارين</a>
+    <a href="/admin/students.html">الطلاب</a>
+    <a href="/admin/plans.html">الخطط</a>
+    <a href="/admin/orders.html">طلبات الدفع</a>
+    <a href="/admin/campaigns.html">البريد</a>
+    <a href="/admin/notifications.html">التنبيهات</a>
+    <a href="/admin/settings.html">الإعدادات</a>
+    <a href="#" id="logoutLink" class="nav-logout-btn">خروج</a>
   </nav>
 </header>
 <main class="wrap">

@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>تأكيد البريد الإلكتروني | TELC Voll</title>
+<link rel="stylesheet" href="/assets/app.css?v=20260918-cairo-local-v2">
+<link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
+<link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
+<link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="/manifest.webmanifest">
+<style>
+.auth-page{min-height:100vh;display:flex;flex-direction:column;justify-content:space-between;background:var(--bg)}
+.auth-nav{padding:18px 24px;display:flex;justify-content:space-between;align-items:center}
+.auth-box-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+.auth-card{background:var(--white);border:1px solid var(--line);border-radius:24px;padding:clamp(22px,4vw,36px);width:min(480px,100%);box-shadow:var(--shadow-lg);box-sizing:border-box;text-align:center}
+.verify-icon{width:70px;height:70px;border-radius:22px;margin:0 auto 18px;display:grid;place-items:center;font-size:32px;background:var(--green-soft);color:var(--green)}
+.verify-icon.bad{background:#fef2f2;color:#ef4444}
+.verify-icon.pending{background:rgba(245,158,11,0.12);color:#f59e0b}
+.auth-card h1{font-size:24px;margin:0 0 10px;color:var(--ink);letter-spacing:-.03em}
+.auth-card p{margin:0 0 20px;color:var(--muted);font-size:14px;line-height:1.7}
+.alert-box{margin-bottom:16px;padding:12px 14px;border-radius:12px;font-size:13px;font-weight:800;text-align:start}
+.alert-box.bad{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+.alert-box.good{background:#e8f7ee;color:#0e7039;border:1px solid #b7ebc7}
+.resend-box{margin-top:20px;padding-top:20px;border-top:1px dashed var(--line);text-align:start}
+.resend-box label{display:block;font-size:12px;font-weight:900;color:var(--ink);margin-bottom:6px}
+.resend-box input{width:100%;box-sizing:border-box;padding:11px 13px;border:1px solid var(--line);border-radius:12px;font-size:14px;background:var(--bg);color:var(--ink);direction:ltr;text-align:right}
+.auth-footer{text-align:center;padding:18px;font-size:12px;color:var(--muted)}
+</style>
+<style><!-- TELC Voll: unified typography -->
+html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
+</style>
+</head>
+<body class="auth-page">
+<header class="auth-nav">
+  <a class="brand" href="/" aria-label="TELC Voll"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
+  <div class="header-actions" style="display:flex;gap:10px;align-items:center;">
+    <a href="/login.html" class="btn small-btn light">تسجيل الدخول</a>
+  </div>
+</header>
+
+<main class="auth-box-wrap">
+  <div class="auth-card" id="cardContent">
+    <div class="verify-icon pending" id="statusIcon">⏳</div>
+    <h1 id="statusTitle">جارٍ التحقق من رابط التفعيل…</h1>
+    <p id="statusDesc">يرجى الانتظار لحظات ريثما يتم التحقق من صحة بريدك الإلكتروني.</p>
+    <div id="alertBox"></div>
+    <div id="actionArea"></div>
+  </div>
+</main>
+
+<footer class="auth-footer">
+  TELC Voll — منصة التدريب والتحضير لامتحانات اللغة الألمانية B1 · B2 · C1
+</footer>
+
+<script src="/assets/i18n.js"></script>
+<script src="/assets/app.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const token = qs('token');
+const emailParam = qs('email') || '';
+
+async function verifyToken() {
+  const icon = $('statusIcon');
+  const title = $('statusTitle');
+  const desc = $('statusDesc');
+  const alertBox = $('alertBox');
+  const actionArea = $('actionArea');
+
+  if (!token) {
+    icon.className = 'verify-icon pending';
+    icon.textContent = '✉️';
+    title.textContent = 'تأكيد البريد الإلكتروني';
+    desc.textContent = emailParam 
+      ? `أرسلنا رابط تفعيل الحساب إلى بريدك الإلكتروني (${esc(emailParam)}). يرجى فتح البريد والضغط على الرابط لتفعيل حسابك.`
+      : 'أرسلنا لك رابط تفعيل الحساب إلى بريدك الإلكتروني. يرجى فتح الرسالة والضغط على الرابط لتأكيد حسابك.';
+    
+    renderResendForm(emailParam);
+    return;
+  }
+
+  try {
+    const res = await api('auth-verify-email', {
+      method: 'POST',
+      body: { token }
+    });
+
+    if (res.token) {
+      try { localStorage.setItem('telc_student_token', res.token); } catch (_) {}
+    }
+
+    icon.className = 'verify-icon';
+    icon.textContent = '✓';
+    title.textContent = 'تم تأكيد الحساب بنجاح!';
+    desc.textContent = 'تم تفعيل بريدك الإلكتروني بنجاح في منصة TELC Voll. حسابك الآن جاهز ومفعل للتدرب.';
+
+    // Check if there was pending checkout
+    let hasPendingCheckout = false;
+    try {
+      hasPendingCheckout = !!sessionStorage.getItem('telc_pending_checkout');
+    } catch (_) {}
+
+    if (hasPendingCheckout) {
+      actionArea.innerHTML = `
+        <a href="/#plans" class="btn" style="width:100%;padding:14px;font-size:15px;font-weight:900;text-decoration:none;display:flex;justify-content:center;align-items:center;gap:8px;">
+          <span>المتابعة إلى إتمام شراء الخطة</span>
+          <span>←</span>
+        </a>
+      `;
+    } else {
+      actionArea.innerHTML = `
+        <a href="/dashboard.html" class="btn" style="width:100%;padding:14px;font-size:15px;font-weight:900;text-decoration:none;display:flex;justify-content:center;align-items:center;gap:8px;">
+          <span>الدخول إلى لوحة التحكم والتمارين</span>
+          <span>←</span>
+        </a>
+      `;
+    }
+  } catch (err) {
+    icon.className = 'verify-icon bad';
+    icon.textContent = '✕';
+    title.textContent = 'تعذر تفعيل الحساب';
+    desc.textContent = err.data?.message || err.data?.error || err.message || 'رابط التفعيل غير صالح أو انتهت صلاحيته.';
+
+    renderResendForm(emailParam);
+  }
+}
+
+function renderResendForm(defaultEmail = '') {
+  const actionArea = $('actionArea');
+  actionArea.innerHTML = `
+    <div class="resend-box">
+      <label for="resendEmail">لم يصلك البريد أو انتهت صلاحية الرابط؟</label>
+      <form id="resendForm" style="display:flex;flex-direction:column;gap:10px;">
+        <input type="email" id="resendEmail" required placeholder="name@example.com" value="${esc(defaultEmail)}">
+        <button type="submit" id="resendBtn" class="btn light" style="font-weight:900;">
+          إعادة إرسال رابط التفعيل ←
+        </button>
+      </form>
+    </div>
+  `;
+
+  $('resendForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const email = $('resendEmail').value.trim();
+    if (!email || !email.includes('@')) return;
+
+    const btn = $('resendBtn');
+    btn.disabled = true;
+    btn.textContent = 'جارٍ الإرسال…';
+
+    try {
+      const res = await api('auth-verify-email', {
+        method: 'POST',
+        body: { action: 'resend', email }
+      });
+      $('alertBox').innerHTML = `<div class="alert-box good">${esc(res.message || 'تم إرسال رابط تفعيل جديد إلى بريدك بنجاح.')}</div>`;
+      btn.textContent = 'تم الإرسال بنجاح ✓';
+      setTimeout(() => { btn.disabled = false; btn.textContent = 'إعادة الإرسال مرة أخرى'; }, 10000);
+    } catch (err) {
+      btn.disabled = false;
+      btn.textContent = 'إعادة إرسال رابط التفعيل ←';
+      $('alertBox').innerHTML = `<div class="alert-box bad">${esc(err.data?.error || err.message || 'تعذر إرسال الرابط.')}</div>`;
+    }
+  };
+}
+
+verifyToken();
+</script>
+</body>
+</html>

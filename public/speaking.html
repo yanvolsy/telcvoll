@@ -28,8 +28,15 @@ html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !impo
 html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}</style>
 </head>
 <body>
-<header class="top"><a class="brand" href="/dashboard.html">TELC Voll</a><nav>
-<a href="/dashboard.html">الرئيسية</a><a href="/errors.html">أخطائي</a><a href="#" id="logout">خروج</a>
+<header class="top"><a class="brand" href="/dashboard.html"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a><nav class="student-nav-links">
+  <a href="/dashboard.html" data-i18n="nav_home_student">منصة الطالب</a>
+  <a href="/plans.html" data-i18n="nav_plans">الخطط</a>
+  <a href="/self-test.html" data-i18n="nav_mock">امتحان تجريبي</a>
+  <a href="/speaking.html" data-i18n="nav_speaking_ai">Sprechen AI</a>
+  <a href="/telc-chat.html" data-i18n="nav_speaking">مساعد TELC</a>
+  <a href="/errors.html" data-i18n="nav_errors">أخطائي</a>
+  <a href="/profile.html" data-i18n="profile_link">ملفي</a>
+  <a href="#" id="logoutLink" data-i18n="nav_logout" class="nav-logout-btn">خروج</a>
 </nav></header>
 <main class="wrap spk-shell"><div class="panel">
 <div id="loading">جارٍ تحميل موضوع Sprechen…</div>
@@ -59,7 +66,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <script src="/assets/app.js"></script>
 <script>
 const id=new URLSearchParams(location.search).get('id');
-const $=x=>document.getElementById(x); let ex=null, history=[], transcript=[], recognition=null, busy=false, voiceRunning=false, speakingNow=false, turnToken=0, modelBusy=false;
+const $=x=>document.getElementById(x); let ex=null, history=[], transcript=[], recognition=null, busy=false, voiceRunning=false, speakingNow=false, turnToken=0, modelBusy=false, isPaidStudent=false;
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function addBubble(who,msg,autoSpeak=false){const d=document.createElement('div');d.className='bubble '+who;const safe=String(msg||'');d.innerHTML=`<div class="bubble-tools"><b>${who==='jerry'?'Jerry':who==='partner'?'Partner':'Du'}</b><span style="margin-inline-start:auto"></span><button type="button" class="icon-btn" data-bubble-speak aria-label="Nachricht anhören">🔊</button><button type="button" class="bubble-translate" data-bubble-translate aria-label="Nachricht übersetzen">文</button></div><div class="bubble-text">${esc(safe)}</div><div class="bubble-translation" hidden></div>`;$('chat').appendChild(d);$('chat').scrollTop=$('chat').scrollHeight;const vb=d.querySelector('[data-bubble-speak]');vb.onclick=()=>speak(safe);const tb=d.querySelector('[data-bubble-translate]');tb.onclick=async()=>{const box=d.querySelector('.bubble-translation');box.hidden=!box.hidden;if(!box.hidden){box.textContent='…';try{box.textContent=await translateText(safe)}catch{box.textContent='Übersetzung nicht verfügbar.'}}};if(autoSpeak)setTimeout(()=>speak(safe),120)}
 async function translateText(raw){const source=String(raw||'').trim();if(!source)return '';const url='https://translate.googleapis.com/translate_a/single?client=gtx&sl=de&tl=ar&dt=t&q='+encodeURIComponent(source);const r=await fetch(url);if(!r.ok)throw new Error('translation failed');const d=await r.json();return (d?.[0]||[]).map(x=>x?.[0]||'').join('').trim()}
@@ -319,9 +326,34 @@ function bindTeil1StudioEvents(){
       try { localStorage.setItem('telc_pres_notes_'+currentPresCategory, notesEl.value); } catch(_){}
     };
   }
+function showPaidOnlyModal(msg) {
+  let modal = $('paidOnlyModal');
+  if (modal) modal.remove();
+  modal = document.createElement('div');
+  modal.id = 'paidOnlyModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+  modal.innerHTML = `
+    <div style="background:var(--white);border:1px solid var(--line);border-radius:22px;padding:32px;max-width:440px;width:100%;text-align:center;box-shadow:var(--shadow);">
+      <div style="width:54px;height:54px;border-radius:16px;background:var(--green-soft);color:var(--green);font-size:26px;display:grid;place-items:center;margin:0 auto 16px;">✦</div>
+      <h3 style="margin:0 0 10px;font-size:21px;color:var(--ink);">ميزة حصرية للمشتركين</h3>
+      <p class="muted" style="margin:0 0 24px;font-size:14px;line-height:1.7;">${esc(msg || 'توليد نموذج العرض الكامل وأسئلة اللجنة متاح في الباقات المدفوعة فقط. يمكنك استعراض كافة المحاور مجاناً.')}</p>
+      <div style="display:flex;gap:10px;flex-direction:column;">
+        <a href="/plans.html" class="btn" style="width:100%;">ترقية الاشتراك الآن ⚡</a>
+        <button type="button" class="btn light" onclick="document.getElementById('paidOnlyModal').remove()">إغلاق</button>
+      </div>
+    </div>
+  `;
+  modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+  document.body.appendChild(modal);
+}
+
   const genBtn = $('presGenBtn');
   if(genBtn){
     genBtn.onclick=async()=>{
+      if (!isPaidStudent) {
+        showPaidOnlyModal();
+        return;
+      }
       const notes = $('presNotes')?.value || '';
       genBtn.disabled=true;
       genBtn.textContent='⏳ جارٍ توليد العرض وأسئلة اللجنة…';
@@ -586,10 +618,11 @@ function renderPresResult(data, isSaved){
   });
 }
 
-async function generateModel(){if(modelBusy)return;modelBusy=true;$('modelBtn').disabled=true;$('modelBtn').textContent='⏳ جارٍ التوليد…';$('modelContent').hidden=false;$('modelContent').innerHTML='<div class="speaking-model-empty">جارٍ إنشاء نموذج مناسب لهذا الموضوع مع أسئلة اللجنة وإجاباتها المقترحة…</div>';try{const r=await api('ai-speaking-session',{method:'POST',body:{id,mode:'model',teil:currentTeil()}});if(r.error)throw new Error(r.error);renderModel(r)}catch(e){$('modelContent').innerHTML=`<div class="alert bad">${esc(e?.message||'حدث خطأ أثناء توليد الإجابة النموذجية.')}</div>`}finally{modelBusy=false;$('modelBtn').disabled=false;$('modelBtn').textContent='🧠 توليد الإجابة النموذجية'}}
+async function generateModel(){if(!isPaidStudent){showPaidOnlyModal('توليد الإجابة النموذجية بالذكاء الاصطناعي متاح في الباقات المدفوعة فقط.');return;}if(modelBusy)return;modelBusy=true;$('modelBtn').disabled=true;$('modelBtn').textContent='⏳ جارٍ التوليد…';$('modelContent').hidden=false;$('modelContent').innerHTML='<div class="speaking-model-empty">جارٍ إنشاء نموذج مناسب لهذا الموضوع مع أسئلة اللجنة وإجاباتها المقترحة…</div>';try{const r=await api('ai-speaking-session',{method:'POST',body:{id,mode:'model',teil:currentTeil()}});if(r.error)throw new Error(r.error);renderModel(r)}catch(e){$('modelContent').innerHTML=`<div class="alert bad">${esc(e?.message||'حدث خطأ أثناء توليد الإجابة النموذجية.')}</div>`}finally{modelBusy=false;$('modelBtn').disabled=false;$('modelBtn').textContent='🧠 توليد الإجابة النموذجية'}}
 async function load(){try{
  const wanted=new URLSearchParams(location.search).get('teil');
  let data=await api('exercise-get?id='+encodeURIComponent(id));
+ isPaidStudent = data.is_paid === true;
  ex=data.exercise;
  if(String(ex.section)!=='Sprechen')throw new Error('هذا ليس تمرين Sprechen.');
  if(wanted && wanted!==currentTeil()){

@@ -19,7 +19,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
   <a class="brand" href="/" aria-label="TELC Voll"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
   <nav>
     <a href="#services" data-i18n="nav_services">الخدمات</a>
-    <a href="#plans" data-i18n="nav_plans">الخطط</a>
+    <a href="/plans.html" data-i18n="nav_plans">الخطط</a>
     <a href="#about" data-i18n="nav_about">عن المنصة</a>
     <a href="/contact.html" data-i18n="nav_contact">اتصل بنا</a>
     <span id="navAuthSlot" style="display:inline-flex;gap:8px;align-items:center;">
@@ -82,24 +82,24 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
     <div id="plansGrid" class="landing-plan-grid"><div class="card"><p class="muted" data-i18n="plans_loading">جارٍ تحميل الخطط…</p></div></div>
 
     <!-- Alternative Payment Methods Box -->
-    <div class="alt-payment-box" style="margin-top:28px;background:var(--white);border:1.5px dashed var(--line);border-radius:24px;padding:26px 28px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;box-shadow:var(--shadow-sm);">
-      <div style="display:flex;align-items:center;gap:18px;max-width:720px;">
-        <div style="width:56px;height:56px;border-radius:18px;background:var(--exercise-accent-soft);color:var(--exercise-accent);display:grid;place-items:center;font-size:26px;flex-shrink:0;">
-          💳
+    <div class="alt-payment-box" style="margin-top:24px;background:var(--white);border:1px solid var(--line);border-radius:20px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;box-shadow:var(--shadow-sm);">
+      <div style="display:flex;align-items:center;gap:14px;max-width:680px;">
+        <div style="width:48px;height:48px;border-radius:14px;background:var(--green-soft);color:var(--green);display:grid;place-items:center;font-size:22px;flex-shrink:0;">
+          💬
         </div>
         <div>
-          <h3 style="margin:0 0 6px;font-size:18px;color:var(--ink);">هل تبحث عن وسيلة دفع أخرى؟ (بريدي موب BaridiMob / CCP / تحويل يدوي)</h3>
-          <p style="margin:0;color:var(--muted);font-size:14px;line-height:1.65;">
-            إذا كنت تفضل الدفع عبر <strong>BaridiMob</strong> أو <strong>CCP</strong> أو أي وسيلة دفع أخرى، تواصل مع الأدمن مباشرة وسيقوم <strong>بتفعيل حسابك فوراً بالخطة التي تختارها</strong>.
+          <h3 style="margin:0 0 4px;font-size:17px;color:var(--ink);">هل تبحث عن طرق دفع أخرى؟</h3>
+          <p style="margin:0;color:var(--muted);font-size:13.5px;line-height:1.6;">
+            إذا كنت تبحث عن وسيلة دفع أخرى، تواصل معنا وسيقوم فريق المنصة بمساعدتك وتفعيل حسابك مباشرة بالخطة المختارة.
           </p>
         </div>
       </div>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-        <a href="https://m.me/TELCVoll" target="_blank" rel="noopener noreferrer" class="btn" style="padding:12px 22px;font-size:14px;font-weight:900;text-decoration:none;">
-          تواصل مع الأدمن عبر Messenger ↗
+        <a href="https://m.me/TELCVoll" target="_blank" rel="noopener noreferrer" class="btn small-btn" style="text-decoration:none;">
+          تواصل مع الإدارة عبر Messenger ↗
         </a>
-        <a href="/contact.html" class="btn light" style="padding:12px 20px;font-size:14px;font-weight:800;text-decoration:none;">
-          جميع طرق التواصل ←
+        <a href="/contact.html" class="btn small-btn light" style="text-decoration:none;">
+          تواصل معنا ←
         </a>
       </div>
     </div>
@@ -132,10 +132,10 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
         <input type="hidden" id="checkoutPlanId" name="plan_id">
         <div class="field" style="margin-bottom:14px;">
           <label style="display:block;font-size:12px;font-weight:800;color:var(--muted);margin-bottom:6px;">الاسم الكامل *</label>
-          <input type="text" id="custName" name="name" required placeholder="مثال: اسم ولقبك" style="width:100%;box-sizing:border-box;padding:11px 14px;border:1px solid var(--line);border-radius:11px;font-size:14px;background:var(--bg);color:var(--ink);">
+          <input type="text" id="custName" name="name" required placeholder="مثال: اسمك لقبك" style="width:100%;box-sizing:border-box;padding:11px 14px;border:1px solid var(--line);border-radius:11px;font-size:14px;background:var(--bg);color:var(--ink);">
         </div>
         <div class="field" style="margin-bottom:14px;">
-          <label style="display:block;font-size:12px;font-weight:800;color:var(--muted);margin-bottom:6px;">البريد الإلكتروني (لتلقي رمز التفعيل فوراً) *</label>
+          <label style="display:block;font-size:12px;font-weight:800;color:var(--muted);margin-bottom:6px;">البريد الإلكتروني (لتلقي تفاصيل الاشتراك وتأكيده) *</label>
           <input type="email" id="custEmail" name="email" required placeholder="example@email.com" style="width:100%;box-sizing:border-box;padding:11px 14px;border:1px solid var(--line);border-radius:11px;font-size:14px;direction:ltr;text-align:right;background:var(--bg);color:var(--ink);">
         </div>
         <div class="field" style="margin-bottom:14px;">
@@ -161,7 +161,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
         </button>
 
         <div style="margin-top:14px;text-align:center;font-size:12.5px;color:var(--muted);line-height:1.6;">
-          تفّضل وسيلة دفع أخرى كـ <strong>BaridiMob أو CCP</strong>؟ <a href="https://m.me/TELCVoll" target="_blank" rel="noopener noreferrer" style="color:var(--exercise-accent);font-weight:900;text-decoration:underline;">اتصل بالأدمن لتفعيل حسابك يدوياً ↗</a>
+          هل تبحث عن طريقة دفع أخرى؟ <a href="https://m.me/TELCVoll" target="_blank" rel="noopener noreferrer" style="color:var(--green);font-weight:900;text-decoration:underline;">تواصل مع الإدارة لمساعدتك ↗</a>
         </div>
       </form>
     </div>
@@ -177,10 +177,6 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
       <a href="/login.html" class="btn" style="padding:13px 28px;font-size:15px;font-weight:900;">تسجيل الدخول بحسابك 🔑</a>
       <a href="/register.html" class="btn light" style="padding:13px 28px;font-size:15px;font-weight:900;">إنشاء حساب جديد مجاناً 🚀</a>
     </div>
-    <div style="max-width:500px;margin:auto;padding-top:18px;border-top:1px dashed var(--line);">
-      <p style="font-size:12px;color:var(--muted);margin-bottom:10px;text-align:center;">لديك رمز وصول قديم (TV-XXXXX)؟ يمكنك كتابته للدخول مباشرة:</p>
-      <form id="loginForm" class="landing-access-form"><input name="code" required placeholder="TV-XXXXX" autocomplete="one-time-code"><button class="btn" data-i18n="access_btn">دخول بالرمز</button></form>
-    </div>
     <div id="msg"></div>
   </section>
 
@@ -190,55 +186,37 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <script src="/assets/i18n.js"></script>
 <script src="/assets/app.js"></script>
 <script>
+let currentUser = null;
+
 api('me').then(res => {
   if (res && res.student && res.student.id) {
+    currentUser = res.student;
     const navSlot = document.getElementById('navAuthSlot');
     if (navSlot) navSlot.innerHTML = `<a class="btn small-btn" href="/dashboard.html">لوحة الطالب ←</a>`;
     const heroSlot = document.getElementById('heroActionsSlot');
     if (heroSlot) heroSlot.innerHTML = `<a class="btn" href="/dashboard.html">لوحة الطالب ومتابعة التدريب ←</a><a class="btn light" href="#plans">الخطط والاشتراكات</a>`;
+
+    // Pre-fill checkout form if open or opened later
+    const nameInput = document.getElementById('custName');
+    const emailInput = document.getElementById('custEmail');
+    const phoneInput = document.getElementById('custPhone');
+    if (nameInput && !nameInput.value) nameInput.value = res.student.name || '';
+    if (emailInput && !emailInput.value) emailInput.value = res.student.email || '';
+    if (phoneInput && !phoneInput.value) phoneInput.value = res.student.phone || '';
+
+    // Check for pending checkout from session storage
+    try {
+      const rawPending = sessionStorage.getItem('telc_pending_checkout');
+      if (rawPending) {
+        const pendingPlan = JSON.parse(rawPending);
+        if (pendingPlan && pendingPlan.id) {
+          sessionStorage.removeItem('telc_pending_checkout');
+          setTimeout(() => openCheckout(pendingPlan), 300);
+        }
+      }
+    } catch (_) {}
   }
 }).catch(() => {});
-if (qs('error') === 'session') {
-  msg.innerHTML = `<div class="alert bad">${getLang() === 'de' ? 'Ihre Sitzung ist abgelaufen oder wurde auf einem anderen Gerät geöffnet. Bitte geben Sie Ihren Code erneut ein.' : 'انتهت الجلسة أو تم تسجيل الدخول من جهاز آخر. يرجى إدخال رمز الوصول مرة أخرى.'}</div>`;
-  try { history.replaceState(null, '', location.pathname); } catch (_) {}
-}
-const urlCode = qs('code');
-if (urlCode && loginForm.code) {
-  loginForm.code.value = urlCode;
-  setTimeout(() => {
-    loginForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, 300);
-}
-loginForm.onsubmit = async (e) => {
-  e.preventDefault(); msg.innerHTML = '';
-  const fd = new FormData(loginForm);
-  const rawCode = String(fd.get('code') || '').trim();
-  if (!rawCode) return;
-  const btn = loginForm.querySelector('button');
-  const oldText = btn ? btn.textContent : '';
-  if (btn) { btn.disabled = true; btn.textContent = getLang() === 'de' ? 'Wird geprüft…' : 'جارٍ التحقق…'; }
-  try {
-    const result = await api('auth-login', { method:'POST', body:{ code: rawCode } });
-    if (result.token) {
-      try { localStorage.setItem('telc_student_token', result.token); } catch (_) {}
-    }
-    location.href = '/dashboard.html';
-  } catch(err) {
-    if (btn) { btn.disabled = false; btn.textContent = oldText; }
-    const errCode = err?.data?.error || err.message;
-    let errorMsg = t('access_error');
-    if (errCode === 'Too many login attempts. Please wait 15 minutes.' || err.status === 429) {
-      errorMsg = getLang() === 'de' ? 'Zu viele Versuche. Bitte warten Sie 15 Minuten.' : 'محاولات دخول متكررة كثيرة. يرجى الانتظار 15 دقيقة قبل المحاولة مرة أخرى.';
-    } else if (errCode === 'expired_or_inactive') {
-      errorMsg = getLang() === 'de' ? 'Dieser Code ist abgelaufen oder inaktiv. Bitte kontaktieren Sie den Administrator.' : 'رمز الدخول هذا منتهي الصلاحية أو غير مفعّل. يرجى مراجعة المشرف.';
-    } else if (errCode === 'invalid' || err.status === 401) {
-      errorMsg = getLang() === 'de' ? 'Ungültiger Zugangscode. Bitte überprüfen Sie den Code.' : 'رمز الدخول غير صحيح. يرجى التأكد من كتابة الرمز بشكل سليم.';
-    } else if (errCode === 'Cross-origin request blocked.' || err.status === 403) {
-      errorMsg = getLang() === 'de' ? 'Anfrage blockiert. Bitte telcvoll.de verwenden.' : 'تم حظر الطلب. يرجى التأكد من الدخول عبر telcvoll.de';
-    }
-    msg.innerHTML = `<div class="alert bad">${esc(errorMsg)}</div>`;
-  }
-};
 
 // Checkout Modal Logic
 let publicPlansList = [];
@@ -260,9 +238,20 @@ function isPlanFree(p) {
 
 function openCheckout(plan) {
   if (isPlanFree(plan)) {
-    location.href = '/contact.html?plan=' + encodeURIComponent(plan.plan_key || 'trial');
+    location.href = '/register.html';
     return;
   }
+
+  // Check if student is authenticated; if not, require account registration or login
+  const token = localStorage.getItem('telc_student_token');
+  if (!token && !currentUser) {
+    try {
+      sessionStorage.setItem('telc_pending_checkout', JSON.stringify(plan));
+    } catch (_) {}
+    location.href = '/login.html?redirect=checkout';
+    return;
+  }
+
   checkoutError.style.display = 'none';
   checkoutError.textContent = '';
   document.getElementById('checkoutPlanId').value = plan.id;
@@ -270,6 +259,13 @@ function openCheckout(plan) {
   const price = plan.price_dzd || (plan.duration_days <= 15 ? 1500 : plan.duration_days <= 30 ? 2500 : 6000);
   document.getElementById('summaryPrice').textContent = Number(price).toLocaleString('fr-DZ') + ' دج';
   document.getElementById('summaryDuration').textContent = plan.duration_days + ' يوماً';
+
+  if (currentUser) {
+    if (document.getElementById('custName')) document.getElementById('custName').value = currentUser.name || '';
+    if (document.getElementById('custEmail')) document.getElementById('custEmail').value = currentUser.email || '';
+    if (document.getElementById('custPhone')) document.getElementById('custPhone').value = currentUser.phone || '';
+  }
+
   checkoutModal.style.display = 'flex';
 }
 
@@ -322,6 +318,16 @@ checkoutForm.onsubmit = async (e) => {
 
 (async () => {
   try {
+    const token = localStorage.getItem('telc_student_token');
+    if (token) {
+      const authSlot = document.getElementById('navAuthSlot');
+      if (authSlot) {
+        authSlot.innerHTML = `
+          <a class="btn small-btn" href="/dashboard.html">منصة الطالب</a>
+          <a href="#" id="logoutLink" class="nav-logout-btn" style="color:var(--danger);font-size:13px;font-weight:800;padding:6px 10px;">خروج</a>
+        `;
+      }
+    }
     const { plans } = await api('public-plans');
     publicPlansList = plans || [];
     // The featured badge is controlled only by the admin's explicit

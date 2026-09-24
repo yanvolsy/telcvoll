@@ -62,7 +62,23 @@
 html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
 html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}</style>
 </head><body class="admin-shell">
-<header class="top admin-nav"><a class="brand" href="/admin/index.html" aria-label="TELC Voll"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a><nav><a href="/admin/index.html">الرئيسية</a><a href="/admin/plans.html">الخطط</a><a href="#" id="logoutLink">خروج</a></nav></header>
+<header class="top admin-nav">
+  <a class="brand" href="/admin/index.html" aria-label="TELC Voll">
+    <span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span>
+    <span class="admin-badge">Admin</span>
+  </a>
+  <nav class="admin-top-links" aria-label="لوحة الإدارة">
+    <a href="/admin/index.html">الرئيسية</a>
+    <a href="/admin/questions.html">التمارين</a>
+    <a href="/admin/students.html">الطلاب</a>
+    <a href="/admin/plans.html">الخطط</a>
+    <a href="/admin/orders.html">طلبات الدفع</a>
+    <a href="/admin/campaigns.html">البريد</a>
+    <a href="/admin/notifications.html">التنبيهات</a>
+    <a href="/admin/settings.html">الإعدادات</a>
+    <a href="#" id="logoutLink" class="nav-logout-btn">خروج</a>
+  </nav>
+</header>
 <main class="wrap codes-page">
 <section class="code-hero"><div><span class="tag">الإدارة</span><h1>إدارة الأكواد</h1><p class="muted">إنشاء ومتابعة رموز الدخول الخاصة بالطلاب دون خلطها مع إدارة الخطط.</p></div><button class="btn light" id="refreshBtn">تحديث</button></section>
 <section class="code-stats"><div class="stat"><small>إجمالي الأكواد</small><strong id="statCodes">—</strong></div><div class="stat"><small>الأكواد المتاحة</small><strong id="statAvailable">—</strong></div><div class="stat"><small>الأكواد المستخدمة</small><strong id="statUsed">—</strong></div></section>

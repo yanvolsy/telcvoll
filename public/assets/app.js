@@ -373,5 +373,48 @@ document.addEventListener('DOMContentLoaded', initAdminLoginTools);
   window.addEventListener('focus', checkSingleSession);
 })();
 
+// Universal Navigation Bar Synchronizer & Active Link Highlighter
+function initUniversalNavbar() {
+  const path = (location.pathname || '').toLowerCase();
+  const navLinks = document.querySelectorAll('.top nav a, .admin-nav nav a, .student-nav-links a, .admin-top-links a');
+  navLinks.forEach(a => {
+    const href = (a.getAttribute('href') || '').toLowerCase();
+    if (!href || href === '#' || href.startsWith('javascript:')) return;
+    const cleanHref = href.split('?')[0].split('#')[0];
+    const isCurrent = (cleanHref === path) ||
+                      (path === '/' && (cleanHref === '/index.html' || cleanHref === '/')) ||
+                      (path === '/index.html' && cleanHref === '/') ||
+                      (path.endsWith('/admin/') && cleanHref === '/admin/index.html') ||
+                      (path === '/admin' && cleanHref === '/admin/index.html');
+    if (isCurrent) {
+      a.classList.add('active');
+      a.setAttribute('aria-current', 'page');
+    }
+  });
 
+  const logoutLinks = document.querySelectorAll('#logoutLink, .nav-logout-btn, a[href="#logout"]');
+  logoutLinks.forEach(btn => {
+    if (btn && !btn._hasUniversalLogout) {
+      btn._hasUniversalLogout = true;
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const isAdmin = location.pathname.startsWith('/admin');
+        if (isAdmin) {
+          try { localStorage.removeItem('telc_admin_token'); } catch (_) {}
+          try { await api('admin-logout', { method: 'POST' }); } catch (_) {}
+          location.href = '/admin/login.html';
+        } else {
+          try { localStorage.removeItem('telc_student_token'); } catch (_) {}
+          try { await api('auth-logout', { method: 'POST' }); } catch (_) {}
+          location.href = '/';
+        }
+      });
+    }
+  });
+}
 
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initUniversalNavbar);
+} else {
+  initUniversalNavbar();
+}

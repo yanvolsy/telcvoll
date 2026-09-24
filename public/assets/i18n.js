@@ -264,11 +264,12 @@ function setLang(lang) {
 // تُنشئ زر الترجمة (تبديل اللغة) وزر الوضع الليلي/النهاري معاً داخل الهيدر،
 // بحيث يبقى مكانهما ثابتاً فيزيائياً في كل صفحات الموقع بغض النظر عن اللغة الحالية.
 function initHeaderActions() {
-  const nav = document.querySelector('.top nav');
-  if (!nav || document.getElementById('langSwitchBtn')) return;
+  if (document.getElementById('langSwitchBtn')) return;
 
-  const top = nav.closest('.top');
-  let wrap = top?.querySelector('.header-actions');
+  const header = document.querySelector('.top, .auth-nav, .admin-nav, .exercise-topbar, header');
+  if (!header) return;
+
+  let wrap = header.querySelector('.header-actions');
   const isNew = !wrap;
   if (!wrap) {
     wrap = document.createElement('span');
@@ -291,7 +292,7 @@ function initHeaderActions() {
   wrap.appendChild(themeBtn);
 
   if (isNew) {
-    if (top?.classList.contains('exercise-topbar')) { nav.appendChild(wrap); } else { (top || nav).appendChild(wrap); }
+    header.appendChild(wrap);
   }
   updateLangBtnLabel();
   applyTheme();

@@ -16,7 +16,16 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <body>
 <header class="top">
   <a class="brand" href="/dashboard.html"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
-  <nav><a href="/dashboard.html" data-i18n="nav_home_student">منصة الطالب</a><a href="#" id="logoutLink" data-i18n="nav_logout">خروج</a></nav>
+  <nav class="student-nav-links">
+    <a href="/dashboard.html" data-i18n="nav_home_student">منصة الطالب</a>
+    <a href="/plans.html" data-i18n="nav_plans">الخطط</a>
+    <a href="/self-test.html" data-i18n="nav_mock">امتحان تجريبي</a>
+    <a href="/speaking.html" data-i18n="nav_speaking_ai">Sprechen AI</a>
+    <a href="/telc-chat.html" data-i18n="nav_speaking">مساعد TELC</a>
+    <a href="/errors.html" data-i18n="nav_errors">أخطائي</a>
+    <a href="/profile.html" data-i18n="profile_link">ملفي</a>
+    <a href="#" id="logoutLink" data-i18n="nav_logout" class="nav-logout-btn">خروج</a>
+  </nav>
 </header>
 <main class="telc-chat-page">
   <section class="telc-chat-shell">
@@ -219,8 +228,27 @@ document.addEventListener('langchange', () => { applyI18n(); if (!sending) $('se
 (async()=>{
   try {
     const r=await fetch('/api/me',{credentials:'same-origin'});
-    if(!r.ok) location.href='/?error=session';
-  } catch { location.href='/?error=session'; }
+    if(!r.ok) { location.href='/login.html?error=session'; return; }
+    const d=await r.json();
+    if (!d.is_paid || !d.ai_enabled) {
+      const isDe = (typeof getLang === 'function' && getLang() === 'de');
+      const shell = document.querySelector('.telc-chat-shell');
+      if (shell) {
+        shell.innerHTML = `
+          <div class="empty-panel" style="margin:40px auto;max-width:560px;text-align:center;padding:40px 28px;background:var(--white);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow-lg)">
+            <div style="width:64px;height:64px;border-radius:20px;background:var(--green-soft);color:var(--green);font-size:32px;display:grid;place-items:center;margin:0 auto 20px;">✦</div>
+            <span class="tag" style="margin-bottom:12px;">${isDe ? 'Exklusives Feature' : 'ميزة حصرية للمشتركين'}</span>
+            <h2 style="margin:8px 0 12px;font-size:24px;color:var(--ink);">${isDe ? 'TELC Assistent ist für Abonnenten verfügbar' : 'مساعد TELC الذكي متاح في الباقات المدفوعة'}</h2>
+            <p class="muted" style="margin:0 0 28px;line-height:1.75;font-size:14.5px;">${isDe ? 'Der KI-Assistent bietet Sprach- und Textberatung zur Prüfungsvorbereitung und zu Aufenthaltswegen in Deutschland. Schalten Sie jetzt Ihren Vollzugang frei.' : 'يتيح لك مساعد TELC الصوتي والكتابي الاستفسار عن كافة تفاصيل الامتحان، نماذج الحل، وشروط الدراسة والعمل في ألمانيا. اشترك الآن في إحدى باقات المنصة لتفعيل المساعد الذكي.'}</p>
+            <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+              <a class="btn" href="/plans.html" style="padding:12px 26px;font-size:15px;font-weight:900;">${isDe ? 'Pläne ansehen & Freischalten ⚡' : 'عرض الخطط والاشتراك الآن ⚡'}</a>
+              <a class="btn light" href="/dashboard.html">${isDe ? 'Zurück zum Dashboard' : 'العودة لمنصة الطالب'}</a>
+            </div>
+          </div>
+        `;
+      }
+    }
+  } catch { location.href='/login.html?error=session'; }
 })();
 </script>
 </body></html>
