@@ -1622,7 +1622,16 @@ html[data-theme="dark"] .landing-access {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
+  gap: 8px !important;
   margin-bottom: 12px !important;
+  flex-wrap: nowrap !important;
+}
+.topic-head-start,
+.topic-head-end {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  flex-wrap: nowrap !important;
 }
 .topic-index {
   font-size: 13px !important;
@@ -1631,6 +1640,43 @@ html[data-theme="dark"] .landing-access {
   background: var(--green-soft) !important;
   padding: 3px 9px !important;
   border-radius: 8px !important;
+  line-height: 1.2 !important;
+}
+.tag-lock-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: #ef4444 !important;
+  border: 1px solid rgba(239, 68, 68, 0.25) !important;
+  font-size: 12px !important;
+  padding: 2px 7px !important;
+  border-radius: 8px !important;
+  line-height: 1 !important;
+  cursor: default !important;
+}
+html[data-theme="dark"] .tag-lock-badge {
+  background: rgba(239, 68, 68, 0.18) !important;
+  color: #fca5a5 !important;
+  border-color: rgba(239, 68, 68, 0.35) !important;
+}
+.tag-free-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: rgba(16, 185, 129, 0.1) !important;
+  color: #0e7039 !important;
+  border: 1px solid rgba(16, 185, 129, 0.25) !important;
+  font-size: 10.5px !important;
+  font-weight: 800 !important;
+  padding: 2px 7px !important;
+  border-radius: 8px !important;
+  line-height: 1.2 !important;
+}
+html[data-theme="dark"] .tag-free-badge {
+  background: rgba(16, 185, 129, 0.18) !important;
+  color: #34d399 !important;
+  border-color: rgba(16, 185, 129, 0.35) !important;
 }
 .topic-card h3 {
   font-size: 18px !important;

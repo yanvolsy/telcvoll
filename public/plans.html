@@ -153,12 +153,8 @@
 <header class="top">
   <a class="brand" href="/dashboard.html"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
   <nav class="student-nav-links">
-    <a href="/dashboard.html" data-i18n="nav_home_student">منصة الطالب</a>
-    <a href="/plans.html" class="active" data-i18n="nav_plans">الخطط</a>
     <a href="/self-test.html" data-i18n="nav_mock">امتحان تجريبي</a>
-    <a href="/speaking.html" data-i18n="nav_speaking_ai">Sprechen AI</a>
     <a href="/telc-chat.html" data-i18n="nav_speaking">مساعد TELC</a>
-    <a href="/errors.html" data-i18n="nav_errors">أخطائي</a>
     <a href="/profile.html" data-i18n="profile_link">ملفي</a>
     <a href="#" id="logoutLink" data-i18n="nav_logout" class="nav-logout-btn">خروج</a>
   </nav>
@@ -179,8 +175,7 @@
     <h3>إذا كنت تبحث عن وسيلة دفع أخرى</h3>
     <p>تواصل مع فريق الدعم والإدارة لمساعدتك في تفعيل حسابك مباشرة بالوسيلة الأنسب لك.</p>
     <div class="alt-payment-actions">
-      <a class="btn" href="https://wa.me/213550000000" target="_blank" rel="noopener">تواصل معنا عبر WhatsApp 💬</a>
-      <a class="btn light" href="/contact.html">صفحة الاتصال ←</a>
+      <a class="btn" href="/contact.html">تواصل معنا ←</a>
     </div>
   </section>
 </main>
@@ -342,6 +337,8 @@ async function loadPlans() {
       plans = Array.isArray(fallbackRes?.plans) ? fallbackRes.plans : [];
     }
 
+    // Sort plans by duration ascending (smallest first)
+    plans.sort((a, b) => (a.duration_days || 0) - (b.duration_days || 0));
     if (!plans.length) {
       grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:50px 20px;color:var(--muted)">لا توجد خطط منشورة حالياً.</div>';
       return;

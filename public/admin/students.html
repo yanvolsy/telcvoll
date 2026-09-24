@@ -511,10 +511,26 @@ $('manageSubForm').onsubmit = async (e) => {
 
 async function load(){
   try {
-    const [studentData, statsData] = await Promise.all([
-      api('admin-students'),
-      api('admin-statistics')
-    ]);
+    let studentData = { students: [], plans: [] };
+    let statsData = { rows: [] };
+
+    try {
+      studentData = await api('admin-students');
+    } catch (stErr) {
+      if (stErr.status === 401) {
+        location.href = '/admin/login.html';
+        return;
+      }
+      console.error('Students fetch error:', stErr);
+      showToast(stErr.message || 'تعذر تحميل بيانات الطلاب', true);
+    }
+
+    try {
+      statsData = await api('admin-statistics');
+    } catch (statsErr) {
+      console.warn('Statistics fetch notice:', statsErr);
+    }
+
     allStudents = studentData.students || [];
     allPlans = studentData.plans || [];
     allStats = statsData.rows || [];
@@ -566,7 +582,7 @@ $('logoutLink').onclick = async e => {
   location.href = '/admin/login.html';
 };
 
-load().catch(() => location.href = '/admin/login.html');
+load().catch(err => console.error('Admin students initial load error:', err));
 </script>
 </body>
 </html>

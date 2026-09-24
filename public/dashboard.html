@@ -180,12 +180,8 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <header class="top">
   <a class="brand" href="/dashboard.html"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
   <nav class="student-nav-links">
-    <a href="/dashboard.html" data-i18n="nav_home_student">منصة الطالب</a>
-    <a href="/plans.html" data-i18n="nav_plans">الخطط</a>
     <a href="/self-test.html" data-i18n="nav_mock">امتحان تجريبي</a>
-    <a href="/speaking.html" data-i18n="nav_speaking_ai">Sprechen AI</a>
     <a href="/telc-chat.html" data-i18n="nav_speaking">مساعد TELC</a>
-    <a href="/errors.html" data-i18n="nav_errors">أخطائي</a>
     <a href="/profile.html" data-i18n="profile_link">ملفي</a>
     <a href="#" id="logoutLink" data-i18n="nav_logout" class="nav-logout-btn">خروج</a>
   </nav>
@@ -997,6 +993,12 @@ function renderTopics(){
     });
 
     const groups = groupTopicExercises(list);
+    // Free exercises first: sort groups so free-access ones appear before paid
+    groups.sort((a, b) => {
+      const aFree = (a.items[0]?.ex?.access_mode || 'paid') === 'free' ? 0 : 1;
+      const bFree = (b.items[0]?.ex?.access_mode || 'paid') === 'free' ? 0 : 1;
+      return aFree - bFree;
+    });
     renderedTopicGroups = groups;
 
     gridEl.innerHTML = groups.length ? groups.map((g, i) => {
@@ -1011,16 +1013,18 @@ function renderTopics(){
       const isLocked = !isUserPaid && !isExFree;
 
       const accessBadge = isExFree
-        ? `<span class="tag" style="background:#e8f7ee;color:#0e7039;border-color:#b7ebc7;font-weight:900;font-size:10px;">🟢 ${text('مجاني','Kostenlos')}</span>`
-        : `<span class="tag" style="background:#fef2f2;color:#991b1b;border-color:#fecaca;font-weight:900;font-size:10px;">🔒 ${text('مدفوع','Premium')}</span>`;
+        ? `<span class="tag tag-free-badge" title="${text('محتوى مجاني للجميع','Kostenlos')}">🟢 ${text('مجاني','Kostenlos')}</span>`
+        : `<span class="tag tag-lock-badge" title="${text('محتوى مخصص للمشتركين (مدفوع)','Nur für Abonnenten (Premium)')}">🔒</span>`;
 
       return `<article class="topic-card ${isMulti ? 'has-variations' : ''}">
         <div class="topic-card-head">
-          <span class="topic-index">${String(i+1).padStart(2,'0')}</span>
-          <div class="topic-card-tags">
+          <div class="topic-head-start">
+            <span class="topic-index">${String(i+1).padStart(2,'0')}</span>
             <span class="tag">Telc ${esc(primaryEx.level||'B2')}</span>
-            ${accessBadge}
+          </div>
+          <div class="topic-head-end">
             ${isMulti ? `<span class="tag tag-variation" title="${g.items.length} ${text('تعديلات متاحة لهذا التمرين','Versionen verfügbar')}">📚 ${g.items.length} ${text('تعديلات','Versionen')}</span>` : ''}
+            ${accessBadge}
           </div>
         </div>
         <h3 class="topic-card-title">
@@ -1192,8 +1196,8 @@ function openVariationModal(group) {
       const isExFree = (ex.access_mode || 'paid') === 'free';
       const isLocked = !isUserPaid && !isExFree;
       const accessBadge = isExFree
-        ? `<span class="tag" style="background:#e8f7ee;color:#0e7039;border-color:#b7ebc7;font-size:10px;padding:2px 6px;">🟢 ${text('مجاني','Free')}</span>`
-        : `<span class="tag" style="background:#fef2f2;color:#991b1b;border-color:#fecaca;font-size:10px;padding:2px 6px;">🔒 ${text('مدفوع','Paid')}</span>`;
+        ? `<span class="tag tag-free-badge" title="${text('محتوى مجاني للجميع','Kostenlos')}">🟢 ${text('مجاني','Free')}</span>`
+        : `<span class="tag tag-lock-badge" title="${text('محتوى مخصص للمشتركين','Premium')}">🔒</span>`;
       const label = it.info.label || (idx === 0 ? text('الأساسي', 'Standard') : ((typeof getLang === 'function' && getLang() === 'de') ? `Modifiziert ${idx}` : `المعدل ${idx}`));
 
       if (isLocked) {
