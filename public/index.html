@@ -188,6 +188,10 @@ let currentUser = null;
 api('me').then(res => {
   if (res && res.student && res.student.id) {
     currentUser = res.student;
+    if (location.pathname === '/' || location.pathname === '/index.html') {
+      location.replace('/dashboard.html');
+      return;
+    }
     const navSlot = document.getElementById('navAuthSlot');
     if (navSlot) navSlot.innerHTML = `<a class="btn small-btn" href="/dashboard.html">لوحة الطالب ←</a>`;
     const heroSlot = document.getElementById('heroActionsSlot');
