@@ -97,17 +97,19 @@ exports.handler=async(event)=>{
   const history=Array.isArray(b.history)?b.history.slice(-12):[];
   const requestedTeil=String(b.teil||'').trim();
 
-  // Mode 1: Teil 1 Presentation Generator (5 TELC Official Categories)
+  // Mode 1: Teil 1 Presentation Generator (7 Official TELC B2 Categories)
   if(mode==='generate-presentation'){
     const category=String(b.category||'Reise').trim();
     const notes=String(b.notes||b.userInput||'').trim();
     const targetLevel=String(b.level||'B2').trim().toUpperCase();
     const categoryTitles={
-      'Reise':'Eine Reise (رحلة)',
-      'Film':'Ein Film (فيلم)',
-      'Buch':'Ein Buch (كتاب)',
-      'Erfahrung':'Eine persönliche / wichtige Erfahrung (تجربة شخصية)',
-      'Person':'Eine wichtige Person (شخص مهم)'
+      'Reise':'1. Eine Reise (Ziel, Zeit, Land und Leute, Sehenswürdigkeiten)',
+      'Buch':'2. Ein Buch (Thema, Autor, Meinung)',
+      'Film':'3. Ein Film (Thema, Handlung, Schauspieler, Meinung)',
+      'Sportereignis':'4. Ein Sportereignis (Sportart, Ort, Personen, Ergebnis)',
+      'Musikveranstaltung':'5. Eine Musikveranstaltung (Musikrichtung, Musiker, Ort)',
+      'Person':'6. Eine wichtige Person im Leben (wer, wann, warum wichtig)',
+      'Erfahrung':'7. Eine wichtige Erfahrung (was, wann, wo, mit wem, warum wichtig)'
     };
     const catLabel=categoryTitles[category]||category;
 
@@ -122,8 +124,15 @@ ${notes || 'Generiere ein realistisches, exzellentes TELC B2/C1 Modellthema für
 YOUR TASK:
 1. Generate a complete, elegant German presentation for TELC Sprechen Teil 1 (2.5 - 3 minutes, approx. 230-320 words) tailored to level ${targetLevel}:
    - Begrüßung und Themaankündigung with standard TELC opening phrases ("In meiner Präsentation möchte ich über ... berichten", "Als Thema meiner Präsentation habe ich ... gewählt", "Das Thema meiner heutigen Präsentation ist ...").
-   - Hauptteil: clear paragraphs covering all core aspects (e.g. for Buch: Autor, Handlung, Hauptcharaktere, Höhepunkte, eigene Leseeindrücke; for Film: Regisseur, Schauspieler, Handlung, spannendste Szene, filmische Wirkung; for Reise: Reiseziel, Begleiter, Ablauf, Sehenswürdigkeiten, Atmosphäre; for Erfahrung: Kontext, genauer Ablauf, Gefühle, Lehre fürs Leben; for Person/Event: Wer, warum inspirierend, Errungenschaften, persönliche Bedeutung).
-   - Schluss: persönliche Empfehlung, Zusammenfassung und Dank ("Ich kann ... jedem wärmstens empfehlen. Damit bin ich am Ende meiner Präsentation angelangt. Vielen Dank für Ihre Aufmerksamkeit. Haben Sie noch Fragen?").
+   - Hauptteil: clear paragraphs covering ALL official TELC Leitpunkte for the chosen topic:
+     * For Reise: Ziel, Zeit, Land und Leute, Sehenswürdigkeiten.
+     * For Buch: Thema, Autor, eigene Meinung.
+     * For Film: Thema, Handlung, Schauspieler, eigene Meinung.
+     * For Sportereignis: Sportart, Ort, Personen, Ergebnis.
+     * For Musikveranstaltung: Musikrichtung, Musiker, Ort.
+     * For Wichtige Person im Leben: wer die Person ist, wann/wie lange man sie kennt, warum sie wichtig ist.
+     * For Wichtige Erfahrung: was passiert ist, wann und wo, mit wem, warum diese Erfahrung wichtig war.
+   - Schluss: persönliche Empfehlung / Fazit, Zusammenfassung und Dank ("Ich kann ... jedem wärmstens empfehlen. Damit bin ich am Ende meiner Präsentation angelangt. Vielen Dank für Ihre Aufmerksamkeit. Haben Sie noch Fragen?").
 2. Provide an accurate, idiomatic Arabic translation of the complete German presentation.
 3. Generate EXACTLY 5 EXAMINER / JURY QUESTIONS (Mögliche Prüferfragen / Jury-Fragen) based directly on the presentation. In TELC exams, the jury asks questions to test whether the student truly understood, experienced, and can defend what they presented (following the standard László Csörgő TELC examiner patterns).
    EVERY QUESTION MUST HAVE A POLISHED SUGGESTED ANSWER (Musterantwort) IN GERMAN!

@@ -1,19 +1,31 @@
 const { db } = require('./_lib/db');
 const { json } = require('./_lib/auth');
-const { requireStudent } = require('./_lib/guard');
+const { requireStudent, checkExerciseAccess } = require('./_lib/guard');
 
 exports.handler = async (event) => {
   try {
     const student = await requireStudent(event);
-    if (!student) return json(401, { error: 'unauthenticated' });
+    if (!student) {
+      return json(401, { error: 'unauthenticated', message: 'يرجى تسجيل الدخول للوصول إلى هذا التمرين.' });
+    }
 
     const id = parseInt((event.queryStringParameters || {}).id || '0', 10);
     if (!id) return json(400, { error: 'Missing id' });
 
     const pool = db();
-    const exRes = await pool.query("SELECT * FROM exercises WHERE id=$1 AND status='published'", [id]);
-    const exercise = exRes.rows[0];
-    if (!exercise || exercise.deleted_at) return json(404, { error: 'Exercise not found' });
+
+    // Strict server-side authorization check: verifies exercise access mode and student subscription
+    const access = await checkExerciseAccess(pool, id, student);
+    if (!access.allowed) {
+      return json(access.status || 403, {
+        error: access.error || 'access_denied',
+        message: access.message || 'غير مصرح لك بالوصول إلى هذا المحتوى.',
+        exercise: access.exercise || null,
+        access_mode: access.exercise?.access_mode || 'paid',
+      });
+    }
+
+    const exercise = access.exercise;
 
     const itemsRes = await pool.query('SELECT * FROM items WHERE exercise_id=$1 ORDER BY position_no', [id]);
     const itemsRows = itemsRes.rows || [];
@@ -54,7 +66,11 @@ exports.handler = async (event) => {
       options: optionsByItemId.get(it.id) || [],
     }));
 
-    return json(200, { exercise, items });
+    return json(200, {
+      exercise,
+      items,
+      is_free: access.is_free === true,
+    });
   } catch (err) {
     console.error('Fatal error in exercise-get.js:', err);
     return json(500, { error: err.message || 'Server error' });

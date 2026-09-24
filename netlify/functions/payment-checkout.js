@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const { db } = require('./_lib/db');
-const { json } = require('./_lib/auth');
+const { json, studentFromEvent } = require('./_lib/auth');
 const { requireSameOrigin, requestSize } = require('./_lib/request');
 const {
   getClientIp,
@@ -19,13 +19,17 @@ exports.handler = async (event) => {
   try { body = JSON.parse(event.body || '{}'); }
   catch { return json(400, { error: 'طلب غير صالح.' }); }
 
+  const authStudent = studentFromEvent(event);
+  const authenticatedStudentId = authStudent?.student_id || null;
+
   const clientIp = getClientIp(event);
   const planId = parseInt(body.plan_id, 10);
-  const name = String(body.name || '').trim();
-  const email = normalizeEmail(body.email);
-  const rawPhone = String(body.phone || '').trim();
+  const name = String(body.name || authStudent?.name || '').trim();
+  const email = normalizeEmail(body.email || authStudent?.email || '');
+  const rawPhone = String(body.phone || authStudent?.phone || '').trim();
   const cleanPhone = rawPhone.replace(/[\s\-\(\)]/g, '');
   const termsAccepted = body.terms === true || body.terms === 'true' || body.terms === 1;
+
 
   // Strict server-side validation against direct API calls & malformed payloads
   if (!planId || planId <= 0) return json(422, { error: 'يرجى اختيار الخطة المطلوبة.' });
@@ -106,9 +110,9 @@ exports.handler = async (event) => {
   try {
     // 3. Insert order record with PENDING status and client IP for audit trails
     await client.query(
-      `INSERT INTO orders(order_id, plan_id, plan_name, customer_name, customer_email, customer_phone, amount, currency, status, ip_address)
-       VALUES($1, $2, $3, $4, $5, $6, $7, 'DZD', 'PENDING', $8)`,
-      [orderId, plan.id, plan.name, name, email, cleanPhone, Math.round(amount), clientIp]
+      `INSERT INTO orders(order_id, plan_id, plan_name, customer_name, customer_email, customer_phone, amount, currency, status, ip_address, student_id)
+       VALUES($1, $2, $3, $4, $5, $6, $7, 'DZD', 'PENDING', $8, $9)`,
+      [orderId, plan.id, plan.name, name, email, cleanPhone, Math.round(amount), clientIp, authenticatedStudentId]
     );
 
     // 4. Prepare payload for gateway createLink

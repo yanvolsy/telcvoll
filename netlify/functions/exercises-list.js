@@ -24,7 +24,8 @@ exports.handler = async (event) => {
   }
 
   const query = `
-    SELECT id, title, body, level, section, teil, duration_minutes, exam_id
+    SELECT id, title, body, level, section, teil, duration_minutes, exam_id,
+           COALESCE(access_mode, 'paid') AS access_mode, audio_url
     FROM exercises
     WHERE ${conditions.join(' AND ')}
     ORDER BY teil ASC, id ASC
@@ -32,8 +33,9 @@ exports.handler = async (event) => {
 
   try {
     const { rows } = await pool.query(query, params);
-    return json(200, { ok: true, exercises: rows });
+    return json(200, { ok: true, exercises: rows, is_paid: student.is_paid, subscription: student.subscription });
   } catch (e) {
+
     console.error('exercises-list error:', e);
     return json(500, { error: 'فشل تحميل قائمة التمارين' });
   }

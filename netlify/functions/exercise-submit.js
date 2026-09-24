@@ -25,6 +25,12 @@ exports.handler = async (event) => {
     const exercise = exRes.rows[0];
     if (!exercise) return json(404, { error: 'Not found' });
 
+    const mode = String(exercise.access_mode || 'paid').toLowerCase();
+    if (mode === 'paid' && (!student.is_paid || !student.subscription?.active)) {
+      return json(403, { error: 'payment_required', message: 'هذا التمرين مدفوع ويتطلب اشتراكاً مفعلاً.' });
+    }
+
+
     const itemsRes = await client.query('SELECT * FROM items WHERE exercise_id=$1 ORDER BY position_no', [id]);
     let score = 0, max = 0;
     const rows = [];

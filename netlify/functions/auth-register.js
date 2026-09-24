@@ -1,0 +1,132 @@
+const crypto = require('crypto');
+const { db } = require('./_lib/db');
+const { sign, setCookie, clientIp, json, hashPassword } = require('./_lib/auth');
+const { rateLimit } = require('./_lib/ratelimit');
+const { requireSameOrigin, requestSize } = require('./_lib/request');
+
+exports.handler = async (event) => {
+  if (!requireSameOrigin(event)) return json(403, { error: 'Cross-origin request blocked.' });
+  if (!requestSize(event)) return json(413, { error: 'Request too large.' });
+  if (event.httpMethod !== 'POST') return json(405, { error: 'Method not allowed' });
+
+  const ip = clientIp(event);
+  try {
+    const allowed = await rateLimit('register', 20, 900, ip);
+    if (!allowed) return json(429, { error: 'عدد محاولات التسجيل تجاوز الحد المسموح. يرجى الانتظار 15 دقيقة.' });
+  } catch (err) {
+    console.warn('Rate limit non-fatal error:', err?.message);
+  }
+
+  let body;
+  try { body = JSON.parse(event.body || '{}'); } catch { return json(400, { error: 'Bad request' }); }
+
+  const firstName = String(body.first_name || '').trim();
+  const lastName = String(body.last_name || '').trim();
+  const rawName = String(body.name || `${firstName} ${lastName}`).trim();
+  const email = String(body.email || '').toLowerCase().trim();
+  const phone = String(body.phone || '').trim();
+  const password = String(body.password || '');
+  const confirmPassword = String(body.confirm_password || body.password_confirm || '');
+
+  // Validation
+  if (!rawName || rawName.length < 2) {
+    return json(422, { error: 'يرجى إدخال الاسم بشكل صحيح.' });
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email || email.length > 190 || !emailRegex.test(email)) {
+    return json(422, { error: 'يرجى إدخال بريد إلكتروني صالح.' });
+  }
+
+  if (!password || password.length < 6) {
+    return json(422, { error: 'يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.' });
+  }
+
+  if (confirmPassword && password !== confirmPassword) {
+    return json(422, { error: 'كلمتا المرور غير متطابقتين.' });
+  }
+
+  const pool = db();
+  const client = await pool.connect();
+
+  try {
+    // Check if email already registered
+    const existingRes = await client.query(
+      'SELECT id, password_hash, auth_provider FROM students WHERE LOWER(TRIM(email)) = $1 LIMIT 1',
+      [email]
+    );
+
+    if (existingRes.rows.length > 0) {
+      const existing = existingRes.rows[0];
+      if (existing.password_hash) {
+        return json(409, { error: 'هذا البريد الإلكتروني مسجل بالفعل. يرجى تسجيل الدخول.' });
+      }
+      // If student existed from legacy order/code without a password, attach password to existing account!
+      const passwordHash = await hashPassword(password);
+      await client.query(
+        `UPDATE students
+         SET name = COALESCE(NULLIF($1, ''), name),
+             first_name = COALESCE(NULLIF($2, ''), first_name),
+             last_name = COALESCE(NULLIF($3, ''), last_name),
+             phone = COALESCE(NULLIF($4, ''), phone),
+             password_hash = $5,
+             auth_provider = 'email',
+             email_verified = TRUE,
+             last_login_at = NOW(),
+             updated_at = NOW()
+         WHERE id = $6`,
+        [rawName, firstName, lastName, phone, passwordHash, existing.id]
+      );
+
+      const token = sign({
+        student_id: existing.id,
+        email,
+        name: rawName || 'Student',
+      });
+
+      return json(200, {
+        ok: true,
+        student: { id: existing.id, name: rawName, email, phone },
+        token,
+      }, {
+        'Set-Cookie': setCookie('student_token', token, 60 * 60 * 24 * 30),
+      });
+    }
+
+    // Hash password securely with bcrypt
+    const passwordHash = await hashPassword(password);
+
+    // Create student account
+    const insertRes = await client.query(
+      `INSERT INTO students(
+         name, first_name, last_name, email, phone,
+         password_hash, auth_provider, email_verified, profile_completed,
+         created_at, updated_at, last_login_at
+       ) VALUES ($1, $2, $3, $4, $5, $6, 'email', TRUE, TRUE, NOW(), NOW(), NOW())
+       RETURNING id, name, email, phone`,
+      [rawName, firstName, lastName, email, phone, passwordHash]
+    );
+
+    const student = insertRes.rows[0];
+
+    // Generate authenticated session token
+    const token = sign({
+      student_id: student.id,
+      email: student.email,
+      name: student.name,
+    });
+
+    return json(200, {
+      ok: true,
+      student,
+      token,
+    }, {
+      'Set-Cookie': setCookie('student_token', token, 60 * 60 * 24 * 30),
+    });
+  } catch (err) {
+    console.error('Registration error:', err);
+    return json(500, { error: 'حدث خطأ أثناء إنشاء الحساب. يرجى المحاولة مرة أخرى.' });
+  } finally {
+    client.release();
+  }
+};

@@ -24,6 +24,7 @@ function normalizePayload(body) {
     teil: String(body.teil || '').trim(),
     title: String(body.title || '').trim(),
     task_type,
+    access_mode: String(body.access_mode || 'paid').toLowerCase() === 'free' ? 'free' : 'paid',
     body: String(body.body || ''),
     translation: String(body.translation || ''),
     audio_url,
@@ -75,9 +76,9 @@ async function saveExercise(client, id, body) {
     await client.query(
       `UPDATE exercises
        SET level=$1, section=$2, teil=$3, title=$4, task_type=$5, body=$6, translation=$7,
-           audio_url=$8, settings_json=$9, updated_at=NOW()
-       WHERE id=$10`,
-      [p.level,p.section,p.teil,p.title,p.task_type,p.body,p.translation,p.audio_url,JSON.stringify(settings),id]
+           audio_url=$8, settings_json=$9, access_mode=$10, updated_at=NOW()
+       WHERE id=$11`,
+      [p.level,p.section,p.teil,p.title,p.task_type,p.body,p.translation,p.audio_url,JSON.stringify(settings),p.access_mode,id]
     );
     await client.query(
       'DELETE FROM items WHERE exercise_id=$1',
@@ -85,9 +86,9 @@ async function saveExercise(client, id, body) {
     );
   } else {
     const r = await client.query(
-      `INSERT INTO exercises(level,section,teil,title,task_type,body,translation,audio_url,settings_json,status)
-       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,'published') RETURNING id`,
-      [p.level,p.section,p.teil,p.title,p.task_type,p.body,p.translation,p.audio_url,JSON.stringify(settings)]
+      `INSERT INTO exercises(level,section,teil,title,task_type,body,translation,audio_url,settings_json,access_mode,status)
+       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'published') RETURNING id`,
+      [p.level,p.section,p.teil,p.title,p.task_type,p.body,p.translation,p.audio_url,JSON.stringify(settings),p.access_mode]
     );
     exerciseId = r.rows[0].id;
   }
@@ -146,6 +147,7 @@ exports.handler = async (event) => {
     const level = url.searchParams.get('level');
     const section = url.searchParams.get('section');
     const teil = url.searchParams.get('teil');
+    const accessMode = url.searchParams.get('access_mode');
     const includeDeleted = url.searchParams.get('include_deleted') === '1';
 
     const clauses = [];
@@ -162,6 +164,10 @@ exports.handler = async (event) => {
     if (teil && teil !== 'ALL') {
       params.push(teil);
       clauses.push(`LOWER(REPLACE(TRIM(e.teil),' ','')) = LOWER(REPLACE(TRIM($${params.length}),' ',''))`);
+    }
+    if (accessMode && accessMode !== 'ALL') {
+      params.push(accessMode.toLowerCase());
+      clauses.push(`COALESCE(e.access_mode, 'paid') = $${params.length}`);
     }
     const whereSql = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
 
@@ -194,7 +200,11 @@ exports.handler = async (event) => {
       const src = await client.query('SELECT * FROM exercises WHERE id=$1', [sourceId]);
       if (!src.rows.length) { await client.query('ROLLBACK'); return json(404, { error: 'التمرين غير موجود.' }); }
       const e = src.rows[0];
-      const created = await client.query(`INSERT INTO exercises(level,section,teil,title,task_type,body,translation,audio_url,settings_json,status) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING id`, [e.level,e.section,e.teil,e.title+' — نسخة',e.task_type,e.body,e.translation,e.audio_url,e.settings_json,e.status]);
+      const created = await client.query(
+        `INSERT INTO exercises(level,section,teil,title,task_type,body,translation,audio_url,settings_json,access_mode,status)
+         VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id`,
+        [e.level,e.section,e.teil,e.title+' — نسخة',e.task_type,e.body,e.translation,e.audio_url,e.settings_json,e.access_mode||'paid',e.status]
+      );
       const newId=created.rows[0].id;
       const items=await client.query('SELECT * FROM items WHERE exercise_id=$1 ORDER BY position_no',[sourceId]);
       for(const it of items.rows){
@@ -208,12 +218,24 @@ exports.handler = async (event) => {
   }
 
   if (event.httpMethod === 'PATCH') {
+    if (body.bulk_ids && Array.isArray(body.bulk_ids) && body.bulk_ids.length && body.access_mode) {
+      const access_mode = body.access_mode === 'free' ? 'free' : 'paid';
+      const ids = body.bulk_ids.map(Number).filter(Boolean);
+      await pool.query('UPDATE exercises SET access_mode=$1, updated_at=NOW() WHERE id = ANY($2)', [access_mode, ids]);
+      return json(200, { ok: true, access_mode, count: ids.length });
+    }
     const id = Number(body.id);
     if (!id) return json(422, { error: 'معرّف التمرين مطلوب.' });
+    if (body.access_mode !== undefined) {
+      const access_mode = body.access_mode === 'free' ? 'free' : 'paid';
+      await pool.query('UPDATE exercises SET access_mode=$1, updated_at=NOW() WHERE id=$2', [access_mode, id]);
+      return json(200, { ok: true, access_mode });
+    }
     const status = body.status === 'disabled' ? 'disabled' : 'published';
-    await pool.query('UPDATE exercises SET status=$1,updated_at=NOW() WHERE id=$2', [status,id]);
+    await pool.query('UPDATE exercises SET status=$1, updated_at=NOW() WHERE id=$2', [status, id]);
     return json(200, { ok: true, status });
   }
+
 
   if (event.httpMethod === 'POST' || event.httpMethod === 'PUT') {
     const id = event.httpMethod === 'PUT' ? Number(body.id) : null;

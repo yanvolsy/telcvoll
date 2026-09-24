@@ -87,7 +87,63 @@ function json(statusCode, body, extraHeaders = {}) {
   };
 }
 
+const bcrypt = require('bcryptjs');
+
+async function hashPassword(plainPassword) {
+  if (!plainPassword || typeof plainPassword !== 'string' || plainPassword.length < 6) {
+    throw new Error('Password must be at least 6 characters long.');
+  }
+  return bcrypt.hash(plainPassword, 10);
+}
+
+async function verifyPassword(plainPassword, passwordHash) {
+  if (!plainPassword || !passwordHash) return false;
+  return bcrypt.compare(plainPassword, passwordHash);
+}
+
+/**
+ * Server-side Google ID Token verification directly with Google's public tokeninfo API.
+ * Never trusts client-reported email or identity without server validation.
+ */
+async function verifyGoogleIdToken(idToken) {
+  if (!idToken || typeof idToken !== 'string') {
+    return { ok: false, error: 'Google token is missing.' };
+  }
+  try {
+    const res = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken.trim())}`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.email) {
+      return { ok: false, error: data.error_description || data.error || 'Google token validation failed.' };
+    }
+
+    // If GOOGLE_CLIENT_ID is configured, verify the audience matches
+    const expectedClientId = process.env.GOOGLE_CLIENT_ID;
+    if (expectedClientId && data.aud && data.aud !== expectedClientId.trim()) {
+      return { ok: false, error: 'Google token audience mismatch.' };
+    }
+
+    return {
+      ok: true,
+      sub: data.sub,
+      email: String(data.email).toLowerCase().trim(),
+      email_verified: data.email_verified === 'true' || data.email_verified === true,
+      name: data.name || '',
+      given_name: data.given_name || '',
+      family_name: data.family_name || '',
+      picture: data.picture || '',
+    };
+  } catch (err) {
+    console.error('Google token verification error:', err);
+    return { ok: false, error: 'Failed to contact Google identity server.' };
+  }
+}
+
 module.exports = {
   sign, verify, getCookies, setCookie, clearCookie,
   studentFromEvent, adminFromEvent, clientIp, json,
+  hashPassword, verifyPassword, verifyGoogleIdToken,
 };
+
