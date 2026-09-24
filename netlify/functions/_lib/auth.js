@@ -120,7 +120,7 @@ async function verifyGoogleIdToken(idToken) {
     }
 
     // If GOOGLE_CLIENT_ID is configured, verify the audience matches
-    const expectedClientId = process.env.GOOGLE_CLIENT_ID;
+    const expectedClientId = process.env.GOOGLE_CLIENT_ID || '23326277113-emvmidaut2b6evuthtitlddckqveg4gt.apps.googleusercontent.com';
     if (expectedClientId && data.aud && data.aud !== expectedClientId.trim()) {
       return { ok: false, error: 'Google token audience mismatch.' };
     }

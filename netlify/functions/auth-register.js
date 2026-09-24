@@ -1,5 +1,5 @@
 const crypto = require('crypto');
-const { db } = require('./_lib/db');
+const { db, ensureSchema } = require('./_lib/db');
 const { sign, setCookie, clientIp, json, hashPassword } = require('./_lib/auth');
 const { rateLimit } = require('./_lib/ratelimit');
 const { requireSameOrigin, requestSize } = require('./_lib/request');
@@ -50,17 +50,27 @@ exports.handler = async (event) => {
   const client = await pool.connect();
 
   try {
+    // Ensure table columns and indexes exist
+    await ensureSchema(client);
+
     // Generate secure email verification token
     const verificationToken = crypto.randomBytes(32).toString('hex');
 
     // Check if email already registered
-    const existingRes = await client.query(
-      'SELECT id, password_hash, auth_provider, email_verified FROM students WHERE LOWER(TRIM(email)) = $1 LIMIT 1',
-      [email]
-    );
+    let existingRes;
+    try {
+      existingRes = await client.query(
+        'SELECT id, password_hash, auth_provider, email_verified FROM students WHERE LOWER(TRIM(email)) = $1 LIMIT 1',
+        [email]
+      );
+    } catch (_) {
+      existingRes = await client.query(
+        'SELECT id FROM students WHERE LOWER(TRIM(email)) = $1 LIMIT 1',
+        [email]
+      );
+    }
 
     let studentId;
-    let isNewAccount = false;
 
     if (existingRes.rows.length > 0) {
       const existing = existingRes.rows[0];
@@ -69,38 +79,66 @@ exports.handler = async (event) => {
       }
       // If student existed from legacy order/code without a password, attach password to existing account!
       const passwordHash = await hashPassword(password);
-      await client.query(
-        `UPDATE students
-         SET name = COALESCE(NULLIF($1, ''), name),
-             first_name = COALESCE(NULLIF($2, ''), first_name),
-             last_name = COALESCE(NULLIF($3, ''), last_name),
-             phone = COALESCE(NULLIF($4, ''), phone),
-             password_hash = $5,
-             auth_provider = 'email',
-             verification_token = $6,
-             verification_expires_at = NOW() + INTERVAL '24 hours',
-             last_login_at = NOW(),
-             updated_at = NOW()
-         WHERE id = $7`,
-        [rawName, firstName, lastName, phone, passwordHash, verificationToken, existing.id]
-      );
+      try {
+        await client.query(
+          `UPDATE students
+           SET name = COALESCE(NULLIF($1, ''), name),
+               first_name = COALESCE(NULLIF($2, ''), first_name),
+               last_name = COALESCE(NULLIF($3, ''), last_name),
+               phone = COALESCE(NULLIF($4, ''), phone),
+               password_hash = $5,
+               auth_provider = 'email',
+               verification_token = $6,
+               verification_expires_at = NOW() + INTERVAL '24 hours',
+               last_login_at = NOW(),
+               updated_at = NOW()
+           WHERE id = $7`,
+          [rawName, firstName, lastName, phone, passwordHash, verificationToken, existing.id]
+        );
+      } catch (updErr) {
+        // Fallback update without verification tokens if columns were unavailable
+        await client.query(
+          `UPDATE students
+           SET name = COALESCE(NULLIF($1, ''), name),
+               first_name = COALESCE(NULLIF($2, ''), first_name),
+               last_name = COALESCE(NULLIF($3, ''), last_name),
+               phone = COALESCE(NULLIF($4, ''), phone),
+               password_hash = $5,
+               updated_at = NOW()
+           WHERE id = $6`,
+          [rawName, firstName, lastName, phone, passwordHash, existing.id]
+        );
+      }
       studentId = existing.id;
     } else {
-      isNewAccount = true;
       // Hash password securely with bcrypt
       const passwordHash = await hashPassword(password);
 
-      // Create student account
-      const insertRes = await client.query(
-        `INSERT INTO students(
-           name, first_name, last_name, email, phone,
-           password_hash, auth_provider, email_verified, profile_completed,
-           verification_token, verification_expires_at,
-           created_at, updated_at, last_login_at
-         ) VALUES ($1, $2, $3, $4, $5, $6, 'email', FALSE, TRUE, $7, NOW() + INTERVAL '24 hours', NOW(), NOW(), NOW())
-         RETURNING id, name, first_name, last_name, email, phone, email_verified`,
-        [rawName, firstName, lastName, email, phone, passwordHash, verificationToken]
-      );
+      // Create student account with fallback
+      let insertRes;
+      try {
+        insertRes = await client.query(
+          `INSERT INTO students(
+             name, first_name, last_name, email, phone,
+             password_hash, auth_provider, email_verified, profile_completed,
+             verification_token, verification_expires_at, is_paid,
+             created_at, updated_at, last_login_at
+           ) VALUES ($1, $2, $3, $4, $5, $6, 'email', FALSE, TRUE, $7, NOW() + INTERVAL '24 hours', FALSE, NOW(), NOW(), NOW())
+           RETURNING id, name, first_name, last_name, email, phone, email_verified`,
+          [rawName, firstName, lastName, email, phone, passwordHash, verificationToken]
+        );
+      } catch (insertErr) {
+        console.warn('[AUTH REGISTER] Primary insert notice, trying standard fallback:', insertErr.message);
+        insertRes = await client.query(
+          `INSERT INTO students(
+             name, first_name, last_name, email, phone,
+             password_hash, auth_provider, email_verified, profile_completed,
+             created_at, updated_at, last_login_at
+           ) VALUES ($1, $2, $3, $4, $5, $6, 'email', FALSE, TRUE, NOW(), NOW(), NOW())
+           RETURNING id, name, first_name, last_name, email, phone, email_verified`,
+          [rawName, firstName, lastName, email, phone, passwordHash]
+        );
+      }
 
       studentId = insertRes.rows[0].id;
     }
@@ -133,7 +171,10 @@ exports.handler = async (event) => {
     });
   } catch (err) {
     console.error('Registration error:', err);
-    return json(500, { error: 'حدث خطأ أثناء إنشاء الحساب. يرجى المحاولة مرة أخرى.' });
+    if (err.code === '23505') {
+      return json(409, { error: 'هذا البريد الإلكتروني مسجل بالفعل. يرجى تسجيل الدخول.' });
+    }
+    return json(500, { error: 'حدث خطأ أثناء إنشاء الحساب. يرجى المحاولة مرة أخرى: ' + (err.message || '') });
   } finally {
     client.release();
   }
