@@ -222,6 +222,20 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
     <div class="variation-modal-list" id="variationList"></div>
   </div>
 </div>
+<div id="lockModal" class="variation-modal-overlay" hidden aria-hidden="true">
+  <div class="variation-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="lockModalTitle" style="max-width:440px;text-align:center;padding:32px 24px;">
+    <button type="button" class="variation-modal-close" onclick="closeLockModal()" aria-label="إغلاق">×</button>
+    <div style="font-size:46px;margin-bottom:12px;">🔒</div>
+    <h2 id="lockModalTitle" style="font-size:22px;margin:0 0 10px;color:var(--ink);">محتوى مدفوع</h2>
+    <p id="lockModalMsg" class="muted" style="font-size:14px;line-height:1.6;margin-bottom:24px;">
+      هذا التمرين متاح فقط لأصحاب الاشتراكات المدفوعة. حسابك الحالي مجاني ويتيح لك الوصول إلى جميع التمارين المصنفة كمجانية.
+    </p>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <a href="/#plans" class="btn" style="padding:12px 24px;font-size:14px;font-weight:900;">ترقية الحساب والاشتراك الآن ←</a>
+      <button type="button" class="btn light" onclick="closeLockModal()" style="padding:12px 18px;font-size:14px;">إغلاق</button>
+    </div>
+  </div>
+</div>
 <script src="/assets/i18n.js?v=20260922"></script><script src="/assets/app.js?v=20260922"></script>
 <script>
 const SECTION_ORDER=['Lesen','Hören','Sprachbausteine','Schreiben','Sprechen'];
@@ -302,7 +316,14 @@ function render(){
     <section class="hub-head">
       <div class="hub-title-block"><span class="hub-greeting"><span>✨</span> ${text('مرحباً، '+(state.student?.name||'الطالب'),'Hallo, '+(state.student?.name||'Student'))}</span><h1>${text('منصة الطالب','Student Platform')}</h1><p class="muted">${text('اختر المستوى والقسم ثم افتح التمرين.','Wähle Niveau und Prüfungsteil und öffne anschließend die Übung.')}</p></div>
       <div class="hub-kpis">
-        <div class="hub-kpi days-kpi ${remainingDays<=2?'warning':''}"><strong>${remainingDays}</strong><span>${text('يوم متبقٍ','Tage verbleibend')}</span></div>
+        ${state.subscription?.is_paid ? `
+          <div class="hub-kpi days-kpi ${remainingDays<=2?'warning':''}"><strong>${remainingDays}</strong><span>${text('يوم متبقٍ','Tage verbleibend')}</span></div>
+        ` : `
+          <div class="hub-kpi free-kpi" onclick="location.href='/#plans'" style="border:1px solid #b7ebc7;background:#e8f7ee;cursor:pointer;padding:10px 14px;border-radius:14px;text-align:center;" title="${text('حساب مجاني — اضغط للترقية والاشتراك','Kostenloses Konto')}">
+            <strong style="color:#0e7039;font-size:18px;display:block;">🟢 ${text('حساب مجاني','Kostenlos')}</strong>
+            <span style="color:#0e7039;font-weight:900;font-size:11px;">${text('ترقية الاشتراك ⚡','Upgrade ⚡')}</span>
+          </div>
+        `}
         <div class="hub-progress-card" aria-label="${text('تقدم الطالب','Lernfortschritt')}">
           <div class="hub-progress-top"><span>${text('تقدمك','Dein Fortschritt')}</span><strong>${levelProgressPercent()}%</strong></div>
           <div class="hub-progress-bar"><i style="width:${levelProgressPercent()}%"></i></div>
@@ -411,32 +432,110 @@ let presTranscript = '';
 let presTimer = null;
 let presSeconds = 0;
 
+const TELC_SPRECHEN_TEIL1_THEMEN = [
+  {
+    key: 'Reise',
+    icon: '✈️',
+    title: '1. Reise',
+    arTitle: 'رحلة',
+    pointsDe: 'Ziel, Zeit, Land und Leute, Sehenswürdigkeiten',
+    pointsAr: 'الوجهة، التوقيت، البلد والناس، المعالم السياحية',
+    placeholderDe: 'z. B. Ziel: Rom / Zeit: Sommer 2024 / Land und Leute: Gastfreundlich, leckeres Essen / Sehenswürdigkeiten: Kolosseum, Vatikan…',
+    placeholderAr: 'مثال: الوجهة: روما / التوقيت: الصيف الماضي / البلد والناس: شعب مضياف وطعام رائع / المعالم: الكولوسيوم والفاتيكان…'
+  },
+  {
+    key: 'Buch',
+    icon: '📖',
+    title: '2. Buch',
+    arTitle: 'كتاب',
+    pointsDe: 'Thema, Autor, Meinung',
+    pointsAr: 'الموضوع، المؤلف، الرأي الشخصي',
+    placeholderDe: 'z. B. Thema: Gesellschaftsroman / Autor: Hermann Hesse / Meine Meinung: Tiefgründig und regt zum Nachdenken an…',
+    placeholderAr: 'مثال: الموضوع: رواية اجتماعية / المؤلف: هرمان هيسه / رأيي: عمل عميق يدعو للتفكير والتأمل…'
+  },
+  {
+    key: 'Film',
+    icon: '🎬',
+    title: '3. Film',
+    arTitle: 'فيلم',
+    pointsDe: 'Thema, Handlung, Schauspieler, Meinung',
+    pointsAr: 'الموضوع، الحبكة، الممثلون، الرأي الشخصي',
+    placeholderDe: 'z. B. Thema: Historisches Drama / Handlung: Flucht aus Berlin / Schauspieler: Herausragende Besetzung / Meinung: Sehr emotional…',
+    placeholderAr: 'مثال: الموضوع: دراما تاريخية / الحبكة: الهروب من برلين / الممثلون: أداء رائع / رأيي: مؤثر ومثير جداً…'
+  },
+  {
+    key: 'Sportereignis',
+    icon: '⚽',
+    title: '4. Sportereignis',
+    arTitle: 'حدث رياضي',
+    pointsDe: 'Sportart, Ort, Personen, Ergebnis',
+    pointsAr: 'نوع الرياضة، المكان، الأشخاص، النتيجة',
+    placeholderDe: 'z. B. Sportart: Fußball-EM / Ort: München / Personen: Mit Freunden im Stadion / Ergebnis: Spannender 2:1 Sieg, tolle Stimmung…',
+    placeholderAr: 'مثال: الرياضة: بطولة كرة القدم / المكان: ميونيخ / الأشخاص: مع أصدقائي في الملعب / النتيجة: فوز مثير 2-1 وأجواء حماسية…'
+  },
+  {
+    key: 'Musikveranstaltung',
+    icon: '🎵',
+    title: '5. Musikveranstaltung',
+    arTitle: 'أمسية أو حفل موسيقي',
+    pointsDe: 'Musikrichtung, Musiker, Ort',
+    pointsAr: 'النمط الموسيقي، الموسيقيون، المكان',
+    placeholderDe: 'z. B. Musikrichtung: Klassik & Jazz / Musiker: Sinfonieorchester / Ort: Elbphilharmonie Hamburg, beeindruckende Akustik…',
+    placeholderAr: 'مثال: النمط الموسيقي: كلاسيكي وجاز / الموسيقيون: أوركسترا سيمفوني شهير / المكان: قاعة إلبفيلهارموني هامبورغ، صوتيات مذهلة…'
+  },
+  {
+    key: 'Person',
+    icon: '👤',
+    title: '6. Wichtige Person',
+    arTitle: 'شخصية مهمة في حياتك',
+    pointsDe: 'wer, wann, warum wichtig',
+    pointsAr: 'من هو، متى عرفته، لماذا هو مهم',
+    placeholderDe: 'z. B. Wer: Mein Großvater / Wann: Begleitet mich seit meiner Kindheit / Warum wichtig: Vorbild für Fleiß und Geduld…',
+    placeholderAr: 'مثال: من هو: جدي / متى: منذ طفولتي / لماذا هو مهم: قدوة في العمل الدؤوب والصبر والإنسانية…'
+  },
+  {
+    key: 'Erfahrung',
+    icon: '🌟',
+    title: '7. Wichtige Erfahrung',
+    arTitle: 'تجربة شخصية مهمة',
+    pointsDe: 'was, wann, wo, mit wem, warum wichtig',
+    pointsAr: 'ماذا حدث، متى، أين، مع من، لماذا هي مهمة',
+    placeholderDe: 'z. B. Was: Mein erstes Auslandspraktikum / Wann: Vor zwei Jahren / Wo: Frankfurt / Mit wem: Team / Warum wichtig: Große Selbstständigkeit…',
+    placeholderAr: 'مثال: ماذا: أول تدريب بالخارج / متى: قبل سنتين / أين: فرانكفورت / مع من: فريق العمل / لماذا مهم: عزز استقلاليتي…'
+  }
+];
+
+function getTeil1Topic(catKey){
+  return TELC_SPRECHEN_TEIL1_THEMEN.find(t=>t.key===catKey) || TELC_SPRECHEN_TEIL1_THEMEN[0];
+}
+
 function renderTeil1StudioDashboard(){
-  const cats = [
-    { key: 'Reise', icon: '✈️', title: 'Eine Reise', desc: text('رحلة قمت بها','Reisebericht') },
-    { key: 'Film', icon: '🎬', title: 'Ein Film', desc: text('فيلم شاهدته','Filmbericht') },
-    { key: 'Buch', icon: '📖', title: 'Ein Buch', desc: text('كتاب قرأته','Buchbericht') },
-    { key: 'Erfahrung', icon: '🌟', title: 'Erfahrung', desc: text('تجربة شخصية مهمة','Persönliche Erfahrung') },
-    { key: 'Person', icon: '👤', title: 'Eine wichtige Person', desc: text('شخص مهم','Eine wichtige Person') }
-  ];
+  const activeTopic = getTeil1Topic(currentPresCategory);
+  const activePoints = text(activeTopic.pointsAr, activeTopic.pointsDe);
+  const activePlaceholder = text(activeTopic.placeholderAr, activeTopic.placeholderDe);
   return `
   <section class="pres-studio-wrap" style="grid-column: 1 / -1; width: 100%;">
     <div class="pres-input-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-        <div><h3 style="margin:0;font-size:18px">${text('استوديو العرض التقديمي (Präsentation Studio)','Präsentations-Studio')}</h3><small class="muted">${text('اختر أحد مواضيع TELC الرسمية الـ 5، واكتب أفكارك لإنشاء عرض متكامل مع أسئلة اللجنة وإجاباتها النموذجية.','Wähle eines der 5 telc-Themen und erstelle eine vollständige Präsentation inklusive Jury-Fragen.')}</small></div>
+        <div><h3 style="margin:0;font-size:18px">${text('استوديو العرض التقديمي (Präsentation Studio)','Präsentations-Studio')}</h3><small class="muted">${text('اختر أحد مواضيع TELC الرسمية الـ 7، واكتب أفكارك لإنشاء عرض متكامل وفق العناصر الإلزامية (Leitpunkte).','Wähle eines der 7 offiziellen telc-Themen und erstelle eine vollständige Präsentation anhand der Leitpunkte.')}</small></div>
         <span class="tag">Teil 1 Präsentation</span>
       </div>
       <div class="pres-categories">
-        ${cats.map(c => `
+        ${TELC_SPRECHEN_TEIL1_THEMEN.map(c => `
           <button type="button" class="pres-cat-btn ${currentPresCategory === c.key ? 'active' : ''}" data-cat="${c.key}">
             <span>${c.icon}</span>
             <span>${c.title}</span>
-            <small style="font-size:10.5px;opacity:.8">${c.desc}</small>
+            <small style="font-size:10.5px;opacity:.85">${text(c.arTitle, c.title)}</small>
+            <span class="pres-cat-points">${c.pointsDe}</span>
           </button>
         `).join('')}
       </div>
+      <div class="pres-leitpunkte-banner">
+        <span class="pres-leitpunkte-tag">TELC Leitpunkte</span>
+        <span class="pres-leitpunkte-text" id="presLeitpunkteText">${text('العناصر الرسمية المطلوبة: ', 'Pflichtpunkte: ')}${activePoints}</span>
+      </div>
       <label style="font-size:12px;font-weight:800;color:var(--muted)">${text('اكتب أفكارك أو تفاصيل تريد تضمينها (بالعربية أو الألمانية):','Schreiben Sie Ihre Notizen oder Stichpunkte (auf Arabisch oder Deutsch):')}</label>
-      <textarea id="presNotes" placeholder="${text('مثال: رحلة إلى برلين الصيف الماضي مع أصدقائي، زرنا بوابة براندنبورغ، أعجبني النظام والمتاحف…','z. B. Eine Reise nach Berlin im letzten Sommer mit Freunden, Brandenburger Tor besucht, tolle Museen…')}">${esc(localStorage.getItem('telc_pres_notes_'+currentPresCategory)||'')}</textarea>
+      <textarea id="presNotes" placeholder="${esc(activePlaceholder)}">${esc(localStorage.getItem('telc_pres_notes_'+currentPresCategory)||'')}</textarea>
       <button type="button" class="pres-generate-btn" id="presGenBtn">✦ ${text('إنشاء العرض التقديمي بالذكاء الاصطناعي مع أسئلة اللجنة','Präsentation mit KI & Jury-Fragen generieren')}</button>
       <div id="presResultWrap"></div>
     </div>
@@ -511,8 +610,16 @@ function bindTeil1StudioDashboardEvents(){
     btn.onclick=()=>{
       currentPresCategory=btn.dataset.cat;
       document.querySelectorAll('.pres-cat-btn').forEach(b=>b.classList.toggle('active',b===btn));
+      const top = getTeil1Topic(currentPresCategory);
       const notesEl = document.getElementById('presNotes');
-      if(notesEl) notesEl.value = localStorage.getItem('telc_pres_notes_'+currentPresCategory) || '';
+      if(notesEl) {
+        notesEl.value = localStorage.getItem('telc_pres_notes_'+currentPresCategory) || '';
+        notesEl.placeholder = text(top.placeholderAr, top.placeholderDe);
+      }
+      const banner = document.getElementById('presLeitpunkteText');
+      if(banner) {
+        banner.textContent = text('العناصر الرسمية المطلوبة: ', 'Pflichtpunkte: ') + text(top.pointsAr, top.pointsDe);
+      }
       const saved = loadSavedPres(currentPresCategory, state.level);
       if (saved) {
         renderPresResultDashboard(saved, true);
@@ -847,17 +954,25 @@ function renderTopics(){
       const hasAudio = g.items.some(it => !!it.ex.audio_url);
       const dur = exerciseDuration(primaryEx);
       const isMulti = g.items.length > 1;
+      const isUserPaid = !!state.subscription?.is_paid;
+      const isExFree = (primaryEx.access_mode || 'paid') === 'free';
+      const isLocked = !isUserPaid && !isExFree;
+
+      const accessBadge = isExFree
+        ? `<span class="tag" style="background:#e8f7ee;color:#0e7039;border-color:#b7ebc7;font-weight:900;font-size:10px;">🟢 ${text('مجاني','Kostenlos')}</span>`
+        : `<span class="tag" style="background:#fef2f2;color:#991b1b;border-color:#fecaca;font-weight:900;font-size:10px;">🔒 ${text('مدفوع','Premium')}</span>`;
 
       return `<article class="topic-card ${isMulti ? 'has-variations' : ''}">
         <div class="topic-card-head">
           <span class="topic-index">${String(i+1).padStart(2,'0')}</span>
           <div class="topic-card-tags">
             <span class="tag">Telc ${esc(primaryEx.level||'B2')}</span>
+            ${accessBadge}
             ${isMulti ? `<span class="tag tag-variation" title="${g.items.length} ${text('تعديلات متاحة لهذا التمرين','Versionen verfügbar')}">📚 ${g.items.length} ${text('تعديلات','Versionen')}</span>` : ''}
           </div>
         </div>
         <h3 class="topic-card-title">
-          <span class="topic-status-dot ${anyDone?'is-done':'is-new'}" title="${anyDone?text('تم التدريب على هذا الموضوع من قبل','Bereits trainiert'):text('لم يتم التدريب على هذا الموضوع بعد','Noch nicht trainiert')}" aria-label="${anyDone?text('تم التدريب من قبل','Bereits trainiert'):text('لم يتم التدريب بعد','Noch nicht trainiert')}"></span>
+          <span class="topic-status-dot ${isLocked ? 'is-locked-dot' : (anyDone?'is-done':'is-new')}" title="${isLocked ? text('محتوى مخصص للمشتركين','Nur für Abonnenten') : (anyDone?text('تم التدريب على هذا الموضوع من قبل','Bereits trainiert'):text('لم يتم التدريب على هذا الموضوع بعد','Noch nicht trainiert'))}"></span>
           <span>${esc(g.baseTitle)}</span>
         </h3>
         <div class="topic-meta">
@@ -869,11 +984,15 @@ function renderTopics(){
           <button type="button" class="btn light topic-open-btn topic-variation-btn" data-group-idx="${i}">
             ${text('فتح التمرين','Übung öffnen')} ▾
           </button>
+        ` : (isLocked ? `
+          <button type="button" class="btn light topic-open-btn locked-topic-btn" data-topic-title="${esc(g.baseTitle)}" style="border-color:#fecaca;color:#991b1b;">
+            🔒 ${text('فتح التمرين (اشتراك)','Freischalten')} →
+          </button>
         ` : `
           <a class="btn light topic-open-btn" href="/exercise.html?id=${primaryEx.id}&duration=${dur*60}">${text('فتح التمرين','Übung öffnen')} →</a>
-        `}
+        `)}
       </article>`;
-    }).join('') : `<div class="empty-panel"><h3>${text('لا توجد تمارين منشورة هنا','Keine veröffentlichten Übungen')}</h3><p class="muted">${text('يمكن للمشرف إضافة الموضوع من لوحة الإدارة.','Der Administrator kann Aufgaben im Adminbereich hinzufügen.')}</p></div>`;
+    }).join('') : `<div class="empty-panel"><h3>${text('لا توجد تمارين متاحة حالياً','Keine Übungen verfügbar')}</h3><p class="muted">${text('سنقوم بإضافتها قريباً.','Wir werden sie in Kürze hinzufügen.')}</p></div>`;
 
     gridEl.querySelectorAll('.topic-variation-btn[data-group-idx]').forEach(btn => {
       btn.onclick = () => {
@@ -881,6 +1000,9 @@ function renderTopics(){
         const group = renderedTopicGroups[idx];
         if (group) openVariationModal(group);
       };
+    });
+    gridEl.querySelectorAll('.locked-topic-btn[data-topic-title]').forEach(btn => {
+      btn.onclick = () => openLockModal(btn.dataset.topicTitle);
     });
   }
 }
@@ -1010,15 +1132,36 @@ function openVariationModal(group) {
   if (subEl) subEl.textContent = text(`اختر من النسخ الـ ${group.items.length} المتاحة لهذا التمرين`, `Wähle aus den ${group.items.length} verfügbaren Versionen`);
 
   if (listEl) {
+    const isUserPaid = !!state.subscription?.is_paid;
     listEl.innerHTML = group.items.map((it, idx) => {
       const ex = it.ex;
       const dur = exerciseDuration(ex);
       const isCompleted = isExerciseCompleted(ex.id);
+      const isExFree = (ex.access_mode || 'paid') === 'free';
+      const isLocked = !isUserPaid && !isExFree;
+      const accessBadge = isExFree
+        ? `<span class="tag" style="background:#e8f7ee;color:#0e7039;border-color:#b7ebc7;font-size:10px;padding:2px 6px;">🟢 ${text('مجاني','Free')}</span>`
+        : `<span class="tag" style="background:#fef2f2;color:#991b1b;border-color:#fecaca;font-size:10px;padding:2px 6px;">🔒 ${text('مدفوع','Paid')}</span>`;
       const label = it.info.label || (idx === 0 ? text('الأساسي', 'Standard') : ((typeof getLang === 'function' && getLang() === 'de') ? `Modifiziert ${idx}` : `المعدل ${idx}`));
+
+      if (isLocked) {
+        return `
+          <a href="javascript:void(0)" class="variation-item-btn locked-var-item" data-ex-title="${esc(group.baseTitle + ' (' + label + ')')}" style="opacity:0.9;">
+            <span class="variation-item-content">
+              <span class="variation-item-label">${esc(label)}</span>
+              ${accessBadge}
+              ${ex.audio_url ? `<span class="variation-audio-badge" title="${text('ملف صوتي','Audio')}">🎧</span>` : ''}
+            </span>
+            <span class="variation-play-icon" aria-hidden="true" style="color:#991b1b">🔒</span>
+          </a>
+        `;
+      }
+
       return `
         <a href="/exercise.html?id=${ex.id}&duration=${dur * 60}" class="variation-item-btn">
           <span class="variation-item-content">
             <span class="variation-item-label">${esc(label)}</span>
+            ${accessBadge}
             ${ex.audio_url ? `<span class="variation-audio-badge" title="${text('ملف صوتي','Audio')}">🎧</span>` : ''}
             ${isCompleted ? `<span class="variation-done-badge" title="${text('تم التدريب مسبقاً','Bereits trainiert')}">✓</span>` : ''}
           </span>
@@ -1026,11 +1169,38 @@ function openVariationModal(group) {
         </a>
       `;
     }).join('');
+
+    listEl.querySelectorAll('.locked-var-item').forEach(b => {
+      b.onclick = (e) => {
+        e.preventDefault();
+        openLockModal(b.dataset.exTitle);
+      };
+    });
   }
 
   modalEl.hidden = false;
   document.body.classList.add('modal-open');
 }
+
+
+function openLockModal(title) {
+  const m = $('lockModal');
+  if (!m) return;
+  const isDe = (typeof getLang === 'function' && getLang() === 'de');
+  $('lockModalTitle').textContent = isDe ? 'Kostenpflichtige Übung' : 'محتوى مخصص للمشتركين';
+  $('lockModalMsg').textContent = isDe
+    ? `Die Übung "${title || ''}" ist nur mit einem aktiven Premium-Abonnement verfügbar.`
+    : `التمرين «${title || ''}» متاح فقط للمشتركين في الباقات المدفوعة. حسابك الحالي مجاني. يمكنك الاشتراك لفتح جميع المحتويات فوراً.`;
+  m.hidden = false;
+  document.body.classList.add('modal-open');
+}
+function closeLockModal() {
+  const m = $('lockModal');
+  if (m) m.hidden = true;
+  document.body.classList.remove('modal-open');
+}
+window.openLockModal = openLockModal;
+window.closeLockModal = closeLockModal;
 
 function closeVariationModal() {
   const modalEl = $('variationModal');
@@ -1196,7 +1366,7 @@ document.addEventListener('click', (e) => {
     console.error('Dashboard init error:', e);
     if (e?.status === 401) {
       try { localStorage.removeItem('telc_student_token'); } catch (_) {}
-      location.href = '/?error=session';
+      location.href = '/login.html?error=session';
     } else {
       const isDe = (typeof getLang === 'function' && getLang() === 'de');
       const title = isDe ? 'Fehler beim Laden' : 'تعذر تحميل بيانات التمارين';

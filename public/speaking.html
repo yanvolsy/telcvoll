@@ -114,33 +114,111 @@ let presTranscript = '';
 let presTimer = null;
 let presSeconds = 0;
 
+const TELC_SPRECHEN_TEIL1_THEMEN = [
+  {
+    key: 'Reise',
+    icon: '✈️',
+    title: '1. Reise',
+    arTitle: 'رحلة',
+    pointsDe: 'Ziel, Zeit, Land und Leute, Sehenswürdigkeiten',
+    pointsAr: 'الوجهة، التوقيت، البلد والناس، المعالم السياحية',
+    placeholderDe: 'z. B. Ziel: Rom / Zeit: Sommer 2024 / Land und Leute: Gastfreundlich, leckeres Essen / Sehenswürdigkeiten: Kolosseum, Vatikan…',
+    placeholderAr: 'مثال: الوجهة: روما / التوقيت: الصيف الماضي / البلد والناس: شعب مضياف وطعام رائع / المعالم: الكولوسيوم والفاتيكان…'
+  },
+  {
+    key: 'Buch',
+    icon: '📖',
+    title: '2. Buch',
+    arTitle: 'كتاب',
+    pointsDe: 'Thema, Autor, Meinung',
+    pointsAr: 'الموضوع، المؤلف، الرأي الشخصي',
+    placeholderDe: 'z. B. Thema: Gesellschaftsroman / Autor: Hermann Hesse / Meine Meinung: Tiefgründig und regt zum Nachdenken an…',
+    placeholderAr: 'مثال: الموضوع: رواية اجتماعية / المؤلف: هرمان هيسه / رأيي: عمل عميق يدعو للتفكير والتأمل…'
+  },
+  {
+    key: 'Film',
+    icon: '🎬',
+    title: '3. Film',
+    arTitle: 'فيلم',
+    pointsDe: 'Thema, Handlung, Schauspieler, Meinung',
+    pointsAr: 'الموضوع، الحبكة، الممثلون، الرأي الشخصي',
+    placeholderDe: 'z. B. Thema: Historisches Drama / Handlung: Flucht aus Berlin / Schauspieler: Herausragende Besetzung / Meinung: Sehr emotional…',
+    placeholderAr: 'مثال: الموضوع: دراما تاريخية / الحبكة: الهروب من برلين / الممثلون: أداء رائع / رأيي: مؤثر ومثير جداً…'
+  },
+  {
+    key: 'Sportereignis',
+    icon: '⚽',
+    title: '4. Sportereignis',
+    arTitle: 'حدث رياضي',
+    pointsDe: 'Sportart, Ort, Personen, Ergebnis',
+    pointsAr: 'نوع الرياضة، المكان، الأشخاص، النتيجة',
+    placeholderDe: 'z. B. Sportart: Fußball-EM / Ort: München / Personen: Mit Freunden im Stadion / Ergebnis: Spannender 2:1 Sieg, tolle Stimmung…',
+    placeholderAr: 'مثال: الرياضة: بطولة كرة القدم / المكان: ميونيخ / الأشخاص: مع أصدقائي في الملعب / النتيجة: فوز مثير 2-1 وأجواء حماسية…'
+  },
+  {
+    key: 'Musikveranstaltung',
+    icon: '🎵',
+    title: '5. Musikveranstaltung',
+    arTitle: 'أمسية أو حفل موسيقي',
+    pointsDe: 'Musikrichtung, Musiker, Ort',
+    pointsAr: 'النمط الموسيقي، الموسيقيون، المكان',
+    placeholderDe: 'z. B. Musikrichtung: Klassik & Jazz / Musiker: Sinfonieorchester / Ort: Elbphilharmonie Hamburg, beeindruckende Akustik…',
+    placeholderAr: 'مثال: النمط الموسيقي: كلاسيكي وجاز / الموسيقيون: أوركسترا سيمفوني شهير / المكان: قاعة إلبفيلهارموني هامبورغ، صوتيات مذهلة…'
+  },
+  {
+    key: 'Person',
+    icon: '👤',
+    title: '6. Wichtige Person',
+    arTitle: 'شخصية مهمة في حياتك',
+    pointsDe: 'wer, wann, warum wichtig',
+    pointsAr: 'من هو، متى عرفته، لماذا هو مهم',
+    placeholderDe: 'z. B. Wer: Mein Großvater / Wann: Begleitet mich seit meiner Kindheit / Warum wichtig: Vorbild für Fleiß und Geduld…',
+    placeholderAr: 'مثال: من هو: جدي / متى: منذ طفولتي / لماذا هو مهم: قدوة في العمل الدؤوب والصبر والإنسانية…'
+  },
+  {
+    key: 'Erfahrung',
+    icon: '🌟',
+    title: '7. Wichtige Erfahrung',
+    arTitle: 'تجربة شخصية مهمة',
+    pointsDe: 'was, wann, wo, mit wem, warum wichtig',
+    pointsAr: 'ماذا حدث، متى، أين، مع من، لماذا هي مهمة',
+    placeholderDe: 'z. B. Was: Mein erstes Auslandspraktikum / Wann: Vor zwei Jahren / Wo: Frankfurt / Mit wem: Team / Warum wichtig: Große Selbstständigkeit…',
+    placeholderAr: 'مثال: ماذا: أول تدريب بالخارج / متى: قبل سنتين / أين: فرانكفورت / مع من: فريق العمل / لماذا مهم: عزز استقلاليتي…'
+  }
+];
+
+function getTeil1Topic(catKey){
+  return TELC_SPRECHEN_TEIL1_THEMEN.find(t=>t.key===catKey) || TELC_SPRECHEN_TEIL1_THEMEN[0];
+}
+
 function renderTeil1Studio(){
   if(currentTeil()!=='Teil 1') return '';
-  const cats = [
-    { key: 'Reise', icon: '✈️', title: 'Eine Reise', desc: 'رحلة قمت بها' },
-    { key: 'Film', icon: '🎬', title: 'Ein Film', desc: 'فيلم شاهدته' },
-    { key: 'Buch', icon: '📖', title: 'Ein Buch', desc: 'كتاب قرأته' },
-    { key: 'Erfahrung', icon: '🌟', title: 'Erfahrung', desc: 'تجربة شخصية مهمة' },
-    { key: 'Person', icon: '👤', title: 'Eine wichtige Person', desc: 'شخص مهم' }
-  ];
+  const activeTopic = getTeil1Topic(currentPresCategory);
+  const activePoints = activeTopic.pointsAr + ' (' + activeTopic.pointsDe + ')';
+  const activePlaceholder = activeTopic.placeholderAr;
   return `
   <section class="pres-studio-wrap">
     <div class="pres-input-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-        <div><h3 style="margin:0;font-size:18px">استوديو العرض التقديمي (Präsentation Studio)</h3><small class="muted">اختر أحد مواضيع TELC الرسمية الـ 5، واكتب أفكارك لإنشاء عرض متكامل مع أسئلة اللجنة وإجاباتها النموذجية.</small></div>
+        <div><h3 style="margin:0;font-size:18px">استوديو العرض التقديمي (Präsentation Studio)</h3><small class="muted">اختر أحد مواضيع TELC الرسمية الـ 7، واكتب أفكارك لإنشاء عرض متكامل وفق العناصر الإلزامية (Leitpunkte).</small></div>
         <span class="tag">Teil 1 Präsentation</span>
       </div>
       <div class="pres-categories">
-        ${cats.map(c => `
+        ${TELC_SPRECHEN_TEIL1_THEMEN.map(c => `
           <button type="button" class="pres-cat-btn ${currentPresCategory === c.key ? 'active' : ''}" data-cat="${c.key}">
             <span>${c.icon}</span>
             <span>${c.title}</span>
-            <small style="font-size:10.5px;opacity:.8">${c.desc}</small>
+            <small style="font-size:10.5px;opacity:.85">${c.arTitle}</small>
+            <span class="pres-cat-points">${c.pointsDe}</span>
           </button>
         `).join('')}
       </div>
+      <div class="pres-leitpunkte-banner">
+        <span class="pres-leitpunkte-tag">TELC Leitpunkte</span>
+        <span class="pres-leitpunkte-text" id="presLeitpunkteText">العناصر الإلزامية: ${activePoints}</span>
+      </div>
       <label style="font-size:12px;font-weight:800;color:var(--muted)">اكتب أفكارك أو تفاصيل تريد تضمينها (بالعربية أو الألمانية):</label>
-      <textarea id="presNotes" placeholder="مثال: رحلة إلى برلين الصيف الماضي مع أصدقائي، زرنا بوابة براندنبورغ، أعجبني النظام والمتاحف..."></textarea>
+      <textarea id="presNotes" placeholder="${esc(activePlaceholder)}">${esc(localStorage.getItem('telc_pres_notes_'+currentPresCategory)||'')}</textarea>
       <button type="button" class="pres-generate-btn" id="presGenBtn">✦ إنشاء العرض التقديمي بالذكاء الاصطناعي مع أسئلة اللجنة</button>
       <div id="presResultWrap"></div>
     </div>
@@ -216,8 +294,16 @@ function bindTeil1StudioEvents(){
     btn.onclick=()=>{
       currentPresCategory=btn.dataset.cat;
       document.querySelectorAll('.pres-cat-btn').forEach(b=>b.classList.toggle('active',b===btn));
+      const top = getTeil1Topic(currentPresCategory);
       const notesEl = $('presNotes');
-      if(notesEl) notesEl.value = localStorage.getItem('telc_pres_notes_'+currentPresCategory) || '';
+      if(notesEl) {
+        notesEl.value = localStorage.getItem('telc_pres_notes_'+currentPresCategory) || '';
+        notesEl.placeholder = top.placeholderAr;
+      }
+      const banner = document.getElementById('presLeitpunkteText');
+      if(banner) {
+        banner.textContent = 'العناصر الإلزامية: ' + top.pointsAr + ' (' + top.pointsDe + ')';
+      }
       const saved = loadSavedPres(currentPresCategory, ex?.level);
       if (saved) {
         renderPresResult(saved, true);

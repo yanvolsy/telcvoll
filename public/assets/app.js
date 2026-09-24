@@ -20,9 +20,10 @@ async function api(path, options = {}) {
     let data = {};
     try { data = await res.json(); } catch { /* no json body */ }
     if (!res.ok) {
-      if (res.status === 401 && !location.pathname.startsWith('/admin') && location.pathname !== '/' && location.pathname !== '/index.html' && location.pathname !== '/contact.html') {
+      const isPublicPage = ['/', '/index.html', '/contact.html', '/login.html', '/login', '/register.html', '/register', '/forgot-password.html', '/reset-password.html'].includes(location.pathname) || location.pathname.startsWith('/admin');
+      if (res.status === 401 && !isPublicPage) {
         try { localStorage.removeItem('telc_student_token'); } catch (_) {}
-        location.href = '/?error=session';
+        location.href = '/login.html?error=session';
       }
       throw Object.assign(new Error(data.error || res.statusText), { status: res.status, data });
     }

@@ -41,7 +41,18 @@ function render(){
         <div class="profile-field"><label for="phone">${text('رقم الهاتف','Telefon')} <span class="profile-note">(${text('اختياري','optional')})</span></label><input id="phone" name="phone" type="tel" maxlength="40" autocomplete="tel" value="${esc(s.phone||'')}"></div>
         <div class="profile-field"><label for="country">${text('البلد','Land')} <span class="profile-note">(${text('اختياري','optional')})</span></label><input id="country" name="country" maxlength="100" autocomplete="country-name" value="${esc(s.country||'')}"></div>
       </div>
-      <div class="profile-plan"><div><strong>${text('صلاحية المنصة','Plattformzugang')}</strong><small>${esc(sub.plan_name||'')} · ${sub.expires_at?new Date(sub.expires_at).toLocaleDateString(lang()==='ar'?'ar-DZ':'de-DE'):''}</small></div><div class="profile-levels"><span>B1</span><span>B2</span><span>C1</span></div></div>
+      <div class="profile-plan">
+        <div>
+          ${sub.is_paid ? `
+            <strong>${text('الاشتراك الحالي: ','Aktueller Plan: ')}${esc(sub.plan_name || text('اشتراك كامل B1 · B2 · C1','Vollzugang'))}</strong>
+            <small>${text('ينتهي في: ','Gültig bis: ')}${sub.expires_at ? new Date(sub.expires_at).toLocaleDateString(lang()==='ar'?'ar-DZ':'de-DE') : ''}</small>
+          ` : `
+            <strong style="color:var(--green);">🟢 ${text('نوع الحساب: حساب مجاني','Kontotyp: Kostenlos')}</strong>
+            <small>${text('وصول للتمارين المجانية. يمكنك ترقية حسابك لفتح جميع المحتويات.','Zugang zu kostenlosen Inhalten.')} <a href="/#plans" style="color:var(--green);font-weight:900;text-decoration:underline;margin-inline-start:6px;">${text('ترقية الاشتراك ⚡','Jetzt abonnieren')}</a></small>
+          `}
+        </div>
+        <div class="profile-levels"><span>B1</span><span>B2</span><span>C1</span></div>
+      </div>
       <div class="profile-actions"><span class="profile-note">${text('الحقول التي تحمل * مطلوبة. يمكنك تعديل بياناتك لاحقاً من صفحة ملفك.','Felder mit * sind erforderlich. Du kannst dein Profil später jederzeit ändern.')}</span><button class="btn profile-save" type="submit">${text('حفظ ومتابعة','Speichern und weiter')} →</button></div>
       <div id="profileStatus" class="profile-status"></div>
     </form>
@@ -53,12 +64,12 @@ $('logoutLink').onclick=async e=>{e.preventDefault();try{localStorage.removeItem
 (async()=>{
   try {
     data = await api('me');
-    if (!data.student) { location.href = '/'; return; }
+    if (!data.student) { location.href = '/login.html'; return; }
     render();
   } catch(e) {
     console.error('Profile init error:', e);
     if (e?.status === 401) {
-      location.href = '/?error=session';
+      location.href = '/login.html?error=session';
     } else {
       const contentEl = $('content');
       if (contentEl) {

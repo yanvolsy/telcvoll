@@ -64,7 +64,53 @@ function translationBox(idKey){return `<div class="inline-translation" id="${idK
 function textTools(raw,targetId){return `<div class="text-tools"><button type="button" class="mini-tool" data-translate="${targetId}-translation" data-source-id="${targetId}" aria-label="${text('ترجمة','Übersetzen')}" aria-pressed="false">文</button><button type="button" class="mini-tool" data-speak="${targetId}" aria-label="${text('نطق بالألمانية','Deutsch vorlesen')}" aria-pressed="false">◉</button></div>`;}
 function toolRegistry(){const map=new Map(); document.querySelectorAll('[data-content-id]').forEach(el=>map.set(el.dataset.contentId,el.dataset.source||''));return map;}
 function bindTextTools(){const registry=toolRegistry();document.querySelectorAll('[data-translate]').forEach(btn=>btn.onclick=async()=>{const target=document.getElementById(btn.dataset.translate);if(!target)return;if(target.classList.contains('visible')){target.classList.remove('visible');target.textContent='';btn.setAttribute('aria-pressed','false');return;}const source=registry.get(btn.dataset.sourceId)||'';target.classList.add('loading');const out=await translateText(source,'ar');target.classList.remove('loading');target.textContent=out||text('تعذرت الترجمة.','Übersetzung nicht verfügbar.');target.classList.add('visible');btn.setAttribute('aria-pressed','true');});document.querySelectorAll('[data-speak]').forEach(btn=>btn.onclick=()=>{const source=registry.get(btn.dataset.speak)||'';speakGerman(source,btn);});}
-function renderAudio(){return model.exercise.audio_url?`<div class="audio-box"><audio controls preload="metadata" src="${esc(model.exercise.audio_url)}"></audio><span>${text('الملف الصوتي','Audiodatei')}</span></div>`:'';}
+function renderUnifiedAudioPlayer(audioUrl) {
+  const hasAudio = Boolean(String(audioUrl || '').trim());
+  if (!hasAudio) {
+    return `
+      <div class="hoeren-audio-player-card is-unavailable" data-hoeren-player>
+        <div class="hoeren-audio-unavailable" role="status">
+          <span class="hoeren-audio-unavailable-icon" aria-hidden="true">♪</span>
+          <div>
+            <strong>${text('الصوت غير متوفر', 'Audio nicht verfügbar')}</strong>
+            <small>${text('لا يوجد ملف صوتي لهذا التمرين حالياً.', 'Für diese Übung ist derzeit keine Audiodatei verfügbar.')}</small>
+          </div>
+        </div>
+      </div>`;
+  }
+  return `
+    <div class="hoeren-audio-player-card" data-hoeren-player>
+      <audio class="hoeren-native-audio" preload="metadata" src="${esc(audioUrl)}"></audio>
+      <div class="hoeren-audio-controls-group">
+        <button type="button" class="hoeren-audio-play" data-audio-play aria-label="${text('تشغيل الصوت','Audio abspielen')}" title="${text('تشغيل / إيقاف مؤقت','Abspielen / Pause')}">
+          <span class="hoeren-audio-play-icon" aria-hidden="true">▶</span>
+        </button>
+        <button type="button" class="hoeren-audio-icon-btn hoeren-audio-skip-btn" data-audio-skip="-5" title="${text('تراجع 5 ثوانٍ','5s zurück')}" aria-label="${text('تراجع 5 ثوانٍ','5s zurück')}">
+          <span>↺ 5s</span>
+        </button>
+        <button type="button" class="hoeren-audio-icon-btn hoeren-audio-skip-btn" data-audio-skip="5" title="${text('تقدم 5 ثوانٍ','5s vor')}" aria-label="${text('تقدم 5 ثوانٍ','5s vor')}">
+          <span>5s ↻</span>
+        </button>
+      </div>
+      <div class="hoeren-audio-main">
+        <div class="hoeren-audio-topline">
+          <span class="hoeren-audio-label">${text('الملف الصوتي TELC Hören','Audiodatei TELC Hören')}</span>
+          <span class="hoeren-audio-time"><span data-audio-current>0:00</span><span> / </span><span data-audio-duration>0:00</span></span>
+        </div>
+        <input class="hoeren-audio-progress" data-audio-progress type="range" min="0" max="100" value="0" step="0.1" aria-label="${text('تقدم الصوت','Audiofortschritt')}">
+      </div>
+      <div class="hoeren-audio-actions">
+        <button type="button" class="hoeren-audio-icon-btn hoeren-audio-speed-btn" data-audio-speed title="${text('سرعة التشغيل: 1x / 0.8x / 1.2x','Wiedergabegeschwindigkeit')}">
+          <span data-audio-speed-label>1x</span>
+        </button>
+        <button type="button" class="hoeren-audio-icon-btn" data-audio-mute aria-label="${text('كتم الصوت','Stummschalten')}" title="${text('كتم الصوت','Stummschalten')}">
+          <span data-audio-volume-icon aria-hidden="true">🔊</span>
+        </button>
+        <input class="hoeren-audio-volume" data-audio-volume type="range" min="0" max="1" value="1" step="0.05" aria-label="${text('مستوى الصوت','Lautstärke')}">
+      </div>
+    </div>`;
+}
+function renderAudio(){return model.exercise.audio_url ? renderUnifiedAudioPlayer(model.exercise.audio_url) : '';}
 function matchingMeta(){return model.exercise.section==='Lesen'&&model.exercise.teil==='Teil 1'?{title:'ÜBERSCHRIFTEN',sub:'FÜR TEXT',ar:'العناوين'}:model.exercise.section==='Lesen'&&model.exercise.teil==='Teil 3'?{title:'SITUATIONEN',sub:'ZUORDNUNG',ar:'المواقف'}:model.exercise.section==='Hören'&&model.exercise.teil==='Teil 3'?{title:'AUSSAGEN',sub:'ZUORDNUNG',ar:'العبارات'}:{title:'AUSWAHL',sub:'ZUORDNUNG',ar:'الاختيارات'};}
 function captureExerciseScroll(){
  const anchor=document.querySelector('.exam-main .active-item, .exam-main .exam-text-card, .exam-main .tf-row, .exam-side .side-question, .hoeren-table-row');
@@ -167,7 +213,7 @@ function renderHoerenChoiceQuestions(){
  const timer=(mockMode||activeDuration)?`<div class="progress-pill ${mockMode?'mock-global-timer':''}" id="timerEl">${initialMin}:00</div>`:'';
  const title=mockMode?'':`<div class="thema-title-row"><h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}" class="${titleRevealed?'':'thema-title-hidden'}">${esc(model.exercise.title||'')}</h1><div class="thema-tools">${textTools(model.exercise.title||'','thema-title')}<div class="inline-translation" id="thema-title-translation"></div><button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen')}" title="${text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen')}"><span class="eye-icon ${titleRevealed?'eye-on':'eye-off'}"></span></button></div></div>`;
  const heading=`<div class="exercise-heading hoeren-choice-heading"><div class="exercise-heading-title"><span class="tag">Telc ${esc(model.exercise.level||'B2')} · Hören</span>${title}<small>${esc(model.exercise.teil||'')}</small></div>${timer}</div>`;
- const audio=model.exercise.audio_url?`<div class="hoeren-choice-audio"><div class="hoeren-choice-audio-icon" aria-hidden="true">🔊</div><div class="hoeren-choice-audio-player"><audio controls preload="metadata" src="${esc(model.exercise.audio_url)}"></audio></div></div>`:'';
+ const audio=model.exercise.audio_url?renderUnifiedAudioPlayer(model.exercise.audio_url):'';
  const rows=items.map((it,index)=>{
    const n=String(it.position_no), chosen=answerValue(n);
    const detail=resultData?.details?.find(d=>String(d.prompt)===String(it.prompt));
@@ -190,6 +236,7 @@ function renderHoerenChoiceQuestions(){
  const sh=document.getElementById('hoerenChoiceShuffle');
  if(sh)sh.onclick=e=>{e.preventDefault();e.stopPropagation();const st=captureExerciseScroll();items.forEach(it=>{const n=String(it.position_no);optionOrders[n]=shuffle((it.options||[]).slice(0,4).map(o=>o.option_key));});rerenderExerciseStable(st);};
  bindTextTools();
+ bindHoerenAudioPlayer();
 }
 
 function renderChoiceQuestions(){
@@ -316,21 +363,8 @@ function renderTF(){
     </div>
     ${resultPanel}`;
 
-  // 2. Theme-aware audio player. Keep native audio hidden as the playback engine.
-  const hasAudio = Boolean(String(model.exercise.audio_url || '').trim());
-  const audioBox = `
-    <div class="hoeren-audio-player-card ${hasAudio ? '' : 'is-unavailable'}" data-hoeren-player>
-      ${hasAudio ? `<audio class="hoeren-native-audio" preload="metadata" src="${esc(model.exercise.audio_url)}"></audio>
-      <button type="button" class="hoeren-audio-play" data-audio-play aria-label="${text('تشغيل الصوت','Audio abspielen')}" title="${text('تشغيل','Abspielen')}"><span class="hoeren-audio-play-icon" aria-hidden="true">▶</span></button>
-      <div class="hoeren-audio-main">
-        <div class="hoeren-audio-topline"><span class="hoeren-audio-label">${text('الملف الصوتي','Audiodatei')}</span><span class="hoeren-audio-time"><span data-audio-current>0:00</span><span> / </span><span data-audio-duration>0:00</span></span></div>
-        <input class="hoeren-audio-progress" data-audio-progress type="range" min="0" max="100" value="0" step="0.1" aria-label="${text('تقدم الصوت','Audiofortschritt')}">
-      </div>
-      <div class="hoeren-audio-actions">
-        <button type="button" class="hoeren-audio-icon-btn" data-audio-mute aria-label="${text('كتم الصوت','Stummschalten')}" title="${text('كتم الصوت','Stummschalten')}"><span data-audio-volume-icon aria-hidden="true">🔊</span></button>
-        <input class="hoeren-audio-volume" data-audio-volume type="range" min="0" max="1" value="1" step="0.05" aria-label="${text('مستوى الصوت','Lautstärke')}">
-      </div>` : `<div class="hoeren-audio-unavailable" role="status"><span class="hoeren-audio-unavailable-icon" aria-hidden="true">♪</span><div><strong>${text('الصوت غير متوفر','Audio nicht verfügbar')}</strong><small>${text('لا يوجد ملف صوتي لهذا التمرين حالياً.','Für diese Übung ist derzeit keine Audiodatei verfügbar.')}</small></div></div>`}
-    </div>`;
+  // 2. Upgraded universal audio player
+  const audioBox = renderUnifiedAudioPlayer(model.exercise.audio_url);
 
   // 3. Question Rows matching media_1790111329552.png
   const questionRows = orderedItems.map((it, idx) => {
@@ -437,43 +471,75 @@ function formatAudioTime(seconds){
   return Math.floor(n/60)+':'+Math.floor(n%60).toString().padStart(2,'0');
 }
 function bindHoerenAudioPlayer(){
-  const card=document.querySelector('[data-hoeren-player]');
-  if(!card)return;
-  const audio=card.querySelector('.hoeren-native-audio');
-  const play=card.querySelector('[data-audio-play]');
-  const icon=card.querySelector('.hoeren-audio-play-icon');
-  const progress=card.querySelector('[data-audio-progress]');
-  const current=card.querySelector('[data-audio-current]');
-  const durationEl=card.querySelector('[data-audio-duration]');
-  const mute=card.querySelector('[data-audio-mute]');
-  const volume=card.querySelector('[data-audio-volume]');
-  const volumeIcon=card.querySelector('[data-audio-volume-icon]');
-  if(!audio||!play)return;
-  const markUnavailable=()=>{
-    card.classList.add('is-unavailable');
-    card.innerHTML = `<div class="hoeren-audio-unavailable" role="status"><span class="hoeren-audio-unavailable-icon" aria-hidden="true">♪</span><div><strong>${text('الصوت غير متوفر','Audio nicht verfügbar')}</strong><small>${text('تعذر تحميل الملف الصوتي لهذا التمرين.','Die Audiodatei für diese Übung konnte nicht geladen werden.')}</small></div></div>`;
-  };
-  audio.addEventListener('error', markUnavailable, {once:true});
-  const sync=()=>{ if(card.classList.contains('is-unavailable')) return;
-    const dur=Number.isFinite(audio.duration)?audio.duration:0;
-    current.textContent=formatAudioTime(audio.currentTime);
-    durationEl.textContent=formatAudioTime(dur);
-    progress.value=dur?audio.currentTime/dur*100:0;
-    icon.textContent=audio.paused?'▶':'❚❚';
-    card.classList.toggle('is-playing',!audio.paused);
-    play.setAttribute('aria-label',audio.paused?text('تشغيل الصوت','Audio abspielen'):text('إيقاف مؤقت','Pause'));
-  };
-  const syncVolume=()=>{
-    const v=audio.muted?0:audio.volume;
-    volume.value=v;
-    volumeIcon.textContent=v===0?'🔇':v<.5?'🔉':'🔊';
-  };
-  play.onclick=()=>audio.paused?audio.play().catch(()=>{}):audio.pause();
-  audio.addEventListener('loadedmetadata',sync); audio.addEventListener('timeupdate',sync); audio.addEventListener('play',sync); audio.addEventListener('pause',sync); audio.addEventListener('ended',sync);
-  progress.oninput=()=>{if(Number.isFinite(audio.duration))audio.currentTime=Number(progress.value)/100*audio.duration;};
-  volume.oninput=()=>{audio.muted=false;audio.volume=Number(volume.value);syncVolume();};
-  mute.onclick=()=>{audio.muted=!audio.muted;syncVolume();};
-  sync(); syncVolume();
+  const cards=document.querySelectorAll('[data-hoeren-player]');
+  cards.forEach(card => {
+    const audio=card.querySelector('.hoeren-native-audio');
+    const play=card.querySelector('[data-audio-play]');
+    const icon=card.querySelector('.hoeren-audio-play-icon');
+    const progress=card.querySelector('[data-audio-progress]');
+    const current=card.querySelector('[data-audio-current]');
+    const durationEl=card.querySelector('[data-audio-duration]');
+    const mute=card.querySelector('[data-audio-mute]');
+    const volume=card.querySelector('[data-audio-volume]');
+    const volumeIcon=card.querySelector('[data-audio-volume-icon]');
+    if(!audio||!play)return;
+    const markUnavailable=()=>{
+      card.classList.add('is-unavailable');
+      card.innerHTML = `<div class="hoeren-audio-unavailable" role="status"><span class="hoeren-audio-unavailable-icon" aria-hidden="true">♪</span><div><strong>${text('الصوت غير متوفر','Audio nicht verfügbar')}</strong><small>${text('تعذر تحميل الملف الصوتي لهذا التمرين.','Die Audiodatei für diese Übung konnte nicht geladen werden.')}</small></div></div>`;
+    };
+    audio.addEventListener('error', markUnavailable, {once:true});
+    const sync=()=>{ if(card.classList.contains('is-unavailable')) return;
+      const dur=Number.isFinite(audio.duration)?audio.duration:0;
+      current.textContent=formatAudioTime(audio.currentTime);
+      durationEl.textContent=formatAudioTime(dur);
+      const pct = dur ? (audio.currentTime / dur * 100) : 0;
+      progress.value = pct;
+      progress.style.background = `linear-gradient(to right, var(--green) 0%, var(--green) ${pct}%, var(--line) ${pct}%, var(--line) 100%)`;
+      icon.textContent=audio.paused?'▶':'❚❚';
+      card.classList.toggle('is-playing',!audio.paused);
+      play.setAttribute('aria-label',audio.paused?text('تشغيل الصوت','Audio abspielen'):text('إيقاف مؤقت','Pause'));
+    };
+    const syncVolume=()=>{
+      const v=audio.muted?0:audio.volume;
+      if (volume) {
+        volume.value=v;
+        const vPct = v * 100;
+        volume.style.background = `linear-gradient(to right, var(--green) 0%, var(--green) ${vPct}%, var(--line) ${vPct}%, var(--line) 100%)`;
+      }
+      if (volumeIcon) volumeIcon.textContent=v===0?'🔇':v<.5?'🔉':'🔊';
+    };
+    play.onclick=()=>audio.paused?audio.play().catch(()=>{}):audio.pause();
+    audio.addEventListener('loadedmetadata',sync); audio.addEventListener('timeupdate',sync); audio.addEventListener('play',sync); audio.addEventListener('pause',sync); audio.addEventListener('ended',sync);
+    progress.oninput=()=>{if(Number.isFinite(audio.duration))audio.currentTime=Number(progress.value)/100*audio.duration;};
+    if (volume) volume.oninput=()=>{audio.muted=false;audio.volume=Number(volume.value);syncVolume();};
+    if (mute) mute.onclick=()=>{audio.muted=!audio.muted;syncVolume();};
+
+    // Skip -5s / +5s
+    card.querySelectorAll('[data-audio-skip]').forEach(btn => {
+      btn.onclick = () => {
+        const delta = Number(btn.dataset.audioSkip || 0);
+        if (Number.isFinite(audio.duration)) {
+          audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + delta));
+        }
+      };
+    });
+
+    // Speed toggle: 1x -> 0.8x -> 1.2x
+    const speedBtn = card.querySelector('[data-audio-speed]');
+    const speedLabel = card.querySelector('[data-audio-speed-label]');
+    const speeds = [1, 0.8, 1.2];
+    let speedIdx = 0;
+    if (speedBtn) {
+      speedBtn.onclick = () => {
+        speedIdx = (speedIdx + 1) % speeds.length;
+        const rate = speeds[speedIdx];
+        audio.playbackRate = rate;
+        if (speedLabel) speedLabel.textContent = rate + 'x';
+      };
+    }
+
+    sync(); syncVolume();
+  });
 }
 function renderWriting(){
  const settings=parseSettings(model.exercise);
@@ -598,32 +664,110 @@ let presTranscript = '';
 let presTimer = null;
 let presSeconds = 0;
 
+const TELC_SPRECHEN_TEIL1_THEMEN = [
+  {
+    key: 'Reise',
+    icon: '✈️',
+    title: '1. Reise',
+    arTitle: 'رحلة',
+    pointsDe: 'Ziel, Zeit, Land und Leute, Sehenswürdigkeiten',
+    pointsAr: 'الوجهة، التوقيت، البلد والناس، المعالم السياحية',
+    placeholderDe: 'z. B. Ziel: Rom / Zeit: Sommer 2024 / Land und Leute: Gastfreundlich, leckeres Essen / Sehenswürdigkeiten: Kolosseum, Vatikan…',
+    placeholderAr: 'مثال: الوجهة: روما / التوقيت: الصيف الماضي / البلد والناس: شعب مضياف وطعام رائع / المعالم: الكولوسيوم والفاتيكان…'
+  },
+  {
+    key: 'Buch',
+    icon: '📖',
+    title: '2. Buch',
+    arTitle: 'كتاب',
+    pointsDe: 'Thema, Autor, Meinung',
+    pointsAr: 'الموضوع، المؤلف، الرأي الشخصي',
+    placeholderDe: 'z. B. Thema: Gesellschaftsroman / Autor: Hermann Hesse / Meine Meinung: Tiefgründig und regt zum Nachdenken an…',
+    placeholderAr: 'مثال: الموضوع: رواية اجتماعية / المؤلف: هرمان هيسه / رأيي: عمل عميق يدعو للتفكير والتأمل…'
+  },
+  {
+    key: 'Film',
+    icon: '🎬',
+    title: '3. Film',
+    arTitle: 'فيلم',
+    pointsDe: 'Thema, Handlung, Schauspieler, Meinung',
+    pointsAr: 'الموضوع، الحبكة، الممثلون، الرأي الشخصي',
+    placeholderDe: 'z. B. Thema: Historisches Drama / Handlung: Flucht aus Berlin / Schauspieler: Herausragende Besetzung / Meinung: Sehr emotional…',
+    placeholderAr: 'مثال: الموضوع: دراما تاريخية / الحبكة: الهروب من برلين / الممثلون: أداء رائع / رأيي: مؤثر ومثير جداً…'
+  },
+  {
+    key: 'Sportereignis',
+    icon: '⚽',
+    title: '4. Sportereignis',
+    arTitle: 'حدث رياضي',
+    pointsDe: 'Sportart, Ort, Personen, Ergebnis',
+    pointsAr: 'نوع الرياضة، المكان، الأشخاص، النتيجة',
+    placeholderDe: 'z. B. Sportart: Fußball-EM / Ort: München / Personen: Mit Freunden im Stadion / Ergebnis: Spannender 2:1 Sieg, tolle Stimmung…',
+    placeholderAr: 'مثال: الرياضة: بطولة كرة القدم / المكان: ميونيخ / الأشخاص: مع أصدقائي في الملعب / النتيجة: فوز مثير 2-1 وأجواء حماسية…'
+  },
+  {
+    key: 'Musikveranstaltung',
+    icon: '🎵',
+    title: '5. Musikveranstaltung',
+    arTitle: 'أمسية أو حفل موسيقي',
+    pointsDe: 'Musikrichtung, Musiker, Ort',
+    pointsAr: 'النمط الموسيقي، الموسيقيون، المكان',
+    placeholderDe: 'z. B. Musikrichtung: Klassik & Jazz / Musiker: Sinfonieorchester / Ort: Elbphilharmonie Hamburg, beeindruckende Akustik…',
+    placeholderAr: 'مثال: النمط الموسيقي: كلاسيكي وجاز / الموسيقيون: أوركسترا سيمفوني شهير / المكان: قاعة إلبفيلهارموني هامبورغ، صوتيات مذهلة…'
+  },
+  {
+    key: 'Person',
+    icon: '👤',
+    title: '6. Wichtige Person',
+    arTitle: 'شخصية مهمة في حياتك',
+    pointsDe: 'wer, wann, warum wichtig',
+    pointsAr: 'من هو، متى عرفته، لماذا هو مهم',
+    placeholderDe: 'z. B. Wer: Mein Großvater / Wann: Begleitet mich seit meiner Kindheit / Warum wichtig: Vorbild für Fleiß und Geduld…',
+    placeholderAr: 'مثال: من هو: جدي / متى: منذ طفولتي / لماذا هو مهم: قدوة في العمل الدؤوب والصبر والإنسانية…'
+  },
+  {
+    key: 'Erfahrung',
+    icon: '🌟',
+    title: '7. Wichtige Erfahrung',
+    arTitle: 'تجربة شخصية مهمة',
+    pointsDe: 'was, wann, wo, mit wem, warum wichtig',
+    pointsAr: 'ماذا حدث، متى، أين، مع من، لماذا هي مهمة',
+    placeholderDe: 'z. B. Was: Mein erstes Auslandspraktikum / Wann: Vor zwei Jahren / Wo: Frankfurt / Mit wem: Team / Warum wichtig: Große Selbstständigkeit…',
+    placeholderAr: 'مثال: ماذا: أول تدريب بالخارج / متى: قبل سنتين / أين: فرانكفورت / مع من: فريق العمل / لماذا مهم: عزز استقلاليتي…'
+  }
+];
+
+function getTeil1Topic(catKey){
+  return TELC_SPRECHEN_TEIL1_THEMEN.find(t=>t.key===catKey) || TELC_SPRECHEN_TEIL1_THEMEN[0];
+}
+
 function renderTeil1Studio(){
-  const cats = [
-    { key: 'Reise', icon: '✈️', title: 'Eine Reise', desc: text('رحلة قمت بها','Reisebericht') },
-    { key: 'Film', icon: '🎬', title: 'Ein Film', desc: text('فيلم شاهدته','Filmbericht') },
-    { key: 'Buch', icon: '📖', title: 'Ein Buch', desc: text('كتاب قرأته','Buchbericht') },
-    { key: 'Erfahrung', icon: '🌟', title: 'Erfahrung', desc: text('تجربة شخصية مهمة','Persönliche Erfahrung') },
-    { key: 'Person', icon: '👤', title: 'Eine wichtige Person', desc: text('شخص مهم','Eine wichtige Person') }
-  ];
+  const activeTopic = getTeil1Topic(currentPresCategory);
+  const activePoints = text(activeTopic.pointsAr, activeTopic.pointsDe);
+  const activePlaceholder = text(activeTopic.placeholderAr, activeTopic.placeholderDe);
   return `
   <section class="pres-studio-wrap">
     <div class="pres-input-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-        <div><h3 style="margin:0;font-size:18px">${text('استوديو العرض التقديمي (Präsentation Studio)','Präsentations-Studio')}</h3><small class="muted">${text('اختر أحد مواضيع TELC الرسمية الـ 5، واكتب أفكارك لإنشاء عرض متكامل مع أسئلة اللجنة وإجاباتها النموذجية.','Wähle eines der 5 telc-Themen und erstelle eine vollständige Präsentation inklusive Jury-Fragen.')}</small></div>
+        <div><h3 style="margin:0;font-size:18px">${text('استوديو العرض التقديمي (Präsentation Studio)','Präsentations-Studio')}</h3><small class="muted">${text('اختر أحد مواضيع TELC الرسمية الـ 7، واكتب أفكارك لإنشاء عرض متكامل وفق العناصر الإلزامية (Leitpunkte).','Wähle eines der 7 offiziellen telc-Themen und erstelle eine vollständige Präsentation anhand der Leitpunkte.')}</small></div>
         <span class="tag">Teil 1 Präsentation</span>
       </div>
       <div class="pres-categories">
-        ${cats.map(c => `
+        ${TELC_SPRECHEN_TEIL1_THEMEN.map(c => `
           <button type="button" class="pres-cat-btn ${currentPresCategory === c.key ? 'active' : ''}" data-cat="${c.key}">
             <span>${c.icon}</span>
             <span>${c.title}</span>
-            <small style="font-size:10.5px;opacity:.8">${c.desc}</small>
+            <small style="font-size:10.5px;opacity:.85">${text(c.arTitle, c.title)}</small>
+            <span class="pres-cat-points">${c.pointsDe}</span>
           </button>
         `).join('')}
       </div>
+      <div class="pres-leitpunkte-banner">
+        <span class="pres-leitpunkte-tag">TELC Leitpunkte</span>
+        <span class="pres-leitpunkte-text" id="presLeitpunkteText">${text('العناصر الرسمية المطلوبة: ', 'Pflichtpunkte: ')}${activePoints}</span>
+      </div>
       <label style="font-size:12px;font-weight:800;color:var(--muted)">${text('اكتب أفكارك أو تفاصيل تريد تضمينها (بالعربية أو الألمانية):','Schreiben Sie Ihre Notizen oder Stichpunkte (auf Arabisch oder Deutsch):')}</label>
-      <textarea id="presNotes" placeholder="${text('مثال: رحلة إلى برلين الصيف الماضي مع أصدقائي، زرنا بوابة براندنبورغ، أعجبني النظام والمتاحف…','z. B. Eine Reise nach Berlin im letzten Sommer mit Freunden, Brandenburger Tor besucht, tolle Museen…')}"></textarea>
+      <textarea id="presNotes" placeholder="${esc(activePlaceholder)}">${esc(localStorage.getItem('telc_pres_notes_'+currentPresCategory)||'')}</textarea>
       <button type="button" class="pres-generate-btn" id="presGenBtn">✦ ${text('إنشاء العرض التقديمي بالذكاء الاصطناعي مع أسئلة اللجنة','Präsentation mit KI & Jury-Fragen generieren')}</button>
       <div id="presResultWrap"></div>
     </div>
@@ -698,8 +842,16 @@ function bindTeil1StudioEvents(){
     btn.onclick=()=>{
       currentPresCategory=btn.dataset.cat;
       document.querySelectorAll('.pres-cat-btn').forEach(b=>b.classList.toggle('active',b===btn));
+      const top = getTeil1Topic(currentPresCategory);
       const notesEl = document.getElementById('presNotes');
-      if(notesEl) notesEl.value = localStorage.getItem('telc_pres_notes_'+currentPresCategory) || '';
+      if(notesEl) {
+        notesEl.value = localStorage.getItem('telc_pres_notes_'+currentPresCategory) || '';
+        notesEl.placeholder = text(top.placeholderAr, top.placeholderDe);
+      }
+      const banner = document.getElementById('presLeitpunkteText');
+      if(banner) {
+        banner.textContent = text('العناصر الرسمية المطلوبة: ', 'Pflichtpunkte: ') + text(top.pointsAr, top.pointsDe);
+      }
       const saved = loadSavedPres(currentPresCategory, model?.exercise?.level);
       if (saved) {
         renderPresResult(saved, true);
@@ -995,11 +1147,13 @@ function renderSpeaking(){
  if(teil==='Teil 1'){
    if(model?.exercise?.title){
      const t=model.exercise.title.toLowerCase();
-     if(t.includes('film')||t.includes('kino')) currentPresCategory='Film';
-     else if(t.includes('buch')||t.includes('roman')||t.includes('lesen')) currentPresCategory='Buch';
-     else if(t.includes('erfahrung')||t.includes('erlebnis')) currentPresCategory='Erfahrung';
-     else if(t.includes('person')||t.includes('sport')||t.includes('event')) currentPresCategory='Person';
-     else if(t.includes('reise')||t.includes('urlaub')||t.includes('stadt')) currentPresCategory='Reise';
+     if(t.includes('film')||t.includes('kino')||t.includes('schauspiel')) currentPresCategory='Film';
+     else if(t.includes('buch')||t.includes('roman')||t.includes('lesen')||t.includes('autor')) currentPresCategory='Buch';
+     else if(t.includes('sport')||t.includes('spiel')||t.includes('turnier')||t.includes('match')||t.includes('verein')) currentPresCategory='Sportereignis';
+     else if(t.includes('musik')||t.includes('konzert')||t.includes('festival')||t.includes('oper')||t.includes('band')) currentPresCategory='Musikveranstaltung';
+     else if(t.includes('person')||t.includes('vorbild')||t.includes('mensch')||t.includes('lehrer')||t.includes('freund')) currentPresCategory='Person';
+     else if(t.includes('erfahrung')||t.includes('erlebnis')||t.includes('moment')) currentPresCategory='Erfahrung';
+     else if(t.includes('reise')||t.includes('urlaub')||t.includes('stadt')||t.includes('land')) currentPresCategory='Reise';
    }
    document.getElementById('content').innerHTML=`<div class="speaking-exercise-shell">
    <div class="thema-title-row speaking-title-row"><h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title)}" class="${titleRevealed?'':'thema-title-hidden'}">${esc(model.exercise.title)}</h1><div class="thema-tools">${textTools(model.exercise.title,'thema-title')}<div class="inline-translation" id="thema-title-translation"></div><button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text('إظهار العنوان','Titel anzeigen')}"><span class="eye-icon eye-off"></span></button></div></div>
@@ -1074,6 +1228,7 @@ function bindActions(){
     tr.setAttribute('aria-label',text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen'));
   };
   if(mockMode){startMockTimer();}else{startExerciseTimer();}
+  bindHoerenAudioPlayer();
 }
 
 function renderWorkspace(){
@@ -1122,10 +1277,26 @@ document.addEventListener('langchange', () => {
     console.error('Exercise load error:', e);
     if (e?.status === 401) {
       try { localStorage.removeItem('telc_student_token'); } catch (_) {}
-      location.href = '/?error=session';
+      location.href = '/login.html?error=login_required';
       return;
     }
     const isDe = (typeof getLang === 'function' && getLang() === 'de');
+    if (e?.status === 403 || e?.data?.error === 'payment_required') {
+      const contentEl = document.getElementById('content');
+      if (contentEl) {
+        contentEl.innerHTML = `
+          <div class="empty-panel" style="margin:50px auto;max-width:540px;text-align:center;padding:36px 28px;background:var(--white);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow-lg)">
+            <div style="font-size:48px;margin-bottom:14px">🔒</div>
+            <h2 style="margin-bottom:8px;font-size:22px;color:var(--ink);">${isDe ? 'Kostenpflichtige Übung' : 'تمرين مخصص للمشتركين'}</h2>
+            <p class="muted" style="margin-bottom:24px;line-height:1.7;font-size:14px;">${isDe ? 'Diese Übung ist nur für Abonnenten verfügbar. Schalten Sie jetzt alle B1-, B2- und C1-Inhalte frei.' : 'هذا التمرين متاح فقط مع الاشتراكات المدفوعة. يمكنك ترقية حسابك لفتح جميع تمارين واختبارات B1 وB2 وC1 كاملة.'}</p>
+            <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+              <a class="btn" href="/#plans" style="padding:12px 24px;font-size:15px;font-weight:900;">${isDe ? 'Pläne ansehen & Freischalten →' : 'عرض الخطط والاشتراك الآن ←'}</a>
+              <a class="btn light" href="/dashboard.html">${isDe ? 'Zurück zum Dashboard' : 'العودة للتمارين المجانية'}</a>
+            </div>
+          </div>`;
+      }
+      return;
+    }
     const msg = e?.message || (isDe ? 'Fehler beim Laden der Übung.' : 'حدث خطأ أثناء تحميل التمرين.');
     const retryTxt = isDe ? 'Erneut versuchen' : 'إعادة المحاولة';
     const backTxt = isDe ? 'Zurück zum Dashboard' : 'العودة إلى لوحة التمارين';

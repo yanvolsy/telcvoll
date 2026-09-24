@@ -2140,7 +2140,7 @@ html[data-theme="dark"] .exercise-actions {
 }
 .pres-categories {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(138px, 1fr));
   gap: 10px;
   margin-bottom: 16px;
 }
@@ -2158,7 +2158,9 @@ html[data-theme="dark"] .exercise-actions {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
+  min-height: 108px;
+  justify-content: flex-start;
 }
 .pres-cat-btn span {
   color: inherit;
@@ -2166,6 +2168,41 @@ html[data-theme="dark"] .exercise-actions {
 .pres-cat-btn small {
   color: var(--muted);
   font-size: 10.5px;
+}
+.pres-cat-points {
+  font-size: 9.5px;
+  line-height: 1.3;
+  opacity: 0.85;
+  font-weight: 700;
+  margin-top: 2px;
+  direction: ltr;
+  text-align: center;
+}
+.pres-leitpunkte-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg);
+  border: 1.5px dashed var(--line);
+  border-radius: 12px;
+  padding: 9px 14px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+.pres-leitpunkte-tag {
+  background: var(--exercise-accent, #ff7a00);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.pres-leitpunkte-text {
+  color: var(--ink);
+  font-weight: 750;
+  font-size: 12.5px;
 }
 .pres-cat-btn span:first-child {
   font-size: 20px;
@@ -4335,4 +4372,250 @@ html[data-theme="dark"] .exercise-page:has(.hoeren-workspace-shell) .hoeren-audi
 }
 .variation-modal-close:hover {
   transform: rotate(90deg) !important;
+}
+
+/* Access Mode & Lock Badges */
+.topic-status-dot.is-locked-dot {
+  background: var(--danger);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--danger) 25%, transparent);
+}
+.topic-card.is-locked-card {
+  border-color: color-mix(in srgb, var(--line) 85%, var(--danger));
+}
+.locked-topic-btn:hover {
+  background: color-mix(in srgb, var(--danger) 10%, transparent) !important;
+}
+.badge-free {
+  background: color-mix(in srgb, var(--green) 12%, transparent);
+  color: var(--green);
+  border: 1px solid color-mix(in srgb, var(--green) 30%, transparent);
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 800;
+}
+.badge-paid {
+  background: color-mix(in srgb, var(--exercise-accent) 12%, transparent);
+  color: var(--exercise-accent);
+  border: 1px solid color-mix(in srgb, var(--exercise-accent) 30%, transparent);
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+/* ========================================================
+   TELC VOLL — ENHANCED UNIFIED AUDIO PLAYER
+   Skip -5s/+5s, playback speed toggle, volume & responsive
+   ======================================================== */
+.hoeren-audio-player-card {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 76px;
+  margin: 0 0 20px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--white);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: var(--shadow-sm, 0 8px 24px rgba(0,0,0,.08));
+  transition: background .2s ease, border-color .2s ease, box-shadow .2s ease;
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+.hoeren-audio-controls-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  order: 1;
+  flex: 0 0 auto;
+}
+
+.hoeren-audio-player-card .hoeren-native-audio {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hoeren-audio-play,
+.hoeren-audio-icon-btn {
+  appearance: none;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  transition: background .18s ease, border-color .18s ease, color .18s ease, transform .12s ease;
+}
+
+.hoeren-audio-play {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--green);
+  border-color: var(--green);
+  color: #fff;
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--green) 24%, transparent);
+}
+
+.hoeren-audio-play:hover,
+.hoeren-audio-icon-btn:hover {
+  filter: brightness(1.06);
+  border-color: var(--green);
+}
+
+.hoeren-audio-play:active,
+.hoeren-audio-icon-btn:active {
+  transform: scale(0.95);
+}
+
+.hoeren-audio-skip-btn {
+  height: 38px;
+  padding: 0 10px;
+  border-radius: 11px;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+}
+
+.hoeren-audio-speed-btn {
+  height: 38px;
+  min-width: 42px;
+  padding: 0 8px;
+  border-radius: 11px;
+  font-size: 11.5px;
+  font-weight: 800;
+}
+
+.hoeren-audio-main {
+  order: 2;
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  direction: ltr !important;
+}
+
+.hoeren-audio-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+  direction: ltr !important;
+}
+
+.hoeren-audio-label {
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  direction: rtl;
+  unicode-bidi: plaintext;
+  text-align: left;
+}
+
+.hoeren-audio-time {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+  direction: ltr !important;
+  unicode-bidi: isolate;
+  white-space: nowrap;
+}
+
+.hoeren-audio-progress,
+.hoeren-audio-volume {
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--line);
+  outline: none;
+  cursor: pointer;
+  accent-color: var(--green);
+  direction: ltr !important;
+}
+
+.hoeren-audio-progress::-webkit-slider-thumb,
+.hoeren-audio-volume::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--green);
+  border: 2px solid var(--white);
+  box-shadow: 0 0 0 1px var(--green);
+}
+
+.hoeren-audio-progress::-moz-range-thumb,
+.hoeren-audio-volume::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--green);
+  border: 2px solid var(--white);
+}
+
+.hoeren-audio-actions {
+  order: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 140px;
+  justify-content: flex-end;
+  direction: ltr !important;
+}
+
+.hoeren-audio-volume {
+  width: 76px;
+}
+
+html[data-theme="dark"] .hoeren-audio-player-card {
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+}
+
+@media(max-width: 768px) {
+  .hoeren-audio-player-card {
+    padding: 12px 14px;
+    gap: 10px;
+    border-radius: 16px;
+    min-height: 72px;
+  }
+  .hoeren-audio-play {
+    width: 40px !important;
+    height: 40px !important;
+  }
+  .hoeren-audio-skip-btn {
+    height: 34px;
+    padding: 0 7px;
+    font-size: 10.5px;
+  }
+  .hoeren-audio-speed-btn {
+    height: 34px;
+    min-width: 36px;
+    padding: 0 6px;
+    font-size: 10.5px;
+  }
+  .hoeren-audio-actions {
+    min-width: auto;
+    gap: 6px;
+  }
+  .hoeren-audio-volume {
+    display: none;
+  }
 }

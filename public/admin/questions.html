@@ -37,8 +37,13 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
   <div class="admin-head"><div><span class="tag">لوحة المشرف</span><h1>إدارة التمارين</h1><p>اختر المستوى والقسم وTeil، وستظهر التمارين بنفس منطق بطاقات الطالب.</p></div></div>
   <div class="context-bar"><div class="context-item"><span>المستوى</span><strong id="pageLevel">Telc B2</strong></div><div class="context-item"><span>القسم</span><strong id="pageSection">Lesen — القراءة</strong></div><div class="context-item"><span>Teil</span><strong id="pageTeil">Teil 1</strong></div></div>
   <section class="panel browser"><div class="browser-toolbar"><div><h2>التمارين <span id="exerciseCountBadge" style="font-size:14px;font-weight:normal;color:var(--muted);margin-right:8px"></span></h2></div><div class="browser-toolbar-actions"><button class="btn" id="refreshBtn">تحديث</button><button class="btn" id="importBtn">⇧ استيراد تمارين</button><button class="btn" id="newBtn">+ إضافة موضوع جديد</button><input id="importFile" type="file" accept=".json,application/json" hidden></div></div>
-    <div class="browser-filters"><select id="browserLevel"><option value="ALL">كل المستويات</option><option value="B1">B1</option><option value="B2" selected>B2</option><option value="C1">C1</option></select><select id="browserSection"><option value="ALL">كل الأقسام</option><option value="Lesen" selected>Lesen — القراءة</option><option value="Hören">Hören — الاستماع</option><option value="Sprachbausteine">Sprachbausteine — القواعد والمفردات</option><option value="Schreiben">Schreiben — الكتابة</option><option value="Sprechen">Sprechen — التحدث</option></select><select id="browserTeil"></select><input id="browserSearch" placeholder="ابحث بالعنوان أو المحتوى أو ID…"></div>
-    <div class="browser-list" id="browserList"></div>
+  <div class="browser-filters" style="grid-template-columns: 1fr 1fr 1fr 1fr 1.4fr;"><select id="browserLevel"><option value="ALL">كل المستويات</option><option value="B1">B1</option><option value="B2" selected>B2</option><option value="C1">C1</option></select><select id="browserSection"><option value="ALL">كل الأقسام</option><option value="Lesen" selected>Lesen — القراءة</option><option value="Hören">Hören — الاستماع</option><option value="Sprachbausteine">Sprachbausteine — القواعد والمفردات</option><option value="Schreiben">Schreiben — الكتابة</option><option value="Sprechen">Sprechen — التحدث</option></select><select id="browserTeil"></select><select id="browserAccess"><option value="ALL">كل أنواع الوصول</option><option value="free">🟢 المجانية فقط (FREE)</option><option value="paid">🔒 المدفوعة فقط (PAID)</option></select><input id="browserSearch" placeholder="ابحث بالعنوان أو المحتوى أو ID…"></div>
+  <div class="access-filter-tabs" style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+    <button type="button" class="btn small-btn access-tab-btn" data-access-tab="ALL">كل التمارين</button>
+    <button type="button" class="btn small-btn light access-tab-btn" data-access-tab="free">🟢 التمارين المجانية (FREE)</button>
+    <button type="button" class="btn small-btn light access-tab-btn" data-access-tab="paid">🔒 التمارين المدفوعة (PAID)</button>
+  </div>
+  <div class="browser-list" id="browserList"></div>
   </section>
 </main>
 <footer class="admin-footer">TELC Voll — لوحة إدارة المنصة</footer>
@@ -47,6 +52,19 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <div class="modal" id="editorModal" aria-hidden="true"><div class="modal-box"><div class="modal-head"><h2 id="modalTitle">إضافة موضوع جديد</h2><button class="close" id="closeModal">×</button></div><div class="modal-body">
   <div class="context-lock"><div class="locked"><small>المستوى</small><b id="lockLevel">Telc B2</b></div><div class="locked"><small>القسم</small><b id="lockSection">Lesen — القراءة</b></div><div class="locked"><small>Teil</small><b id="lockTeil">Teil 1</b></div></div>
   <div class="field"><label>عنوان الموضوع / Thema</label><input id="title" placeholder="مثال: LimOnade"></div>
+  <div class="field">
+    <label>نوع الوصول إلى التمرين (Access Mode)</label>
+    <div style="display:flex;gap:18px;align-items:center;background:var(--bg);padding:12px 16px;border-radius:12px;border:1px solid var(--line);flex-wrap:wrap;">
+      <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-weight:900;">
+        <input type="radio" name="accessModeRadio" value="paid" checked>
+        <span>🔒 مدفوع (PAID) — يتطلب اشتراكاً مفعلاً</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:7px;cursor:pointer;font-weight:900;color:var(--green);">
+        <input type="radio" name="accessModeRadio" value="free">
+        <span>🟢 مجاني (FREE) — متاح لجميع الطلاب المسجلين</span>
+      </label>
+    </div>
+  </div>
   <div id="dynamic"></div>
 </div><div class="modal-footer"><button class="btn" id="saveBtn">إضافة الموضوع</button><button class="small-btn" id="cancelBtn">إلغاء</button></div></div></div>
 
@@ -115,6 +133,10 @@ function openModal(mode='new',data=null){
   $('lockSection').textContent=sectionNames[exSection]||exSection;
   $('lockTeil').textContent=exTeil;
   $('title').value=mode==='new'?'':(data?.title||'');
+  const accessMode = data?.access_mode || 'paid';
+  document.querySelectorAll('input[name="accessModeRadio"]').forEach(r => {
+    r.checked = (r.value === accessMode);
+  });
   let formData=mode==='new'?{}:JSON.parse(JSON.stringify(data||{}));
   if(exSection==='Sprachbausteine'&&formData.body&&Array.isArray(formData.items)){
     formData.body=formData.body.replace(/\((\d+)\)/g,(_,n)=>{
@@ -232,7 +254,8 @@ async function collect(){const c=state.activeModalContext||currentContext();cons
  } else if(type==='GAP'){document.querySelectorAll('#questions .question-card').forEach(q=>{const word=q.querySelector('.gap-word').value.trim();items.push({prompt:word,correct:word,correctText:word,points:1,options:{[word]:word}});});}
  let settings={};if(type==='GAP'&&sec==='Sprachbausteine'&&teil==='Teil 2')settings.distractors=[...document.querySelectorAll('.distractor-input')].map(x=>x.value.trim()).filter(Boolean);
  let audio_url=document.getElementById('audioUrl')?.value||'';const file=document.getElementById('audioFile')?.files?.[0];if(file){if(file.size>5*1024*1024)throw Error('ملف الصوت كبير جداً. استخدم ملفاً أقل من 5MB.');audio_url=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file);});}
- return {id:state.editId,level:lvl,section:sec,teil:teil,title:$('title').value.trim(),task_type:type,body,translation:'',audio_url,allow_replay:true,headings:[...document.querySelectorAll('.head-input')].map(x=>x.value.trim()).filter(Boolean),items,settings};}
+ const access_mode = document.querySelector('input[name="accessModeRadio"]:checked')?.value || 'paid';
+ return {id:state.editId,level:lvl,section:sec,teil:teil,title:$('title').value.trim(),access_mode,task_type:type,body,translation:'',audio_url,allow_replay:true,headings:[...document.querySelectorAll('.head-input')].map(x=>x.value.trim()).filter(Boolean),items,settings};}
 function validate(data){if(!data.title)throw Error('اكتب عنوان الموضوع.');if(data.task_type==='MATCHING'){if(data.headings.length<2)throw Error('أضف عنوانين على الأقل.');if(!data.items.length)throw Error('أضف فقرة واحدة على الأقل.');if(data.items.some(x=>!x.prompt.trim()||!x.correct))throw Error('أكمل نص كل فقرة وحدد عنوانها الصحيح.');}if(['MCQ','AUDIO_MCQ'].includes(data.task_type)){if(!data.items.length)throw Error('أضف سؤالاً واحداً على الأقل.');if(data.items.some(x=>!x.prompt.trim()||!x.correct||Object.keys(x.options).length!==3||Object.values(x.options).some(v=>!String(v).trim())))throw Error('كل سؤال يجب أن يحتوي على سؤال و3 اختيارات وتحديد الإجابة الصحيحة.');}if(data.task_type==='AUDIO_TF'&&data.items.some(x=>!x.prompt.trim()||!x.correct))throw Error('أكمل كل عبارة وحدد Richtig أو Falsch.');if(data.task_type==='GAP'){if(!data.body.trim())throw Error('أدخل النص.');if(!data.items.length)throw Error('أضف فراغاً واحداً على الأقل.');if(data.section==='Sprachbausteine'&&data.teil==='Teil 1'&&data.items.some(x=>!x.correctText.trim()||!['A','B','C'].includes(x.correct)||Object.keys(x.options).length!==3||Object.values(x.options).some(v=>!String(v).trim())))throw Error('أكمل كل فراغ بكلمة صحيحة و3 اختيارات وحدد الصحيحة.');if(data.section==='Sprachbausteine'&&data.teil==='Teil 2'&&data.items.some(x=>!x.correctText.trim()||!x.correct))throw Error('أكمل الكلمات الصحيحة لكل الفراغات.');}if(['WRITING','SPEAKING'].includes(data.task_type)&&!data.body.trim())throw Error('أدخل نص الموضوع.');}
 async function save(){try{const data=await collect();validate(data);await api('admin-questions',{method:state.editId&&!state.cloneMode?'PUT':'POST',body:data});closeModal();showToast(state.editId&&!state.cloneMode?'تم تعديل الموضوع بنجاح':'تمت إضافة الموضوع بنجاح');await load();}catch(e){showToast(e.message||'حدث خطأ',true);}}
 function showToast(msg,bad=false){const t=$('toast');t.textContent=msg;t.className='toast show'+(bad?' bad':'');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>t.className='toast',2600);}
@@ -303,14 +326,18 @@ function renderBrowser(){
   const cSec=norm(c.section);
   const cTeil=norm(c.teil);
 
+  const cAcc = $('browserAccess')?.value || 'ALL';
+
   let rows=state.exercises.filter(x=>{
     const xLvl=norm(x.level||'B2');
     const xSec=norm(x.section);
     const xTeil=norm(x.teil);
+    const xAcc=(x.access_mode || 'paid').toLowerCase();
 
     if(cLvl!=='all'&&cLvl!==norm('كلالمستويات')&&xLvl!==cLvl) return false;
     if(cSec!=='all'&&cSec!==norm('كلاﻷقسام')&&cSec!==norm('كلاقسام')&&xSec!==cSec) return false;
     if(cTeil!=='all'&&cTeil!==norm('كلاﻷجزاء')&&cTeil!==norm('كلاجزاء')&&xTeil!==cTeil) return false;
+    if(cAcc!=='ALL'&&xAcc!==cAcc) return false;
     return true;
   });
 
@@ -330,7 +357,9 @@ function renderBrowser(){
     const vInfo = parseVariationInfo(r.title, r.settings_json);
     const isVar = vInfo.isVariation || (r.settings_json && r.settings_json.is_variation);
     const varBadge = isVar ? `<span class="tag tag-variation" style="font-size:10px;">📚 ${esc(vInfo.label || 'معدل')}</span>` : '';
-    return `<article class="student-card" data-edit-card="${r.id}"><div class="student-card-top"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="tag">Telc ${esc(r.level||'B2')}</span>${varBadge}</div><span class="tag" style="background:#f4f6f8;color:var(--muted)">#${r.id}</span></div><h3>${esc(r.title)}</h3><div class="student-meta"><span class="tag" style="font-size:10px">${esc(sectionNames[r.section]||r.section)}</span><span>${esc(r.teil)}</span><span>${Number(r.item_count||0)} عناصر</span>${r.audio_url ? `<span class="tag tag-audio">🎧 صوتي</span>` : ''}<span class="status ${r.status==='disabled'?'disabled':'published'}">${r.status==='disabled'?'معطل':'منشور'}</span></div><div class="open-like">فتح التمرين للتعديل ✎</div><div class="admin-actions"><button class="icon-btn" title="تعديل" data-edit="${r.id}">✎</button><button class="icon-btn" title="مضاعفة" data-clone="${r.id}">⧉</button><button class="icon-btn danger" title="حذف" data-delete="${r.id}">⌫</button></div></article>`;
+    const isFree = (r.access_mode || 'paid') === 'free';
+    const accessBadge = isFree ? `<span class="tag" style="background:#e8f7ee;color:#0e7039;border-color:#b7ebc7;font-weight:900;font-size:10px;">🟢 مجاني (FREE)</span>` : `<span class="tag" style="background:#fef2f2;color:#991b1b;border-color:#fecaca;font-weight:900;font-size:10px;">🔒 مدفوع (PAID)</span>`;
+    return `<article class="student-card" data-edit-card="${r.id}"><div class="student-card-top"><div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;"><span class="tag">Telc ${esc(r.level||'B2')}</span>${varBadge}${accessBadge}</div><span class="tag" style="background:#f4f6f8;color:var(--muted)">#${r.id}</span></div><h3>${esc(r.title)}</h3><div class="student-meta"><span class="tag" style="font-size:10px">${esc(sectionNames[r.section]||r.section)}</span><span>${esc(r.teil)}</span><span>${Number(r.item_count||0)} عناصر</span>${r.audio_url ? `<span class="tag tag-audio">🎧 صوتي</span>` : ''}<span class="status ${r.status==='disabled'?'disabled':'published'}">${r.status==='disabled'?'معطل':'منشور'}</span></div><div class="open-like">فتح التمرين للتعديل ✎</div><div class="admin-actions"><button class="icon-btn" title="تعديل" data-edit="${r.id}">✎</button><button class="icon-btn" title="مضاعفة" data-clone="${r.id}">⧉</button><button class="icon-btn" title="تبديل نوع الوصول (مجاني / مدفوع)" data-toggle-access="${r.id}" data-current-access="${r.access_mode || 'paid'}" style="width:auto;padding:0 8px;font-size:11px;font-weight:800;border-radius:10px;background:${isFree?'#fef2f2':'#e8f7ee'};color:${isFree?'#991b1b':'#0e7039'}">${isFree?'تحويل لمدفوع 🔒':'تحويل لمجاني 🟢'}</button><button class="icon-btn danger" title="حذف" data-delete="${r.id}">⌫</button></div></article>`;
   }).join(''):`<div class="empty">لا توجد تمارين تطابق التصفية الحالية.<br><small style="display:inline-block;margin-top:6px;color:var(--muted)">إجمالي التمارين المحمّلة في المنصة: ${state.exercises.length} تمرين</small><br><button class="small-btn" style="margin-top:12px" id="emptyAdd">+ إضافة موضوع جديد</button></div>`;
 
   async function openForEdit(id){
@@ -348,6 +377,18 @@ function renderBrowser(){
   });
   document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=(e)=>{e.stopPropagation();openForEdit(b.dataset.edit);});
   document.querySelectorAll('[data-clone]').forEach(b=>b.onclick=async(e)=>{e.stopPropagation();try{const x=await api('admin-questions?id='+b.dataset.clone);openModal('clone',{id:null,...x.exercise,items:(x.items||[]).map(it=>{const opts=Object.fromEntries((it.options||[]).map(o=>[o.option_key,o.option_text]));return {prompt:it.prompt,correct:it.correct_answer||'',correctText:opts[it.correct_answer]||it.prompt,points:it.points,options:opts};}),headings:x.exercise.settings_json?.headings||[],settings:x.exercise.settings_json||{}});}catch(err){showToast(err.message,true);}});
+  document.querySelectorAll('[data-toggle-access]').forEach(b=>b.onclick=async(e)=>{
+    e.stopPropagation();
+    const id = Number(b.dataset.toggleAccess);
+    const newAccess = b.dataset.currentAccess === 'free' ? 'paid' : 'free';
+    try {
+      await api('admin-questions', { method: 'PATCH', body: { id, access_mode: newAccess } });
+      showToast(newAccess === 'free' ? 'تم تحويل التمرين إلى مجاني بنجاح 🟢' : 'تم تحويل التمرين إلى مدفوع بنجاح 🔒');
+      await load();
+    } catch(err) {
+      showToast(err.message || 'فشل تعديل نوع الوصول', true);
+    }
+  });
   document.querySelectorAll('[data-delete]').forEach(b=>b.onclick=async(e)=>{e.stopPropagation();if(!confirm('هل تريد حذف هذا الموضوع نهائياً؟'))return;try{await api('admin-questions',{method:'DELETE',body:{id:Number(b.dataset.delete)}});showToast('تم حذف الموضوع بنجاح');await load();}catch(err){showToast(err.message,true);}});
   $('emptyAdd')?.addEventListener('click',()=>openModal());
 }
@@ -751,7 +792,9 @@ if (browserEl) {
   });
 }
 
-$('newBtn').onclick=()=>openModal();$('closeModal').onclick=closeModal;$('cancelBtn').onclick=closeModal;$('saveBtn').onclick=save;$('refreshBtn').onclick=load;$('browserLevel').onchange=()=>{updateContext();renderBrowser();};$('browserSection').onchange=()=>{setTeile($('browserTeil'),$('browserSection').value);updateContext();renderBrowser();};$('browserTeil').onchange=()=>{updateContext();renderBrowser();};$('browserSearch').oninput=renderBrowser;modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('open'))closeModal();if(e.key==='Escape'&&importModal?.classList.contains('open'))closeImportModal();});$('logoutLink').onclick=async e=>{e.preventDefault();await api('admin-logout',{method:'POST'});location.href='/admin/login.html'};
+$('newBtn').onclick=()=>openModal();$('closeModal').onclick=closeModal;$('cancelBtn').onclick=closeModal;$('saveBtn').onclick=save;$('refreshBtn').onclick=load;$('browserLevel').onchange=()=>{updateContext();renderBrowser();};$('browserSection').onchange=()=>{setTeile($('browserTeil'),$('browserSection').value);updateContext();renderBrowser();};$('browserTeil').onchange=()=>{updateContext();renderBrowser();};$('browserAccess').onchange=()=>{syncAccessTabs($('browserAccess').value);renderBrowser();};$('browserSearch').oninput=renderBrowser;
+document.querySelectorAll('.access-tab-btn').forEach(btn=>{btn.onclick=()=>{const val=btn.dataset.accessTab;$('browserAccess').value=val;syncAccessTabs(val);renderBrowser();};});
+function syncAccessTabs(val){document.querySelectorAll('.access-tab-btn').forEach(b=>{if(b.dataset.accessTab===val){b.classList.remove('light');}else{b.classList.add('light');}});}modal.addEventListener('click',e=>{if(e.target===modal)closeModal();});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&modal.classList.contains('open'))closeModal();if(e.key==='Escape'&&importModal?.classList.contains('open'))closeImportModal();});$('logoutLink').onclick=async e=>{e.preventDefault();await api('admin-logout',{method:'POST'});location.href='/admin/login.html'};
 setTeile($('browserTeil'),'Lesen','Teil 1');load().catch(e=>{if(e.status===401)location.href='/admin/login.html';else showToast(e.message||'تعذر تحميل التمارين',true);});
 </script>
 </body></html>
