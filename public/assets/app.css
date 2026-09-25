@@ -5635,3 +5635,38 @@ html[data-theme="dark"] .card-access-pill.pill-paid {
   .exercise-page { padding-top: 60px !important; }
   .exercise-heading-shuffle span:last-child { display: none !important; }
 }
+
+/* Final visual unification: single-layer TELC level switch */
+.level-switch {
+  box-shadow: none !important;
+}
+.level-switch .level-btn,
+.level-switch .level-btn.active,
+.level-switch .level-btn.active:hover,
+.level-switch .level-btn[aria-pressed="true"] {
+  box-shadow: none !important;
+}
+.level-switch .level-btn.active {
+  transform: none !important;
+}
+.level-switch .level-btn:hover:not(.active) {
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Writing-style title presentation across exercise sections */
+.exercise-heading .thema-title-row {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+}
+.exercise-heading .thema-title-row h1 {
+  filter: none !important;
+  opacity: 1 !important;
+}
+.exercise-heading .thema-title-row .thema-tools {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}

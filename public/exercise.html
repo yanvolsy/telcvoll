@@ -21,7 +21,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
 <script>
 const id=qs('id'); const duration=Number(qs('duration')||0); const sessionId=qs('session'); const mockMode=qs('mock')==='1' && !!sessionId; let model=null; let answers={}; let activeItem=null; let submitted=false; let resultData=null;
-let matchingOrder=null; let headingOrder=null; let optionOrders={}; let showModelAnswers=false; let titleRevealed=false; let hoerenOrder=null; let hoerenAllTranslated=false; const translationCache=new Map();
+let matchingOrder=null; let headingOrder=null; let optionOrders={}; let showModelAnswers=false; let titleRevealed=true; let hoerenOrder=null; let hoerenAllTranslated=false; let wordOrder=null; const translationCache=new Map();
 const TELC_DUR = {
   B1: { Lesen: { 'Teil 1': 20, 'Teil 2': 20, 'Teil 3': 15, _default: 20 }, Sprachbausteine: { 'Teil 1': 10, 'Teil 2': 10, _default: 10 }, Hören: { 'Teil 1': 10, 'Teil 2': 10, 'Teil 3': 10, _default: 10 }, Schreiben: { 'Teil 1': 30, _default: 30 }, Sprechen: { 'Teil 1': 4, 'Teil 2': 5, 'Teil 3': 5, _default: 5 } },
   B2: { Lesen: { 'Teil 1': 20, 'Teil 2': 25, 'Teil 3': 20, _default: 20 }, Sprachbausteine: { 'Teil 1': 15, 'Teil 2': 10, _default: 15 }, Hören: { 'Teil 1': 6, 'Teil 2': 8, 'Teil 3': 6, _default: 7 }, Schreiben: { 'Teil 1': 30, _default: 30 }, Sprechen: { 'Teil 1': 5, 'Teil 2': 5, 'Teil 3': 5, _default: 5 } },
@@ -131,9 +131,17 @@ function getExerciseBody(model) {
     st.situation_text,
     st.thema_text,
     st.prompt,
+    st.passage_text,
+    st.long_text,
+    st.reading_passage,
+    st.text_de,
+    st.german_text,
+    st.content_text,
     model?.items?.[0]?.body,
     model?.items?.[0]?.settings_json?.body,
-    model?.items?.[0]?.settings_json?.text
+    model?.items?.[0]?.settings_json?.text,
+    model?.items?.[0]?.settings_json?.passage,
+    ...(Array.isArray(model?.items) ? model.items.map(it => it?.body).filter(Boolean) : [])
   ];
   for (const c of candidates) {
     if (typeof c === 'string' && c.trim()) return c.trim();
@@ -317,10 +325,6 @@ function renderSprachbausteine1(){
           <span>${text('خيارات الفراغات (21 - 30):','Aufgaben Sprachbausteine Teil 1:')}</span>
         </h3>
         <div style="display:flex;align-items:center;gap:10px;">
-          <button type="button" class="btn small-btn shuffle-spb1 shuffle-btn-styled" title="${text('خلط الاختيارات','Antworten mischen')}">
-            <span style="font-size:16px;">⤨</span>
-            <span>${text('خلط الاختيارات','Mischen')}</span>
-          </button>
           <span class="side-counter-pill">${Object.keys(answers).length} / ${items.length}</span>
         </div>
       </div>
@@ -365,8 +369,7 @@ function renderSprachbausteine1(){
    <div class="side-title side-title-large">
      <div class="side-title-text"><b>AUFGABEN</b><small>SPRACHBAUSTEINE TEIL 1</small></div>
      <div class="side-title-actions">
-       <button type="button" class="side-icon shuffle-spb1" aria-label="${text('خلط الاختيارات','Antworten mischen')}" title="${text('خلط الاختيارات','Antworten mischen')}">⤨</button>
-       <span class="side-counter-pill">${Object.keys(answers).length} / ${items.length}</span>
+        <span class="side-counter-pill">${Object.keys(answers).length} / ${items.length}</span>
      </div>
    </div>
  </div>`;
@@ -377,13 +380,6 @@ function renderSprachbausteine1(){
    e.stopPropagation();
    selectAnswer(sel.dataset.gapSelect,sel.value);
  });
- const sh=document.querySelector('.shuffle-spb1');
- if(sh)sh.onclick=e=>{
-   e.preventDefault();e.stopPropagation();
-   const st=captureExerciseScroll();
-   items.forEach(it=>{const n=String(it.position_no);optionOrders[n]=shuffle((it.options||[]).slice(0,3).map(o=>o.option_key));});
-   rerenderExerciseStable(st);
- };
  bindTextTools();
 }
 
@@ -392,7 +388,7 @@ function renderHoerenChoiceQuestions(){
  const activeDuration=duration || (model?.exercise ? getTelcDurationSeconds(model.exercise) : 600);
  const initialMin=String(Math.floor(activeDuration/60)).padStart(2,'0');
  const timer=(mockMode||activeDuration)?`<div class="progress-pill ${mockMode?'mock-global-timer':''}" id="timerEl"><span class="timer-icon" aria-hidden="true">⏱️</span> <span class="timer-digits">${initialMin}:00</span></div>`:'';
- const title=mockMode?'':`<div class="thema-title-row"><h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}" class="${titleRevealed?'':'thema-title-hidden'}">${esc(model.exercise.title||'')}</h1><div class="thema-tools">${textTools(model.exercise.title||'','thema-title')}<div class="inline-translation" id="thema-title-translation"></div><button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen')}" title="${text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen')}"><span class="eye-icon ${titleRevealed?'eye-on':'eye-off'}"></span></button></div></div>`;
+ const title=mockMode?'':`<div class="thema-title-row"><h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}">${esc(model.exercise.title||'')}</h1><div class="thema-tools">${textTools(model.exercise.title||'','thema-title')}<div class="inline-translation" id="thema-title-translation"></div></div></div>`;
  const heading=`<div class="exercise-heading hoeren-choice-heading">
   <div class="exercise-heading-meta">
     <div class="exercise-heading-tags">
@@ -419,12 +415,10 @@ function renderHoerenChoiceQuestions(){
      <div class="inline-translation hoeren-choice-question-translation" id="${qid}-translation"></div>
    </article>`;
  }).join('');
- const toolbar=`<div class="hoeren-choice-toolbar"><span class="hoeren-choice-count">${Object.keys(answers).length} / ${items.length}</span><button type="button" class="hoeren-toolbar-btn" id="hoerenChoiceShuffle" title="${text('خلط الاختيارات','Antworten mischen')}">🔀</button></div>`;
+ const toolbar=`<div class="hoeren-choice-toolbar"><span class="hoeren-choice-count">${Object.keys(answers).length} / ${items.length}</span></div>`;
  const actions=`<div class="exercise-actions"><div class="exercise-nav"><button class="btn" id="checkBtn">${text(mockMode?'إنهاء الجزء':'تحقق من الإجابات',mockMode?'Teil beenden':'Antworten prüfen')}</button>${mockMode?'':`<button class="btn model-btn" id="modelBtn">${text(showModelAnswers?'إخفاء الإجابة':'الإجابة النموذجية',showModelAnswers?'Musterlösung ausblenden':'Musterlösung')}</button>`}</div></div>`;
  document.getElementById('content').innerHTML=`${heading}<main class="hoeren-choice-page">${audio}<div class="hoeren-choice-list-head"><div><b>AUFGABEN</b><small>${text('اختر الإجابة الصحيحة لكل سؤال','Wählen Sie die richtige Antwort für jede Frage.')}</small></div>${toolbar}</div><section class="hoeren-choice-list">${rows}</section></main>${actions}`;
  document.querySelectorAll('.hoeren-choice-option[data-q]').forEach(b=>b.onclick=()=>selectAnswer(b.dataset.q,b.dataset.o));
- const sh=document.getElementById('hoerenChoiceShuffle');
- if(sh)sh.onclick=e=>{e.preventDefault();e.stopPropagation();const st=captureExerciseScroll();items.forEach(it=>{const n=String(it.position_no);optionOrders[n]=shuffle((it.options||[]).slice(0,4).map(o=>o.option_key));});rerenderExerciseStable(st);};
  bindTextTools();
  bindHoerenAudioPlayer();
 }
@@ -485,10 +479,6 @@ function renderChoiceQuestions(){
         <span>${titleText}</span>
       </h3>
       <div style="display:flex;align-items:center;gap:10px;">
-        <button type="button" class="btn small-btn shuffle-options shuffle-btn-styled" title="${text('خلط الاختيارات','Antworten mischen')}">
-          <span style="font-size:16px;">⤨</span>
-          <span>${text('خلط الاختيارات','Mischen')}</span>
-        </button>
         <span class="side-counter-pill">${Object.keys(answers).length} / ${items.length}</span>
       </div>
     </div>
@@ -527,7 +517,8 @@ function renderChoiceQuestions(){
         </div>
       </div>
       <div class="word-bank" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));gap:10px;">
-        ${sharedOptions().map(([k,v],oi)=>{
+        ${(wordOrder || sharedOptions().map(([k])=>k)).map((k,oi)=>{
+          const v=(sharedOptions().find(([key])=>String(key)===String(k))||[])[1]||k;
           const wid='wordbank-'+oi;
           const isCorrect=(resultData?.details||[]).some(d=>String(d.correct_answer)===String(k));
           return `<div class="word-card-wrap">
@@ -585,14 +576,6 @@ function renderChoiceQuestions(){
     e.stopPropagation();
     selectAnswer(sel.dataset.gapSelect,sel.value);
   });
-
-  const sh=document.querySelector('.shuffle-options');
-  if(sh)sh.onclick=e=>{
-    e.preventDefault(); e.stopPropagation();
-    items.forEach(it=>{const n=String(it.position_no); optionOrders[n]=shuffle((it.options||[]).slice(0,3).map(o=>o.option_key));});
-    const st=captureExerciseScroll();
-    rerenderExerciseStable(st);
-  };
 
   bindTextTools();
 }
@@ -674,13 +657,10 @@ function renderTF(){
   // 1. Standard Top Heading identical to other sections
   const mockTitle = mockMode ? '' : `
     <div class="thema-title-row">
-      <h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}" class="${titleRevealed?'':'thema-title-hidden'}">${esc(model.exercise.title)}</h1>
+      <h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}">${esc(model.exercise.title)}</h1>
       <div class="thema-tools">
         ${textTools(model.exercise.title||'', 'thema-title')}
         <div class="inline-translation" id="thema-title-translation"></div>
-        <button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen')}" title="${text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen')}">
-          <span class="eye-icon ${titleRevealed ? 'eye-on' : 'eye-off'}" aria-hidden="true"></span>
-        </button>
       </div>
     </div>`;
 
@@ -755,11 +735,7 @@ function renderTF(){
         <div class="hoeren-th hoeren-th-r">${text('صحيح','RICHTIG')}</div>
         <div class="hoeren-th hoeren-th-f">${text('خطأ','FALSCH')}</div>
         <div class="hoeren-th hoeren-th-statement">${text('العبارة','AUSSAGE')}</div>
-        <div class="hoeren-table-toolbar">
-          <button type="button" class="side-icon hoeren-toolbar-btn" id="hoerenShuffleBtn" title="${text('خلط ترتيب العبارات','Aussagen mischen')}" aria-label="${text('خلط ترتيب العبارات','Aussagen mischen')}">
-            <span class="hoeren-toolbar-icon" aria-hidden="true">⤨</span>
-          </button>
-        </div>
+
       </div>
       <div class="hoeren-table-body">
         ${questionRows}
@@ -786,15 +762,6 @@ function renderTF(){
   document.querySelectorAll('.hoeren-circle-radio-btn[data-q]').forEach(b => {
     b.onclick = () => selectAnswer(b.dataset.q, b.dataset.o);
   });
-
-  const shuffleBtn = document.getElementById('hoerenShuffleBtn');
-  if (shuffleBtn) {
-    shuffleBtn.onclick = () => {
-      const st = captureExerciseScroll();
-      hoerenOrder = shuffle(hoerenOrder);
-      rerenderExerciseStable(st);
-    };
-  }
 
   bindTextTools();
   bindHoerenAudioPlayer();
@@ -890,7 +857,6 @@ function renderWriting(){
      <div class="exercise-heading-meta">
        <div class="exercise-heading-tags">
          <span class="tag tag-level-section">Telc ${esc(model.exercise.level||'B2')} · Schreiben</span>
-         <span class="tag tag-teil">${esc(model.exercise.teil||'Teil 1')}</span>
        </div>
        <div class="exercise-heading-timer">
          <div class="progress-pill" id="timerEl"><span class="timer-icon" aria-hidden="true">⏱️</span> <span class="timer-digits">${initialMin}:00</span></div>
@@ -1606,18 +1572,45 @@ function initInlineSpeaking(currentTeil){
   modelBtn.onclick=async()=>{if(busy)return;busy=true;modelBtn.disabled=true;const old= modelBox.innerHTML;try{const r=await api('ai-speaking-session',{method:'POST',body:{id,mode:'model',teil:currentTeil}});modelBox.hidden=false;const isT3=currentTeil==='Teil 3';modelBox.innerHTML=`<div class="speaking-model-head"><div><span class="tag">${text('تدريب بالذكاء الاصطناعي','KI-Training')}</span><h3>${esc(r.title||(isT3?text('تخطيط مشترك للمهمة','Gemeinsam etwas planen'):text('إجابة نموذجية','Musterantwort')))}</h3></div><small>${esc(r.note||'')}</small></div><div class="speaking-model-dialogue">${(r.dialogue||[]).map((m,i)=>{const who=String(m.speaker||'').toLowerCase();const label=who==='student'?(isT3?text('الطالب (Kandidat A) — نموذج إجابة','Kandidat A — Musterantwort'):text('الطالب — إجابة نموذجية','Kandidat — Musterantwort')):(isT3?text('الشريك (Kandidat B)','Partner (Kandidat B)'):text('الشريك','Partner'));const cls=who==='student'?'model-student':'model-partner';const phaseLabels={inhalt:text('Inhalt — المحتوى','Inhalt'),meinung1:text('Meinung 1 — رأي الطالب','Meinung 1 — Kandidat'),meinung2:text('Meinung 2 — رأي الشريك','Meinung 2 — Partner'),erfahrung1:text('Erfahrung 1 — تجربة الطالب','Erfahrung 1 — Kandidat'),erfahrung2:text('Erfahrung 2 — تجربة الشريك','Erfahrung 2 — Partner'),vorteile:text('Vorteile — مزايا','Vorteile'),nachteile:text('Nachteile — عيوب','Nachteile'),abschluss:text('الخلاصة','Abschluss'),planung:text('التخطيط','Planung')};const phase=phaseLabels[String(m.phase||'').toLowerCase()]||'';return `<article class="speaking-model-line ${cls}"><div>${phase?`<span class="speaking-model-phase">${phase}</span>`:''}<b>${label}</b><p>${esc(m.text||'')}</p></div>${m.text?`<span class="speaking-model-tools"><button type="button" class="speaking-voice-btn" data-model-voice="${esc(m.text)}" aria-label="${text('سماع الإجابة','Antwort anhören')}">🔊</button><button type="button" class="speaking-translate-btn" data-model-translate aria-label="${text('ترجمة الرسالة','Nachricht übersetzen')}">文</button></span>`:''}<div class="speaking-model-translation" hidden></div></article>`;}).join('')}</div>${(()=>{const st=r.structure||{};if(isT3){const t3Map=[['planung',text('Planungsschritte — خطوات التخطيط','Planungsschritte')],['verteilung',text('Aufgabenverteilung — توزيع المهام','Aufgabenverteilung')],['vereinbarung',text('Vereinbarung & Treffen — الاتفاق النهائي وموعد اللقاء','Vereinbarung & Treffen')]];return t3Map.filter(([k])=>Array.isArray(st[k])&&st[k].length).map(([k,l])=>`<div class="speaking-model-section"><h4>${l}</h4><ul class="speaking-model-list">${st[k].map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`).join('');}const map=[['inhalt',text('Inhalt — المحتوى','Inhalt')],['meinung1',text('Meinung 1 — رأي الطالب','Meinung 1 — Kandidat')],['meinung2',text('Meinung 2 — رأي الشريك','Meinung 2 — Partner')],['erfahrung1',text('Erfahrung 1 — تجربة الطالب','Erfahrung 1 — Kandidat')],['erfahrung2',text('Erfahrung 2 — تجربة الشريك','Erfahrung 2 — Partner')],['vorteile',text('Vorteile — مزايا','Vorteile')],['nachteile',text('Nachteile — عيوب','Nachteile')],['planung',text('التخطيط','Planung')]];return map.filter(([k])=>Array.isArray(st[k])&&st[k].length).map(([k,l])=>`<div class="speaking-model-section"><h4>${l}</h4><ul class="speaking-model-list">${st[k].map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')})()}<div class="speaking-model-questions"><div class="speaking-model-questions-head"><h4>${text('أسئلة للتدرب مع إجابات مقترحة','Fragen zum Üben mit vorgeschlagenen Antworten')}</h4><small>${text('نماذج أسئلة وإجابات متوقعة للتدرب عليها مع الشريك أو الممتحن.','Typische Fragen und Antwortvorschläge zum Üben mit dem Partner oder Prüfer.')}</small></div><div class="speaking-qa-list">${(r.questions||[]).map((item,i)=>{const qText=typeof item==='string'?item:(item.question||item.q||'');const aText=typeof item==='object'?(item.answer||item.a||''):'';return `<div class="speaking-model-qa-card"><div class="speaking-model-q-row"><span class="speaking-qa-badge q-badge">${text('سؤال','Frage')} ${i+1}</span><div class="speaking-qa-text"><b>${esc(qText)}</b></div><span class="speaking-model-tools"><button type="button" class="speaking-voice-btn" data-model-voice="${esc(qText)}" aria-label="${text('سماع السؤال','Frage anhören')}">🔊</button><button type="button" class="speaking-translate-btn" data-qa-translate aria-label="${text('ترجمة السؤال','Frage übersetzen')}">文</button></span></div><div class="speaking-qa-translation" hidden></div>${aText?`<div class="speaking-model-a-row"><span class="speaking-qa-badge a-badge">${text('الإجابة المقترحة','Vorgeschlagene Antwort')}</span><div class="speaking-qa-text"><p>${esc(aText)}</p></div><span class="speaking-model-tools"><button type="button" class="speaking-voice-btn" data-model-voice="${esc(aText)}" aria-label="${text('سماع الإجابة','Antwort anhören')}">🔊</button><button type="button" class="speaking-translate-btn" data-qa-translate aria-label="${text('ترجمة الإجابة','Antwort übersetzen')}">文</button></span></div><div class="speaking-qa-translation" hidden></div>`:''}</div>`}).join('')}</div></div><div class="speaking-model-phrases"><h4>${text('عبارات مفيدة','Nützliche Redemittel')}</h4><div>${(r.redemittel||[]).map(x=>`<span>${esc(x)}</span>`).join('')}</div></div>`;modelBox.querySelectorAll('[data-model-voice]').forEach(b=>b.onclick=()=>speakGerman(b.dataset.modelVoice,b));modelBox.querySelectorAll('[data-model-translate]').forEach(b=>b.onclick=async()=>{const line=b.closest('.speaking-model-line');const source=line?.querySelector('p')?.textContent||'';const box=line?.querySelector('.speaking-model-translation');if(!box||!source)return;if(!box.hidden){box.hidden=true;return}b.disabled=true;box.textContent=text('جارٍ الترجمة…','Übersetzung…');box.hidden=false;try{box.textContent=await translateText(source,'ar')}catch{box.textContent=text('تعذرت الترجمة.','Übersetzung nicht verfügbar.')}finally{b.disabled=false}});modelBox.querySelectorAll('[data-qa-translate]').forEach(b=>b.onclick=async()=>{const row=b.closest('.speaking-model-q-row')||b.closest('.speaking-model-a-row');const box=row?.nextElementSibling;const source=row?.querySelector('.speaking-qa-text')?.textContent||'';if(!box||!source)return;if(!box.hidden){box.hidden=true;return}b.disabled=true;box.textContent=text('جارٍ الترجمة…','Übersetzung…');box.hidden=false;try{box.textContent=await translateText(source,'ar')}catch{box.textContent=text('تعذرت الترجمة.','Übersetzung nicht verfügbar.')}finally{b.disabled=false}});modelBox.scrollIntoView({behavior:'smooth',block:'nearest'})}catch(e){modelBox.hidden=false;modelBox.innerHTML=`<div class="alert bad">${esc(e.message)}</div>`;}finally{busy=false;modelBtn.disabled=false}};
 
 }
+function topShuffleCurrentExercise(){
+  const sec=String(model?.exercise?.section||'');
+  const teil=String(model?.exercise?.teil||'');
+  const items=model?.items||[];
+  if(sec==='Lesen' && teil==='Teil 1'){
+    matchingOrder=shuffle(matchingOrder||items.map(it=>String(it.position_no)));
+  }else if(sec==='Lesen' && teil==='Teil 3'){
+    matchingOrder=shuffle(matchingOrder||items.map(it=>String(it.position_no)));
+  }else if(sec==='Lesen' && teil==='Teil 2'){
+    items.forEach(it=>{const n=String(it.position_no);optionOrders[n]=shuffle((it.options||[]).slice(0,3).map(o=>o.option_key));});
+  }else if(sec==='Hören'){
+    if(items.some(it=>(it.options||[]).some(o=>String(o.option_text||o.option_key).toLowerCase()==='richtig'||String(o.option_text||o.option_key).toLowerCase()==='falsch')) || String(model?.exercise?.task_type||'')==='AUDIO_TF'){
+      hoerenOrder=shuffle(hoerenOrder||items.map((_,i)=>i));
+    }else{
+      items.forEach(it=>{const n=String(it.position_no);optionOrders[n]=shuffle((it.options||[]).slice(0,4).map(o=>o.option_key));});
+    }
+  }else if(sec==='Sprachbausteine' && teil==='Teil 1'){
+    items.forEach(it=>{const n=String(it.position_no);optionOrders[n]=shuffle((it.options||[]).slice(0,3).map(o=>o.option_key));});
+  }else if(sec==='Sprachbausteine' && teil==='Teil 2'){
+    const opts=sharedOptions();
+    wordOrder=shuffle((wordOrder||opts.map(([k])=>k)));
+  }
+  const st=captureExerciseScroll();
+  rerenderExerciseStable(st);
+}
+
 function layout(main,side,workspaceClass=''){
  const isHoeren = String(model?.exercise?.section||'').toLowerCase().includes('hör') || String(model?.exercise?.section||'').toLowerCase().includes('hoer');
  const combinedWorkspaceClass = [workspaceClass, isHoeren ? 'hoeren-workspace' : ''].filter(Boolean).join(' ');
- const mockTitle=mockMode?'':`<div class="thema-title-row"><h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}" class="${titleRevealed?'':'thema-title-hidden'}">${esc(model.exercise.title)}</h1><div class="thema-tools">${textTools(model.exercise.title,'thema-title')}<div class="inline-translation" id="thema-title-translation"></div><button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text('إظهار العنوان','Titel anzeigen')}" title="${text('إظهار العنوان','Titel anzeigen')}"><span class="eye-icon eye-off" aria-hidden="true"></span></button></div></div>`;
+ const mockTitle=mockMode?'':`<div class="thema-title-row"><h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}">${esc(model.exercise.title)}</h1><div class="thema-tools">${textTools(model.exercise.title,'thema-title')}<div class="inline-translation" id="thema-title-translation"></div></div></div>`;
  const headingTools=mockMode?'':mockTitle;
  const activeDuration = duration || (model?.exercise ? getTelcDurationSeconds(model.exercise) : 1200);
  const initialMin = String(Math.floor(activeDuration / 60)).padStart(2, '0');
  const timer=(mockMode||activeDuration)?`<div class="progress-pill ${mockMode?'mock-global-timer':''}" id="timerEl"><span class="timer-icon" aria-hidden="true">⏱️</span> <span class="timer-digits">${initialMin}:00</span></div>`:'';
  const resultPanel=resultData?`<div class="inline-result-panel ${resultData.percent>=60?'pass':'fail'}"><div class="result-panel-main"><span class="result-panel-label">${text('النتيجة','Ergebnis')}</span><strong>${resultData.score} / ${resultData.max}</strong></div><div class="result-panel-meta"><span>${resultData.percent}%</span><b>${esc(resultData.result||'')}</b></div></div>`:'';
  
- const isMatchingExercise = model.exercise.section==='Lesen' && ['Teil 1','Teil 3'].includes(model.exercise.teil);
- const headingShuffle = (!mockMode && isMatchingExercise) ? `
+ const shuffleSections = ['Lesen','Hören','Sprachbausteine'];
+ const hasTopShuffle = !mockMode && shuffleSections.includes(String(model.exercise.section||''));
+ const headingShuffle = hasTopShuffle ? `
     <button type="button" class="exercise-heading-shuffle" id="headingShuffleBtn" title="${text('خلط الأسئلة','Aufgaben mischen')}" aria-label="${text('خلط الأسئلة','Aufgaben mischen')}">
       <span aria-hidden="true">⤨</span><span>${text('خلط الأسئلة','Aufgaben mischen')}</span>
     </button>` : '';
@@ -1662,18 +1655,8 @@ function bindActions(){
      rerenderExerciseStable(st);
    }catch(e){document.getElementById('content').insertAdjacentHTML('beforeend',`<div class="alert bad">${esc(e.message)}</div>`);restoreExerciseScroll(st);}
  };
-  const tr=document.getElementById('titleReveal');
-  if(tr)tr.onclick=()=>{
-    titleRevealed=!titleRevealed;
-    const h=document.getElementById('thema-title');
-    if(h)h.classList.toggle('thema-title-hidden',!titleRevealed);
-    const eye=tr.querySelector('.eye-icon');
-    if(eye){
-      eye.classList.toggle('eye-on',titleRevealed);
-      eye.classList.toggle('eye-off',!titleRevealed);
-    }
-    tr.setAttribute('aria-label',text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen'));
-  };
+  const topShuffle=document.getElementById('headingShuffleBtn');
+  if(topShuffle) topShuffle.onclick=e=>{e.preventDefault();e.stopPropagation();topShuffleCurrentExercise();};
   if(mockMode){startMockTimer();}else{startExerciseTimer();}
   bindHoerenAudioPlayer();
 }
