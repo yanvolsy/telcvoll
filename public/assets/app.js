@@ -124,6 +124,9 @@ function startTimer(el, seconds, onEnd) {
 
 // Responsive TELC Voll navigation: compact mobile controls + vertical menu.
 function initMobileHeader() {
+  // Dashboard has its own larger mobile navigation control. Do not inject the generic
+  // compact menu button there, otherwise two menu buttons appear side by side.
+  if (location.pathname === '/dashboard.html' || location.pathname === '/dashboard') return;
   const top = document.querySelector('.top:not(.admin-nav)');
   if (!top || top.dataset.mobileReady === '1') return;
   const nav = top.querySelector('nav');

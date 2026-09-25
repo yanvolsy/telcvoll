@@ -1,4 +1,4 @@
-﻿@font-face{font-family:"Cairo";src:url("/assets/fonts/Cairo-Regular.ttf") format("truetype");font-weight:400;font-style:normal;font-display:swap;}
+@font-face{font-family:"Cairo";src:url("/assets/fonts/Cairo-Regular.ttf") format("truetype");font-weight:400;font-style:normal;font-display:swap;}
 @font-face{font-family:"Cairo";src:url("/assets/fonts/Cairo-Medium.ttf") format("truetype");font-weight:500;font-style:normal;font-display:swap;}
 @font-face{font-family:"Cairo";src:url("/assets/fonts/Cairo-SemiBold.ttf") format("truetype");font-weight:600;font-style:normal;font-display:swap;}
 @font-face{font-family:"Cairo";src:url("/assets/fonts/Cairo-Bold.ttf") format("truetype");font-weight:700;font-style:normal;font-display:swap;}
@@ -5856,4 +5856,75 @@ html[data-theme="dark"] .level-btn:focus{outline:none!important}
 @media(max-width:700px){
   .top .student-nav-links{display:none!important}
   .top nav{display:none!important}
+}
+
+/* ============================================================
+   TELC VOLL — FINAL DASHBOARD MOBILE REFINEMENT
+   ============================================================ */
+/* Keep one dashboard menu button: the larger square control. */
+@media (max-width:700px){
+  .student-hub .hub-kpis{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+    gap:8px !important;
+    width:100% !important;
+    align-items:stretch !important;
+  }
+  .student-hub .hub-status-card,
+  .student-hub .hub-progress-card{
+    min-width:0 !important;
+    width:100% !important;
+    margin:0 !important;
+    padding:11px 10px !important;
+    border-radius:16px !important;
+  }
+  .student-hub .hub-status-card-top,
+  .student-hub .hub-progress-top{
+    gap:6px !important;
+  }
+  .student-hub .hub-status-card-title,
+  .student-hub .hub-progress-title{
+    font-size:10px !important;
+  }
+  .student-hub .hub-badge-pill{
+    font-size:10px !important;
+    padding:4px 7px !important;
+    white-space:nowrap !important;
+  }
+  .student-hub .hub-progress-val{
+    font-size:15px !important;
+  }
+  .student-hub .hub-progress-bottom{
+    font-size:9px !important;
+    gap:5px !important;
+  }
+  .student-hub .hub-status-card-action{
+    padding:7px 8px !important;
+    font-size:10px !important;
+  }
+}
+
+/* TELC B1/B2/C1 hover = same visual language as Teil 1/2/3 hover. */
+.level-switch .level-btn:not(.active):hover{
+  background:var(--exercise-accent-soft) !important;
+  color:var(--exercise-accent) !important;
+  box-shadow:none !important;
+  transform:none !important;
+}
+
+/* Dashboard only: use the larger custom menu button and never the generic compact one. */
+@media (max-width:700px){
+  .top .mobile-menu-toggle{display:none !important;}
+  .top .mobile-nav-toggle{
+    display:inline-flex !important;
+    width:42px !important;
+    height:42px !important;
+    border-radius:12px !important;
+  }
+}
+@media (max-width:430px){
+  .top .mobile-nav-toggle{
+    width:38px !important;
+    height:38px !important;
+  }
 }
