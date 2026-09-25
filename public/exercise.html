@@ -185,6 +185,9 @@ function getExerciseHeadings(model) {
 }
 
 function renderAudio(){return model.exercise.audio_url ? renderUnifiedAudioPlayer(model.exercise.audio_url) : '';}
+function formatMatchingHeading(value){
+  return String(value||'').replace(/^\s*W(\d+)\s*:\s*/i,'$1: ');
+}
 function matchingMeta(){
   return model.exercise.section==='Lesen'&&model.exercise.teil==='Teil 1'?{title:'ÜBERSCHRIFTEN',sub:'FÜR TEXT',ar:'العناوين'}:
   model.exercise.section==='Lesen'&&model.exercise.teil==='Teil 3'?{title:'ANZEIGEN',sub:'ZUORDNUNG',ar:'الإعلانات'}:
@@ -205,7 +208,7 @@ function renderMatching(){
  const isLesen3=model.exercise.section==='Lesen'&&model.exercise.teil==='Teil 3';
  if(!matchingOrder)matchingOrder=items.map(it=>String(it.position_no));
  if(!headingOrder)headingOrder=heads.map((_,i)=>i);
- const usedKeys=new Set(Object.values(answers).filter(Boolean).map(String));
+ const usedAnswerIds=new Set(Object.values(answers).filter(Boolean).map(v=>matchingAnswerIdentity(v)));
 
  const bodySection = bodyText ? `
    <div class="long-text matching-reading-panel" style="margin-bottom:24px;">
@@ -232,9 +235,11 @@ function renderMatching(){
    const shownAnswer=showModelAnswers&&correctVal?correctVal:selected;
    const shownLabel=shownAnswer?labelFor(it.position_no,shownAnswer):'';
    const resultClass=detail?(detail.ok?'answer-correct':'answer-wrong'):'';
-   const options=heads.map((h,i)=>({key:String.fromCharCode(65+i),text:h}));
+   const options=heads.map((h,i)=>({key:String.fromCharCode(65+i),text:formatMatchingHeading(h)}));
+   const selectedIdentity=selected?matchingAnswerIdentity(selected):'';
    const selectOptions=options.map(o=>{
-     const used=usedKeys.has(o.key)&&selected!==o.key;
+     const identity=normalizeAnswerText(o.text);
+     const used=usedAnswerIds.has(identity)&&selectedIdentity!==identity;
      return `<option value="${esc(o.key)}" ${selected===o.key?'selected':''} ${used?'disabled':''}>${esc(o.text)}${used?' — '+text('تم اختياره','Bereits ausgewählt'):''}</option>`;
    }).join('');
    const assignLabel = isLesen3 ? text('الإعلان المناسب لهذا الموقف:','Passende Anzeige für diese Situation:') : text('العنوان المناسب لهذه الفقرة:','Passende Überschrift für diesen Text:');
@@ -258,18 +263,20 @@ function renderMatching(){
  const main = `${bodySection}${situationsHeader}${cards}`;
  const side=headingOrder.map(i=>({h:heads[i],i})).map(({h,i})=>{
    const key=String.fromCharCode(65+i);
-   const owner=items.find(it=>String(answerValue(it.position_no))===key);
+   const displayHeading=formatMatchingHeading(h);
+   const identity=normalizeAnswerText(displayHeading);
+   const owner=items.find(it=>{const v=answerValue(it.position_no); return v && matchingAnswerIdentity(v)===identity;});
    const ownerDetail=owner&&resultData?(resultData.details||[]).find(d=>String(d.prompt)===String(owner.prompt)):null;
    const modelDetail=(resultData?.details||[]).find(d=>String(d.correct_answer)===key);
    const modelOwner=modelDetail?items.find(it=>String(it.prompt)===String(modelDetail.prompt)):null;
    const selectedForActive=activeItem&&answerValue(activeItem)===key;
-   const isUsed=!!owner;
+   const isUsed=!!owner && String(owner.position_no)!==String(activeItem||'');
    const resultClass=ownerDetail?(ownerDetail.ok?'result-correct':'result-wrong'):'';
    const modelClass=showModelAnswers&&modelOwner?'model-correct':'';
    const cid='head-'+key;
    return `<div class="heading-option-wrap ${selectedForActive?'is-active-match':''} ${isUsed?'heading-used':''} ${selectedForActive?'heading-current':''}">
-      <button type="button" class="choice-card ${selectedForActive?'selected':''} ${resultClass} ${modelClass}" data-choice="${key}" ${isUsed&&!selectedForActive?'disabled':''}><b id="${cid}" data-content-id="${cid}" data-source="${esc(h)}">${esc(h)}</b>${isUsed?`<small class="heading-used-badge">✓ ${text('تم اختياره','Ausgewählt')}</small>`:''}</button>
-      ${textTools(h,cid)}
+      <button type="button" class="choice-card ${selectedForActive?'selected':''} ${resultClass} ${modelClass}" data-choice="${key}" ${isUsed&&!selectedForActive?'disabled':''}><b id="${cid}" data-content-id="${cid}" data-source="${esc(displayHeading)}">${esc(displayHeading)}</b>${isUsed?`<small class="heading-used-badge">✓ ${text('تم اختياره','Ausgewählt')}</small>`:''}</button>
+      ${textTools(displayHeading,cid)}
       <div class="inline-translation" id="${cid}-translation"></div>
    </div>`;
  }).join('');
@@ -304,11 +311,11 @@ function renderMatching(){
    e.stopPropagation(); const st=captureExerciseScroll();
    const n=String(sel.dataset.paragraphSelect), chosen=String(sel.value||'');
    activeItem=n;
-   if(!chosen){delete answers[n];}else{Object.keys(answers).forEach(k=>{if(k!==n&&answers[k]===chosen)delete answers[k];});answers[n]=chosen;}
+   if(!chosen){delete answers[n];}else{const chosenId=matchingAnswerIdentity(chosen);const duplicate=Object.entries(answers).some(([k,v])=>k!==n&&matchingAnswerIdentity(v)===chosenId);if(duplicate){const msg=text('هذا الخيار مستخدم بالفعل في حقل آخر. اختر خياراً مختلفاً.','Diese Antwort wurde bereits einem anderen Feld zugeordnet. Bitte wählen Sie eine andere Antwort.');const existing=document.querySelector('.unique-answer-warning');if(existing)existing.remove();document.getElementById('content')?.insertAdjacentHTML('afterbegin',`<div class="alert bad unique-answer-warning">${esc(msg)}</div>`);restoreExerciseScroll(st);return;}answers[n]=chosen;}
    renderMatching();restoreExerciseScroll(st);bindActions();
  });
  document.querySelectorAll('[data-clear]').forEach(b=>b.onclick=e=>{e.stopPropagation();const st=captureExerciseScroll();delete answers[String(b.dataset.clear)];activeItem=String(b.dataset.clear);renderMatching();restoreExerciseScroll(st);bindActions();});
- document.querySelectorAll('[data-choice]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=e=>{e.preventDefault();if(b.disabled||!activeItem)return;const st=captureExerciseScroll();const chosen=b.dataset.choice;Object.keys(answers).forEach(k=>{if(k!==String(activeItem)&&answers[k]===chosen)delete answers[k];});answers[String(activeItem)]=chosen;renderMatching();restoreExerciseScroll(st);bindActions();};});
+ document.querySelectorAll('[data-choice]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=e=>{e.preventDefault();if(b.disabled||!activeItem)return;const st=captureExerciseScroll();const chosen=b.dataset.choice;const chosenId=matchingAnswerIdentity(chosen);const duplicate=Object.entries(answers).some(([q,v])=>String(q)!==String(activeItem)&&matchingAnswerIdentity(v)===chosenId);if(duplicate){const msg=text('هذا الخيار مستخدم بالفعل في حقل آخر. اختر خياراً مختلفاً.','Diese Antwort wurde bereits einem anderen Feld zugeordnet. Bitte wählen Sie eine andere Antwort.');const existing=document.querySelector('.unique-answer-warning');if(existing)existing.remove();document.getElementById('content')?.insertAdjacentHTML('afterbegin',`<div class="alert bad unique-answer-warning">${esc(msg)}</div>`);return;}answers[String(activeItem)]=chosen;renderMatching();restoreExerciseScroll(st);bindActions();};});
  const sh=document.getElementById('headingShuffleBtn');
  if(sh)sh.onclick=e=>{e.stopPropagation();const st=captureExerciseScroll();matchingOrder=shuffle(matchingOrder);activeItem=null;renderMatching();restoreExerciseScroll(st);bindActions();};
  bindTextTools();
@@ -628,6 +635,18 @@ function renderBody(body){
  return html;
 }
 function escapeRegExp(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+function normalizeAnswerText(v){return String(v??'').replace(/\s+/g,' ').trim().toLowerCase();}
+function matchingAnswerIdentity(val){
+  const key=String(val??'').trim();
+  if(!key)return '';
+  const heads=getExerciseHeadings(model)||[];
+  const idx=key.charCodeAt(0)-65;
+  if(idx>=0 && idx<heads.length){
+    const textVal=formatMatchingHeading(heads[idx]);
+    return normalizeAnswerText(textVal)||key.toLowerCase();
+  }
+  return key.toLowerCase();
+}
 function isUniqueAnswerExercise(){
   const sec=String(model?.exercise?.section||'');
   const teil=String(model?.exercise?.teil||'');
@@ -640,7 +659,8 @@ function selectAnswer(n,val){
  // Matching tasks use each option only once. Never allow the same option
  // to be assigned to two different fields/questions.
  if(isUniqueAnswerExercise() && next){
-   const duplicate=Object.entries(answers).some(([q,v])=>String(q)!==key && String(v)===next);
+   const nextId=matchingAnswerIdentity(next);
+   const duplicate=Object.entries(answers).some(([q,v])=>String(q)!==key && matchingAnswerIdentity(v)===nextId);
    if(duplicate){
      const msg=text('هذا الخيار مستخدم بالفعل في حقل آخر. اختر خياراً مختلفاً.','Diese Antwort wurde bereits einem anderen Feld zugeordnet. Bitte wählen Sie eine andere Antwort.');
      const existing=document.querySelector('.unique-answer-warning');
