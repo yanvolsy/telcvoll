@@ -188,6 +188,15 @@ function renderAudio(){return model.exercise.audio_url ? renderUnifiedAudioPlaye
 function formatMatchingHeading(value){
   return String(value||'').replace(/^\s*W(\d+)\s*:\s*/i,'$1: ');
 }
+function matchingDisplayLabel(value, index){
+  const raw=String(value??'').trim();
+  const m=raw.match(/^W\s*(\d+)\s*:\s*(.*)$/i);
+  if(m) return `${m[1]}: ${m[2]}`;
+  const n=raw.match(/^\s*(\d+)\s*:\s*(.*)$/);
+  if(n) return `${n[1]}: ${n[2]}`;
+  return raw;
+}
+
 function matchingMeta(){
   return model.exercise.section==='Lesen'&&model.exercise.teil==='Teil 1'?{title:'ÜBERSCHRIFTEN',sub:'FÜR TEXT',ar:'العناوين'}:
   model.exercise.section==='Lesen'&&model.exercise.teil==='Teil 3'?{title:'ANZEIGEN',sub:'ZUORDNUNG',ar:'الإعلانات'}:
@@ -235,10 +244,10 @@ function renderMatching(){
    const shownAnswer=showModelAnswers&&correctVal?correctVal:selected;
    const shownLabel=shownAnswer?labelFor(it.position_no,shownAnswer):'';
    const resultClass=detail?(detail.ok?'answer-correct':'answer-wrong'):'';
-   const options=heads.map((h,i)=>({key:String.fromCharCode(65+i),text:formatMatchingHeading(h)}));
+   const options=heads.map((h,i)=>({key:String.fromCharCode(65+i),text:matchingDisplayLabel(h,i)}));
    const selectedIdentity=selected?matchingAnswerIdentity(selected):'';
    const selectOptions=options.map(o=>{
-     const identity=normalizeAnswerText(o.text);
+     const identity=matchingAnswerIdentity(o.key);
      const used=usedAnswerIds.has(identity)&&selectedIdentity!==identity;
      return `<option value="${esc(o.key)}" ${selected===o.key?'selected':''} ${used?'disabled':''}>${esc(o.text)}${used?' — '+text('تم اختياره','Bereits ausgewählt'):''}</option>`;
    }).join('');
@@ -263,8 +272,8 @@ function renderMatching(){
  const main = `${bodySection}${situationsHeader}${cards}`;
  const side=headingOrder.map(i=>({h:heads[i],i})).map(({h,i})=>{
    const key=String.fromCharCode(65+i);
-   const displayHeading=formatMatchingHeading(h);
-   const identity=normalizeAnswerText(displayHeading);
+   const displayHeading=matchingDisplayLabel(h,i);
+   const identity=matchingAnswerIdentity(String(i+1));
    const owner=items.find(it=>{const v=answerValue(it.position_no); return v && matchingAnswerIdentity(v)===identity;});
    const ownerDetail=owner&&resultData?(resultData.details||[]).find(d=>String(d.prompt)===String(owner.prompt)):null;
    const modelDetail=(resultData?.details||[]).find(d=>String(d.correct_answer)===key);
@@ -306,6 +315,19 @@ function renderMatching(){
  document.querySelectorAll('[data-item]').forEach(c=>{
    c.onmousedown=e=>{if(e.target.closest('select,.text-tools,.mini-tool,.clear-selection'))return;e.preventDefault();};
    c.onclick=e=>{if(e.target.closest('select,.text-tools,.mini-tool,.clear-selection'))return;activeItem=String(c.dataset.item);document.querySelectorAll('[data-item]').forEach(x=>x.classList.toggle('active-item',String(x.dataset.item)===activeItem));};
+ });
+ // Enforce one-to-one matching at DOM level as well as in the state layer.
+ document.querySelectorAll('[data-paragraph-select]').forEach(sel=>{
+   const refreshUniqueOptions=()=>{
+     const selectedKeys=new Set([...document.querySelectorAll('[data-paragraph-select]')].filter(x=>x!==sel).map(x=>String(x.value||'')).filter(Boolean).map(matchingAnswerIdentity));
+     [...sel.options].forEach(opt=>{
+       if(!opt.value){opt.disabled=false;return;}
+       const id=matchingAnswerIdentity(opt.value);
+       opt.disabled=selectedKeys.has(id) && String(opt.value)!==String(sel.value||'');
+     });
+   };
+   sel.addEventListener('focus',refreshUniqueOptions);
+   refreshUniqueOptions();
  });
  document.querySelectorAll('[data-paragraph-select]').forEach(sel=>sel.onchange=e=>{
    e.stopPropagation(); const st=captureExerciseScroll();
@@ -640,12 +662,21 @@ function matchingAnswerIdentity(val){
   const key=String(val??'').trim();
   if(!key)return '';
   const heads=getExerciseHeadings(model)||[];
-  const idx=key.charCodeAt(0)-65;
+
+  // Matching answers may be stored as W1/W2/... (or 1/2/...) instead of A/B/C.
+  // Resolve all of these representations to the actual option text so the
+  // uniqueness check cannot be bypassed by changing only the internal key.
+  let idx=-1;
+  let m=key.match(/^W\s*(\d+)$/i);
+  if(m) idx=Number(m[1])-1;
+  else if(/^\d+$/.test(key)) idx=Number(key)-1;
+  else if(/^[A-Z]$/i.test(key)) idx=key.toUpperCase().charCodeAt(0)-65;
+
   if(idx>=0 && idx<heads.length){
     const textVal=formatMatchingHeading(heads[idx]);
-    return normalizeAnswerText(textVal)||key.toLowerCase();
+    return normalizeAnswerText(textVal)||String(idx+1);
   }
-  return key.toLowerCase();
+  return normalizeAnswerText(formatMatchingHeading(key));
 }
 function isUniqueAnswerExercise(){
   const sec=String(model?.exercise?.section||'');
