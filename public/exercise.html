@@ -113,8 +113,64 @@ function renderUnifiedAudioPlayer(audioUrl) {
       </div>
     </div>`;
 }
+function getExerciseBody(model) {
+  const ex = model?.exercise || {};
+  const st = parseSettings(ex);
+  return (
+    ex.body ||
+    st.text ||
+    st.body ||
+    st.situation ||
+    st.situation_text ||
+    st.thema_text ||
+    st.prompt ||
+    model?.items?.[0]?.body ||
+    ''
+  );
+}
+
+function getExerciseHeadings(model) {
+  const ex = model?.exercise || {};
+  const st = parseSettings(ex);
+  if (Array.isArray(st.headings) && st.headings.filter(Boolean).length) return st.headings.filter(Boolean);
+  if (Array.isArray(ex.headings) && ex.headings.filter(Boolean).length) return ex.headings.filter(Boolean);
+  if (Array.isArray(st.situations) && st.situations.filter(Boolean).length) return st.situations.filter(Boolean);
+  if (Array.isArray(st.anzeigen) && st.anzeigen.filter(Boolean).length) return st.anzeigen.filter(Boolean);
+  if (Array.isArray(st.ads) && st.ads.filter(Boolean).length) return st.ads.filter(Boolean);
+
+  const isLesen3 = ex.section === 'Lesen' && ex.teil === 'Teil 3';
+  const optMap = new Map();
+  (model?.items || []).forEach(it => {
+    (it.options || []).forEach(o => {
+      const k = String(o.option_key || '').trim().toUpperCase();
+      const txt = String(o.option_text || '').trim();
+      if (k && !optMap.has(k)) {
+        optMap.set(k, txt || (isLesen3 ? (k === 'X' ? 'x (Keine Anzeige passt)' : `Anzeige ${k}`) : k));
+      }
+    });
+  });
+  if (optMap.size) {
+    return Array.from(optMap.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(entry => entry[1]);
+  }
+  if (isLesen3) {
+    return [
+      'Anzeige a', 'Anzeige b', 'Anzeige c', 'Anzeige d', 'Anzeige e',
+      'Anzeige f', 'Anzeige g', 'Anzeige h', 'Anzeige i', 'Anzeige j',
+      'Anzeige k', 'Anzeige l', 'x (Keine Anzeige passt)'
+    ];
+  }
+  return [];
+}
+
 function renderAudio(){return model.exercise.audio_url ? renderUnifiedAudioPlayer(model.exercise.audio_url) : '';}
-function matchingMeta(){return model.exercise.section==='Lesen'&&model.exercise.teil==='Teil 1'?{title:'ÜBERSCHRIFTEN',sub:'FÜR TEXT',ar:'العناوين'}:model.exercise.section==='Lesen'&&model.exercise.teil==='Teil 3'?{title:'SITUATIONEN',sub:'ZUORDNUNG',ar:'المواقف'}:model.exercise.section==='Hören'&&model.exercise.teil==='Teil 3'?{title:'AUSSAGEN',sub:'ZUORDNUNG',ar:'العبارات'}:{title:'AUSWAHL',sub:'ZUORDNUNG',ar:'الاختيارات'};}
+function matchingMeta(){
+  return model.exercise.section==='Lesen'&&model.exercise.teil==='Teil 1'?{title:'ÜBERSCHRIFTEN',sub:'FÜR TEXT',ar:'العناوين'}:
+  model.exercise.section==='Lesen'&&model.exercise.teil==='Teil 3'?{title:'ANZEIGEN',sub:'ZUORDNUNG',ar:'الإعلانات'}:
+  model.exercise.section==='Hören'&&model.exercise.teil==='Teil 3'?{title:'AUSSAGEN',sub:'ZUORDNUNG',ar:'العبارات'}:
+  {title:'AUSWAHL',sub:'ZUORDNUNG',ar:'الاختيارات'};
+}
 function captureExerciseScroll(){
  const anchor=document.querySelector('.exam-main .active-item, .exam-main .exam-text-card, .exam-main .tf-row, .exam-side .side-question, .hoeren-table-row');
  return {main:document.querySelector('.exam-main')?.scrollTop||0,side:document.querySelector('.exam-side')?.scrollTop||0,workspace:document.querySelector('.exam-workspace, .hoeren-workspace-shell')?.scrollTop||0,x:window.scrollX||0,y:window.scrollY||0,anchorTop:anchor?.getBoundingClientRect().top??null};
@@ -123,12 +179,32 @@ function restoreExerciseScroll(state){if(!state)return;const restore=()=>{const 
 function rerenderExerciseStable(state){renderWorkspace(false);bindActions();restoreExerciseScroll(state);}
 
 function renderMatching(){
- const heads=(parseSettings(model.exercise).headings||[]).filter(Boolean);
+ const heads=getExerciseHeadings(model);
  const items=model.items||[];
+ const bodyText=getExerciseBody(model);
+ const isLesen3=model.exercise.section==='Lesen'&&model.exercise.teil==='Teil 3';
  if(!matchingOrder)matchingOrder=items.map(it=>String(it.position_no));
  if(!headingOrder)headingOrder=heads.map((_,i)=>i);
  const usedKeys=new Set(Object.values(answers).filter(Boolean).map(String));
- const main=matchingOrder.map(n=>items.find(it=>String(it.position_no)===n)).filter(Boolean).map(it=>{
+
+ const bodySection = bodyText ? `
+   <div class="long-text matching-reading-panel" style="margin-bottom:24px;">
+     <div class="long-text-tools">${textTools(bodyText, 'matching-main-body')}</div>
+     <div class="long-text-content" id="matching-main-body" data-content-id="matching-main-body" data-source="${esc(bodyText)}">${escBody(bodyText)}</div>
+     ${translationBox('matching-main-body-translation')}
+   </div>
+ ` : '';
+
+ const situationsHeader = (isLesen3 && bodyText) ? `
+   <div class="matching-situations-head" style="margin:20px 0 14px;padding-top:16px;border-top:1px solid var(--line);">
+     <h3 style="margin:0;font-size:18px;font-weight:900;display:flex;align-items:center;gap:8px;">
+       <span>📋</span>
+       <span>${text('المواقف والمطلوب مطابقتها مع الإعلانات:','Situationen (Zuordnung zu den Anzeigen):')}</span>
+     </h3>
+   </div>
+ ` : '';
+
+ const cards = matchingOrder.map(n=>items.find(it=>String(it.position_no)===n)).filter(Boolean).map(it=>{
    const selected=answerValue(it.position_no);
    const cid='para-'+it.position_no;
    const detail=resultData?(resultData.details||[]).find(d=>String(d.prompt)===String(it.prompt)):null;
@@ -141,13 +217,17 @@ function renderMatching(){
      const used=usedKeys.has(o.key)&&selected!==o.key;
      return `<option value="${esc(o.key)}" ${selected===o.key?'selected':''} ${used?'disabled':''}>${esc(o.text)}${used?' — '+text('تم اختياره','Bereits ausgewählt'):''}</option>`;
    }).join('');
+   const assignLabel = isLesen3 ? text('الإعلان المناسب لهذا الموقف:','Passende Anzeige für diese Situation:') : text('العنوان المناسب لهذه الفقرة:','Passende Überschrift für diesen Text:');
+   const assignPlaceholder = isLesen3 ? text('— اختر الإعلان المناسب —','— Passende Anzeige auswählen —') : text('— اختر العنوان —','— Überschrift auswählen —');
    return `<article class="exam-text-card ${selected?'answered':''} ${resultClass} ${String(activeItem)===String(it.position_no)?'active-item':''}" data-item="${it.position_no}">
-     <div class="paragraph-assignment"><div class="assignment-label">${text('العنوان المناسب','Passende Überschrift')}</div><select data-paragraph-select="${it.position_no}" aria-label="${text('اختيار العنوان','Überschrift auswählen')}"><option value="">${text('— اختر العنوان —','— Überschrift auswählen —')}</option>${selectOptions}</select>${shownLabel?`<button type="button" class="assignment-selected" data-clear="${it.position_no}" aria-label="${text('إلغاء الاختيار','Auswahl löschen')}"><span>${esc(shownLabel)}</span><b>×</b></button>`:`<span class="assignment-empty">${text('لم يتم الاختيار','Noch nicht ausgewählt')}</span>`}</div>
      <div class="exam-card-top">${textTools(it.prompt,cid)}</div>
      <div class="exam-text" id="${cid}" data-content-id="${cid}" data-source="${esc(it.prompt)}">${escBody(it.prompt)}</div>
      <div class="inline-translation" id="${cid}-translation"></div>
+     <div class="paragraph-assignment" style="margin-top:16px;padding-top:14px;border-top:1px dashed var(--line);"><div class="assignment-label">${assignLabel}</div><select data-paragraph-select="${it.position_no}" aria-label="${assignLabel}"><option value="">${assignPlaceholder}</option>${selectOptions}</select>${shownLabel?`<button type="button" class="assignment-selected" data-clear="${it.position_no}" aria-label="${text('إلغاء الاختيار','Auswahl löschen')}"><span>${esc(shownLabel)}</span><b>×</b></button>`:`<span class="assignment-empty">${text('لم يتم الاختيار بعد','Noch nicht ausgewählt')}</span>`}</div>
    </article>`;
  }).join('');
+
+ const main = `${bodySection}${situationsHeader}${cards}`;
  const side=headingOrder.map(i=>({h:heads[i],i})).map(({h,i})=>{
    const key=String.fromCharCode(65+i);
    const owner=items.find(it=>String(answerValue(it.position_no))===key);
@@ -188,24 +268,74 @@ function renderMatching(){
 }
 function renderSprachbausteine1(){
  const items=(model.items||[]); const longTextId='spb1-text';
- const main=`<div class="long-text"><div class="long-text-tools">${textTools(model.exercise.body||'',longTextId)}</div><div id="${longTextId}" data-content-id="${longTextId}" data-source="${esc(model.exercise.body||'')}">${renderBody(model.exercise.body)}</div>${translationBox(longTextId+'-translation')}</div>`;
-  let side=`<div class="exam-side-sticky-header"><div class="side-title side-title-large"><div class="side-title-text"><b>AUFGABEN</b><small>SPRACHBAUSTEINE TEIL 1</small></div><div class="side-title-actions"><button type="button" class="side-icon shuffle-spb1" aria-label="${text('خلط الاختيارات','Antworten mischen')}" title="${text('خلط الاختيارات','Antworten mischen')}">⤨</button><span class="side-counter-pill">${Object.keys(answers).length} / ${items.length}</span></div></div></div>`;
- side+=items.map(it=>{
-   const n=String(it.position_no), examNo=Number(n)+20, chosen=answerValue(n);
-   const detail=resultData?.details?.find(d=>String(d.prompt)===String(it.prompt));
-   const correct=detail?.correct_answer||''; const showCorrect=showModelAnswers&&correct;
-   const base=(it.options||[]).slice(0,3);
-   if(!optionOrders[n]) optionOrders[n]=base.map(o=>o.option_key);
-   const byKey=new Map(base.map(o=>[String(o.option_key),o]));
-   const ordered=optionOrders[n].map(k=>byKey.get(String(k))).filter(Boolean);
-   return `<div class="side-question spb1-question ${detail?(detail.ok?'result-correct':'result-wrong'):''}">
-      <div class="question-prompt question-text-tools"><strong>${examNo}</strong><span>${text('الفراغ','Lücke')} ${examNo}</span></div>
-      <div class="side-options">${ordered.map((o,oi)=>{const ocid=`spb1-o-${n}-${oi}`;return `<div class="spb1-option-wrap"><button type="button" class="side-option ${chosen===o.option_key?'selected':''} ${detail&&chosen===o.option_key?(detail.ok?'result-correct':'result-wrong'):''} ${showCorrect&&correct===o.option_key?'model-correct':''}" data-q="${esc(n)}" data-o="${esc(o.option_key)}"><span class="option-text" id="${ocid}" data-content-id="${ocid}" data-source="${esc(o.option_text||'')}">${esc(o.option_text||'')}</span></button>${textTools(o.option_text||'',ocid)}${translationBox(ocid+'-translation')}</div>`;}).join('')}</div>
-   </div>`;
- }).join('');
+ const bodyText=getExerciseBody(model);
+
+ const questionsUnderText=`
+   <div class="spb-questions-container" style="margin-top:28px;padding-top:20px;border-top:1px solid var(--line);">
+     <h3 style="font-size:18px;font-weight:900;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+       <span>🧩</span>
+       <span>${text('خيارات الفراغات (21 - 30):','Aufgaben Sprachbausteine Teil 1:')}</span>
+     </h3>
+     <div class="spb-questions-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));gap:14px;">
+       ${items.map(it=>{
+         const n=String(it.position_no), examNo=Number(n)+20, chosen=answerValue(n);
+         const detail=resultData?.details?.find(d=>String(d.prompt)===String(it.prompt));
+         const correct=detail?.correct_answer||'';
+         const showCorrect=showModelAnswers&&correct;
+         const base=(it.options||[]).slice(0,3);
+         if(!optionOrders[n]) optionOrders[n]=base.map(o=>o.option_key);
+         const byKey=new Map(base.map(o=>[String(o.option_key),o]));
+         const ordered=optionOrders[n].map(k=>byKey.get(String(k))).filter(Boolean);
+         return `<div class="side-question spb1-question ${detail?(detail.ok?'result-correct':'result-wrong'):''}">
+           <div class="question-prompt question-text-tools"><strong>${examNo}</strong><span>${text('الفراغ','Lücke')} ${examNo}</span></div>
+           <div class="side-options">
+             ${ordered.map((o,oi)=>{
+               const ocid=`spb1-o-${n}-${oi}`;
+               return `<div class="spb1-option-wrap">
+                 <button type="button" class="side-option ${chosen===o.option_key?'selected':''} ${detail&&chosen===o.option_key?(detail.ok?'result-correct':'result-wrong'):''} ${showCorrect&&correct===o.option_key?'model-correct':''}" data-q="${esc(n)}" data-o="${esc(o.option_key)}">
+                   <span class="option-text" id="${ocid}" data-content-id="${ocid}" data-source="${esc(o.option_text||'')}">${esc(o.option_key)}) ${esc(o.option_text||'')}</span>
+                 </button>
+                 ${textTools(o.option_text||'',ocid)}
+                 ${translationBox(ocid+'-translation')}
+               </div>`;
+             }).join('')}
+           </div>
+         </div>`;
+       }).join('')}
+     </div>
+   </div>
+ `;
+
+ const main=`<div class="long-text">
+   <div class="long-text-tools">${textTools(bodyText,longTextId)}</div>
+   <div id="${longTextId}" data-content-id="${longTextId}" data-source="${esc(bodyText)}">${renderBody(bodyText)}</div>
+   ${translationBox(longTextId+'-translation')}
+   ${questionsUnderText}
+ </div>`;
+
+ const side=`<div class="exam-side-sticky-header">
+   <div class="side-title side-title-large">
+     <div class="side-title-text"><b>AUFGABEN</b><small>SPRACHBAUSTEINE TEIL 1</small></div>
+     <div class="side-title-actions">
+       <button type="button" class="side-icon shuffle-spb1" aria-label="${text('خلط الاختيارات','Antworten mischen')}" title="${text('خلط الاختيارات','Antworten mischen')}">⤨</button>
+       <span class="side-counter-pill">${Object.keys(answers).length} / ${items.length}</span>
+     </div>
+   </div>
+ </div>`;
+
  document.getElementById('content').innerHTML=layout(main,side,'spb1');
  document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>selectAnswer(b.dataset.q,b.dataset.o));
- const sh=document.querySelector('.shuffle-spb1'); if(sh)sh.onclick=e=>{e.preventDefault();e.stopPropagation();const st=captureExerciseScroll();items.forEach(it=>{const n=String(it.position_no);optionOrders[n]=shuffle((it.options||[]).slice(0,3).map(o=>o.option_key));});rerenderExerciseStable(st);};
+ document.querySelectorAll('[data-gap-select]').forEach(sel=>sel.onchange=e=>{
+   e.stopPropagation();
+   selectAnswer(sel.dataset.gapSelect,sel.value);
+ });
+ const sh=document.querySelector('.shuffle-spb1');
+ if(sh)sh.onclick=e=>{
+   e.preventDefault();e.stopPropagation();
+   const st=captureExerciseScroll();
+   items.forEach(it=>{const n=String(it.position_no);optionOrders[n]=shuffle((it.options||[]).slice(0,3).map(o=>o.option_key));});
+   rerenderExerciseStable(st);
+ };
  bindTextTools();
 }
 
@@ -233,7 +363,7 @@ function renderHoerenChoiceQuestions(){
    </article>`;
  }).join('');
  const toolbar=`<div class="hoeren-choice-toolbar"><span class="hoeren-choice-count">${Object.keys(answers).length} / ${items.length}</span><button type="button" class="hoeren-toolbar-btn" id="hoerenChoiceShuffle" title="${text('خلط الاختيارات','Antworten mischen')}">🔀</button></div>`;
- const actions=`<div class="exercise-actions"><div class="exercise-nav"><button class="btn" id="checkBtn">${text(mockMode?'إنهاء الجزء':'تحقق من الإجابات',mockMode?'Teil beenden':'Antworten prüfen')}</button>${mockMode?'':`<button class="btn model-btn" id="modelBtn">${text('الإجابة النموذجية','Musterlösung')}</button>`}</div></div>`;
+ const actions=`<div class="exercise-actions"><div class="exercise-nav"><button class="btn" id="checkBtn">${text(mockMode?'إنهاء الجزء':'تحقق من الإجابات',mockMode?'Teil beenden':'Antworten prüfen')}</button>${mockMode?'':`<button class="btn model-btn" id="modelBtn">${text(showModelAnswers?'إخفاء الإجابة':'الإجابة النموذجية',showModelAnswers?'Musterlösung ausblenden':'Musterlösung')}</button>`}</div></div>`;
  document.getElementById('content').innerHTML=`${heading}<main class="hoeren-choice-page">${audio}<div class="hoeren-choice-list-head"><div><b>AUFGABEN</b><small>${text('اختر الإجابة الصحيحة لكل سؤال','Wählen Sie die richtige Antwort für jede Frage.')}</small></div>${toolbar}</div><section class="hoeren-choice-list">${rows}</section></main>${actions}`;
  document.querySelectorAll('.hoeren-choice-option[data-q]').forEach(b=>b.onclick=()=>selectAnswer(b.dataset.q,b.dataset.o));
  const sh=document.getElementById('hoerenChoiceShuffle');
@@ -246,36 +376,108 @@ function renderChoiceQuestions(){
  const isLesen2=model.exercise.section==='Lesen'&&model.exercise.teil==='Teil 2';
  const gap2=model.exercise.section==='Sprachbausteine'&&model.exercise.teil==='Teil 2';
  const items=isLesen2?(model.items||[]).slice(0,5):(model.items||[]);
- const longTextId='lesen2-text';
- const main=isLesen2?`<div class="long-text lesen2-long-text"><div class="long-text-tools">${textTools(model.exercise.body||'',longTextId)}</div><div class="long-text-content" id="${longTextId}" data-content-id="${longTextId}" data-source="${esc(model.exercise.body||'')}">${escBody(model.exercise.body||'')}</div>${translationBox(longTextId+'-translation')}</div>`:gap2?`<div class="long-text"><div class="long-text-tools">${textTools(model.exercise.body||'','gap2-text')}</div><div id="gap2-text" data-content-id="gap2-text" data-source="${esc(model.exercise.body||'')}">${renderBody(model.exercise.body)}</div>${translationBox('gap2-text-translation')}</div>`:`<div class="long-text"><div class="long-text-tools">${textTools(model.exercise.body||'','choice-long-text')}</div><div id="choice-long-text" data-content-id="choice-long-text" data-source="${esc(model.exercise.body||'')}">${escBody(model.exercise.body||'')}</div>${translationBox('choice-long-text-translation')}</div>`;
+ const longTextId=isLesen2?'lesen2-text':gap2?'gap2-text':'choice-long-text';
+ const bodyText=getExerciseBody(model);
+
+ const lesen2QuestionsMarkup=isLesen2?`
+   <div class="lesen2-questions-block" style="margin-top:28px;padding-top:20px;border-top:1px solid var(--line);">
+     <h3 style="font-size:18px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+       <span>📝</span>
+       <span>${text('أسئلة الفهم والاختيار من متعدد:','Aufgaben zum Text:')}</span>
+     </h3>
+     <div class="lesen2-questions-list" style="display:flex;flex-direction:column;gap:16px;">
+       ${items.map((it,i)=>{
+         const n=String(it.position_no);
+         const chosen=answerValue(n);
+         const detail=resultData?.details?.find(d=>String(d.prompt)===String(it.prompt));
+         const correct=detail?.correct_answer||'';
+         const showCorrect=showModelAnswers&&correct;
+         const baseOptions=(it.options||[]).slice(0,3);
+         if(!optionOrders[n]) optionOrders[n]=baseOptions.map(o=>o.option_key);
+         const byKey=new Map(baseOptions.map(o=>[String(o.option_key),o]));
+         const ordered=optionOrders[n].map(k=>byKey.get(String(k))).filter(Boolean);
+         return `<div class="side-question lesen2-question ${detail?(detail.ok?'result-correct':'result-wrong'):''}">
+           <div class="question-prompt question-text-tools">
+             ${textTools(it.prompt||'',`lesen2-q-${n}`)}
+             <div class="question-prompt-text" id="lesen2-q-${n}" data-content-id="lesen2-q-${n}" data-source="${esc(it.prompt||'')}"><b>${i+1}.</b> ${esc(it.prompt||'')}</div>
+             ${translationBox(`lesen2-q-${n}-translation`)}
+           </div>
+           <div class="side-options">
+             ${ordered.map((o,oi)=>{
+               const ocid=`lesen2-o-${n}-${oi}`;
+               return `<div class="lesen2-option-wrap">
+                 <div class="lesen2-option-row">
+                   <button type="button" class="side-option ${chosen===o.option_key?'selected':''} ${detail&&chosen===o.option_key?(detail.ok?'result-correct':'result-wrong'):''} ${showCorrect&&correct===o.option_key?'model-correct':''}" data-q="${esc(n)}" data-o="${esc(o.option_key)}">
+                     <span class="option-text" id="${ocid}" data-content-id="${ocid}" data-source="${esc(o.option_text||'')}">${esc(o.option_key)}) ${esc(o.option_text||'')}</span>
+                   </button>
+                   ${textTools(o.option_text||'',ocid)}
+                 </div>
+                 ${translationBox(`${ocid}-translation`)}
+               </div>`;
+             }).join('')}
+           </div>
+         </div>`;
+       }).join('')}
+     </div>
+   </div>
+ `:'';
+
+ const gap2WordBankUnderText=gap2?`
+   <div class="gap2-wordbank-block" style="margin-top:28px;padding-top:20px;border-top:1px solid var(--line);">
+     <h3 style="font-size:18px;font-weight:900;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+       <span>🔤</span>
+       <span>${text('بنك الكلمات للاختيار في الفراغات (WÖRTER):','Wortauswahl für die Lücken:')}</span>
+     </h3>
+     <div class="word-bank" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));gap:10px;">
+       ${sharedOptions().map(([k,v],oi)=>{
+         const wid='wordbank-'+oi;
+         const isCorrect=(resultData?.details||[]).some(d=>String(d.correct_answer)===String(k));
+         return `<div class="word-card-wrap">
+           <button class="word-card ${Object.values(answers).includes(k)?'used':''} ${showModelAnswers&&isCorrect?'model-correct':''}" data-word="${esc(k)}">
+             <small>${String.fromCharCode(65+oi)}</small>
+             <b>${esc(v)}</b>
+           </button>
+           ${textTools(v,wid)}
+           ${translationBox(wid+'-translation')}
+         </div>`;
+       }).join('')}
+     </div>
+   </div>
+ `:'';
+
+ const main=isLesen2?`<div class="long-text lesen2-long-text">
+   <div class="long-text-tools">${textTools(bodyText,longTextId)}</div>
+   <div class="long-text-content" id="${longTextId}" data-content-id="${longTextId}" data-source="${esc(bodyText)}">${escBody(bodyText)}</div>
+   ${translationBox(longTextId+'-translation')}
+   ${lesen2QuestionsMarkup}
+ </div>`:gap2?`<div class="long-text">
+   <div class="long-text-tools">${textTools(bodyText,'gap2-text')}</div>
+   <div id="gap2-text" data-content-id="gap2-text" data-source="${esc(bodyText)}">${renderBody(bodyText)}</div>
+   ${translationBox('gap2-text-translation')}
+   ${gap2WordBankUnderText}
+ </div>`:`<div class="long-text">
+   <div class="long-text-tools">${textTools(bodyText,'choice-long-text')}</div>
+   <div id="choice-long-text" data-content-id="choice-long-text" data-source="${esc(bodyText)}">${escBody(bodyText)}</div>
+   ${translationBox('choice-long-text-translation')}
+ </div>`;
+
  let side='';
  if(gap2){
    const opts=sharedOptions();
-    side=`<div class="exam-side-sticky-header"><div class="side-title"><div class="side-title-text"><b>WÖRTER</b><small>${text('بنك الكلمات','Wortauswahl')}</small></div><div class="side-title-actions"><span class="side-counter-pill">${Object.keys(answers).length} / ${items.length}</span></div></div></div><div class="word-bank">${opts.map(([k,v],oi)=>{const wid='wordbank-'+oi;const isCorrect=(resultData?.details||[]).some(d=>String(d.correct_answer)===String(k));return `<div class="word-card-wrap"><button class="word-card ${Object.values(answers).includes(k)?'used':''} ${showModelAnswers&&isCorrect?'model-correct':''}" data-word="${esc(k)}"><small>${String.fromCharCode(65+oi)}</small><b>${esc(v)}</b></button>${textTools(v,wid)}${translationBox(wid+'-translation')}</div>`;}).join('')}</div>`;
-  } else if(isLesen2){
-    side=`<div class="exam-side-sticky-header"><div class="side-title side-title-large"><div class="side-title-text"><b>LESEN TEIL 2</b><small>${text('أسئلة الاختيار من متعدد','Multiple Choice')}</small></div><div class="side-title-actions"><button type="button" class="side-icon shuffle-options" aria-label="${text('خلط الاختيارات','Antworten mischen')}" title="${text('خلط الاختيارات','Antworten mischen')}">⤨</button><span class="side-counter-pill">${Object.keys(answers).length} / ${items.length}</span></div></div></div>`+
-     items.map((it,i)=>{
-       const n=String(it.position_no);
-       const chosen=answerValue(n);
-       const detail=resultData?.details?.find(d=>String(d.prompt)===String(it.prompt));
-       const correct=detail?.correct_answer||'';
-       const showCorrect=showModelAnswers&&correct;
-       const baseOptions=(it.options||[]).slice(0,3);
-       if(!optionOrders[n]) optionOrders[n]=baseOptions.map(o=>o.option_key);
-       const byKey=new Map(baseOptions.map(o=>[String(o.option_key),o]));
-       const ordered=optionOrders[n].map(k=>byKey.get(String(k))).filter(Boolean);
-       return `<div class="side-question lesen2-question ${detail?(detail.ok?'result-correct':'result-wrong'):''}">
-         <div class="question-prompt question-text-tools">${textTools(it.prompt||'',`lesen2-q-${n}`)}<div class="question-prompt-text" id="lesen2-q-${n}" data-content-id="lesen2-q-${n}" data-source="${esc(it.prompt||'')}">${esc(it.prompt||'')}</div>${translationBox(`lesen2-q-${n}-translation`)}</div>
-         <div class="side-options">${ordered.map((o,oi)=>{const ocid=`lesen2-o-${n}-${oi}`;return `<div class="lesen2-option-wrap">
-           <div class="lesen2-option-row"><button type="button" class="side-option ${chosen===o.option_key?'selected':''} ${detail&&chosen===o.option_key?(detail.ok?'result-correct':'result-wrong'):''} ${showCorrect&&correct===o.option_key?'model-correct':''}" data-q="${esc(n)}" data-o="${esc(o.option_key)}"><span class="option-text" id="${ocid}" data-content-id="${ocid}" data-source="${esc(o.option_text||'')}">${esc(o.option_text||'')}</span></button>${textTools(o.option_text||'',ocid)}</div>${translationBox(`${ocid}-translation`)}</div>`;}).join('')}</div>
-       </div>`;
-     }).join('');
+   side=`<div class="exam-side-sticky-header"><div class="side-title"><div class="side-title-text"><b>WÖRTER</b><small>${text('بنك الكلمات','Wortauswahl')}</small></div><div class="side-title-actions"><span class="side-counter-pill">${Object.keys(answers).length} / ${items.length}</span></div></div></div><div class="word-bank">${opts.map(([k,v],oi)=>{const wid='wordbank-'+oi;const isCorrect=(resultData?.details||[]).some(d=>String(d.correct_answer)===String(k));return `<div class="word-card-wrap"><button class="word-card ${Object.values(answers).includes(k)?'used':''} ${showModelAnswers&&isCorrect?'model-correct':''}" data-word="${esc(k)}"><small>${String.fromCharCode(65+oi)}</small><b>${esc(v)}</b></button>${textTools(v,wid)}${translationBox(wid+'-translation')}</div>`;}).join('')}</div>`;
+ } else if(isLesen2){
+   side=`<div class="exam-side-sticky-header"><div class="side-title side-title-large"><div class="side-title-text"><b>LESEN TEIL 2</b><small>${text('أسئلة الاختيار من متعدد','Multiple Choice')}</small></div><div class="side-title-actions"><button type="button" class="side-icon shuffle-options" aria-label="${text('خلط الاختيارات','Antworten mischen')}" title="${text('خلط الاختيارات','Antworten mischen')}">⤨</button><span class="side-counter-pill">${Object.keys(answers).length} / ${items.length}</span></div></div></div>`;
  } else {
-    side=`<div class="exam-side-sticky-header"><div class="side-title"><div class="side-title-text"><b>${model.exercise.task_type==='MCQ'?'AUFGABEN':'LÜCKEN'}</b><small>${text('قائمة الأسئلة','Fragenliste')}</small></div><div class="side-title-actions"><span class="side-counter-pill">${Object.keys(answers).length} / ${items.length}</span></div></div></div>`+items.map((it,i)=>{const qid='generic-q-'+it.position_no;return `<div class="side-question ${(()=>{const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));return d?(d.ok?'result-correct':'result-wrong'):''})()}"><div class="question-prompt question-text-tools">${textTools(it.prompt||'',qid)}<div id="${qid}" data-content-id="${qid}" data-source="${esc(it.prompt||'')}">${esc(it.prompt||'')}</div>${translationBox(qid+'-translation')}</div><div class="side-options">${(it.options||[]).map((o,oi)=>{const oid=`generic-o-${it.position_no}-${oi}`;const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));const isChosen=answerValue(it.position_no)===o.option_key;const isCorrect=showModelAnswers&&String(d?.correct_answer||'')===String(o.option_key);const resultClass=d&&isChosen?(d.ok?'result-correct':'result-wrong'):'';return `<div class="option-tool-wrap"><button class="side-option ${isChosen?'selected':''} ${resultClass} ${isCorrect?'model-correct':''}" data-q="${it.position_no}" data-o="${esc(o.option_key)}">${esc(o.option_text)}</button>${textTools(o.option_text||'',oid)}${translationBox(oid+'-translation')}</div>`;}).join('')}</div></div>`;}).join('');
+   side=`<div class="exam-side-sticky-header"><div class="side-title"><div class="side-title-text"><b>${model.exercise.task_type==='MCQ'?'AUFGABEN':'LÜCKEN'}</b><small>${text('قائمة الأسئلة','Fragenliste')}</small></div><div class="side-title-actions"><span class="side-counter-pill">${Object.keys(answers).length} / ${items.length}</span></div></div></div>`+items.map((it,i)=>{const qid='generic-q-'+it.position_no;return `<div class="side-question ${(()=>{const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));return d?(d.ok?'result-correct':'result-wrong'):''})()}"><div class="question-prompt question-text-tools">${textTools(it.prompt||'',qid)}<div id="${qid}" data-content-id="${qid}" data-source="${esc(it.prompt||'')}">${esc(it.prompt||'')}</div>${translationBox(qid+'-translation')}</div><div class="side-options">${(it.options||[]).map((o,oi)=>{const oid=`generic-o-${it.position_no}-${oi}`;const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));const isChosen=answerValue(it.position_no)===o.option_key;const isCorrect=showModelAnswers&&String(d?.correct_answer||'')===String(o.option_key);const resultClass=d&&isChosen?(d.ok?'result-correct':'result-wrong'):'';return `<div class="option-tool-wrap"><button class="side-option ${isChosen?'selected':''} ${resultClass} ${isCorrect?'model-correct':''}" data-q="${it.position_no}" data-o="${esc(o.option_key)}">${esc(o.option_text)}</button>${textTools(o.option_text||'',oid)}${translationBox(oid+'-translation')}</div>`;}).join('')}</div></div>`;}).join('');
  }
+
  document.getElementById('content').innerHTML=layout(main,side,isLesen2?'lesen2':'');
  if(gap2)document.querySelectorAll('[data-word]').forEach(b=>b.onclick=()=>{const first=items.find(it=>!answerValue(it.position_no));if(first)selectAnswer(first.position_no,b.dataset.word);});
  document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>selectAnswer(b.dataset.q,b.dataset.o));
+ document.querySelectorAll('[data-gap-select]').forEach(sel=>sel.onchange=e=>{
+   e.stopPropagation();
+   selectAnswer(sel.dataset.gapSelect,sel.value);
+ });
  if(isLesen2){
    const sh=document.querySelector('.shuffle-options');
    if(sh)sh.onclick=e=>{
@@ -289,7 +491,8 @@ function renderChoiceQuestions(){
 }
 
 function renderBody(body){
- let html=escBody(body||'');
+ const fullBody=getExerciseBody(model);
+ let html=escBody(fullBody||'');
  (model.items||[]).forEach(i=>{
    const n=String(i.position_no);
    const val=answerValue(n);
@@ -301,17 +504,36 @@ function renderBody(body){
    const isSpb1=model.exercise.section==='Sprachbausteine'&&model.exercise.teil==='Teil 1';
    const isSpb2=model.exercise.section==='Sprachbausteine'&&model.exercise.teil==='Teil 2';
    const examNo=isSpb1?Number(n)+20:isSpb2?Number(n)+30:Number(n);
-   let re;
+
+   let gapHtml='';
    if(isSpb1){
-     const correctText=String(i.correctText||i.prompt||'').trim();
-     re=correctText
-       ?new RegExp('\\('+examNo+'\\)|\\['+examNo+'\\]|\\{'+examNo+'\\}|\\['+escapeRegExp(correctText)+'\\]','g')
-       :new RegExp('\\('+examNo+'\\)|\\['+examNo+'\\]|\\{'+examNo+'\\}','g');
+     const options=(i.options||[]).slice(0,3);
+     const selectOpts=options.map(o=>{
+       const isSel=String(displayVal).toLowerCase()===String(o.option_key).toLowerCase();
+       return `<option value="${esc(o.option_key)}" ${isSel?'selected':''}>${esc(o.option_key)}) ${esc(o.option_text||o.option_key)}</option>`;
+     }).join('');
+     gapHtml=`<select class="inline-gap-select ${val?'answered':''} ${resultClass} ${modelClass}" data-gap-select="${n}" aria-label="${text('الفراغ','Lücke')} ${examNo}"><option value="">(${examNo}) — ${text('اختر','wählen')}</option>${selectOpts}</select>`;
+   }else if(isSpb2){
+     const opts=sharedOptions();
+     const selectOpts=opts.map(([k,v])=>{
+       const isSel=String(displayVal).toLowerCase()===String(k).toLowerCase();
+       return `<option value="${esc(k)}" ${isSel?'selected':''}>${esc(k)}: ${esc(v)}</option>`;
+     }).join('');
+     gapHtml=`<select class="inline-gap-select ${val?'answered':''} ${resultClass} ${modelClass}" data-gap-select="${n}" aria-label="${text('الفراغ','Lücke')} ${examNo}"><option value="">(${examNo}) — ${text('اختر كلمة','Wort')}</option>${selectOpts}</select>`;
    }else{
-     re=new RegExp('\\('+n+'\\)|\\['+n+'\\]|\\{'+n+'\\}','g');
+     const shown=displayVal?esc(labelFor(n,displayVal)):'('+examNo+')';
+     gapHtml='<span class="inline-answer '+(displayVal?'filled ':'')+resultClass+' '+modelClass+'">'+shown+'</span>';
    }
-   const shown=displayVal?esc(labelFor(n,displayVal)):'('+examNo+')';
-   html=html.replace(re,'<span class="inline-answer '+(displayVal?'filled ':'')+resultClass+' '+modelClass+'">'+shown+'</span>');
+
+   const re=new RegExp('(?:_{2,}|\\(|\\[|\\{)\\s*(?:'+examNo+'|'+n+')\\s*(?:_{2,}|\\)|\\]|\\})','g');
+   if(re.test(html)){
+     html=html.replace(re,gapHtml);
+   }else{
+     const fallbackRe=new RegExp('\\b'+examNo+'\\b','g');
+     if(fallbackRe.test(html)){
+       html=html.replace(fallbackRe,gapHtml);
+     }
+   }
  });
  return html;
 }
@@ -440,7 +662,7 @@ function renderTF(){
     <div class="exercise-actions">
       <div class="exercise-nav">
         <button class="btn" id="checkBtn">${text(mockMode ? 'إنهاء الجزء' : 'تحقق من الإجابات', mockMode ? 'Teil beenden' : 'Antworten prüfen')}</button>
-        ${mockMode ? '' : `<button class="btn model-btn" id="modelBtn">${text('الإجابة النموذجية','Musterlösung')}</button>`}
+        ${mockMode ? '' : `<button class="btn model-btn" id="modelBtn">${text(showModelAnswers ? 'إخفاء الإجابة' : 'الإجابة النموذجية', showModelAnswers ? 'Musterlösung ausblenden' : 'Musterlösung')}</button>`}
       </div>
     </div>`;
 
@@ -546,23 +768,38 @@ function bindHoerenAudioPlayer(){
 }
 function renderWriting(){
  const settings=parseSettings(model.exercise);
- const situationRaw=settings.situation_text||model.exercise.body||'';
- const taskRaw=settings.task_text||'';
+ const situationRaw=settings.situation_text||settings.situation||getExerciseBody(model);
+ const taskRaw=settings.task_text||settings.task||'';
  const sid='writing-situation'; const tid='writing-task';
  const activeDur = duration || (model?.exercise ? getTelcDurationSeconds(model.exercise) : 1800);
  const durMin = Math.round(activeDur / 60);
  const wordLimit = String(model?.exercise?.level||'').toUpperCase() === 'C1' ? 350 : 150;
+ const initialMin = String(durMin).padStart(2, '0');
+
  document.getElementById('content').innerHTML=`<div class="writing-page-shell">
+   <div class="exercise-heading writing-heading">
+     <div class="exercise-heading-title">
+       <span class="tag">Telc ${esc(model.exercise.level||'B2')} · Schreiben</span>
+       <div class="thema-title-row">
+         <h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}">${esc(model.exercise.title)}</h1>
+         <div class="thema-tools">
+           ${textTools(model.exercise.title||'','thema-title')}
+           <div class="inline-translation" id="thema-title-translation"></div>
+         </div>
+       </div>
+       <small>${esc(model.exercise.teil||'Teil 1')}</small>
+     </div>
+     <div class="progress-pill" id="timerEl">${initialMin}:00</div>
+   </div>
    <div class="writing-workspace">
     <section class="writing-left">
-      <div class="writing-title"><span>${esc(model.exercise.level||'B2')} · ${esc(model.exercise.teil)}</span><h1>${esc(model.exercise.title)}</h1></div>
       <div class="writing-time-rule">${text(`الوقت: ${durMin} دقيقة | الحد الأدنى ${wordLimit} كلمة`,`Zeit: ${durMin} Minuten | Mindestens ${wordLimit} Wörter`)}</div>
       <div class="writing-exam-note">Vergessen Sie nicht: Absender, Anschrift, Datum, Betreffzeile, Anrede und Schlussformel. Schreiben Sie mindestens ${wordLimit} Wörter.</div>
       <div class="writing-block"><h2>${text('الوضعية','Situation')}</h2><div class="question-text-tools">${textTools(situationRaw,sid)}<div id="${sid}" class="writing-german-content" data-content-id="${sid}" data-source="${esc(situationRaw)}">${escBody(situationRaw)}</div>${translationBox(sid+'-translation')}</div></div>
       ${taskRaw?`<div class="writing-block"><h2>${text('المطلوب','Aufgabe')}</h2><div class="writing-task question-text-tools">${textTools(taskRaw,tid)}<div id="${tid}" class="writing-german-content" data-content-id="${tid}" data-source="${esc(taskRaw)}">${escBody(taskRaw)}</div>${translationBox(tid+'-translation')}</div></div>`:''}
     </section>
     <section class="writing-editor">
-      <div class="editor-tools"><div class="editor-chars">${['ä','ö','ü','ß','Ä','Ö','Ü'].map(c=>`<button type="button" data-char="${c}">${c}</button>`).join('')}</div><div style="display:flex;align-items:center;gap:10px"><div class="progress-pill" id="timerEl">00:00</div><span id="wordCount">0 Wörter</span></div></div>
+      <div class="editor-tools"><div class="editor-chars">${['ä','ö','ü','ß','Ä','Ö','Ü'].map(c=>`<button type="button" class="char-btn" data-char="${c}">${c}</button>`).join('')}</div><div style="display:flex;align-items:center;gap:10px"><span id="wordCount">0 Wörter</span></div></div>
       <textarea id="writingAnswer" placeholder="${text('ابدأ في كتابة إجابتك هنا…','Beginne hier mit deiner Antwort…')}"></textarea>
       <div class="editor-bottom"><button class="btn ai-check-btn" id="aiWritingCheck">✦ ${text('تصحيح بالذكاء الاصطناعي','Mit KI korrigieren')}</button></div>
     </section>
@@ -1167,7 +1404,7 @@ function renderPresResult(data, isSaved){
 }
 
 function renderSpeaking(){
- const qid='speaking-question', body=model.exercise.body||'', teil=String(model.exercise.teil||'Teil 1');
+ const qid='speaking-question', body=getExerciseBody(model)||model.exercise.body||'', teil=String(model.exercise.teil||'Teil 1');
  const hint=teil==='Teil 1'?text('اختر موضوع العرض التقديمي واستعد للإلقاء ومناقشة أسئلة اللجنة مع الشريك.','Wählen Sie ein Thema für Ihre Präsentation und bereiten Sie sich auf die Fragen der Prüfer vor.'):
  teil==='Teil 2'?text('ناقش الموضوع مع الشريك: ابدأ بالمحتوى ثم عبّر عن رأيك وناقش التجارب والمزايا والعيوب وأسئلة اللجنة.','Diskutiere das Thema mit deinem Partner: Beginne mit dem Inhalt, äußere deine Meinung und besprecht Erfahrungen sowie Vor- und Nachteile.'):
  text('خططا المهمة معًا خطوة بخطوة، تفاوضا حول النقاط المطلوبة، ثم توصلا إلى اتفاق واضح.','Plant die Aufgabe gemeinsam Schritt für Schritt, besprecht die vorgegebenen Punkte und findet am Ende eine klare gemeinsame Lösung.');
@@ -1184,7 +1421,20 @@ function renderSpeaking(){
      else if(t.includes('reise')||t.includes('urlaub')||t.includes('stadt')||t.includes('land')) currentPresCategory='Reise';
    }
    document.getElementById('content').innerHTML=`<div class="speaking-exercise-shell">
-   <div class="thema-title-row speaking-title-row"><h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title)}" class="${titleRevealed?'':'thema-title-hidden'}">${esc(model.exercise.title)}</h1><div class="thema-tools">${textTools(model.exercise.title,'thema-title')}<div class="inline-translation" id="thema-title-translation"></div><button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text('إظهار العنوان','Titel anzeigen')}"><span class="eye-icon eye-off"></span></button></div></div>
+   <div class="exercise-heading speaking-heading">
+     <div class="exercise-heading-title">
+       <span class="tag">Telc ${esc(model.exercise.level||'B2')} · Sprechen</span>
+       <div class="thema-title-row">
+         <h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}" class="${titleRevealed?'':'thema-title-hidden'}">${esc(model.exercise.title)}</h1>
+         <div class="thema-tools">
+           ${textTools(model.exercise.title,'thema-title')}
+           <div class="inline-translation" id="thema-title-translation"></div>
+           <button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text('إظهار العنوان','Titel anzeigen')}"><span class="eye-icon eye-off"></span></button>
+         </div>
+       </div>
+       <small>${esc(teil)}</small>
+     </div>
+   </div>
    ${renderTeil1Studio()}
    </div>`;
    bindTeil1StudioEvents();
@@ -1193,7 +1443,20 @@ function renderSpeaking(){
  }
 
  document.getElementById('content').innerHTML=`<div class="speaking-exercise-shell">
- <div class="thema-title-row speaking-title-row"><h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title)}" class="${titleRevealed?'':'thema-title-hidden'}">${esc(model.exercise.title)}</h1><div class="thema-tools">${textTools(model.exercise.title,'thema-title')}<div class="inline-translation" id="thema-title-translation"></div><button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text('إظهار العنوان','Titel anzeigen')}"><span class="eye-icon eye-off"></span></button></div></div>
+ <div class="exercise-heading speaking-heading">
+   <div class="exercise-heading-title">
+     <span class="tag">Telc ${esc(model.exercise.level||'B2')} · Sprechen</span>
+     <div class="thema-title-row">
+       <h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}" class="${titleRevealed?'':'thema-title-hidden'}">${esc(model.exercise.title)}</h1>
+       <div class="thema-tools">
+         ${textTools(model.exercise.title,'thema-title')}
+         <div class="inline-translation" id="thema-title-translation"></div>
+         <button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text('إظهار العنوان','Titel anzeigen')}"><span class="eye-icon eye-off"></span></button>
+       </div>
+     </div>
+     <small>${esc(teil)}</small>
+   </div>
+ </div>
  <div class="speaking-layout"><section class="speaking-task-panel"><div class="speaking-task-head"><span class="tag">${esc(model.exercise.level||'B2')} · ${esc(teil)}</span><strong>${text('الموضوع','Thema')}</strong></div><div class="speaking-task-text question-text-tools">${textTools(body,qid)}<div id="${qid}" data-content-id="${qid}" data-source="${esc(body)}">${escBody(body)}</div>${translationBox(qid+'-translation')}</div>${teil==='Teil 3'?renderSpeakingTaskList(body):''}<div class="speaking-hint">${esc(hint)}</div></section>
  <section class="speaking-simulator"><div class="speaking-sim-head"><div><span class="tag">${esc(teil)}</span><h2>${text('محادثة مع الشريك والممتحن','Gespräch mit Partner & Prüfer')}</h2><small>${text('اكتب إجابتك بالألمانية واستمع إلى رد الشريك صوتيًا.','Schreibe deine Antwort auf Deutsch und höre die Antwort deines Partners an.')}</small></div><span class="speaking-live-dot">●</span></div><div class="speaking-roles"><div class="speaking-role"><span class="speaking-avatar jerry-avatar">J</span><div><b>Jerry</b><small>${text('الممتحن والمدرب','Prüfer & Trainer')}</small></div></div><div class="speaking-role"><span class="speaking-avatar partner-avatar">P</span><div><b>${text('الشريك','Partner')}</b><small>${text('يتفاعل معك في المحادثة','Gesprächspartner')}</small></div></div></div><div class="speaking-chat" id="speakingChat"></div>
  <div class="speaking-writing-box"><div class="speaking-writing-label"><span>${text('إجابتك','Deine Antwort')}</span><small>${text('اكتب بالألمانية ثم اضغط إرسال','Auf Deutsch schreiben und Senden drücken')}</small></div><div class="speaking-input-row"><textarea id="speakingInput" placeholder="${text('اكتب ردك هنا بالألمانية…','Schreibe deine Antwort auf Deutsch…')}"></textarea><button type="button" class="btn dark" id="speakingSend">${text('إرسال','Senden')}</button></div></div>
@@ -1227,7 +1490,7 @@ function layout(main,side,workspaceClass=''){
  const activeDuration = duration || (model?.exercise ? getTelcDurationSeconds(model.exercise) : 1200);
  const initialMin = String(Math.floor(activeDuration / 60)).padStart(2, '0');
  const timer=(mockMode||activeDuration)?`<div class="progress-pill ${mockMode?'mock-global-timer':''}" id="timerEl">${initialMin}:00</div>`:'';
- const resultPanel=resultData?`<div class="inline-result-panel ${resultData.percent>=60?'pass':'fail'}"><div class="result-panel-main"><span class="result-panel-label">${text('النتيجة','Ergebnis')}</span><strong>${resultData.score} / ${resultData.max}</strong></div><div class="result-panel-meta"><span>${resultData.percent}%</span><b>${esc(resultData.result||'')}</b></div></div>`:''; return `<div class="exercise-heading"><div class="exercise-heading-title"><span class="tag">Telc ${esc(model.exercise.level||'B2')} · ${esc(model.exercise.section)}</span>${headingTools}<small>${esc(model.exercise.teil)}</small></div>${renderAudio()}${timer}</div>${resultPanel}<div class="exam-workspace ${combinedWorkspaceClass}"><section class="exam-main">${main}</section><aside class="exam-side">${side}</aside></div><div class="exercise-actions"><div class="exercise-nav"><button class="btn" id="checkBtn">${text(mockMode?'إنهاء الجزء':'تحقق من الإجابات',mockMode?'Teil beenden':'Antworten prüfen')}</button>${mockMode?'':`<button class="btn model-btn" id="modelBtn">${text('الإجابة النموذجية','Musterlösung')}</button>`}</div></div>`;
+ const resultPanel=resultData?`<div class="inline-result-panel ${resultData.percent>=60?'pass':'fail'}"><div class="result-panel-main"><span class="result-panel-label">${text('النتيجة','Ergebnis')}</span><strong>${resultData.score} / ${resultData.max}</strong></div><div class="result-panel-meta"><span>${resultData.percent}%</span><b>${esc(resultData.result||'')}</b></div></div>`:''; return `<div class="exercise-heading"><div class="exercise-heading-title"><span class="tag">Telc ${esc(model.exercise.level||'B2')} · ${esc(model.exercise.section)}</span>${headingTools}<small>${esc(model.exercise.teil)}</small></div>${renderAudio()}${timer}</div>${resultPanel}<div class="exam-workspace ${combinedWorkspaceClass}"><section class="exam-main">${main}</section><aside class="exam-side">${side}</aside></div><div class="exercise-actions"><div class="exercise-nav"><button class="btn" id="checkBtn">${text(mockMode?'إنهاء الجزء':'تحقق من الإجابات',mockMode?'Teil beenden':'Antworten prüfen')}</button>${mockMode?'':`<button class="btn model-btn" id="modelBtn">${text(showModelAnswers ? 'إخفاء الإجابة' : 'الإجابة النموذجية', showModelAnswers ? 'Musterlösung ausblenden' : 'Musterlösung')}</button>`}</div></div>`;
 }
 
 function bindActions(){
@@ -1237,9 +1500,8 @@ function bindActions(){
  if(mb)mb.onclick=async()=>{
    const st=captureExerciseScroll();
    try{
-     if(!submitted)await submit();
-     if(!resultData)return;
-     showModelAnswers=true;
+     if(!submitted && !resultData) await submit();
+     showModelAnswers=!showModelAnswers;
      rerenderExerciseStable(st);
    }catch(e){document.getElementById('content').insertAdjacentHTML('beforeend',`<div class="alert bad">${esc(e.message)}</div>`);restoreExerciseScroll(st);}
  };
@@ -1279,7 +1541,7 @@ function renderWorkspace(){
   return renderChoiceQuestions();
 }
 function renderResult(r){const st=captureExerciseScroll();submitted=true;resultData=r;rerenderExerciseStable(st);}
-async function submit(){if(submitted)return;if(!model.items.length){if(mockMode){goNextMock();}return;}try{const r=await api('exercise-submit',{method:'POST',body:{exercise_id:id,answers}});localStorage.setItem('last_exercise_result_'+id,JSON.stringify(r));markExerciseCompleted(id);if(mockMode){const s=getMockSession();if(s){s.results=s.results||[];s.results.push({id,title:model.exercise.title,section:model.exercise.section,teil:model.exercise.teil,score:r.score,max:r.max,percent:r.percent,result:r.result});s.index=(s.ids||[]).findIndex(x=>String(x)===String(id));localStorage.setItem('telc_self_test',JSON.stringify(s));}goNextMock();return;}renderResult(r);}catch(e){document.getElementById('content').insertAdjacentHTML('beforeend',`<div class="alert bad">${esc(e.message)}</div>`);}}
+async function submit(){if(!model.items.length){if(mockMode){goNextMock();}return;}showModelAnswers=false;try{const r=await api('exercise-submit',{method:'POST',body:{exercise_id:id,answers}});localStorage.setItem('last_exercise_result_'+id,JSON.stringify(r));markExerciseCompleted(id);if(mockMode){const s=getMockSession();if(s){s.results=s.results||[];s.results.push({id,title:model.exercise.title,section:model.exercise.section,teil:model.exercise.teil,score:r.score,max:r.max,percent:r.percent,result:r.result});s.index=(s.ids||[]).findIndex(x=>String(x)===String(id));localStorage.setItem('telc_self_test',JSON.stringify(s));}goNextMock();return;}renderResult(r);}catch(e){document.getElementById('content').insertAdjacentHTML('beforeend',`<div class="alert bad">${esc(e.message)}</div>`);}}
 document.addEventListener('langchange', () => {
   if (!model?.exercise || model.exercise.section !== 'Hören') return;
   const st = captureExerciseScroll();

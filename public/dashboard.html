@@ -1013,17 +1013,17 @@ function renderTopics(){
       const isLocked = !isUserPaid && !isExFree;
 
       const accessBadge = isExFree
-        ? `<span class="tag tag-free-badge" title="${text('محتوى مجاني للجميع','Kostenlos')}">🟢 ${text('مجاني','Kostenlos')}</span>`
-        : `<span class="tag tag-lock-badge" title="${text('محتوى مخصص للمشتركين (مدفوع)','Nur für Abonnenten (Premium)')}">🔒</span>`;
+        ? `<span class="card-access-pill pill-free" title="${text('محتوى مجاني للجميع','Kostenlos')}"><span class="pill-dot"></span>${text('مجاني','Kostenlos')}</span>`
+        : (isUserPaid
+          ? `<span class="card-access-pill pill-unlocked" title="${text('متاح ضمن اشتراكك','Freigeschaltet')}">✨ ${text('متاح','Aktiv')}</span>`
+          : `<span class="card-access-pill pill-locked" title="${text('محتوى مخصص للمشتركين (مدفوع)','Nur für Abonnenten')}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> ${text('مشتركين','Premium')}</span>`);
 
       return `<article class="topic-card ${isMulti ? 'has-variations' : ''}">
         <div class="topic-card-head">
           <div class="topic-head-start">
-            <span class="topic-index">${String(i+1).padStart(2,'0')}</span>
-            <span class="tag">Telc ${esc(primaryEx.level||'B2')}</span>
+            <span class="topic-level-badge">${String(i+1).padStart(2,'0')} · Telc ${esc(primaryEx.level||'B2')}</span>
           </div>
           <div class="topic-head-end">
-            ${isMulti ? `<span class="tag tag-variation" title="${g.items.length} ${text('تعديلات متاحة لهذا التمرين','Versionen verfügbar')}">📚 ${g.items.length} ${text('تعديلات','Versionen')}</span>` : ''}
             ${accessBadge}
           </div>
         </div>
@@ -1035,6 +1035,7 @@ function renderTopics(){
           <span class="topic-meta-pill">${esc(primaryEx.teil)}</span>
           <span class="topic-meta-pill">${esc(taskTypeLabel(primaryEx.task_type))}</span>
           <span class="topic-meta-pill">⏱ ${dur} ${text('دقيقة','Min.')}</span>
+          ${isMulti ? `<span class="topic-meta-pill topic-variation-pill" title="${g.items.length} ${text('تعديلات متاحة لهذا التمرين','Versionen verfügbar')}">📑 ${g.items.length} ${text('تعديلات','Versionen')}</span>` : ''}
         </div>
         ${isMulti ? `
           <button type="button" class="btn light topic-open-btn topic-variation-btn" data-group-idx="${i}">
@@ -1196,8 +1197,10 @@ function openVariationModal(group) {
       const isExFree = (ex.access_mode || 'paid') === 'free';
       const isLocked = !isUserPaid && !isExFree;
       const accessBadge = isExFree
-        ? `<span class="tag tag-free-badge" title="${text('محتوى مجاني للجميع','Kostenlos')}">🟢 ${text('مجاني','Free')}</span>`
-        : `<span class="tag tag-lock-badge" title="${text('محتوى مخصص للمشتركين','Premium')}">🔒</span>`;
+        ? `<span class="card-access-pill pill-free"><span class="pill-dot"></span>${text('مجاني','Free')}</span>`
+        : (isUserPaid
+          ? `<span class="card-access-pill pill-unlocked">✨ ${text('متاح','Aktiv')}</span>`
+          : `<span class="card-access-pill pill-locked">🔒 ${text('مشتركين','Premium')}</span>`);
       const label = it.info.label || (idx === 0 ? text('الأساسي', 'Standard') : ((typeof getLang === 'function' && getLang() === 'de') ? `Modifiziert ${idx}` : `المعدل ${idx}`));
 
       if (isLocked) {

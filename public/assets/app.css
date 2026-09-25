@@ -93,8 +93,8 @@ html[data-theme="dark"] .top, html[data-theme="dark"] .auth-nav, html[data-theme
 .brand{font-weight:900;color:var(--green);text-decoration:none;font-size:21px;letter-spacing:-.04em;order:1 !important;flex:none;display:inline-flex;align-items:center;gap:8px;margin-inline-end:10px}
 .brand-mark{display:inline-flex;align-items:center;gap:8px}.brand-dot{width:10px;height:10px;border-radius:50%;background:var(--green);display:inline-block}
 
-/* Unified Nav Links for both Student & Admin */
-.top nav, .admin-nav nav, .student-nav-links, .admin-top-links{display:flex !important;gap:5px !important;align-items:center !important;order:2 !important;flex:1 1 auto;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:4px 0;margin:0;list-style:none}
+/* Unified Nav Links for both Student & Admin - Horizontally Centered */
+.top nav, .admin-nav nav, .student-nav-links, .admin-top-links{display:flex !important;gap:6px !important;align-items:center !important;justify-content:center !important;margin-inline:auto !important;order:2 !important;flex:1 1 auto;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding:4px 0;list-style:none}
 .top nav::-webkit-scrollbar, .admin-nav nav::-webkit-scrollbar, .student-nav-links::-webkit-scrollbar, .admin-top-links::-webkit-scrollbar{display:none}
 .top nav a, .admin-nav nav a, .student-nav-links a, .admin-top-links a{display:inline-flex;align-items:center;justify-content:center;padding:6px 13px;border-radius:999px;color:var(--ink);opacity:.85;text-decoration:none;white-space:nowrap;font-size:13.5px;font-weight:750;line-height:1.4;border:1px solid transparent;transition:all .18s cubic-bezier(0.16,1,0.3,1);box-sizing:border-box;flex:none}
 .top nav a:hover, .admin-nav nav a:hover, .student-nav-links a:hover, .admin-top-links a:hover{opacity:1;color:var(--green-dark);background:var(--green-soft);border-color:color-mix(in srgb,var(--green) 25%,transparent)}
@@ -4797,3 +4797,226 @@ html[data-theme="dark"] .hoeren-audio-player-card {
   color: var(--green);
   flex: none;
 }
+
+/* =====================================================================
+   TELC VOLL PLATFORM-WIDE POLISH: EXERCISE, DASHBOARD, ADMIN & MOBILE
+   ===================================================================== */
+
+/* German Character Buttons (Schreiben Editor) in Dark & Light Mode */
+.editor-chars {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  flex-wrap: wrap !important;
+}
+
+.char-btn,
+.editor-chars button {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 9px !important;
+  border: 1.5px solid var(--line) !important;
+  background: var(--white) !important;
+  color: var(--ink) !important;
+  font-family: inherit !important;
+  font-weight: 850 !important;
+  font-size: 15px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.18s ease !important;
+  user-select: none !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1) !important;
+}
+
+.char-btn:hover,
+.editor-chars button:hover {
+  background: var(--green) !important;
+  color: #fff !important;
+  border-color: var(--green) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 10px rgba(255,122,47,0.25) !important;
+}
+
+.char-btn:active,
+.editor-chars button:active {
+  transform: translateY(0) !important;
+}
+
+/* Interactive Inline Gap Select (Sprachbausteine 1 & 2) */
+.inline-gap-select {
+  display: inline-flex;
+  vertical-align: middle;
+  margin: 0 5px;
+  padding: 4px 10px;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 750;
+  color: var(--ink);
+  background: var(--white);
+  border: 1.5px solid var(--line);
+  border-radius: 9px;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  max-width: 240px;
+  text-overflow: ellipsis;
+}
+
+.inline-gap-select:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px var(--green-soft);
+}
+
+.inline-gap-select.answered {
+  border-color: var(--green);
+  background: var(--green-soft);
+  color: var(--ink);
+}
+
+.inline-gap-select.result-correct,
+.inline-gap-select.model-correct {
+  border-color: #228151 !important;
+  background: rgba(34, 129, 81, 0.18) !important;
+  color: #2ecc71 !important;
+  font-weight: 850 !important;
+}
+
+.inline-gap-select.result-wrong {
+  border-color: #e06c62 !important;
+  background: rgba(224, 108, 98, 0.18) !important;
+  color: #e06c62 !important;
+  font-weight: 850 !important;
+}
+
+/* Dashboard SaaS Exercise Cards Modern Badges */
+.topic-level-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: rgba(255, 122, 47, 0.12);
+  color: var(--green);
+  border: 1px solid rgba(255, 122, 47, 0.25);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.card-access-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 850;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+
+.card-access-pill.pill-free {
+  background: rgba(46, 204, 113, 0.12);
+  color: #2ecc71;
+  border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.card-access-pill.pill-locked {
+  background: rgba(255, 122, 47, 0.10);
+  color: var(--green);
+  border: 1px solid rgba(255, 122, 47, 0.25);
+}
+
+.card-access-pill.pill-unlocked {
+  background: rgba(52, 152, 219, 0.12);
+  color: #3498db;
+  border: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+.topic-variation-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+/* Admin Students Table Single-Row Badges and Actions */
+.badge-free, .badge-paid, .badge-provider {
+  white-space: nowrap !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.action-group {
+  display: inline-flex !important;
+  flex-wrap: nowrap !important;
+  gap: 6px !important;
+  align-items: center !important;
+  white-space: nowrap !important;
+}
+
+/* Mobile & Touch Responsiveness for Exercise & Exam Shell */
+@media (max-width: 768px) {
+  .exercise-heading {
+    padding: 16px 14px 12px !important;
+    gap: 10px !important;
+    flex-wrap: wrap !important;
+  }
+  .exercise-heading-title {
+    width: 100% !important;
+  }
+  .thema-title-row {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  .exam-workspace {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  .exam-main {
+    padding: 14px 12px 90px !important;
+  }
+  .exam-side {
+    position: static !important;
+    height: auto !important;
+    max-height: none !important;
+    border-inline-start: 0 !important;
+    border-top: 1px solid var(--line) !important;
+    padding: 16px 12px 80px !important;
+  }
+  .spb-questions-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .hoeren-table-card {
+    border-radius: 16px !important;
+    overflow-x: auto !important;
+  }
+  .exercise-actions {
+    padding: 10px 14px !important;
+    min-height: 58px !important;
+  }
+  .exercise-nav {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+  .exercise-nav .btn {
+    flex: 1 !important;
+    text-align: center !important;
+    justify-content: center !important;
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+  }
+}
+
