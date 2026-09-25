@@ -3,41 +3,258 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0d1310"><title>لوحة الطالب</title>
-<link rel="stylesheet" href="/assets/app.css">
+<link rel="stylesheet" href="/assets/app.css?v=20260918-cairo-local-v2">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
 <link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="/manifest.webmanifest">
+<style>
+.pres-studio-active-grid { display: block !important; width: 100% !important; grid-column: 1 / -1; }
+/* In-app Student Notification Center */
+.notif-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+.notif-bell-btn.icon-btn {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  padding: 0;
+  box-sizing: border-box;
+}
+.notif-bell-btn.icon-btn:hover {
+  background: var(--green-soft);
+  border-color: var(--green);
+  color: var(--green);
+}
+.notif-badge {
+  position: absolute;
+  top: -4px;
+  inset-inline-end: -4px;
+  background: var(--green, #f47b20);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 900;
+  min-width: 17px;
+  height: 17px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid var(--white);
+  line-height: 1;
+}
+.notif-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  inset-inline-end: 0;
+  width: min(360px, calc(100vw - 28px));
+  max-height: 420px;
+  background: var(--white, #fff);
+  border: 1px solid var(--line, #e2e8e5);
+  border-radius: 18px;
+  box-shadow: 0 16px 40px rgba(16, 35, 30, 0.15);
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  text-align: right;
+}
+.notif-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+}
+.notif-btn-text {
+  background: none;
+  border: none;
+  color: var(--green, #f47b20);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+.notif-btn-text:hover { text-decoration: underline; }
+.notif-list {
+  overflow-y: auto;
+  max-height: 360px;
+}
+.notif-item {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  position: relative;
+  transition: background 0.15s;
+}
+.notif-item:last-child { border-bottom: none; }
+.notif-item.unread {
+  background: var(--green-soft);
+}
+.notif-item.unread::before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  inset-inline-end: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+}
+.notif-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.notif-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink);
+  margin: 0;
+}
+.notif-badge-pill {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 999px;
+  display: inline-block;
+}
+.notif-pill-important, .notif-pill-urgent { background: rgba(239, 68, 68, 0.14); color: var(--danger); }
+.notif-pill-warning { background: rgba(245, 158, 11, 0.14); color: var(--gold); }
+.notif-pill-info { background: rgba(59, 130, 246, 0.14); color: #3b82f6; }
+.notif-pill-success { background: rgba(34, 197, 94, 0.14); color: #16a34a; }
+.notif-pill-announcement { background: rgba(168, 85, 247, 0.14); color: #9333ea; }
+.notif-msg {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 4px 0 6px;
+}
+.notif-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--muted);
+}
+.notif-mark-single-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+.notif-mark-single-btn:hover { color: var(--green); }
+.notif-empty {
+  padding: 30px 20px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+html[data-theme="dark"] .notif-dropdown {
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+}
+</style>
+<style><!-- TELC Voll: unified homepage typography -->
+html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
+html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}</style>
 </head>
 <body>
 <header class="top">
   <a class="brand" href="/dashboard.html"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
-  <nav>
-    <a href="/self-test.html" id="mockExamNav" data-i18n="nav_mock">امتحان تجريبي</a><a href="/telc-chat.html" id="telcChatNav" data-i18n="nav_speaking">مساعد TELC</a><a href="#" id="logoutLink" data-i18n="nav_logout">خروج</a>
+  <nav class="student-nav-links">
+    <a href="/self-test.html" data-i18n="nav_mock">امتحان تجريبي</a>
+    <a href="/telc-chat.html" data-i18n="nav_speaking">مساعد TELC</a>
+    <a href="/profile.html" data-i18n="profile_link">ملفي</a>
+    <a href="#" id="logoutLink" data-i18n="nav_logout" class="nav-logout-btn">خروج</a>
   </nav>
-  <div class="header-actions">
-    <button class="icon-btn mobile-nav-toggle" id="mobileNavToggle" aria-label="القائمة" aria-expanded="false" aria-controls="mobileNavPanel">
-      <svg width="18" height="14" viewBox="0 0 18 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="0" y1="1" x2="18" y2="1"/><line x1="0" y1="7" x2="18" y2="7"/><line x1="0" y1="13" x2="18" y2="13"/></svg>
-    </button>
-  </div>
-</header>
+  <span class="header-actions">
+    <div class="notif-wrapper">
+      <button id="notifBellBtn" class="icon-btn notif-bell-btn" type="button" aria-label="التنبيهات" title="التنبيهات">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+        <span id="notifBadge" class="notif-badge" style="display:none;">0</span>
+      </button>
+      <div id="notifDropdown" class="notif-dropdown" style="display:none;">
+        <div class="notif-header">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-weight:900;font-size:14px;">التنبيهات</span>
+            <span id="notifCountTag" class="tag" style="padding:2px 8px;font-size:11px;">0</span>
+          </div>
+          <button type="button" id="markAllReadBtn" class="notif-btn-text">تحديد الكل كمقروء</button>
+        </div>
+        <div id="notifList" class="notif-list">
+          <div class="notif-empty">لا توجد تنبيهات جديدة</div>
+        </div>
+      </div>
+    </div>
+  </span>
+<button class="icon-btn mobile-nav-toggle" id="mobileNavToggle" aria-label="القائمة" aria-expanded="false"><svg width="18" height="14" viewBox="0 0 18 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="0" y1="1" x2="18" y2="1"/><line x1="0" y1="7" x2="18" y2="7"/><line x1="0" y1="13" x2="18" y2="13"/></svg></button></header>
 <nav class="dashboard-mobile-nav" id="mobileNavPanel" role="navigation" aria-label="القائمة الرئيسية">
-  <a href="/self-test.html" id="mobileExamNav">
+  <a href="/self-test.html">
     <span class="nav-item-icon">📋</span>
     <span data-i18n="nav_mock">امتحان تجريبي</span>
   </a>
-  <a href="/telc-chat.html" id="mobileChatNav">
+  <a href="/telc-chat.html">
     <span class="nav-item-icon">✦</span>
     <span data-i18n="nav_speaking">مساعد TELC</span>
   </a>
-  <a href="#" id="mobileLogoutLink" class="nav-danger">
+  <a href="/profile.html">
+    <span class="nav-item-icon">👤</span>
+    <span data-i18n="profile_link">الملف</span>
+  </a>
+  <a href="#" id="mobileLogoutLink">
     <span class="nav-item-icon danger">↩</span>
-    <span data-i18n="nav_logout">خروج</span>
+    <span>خروج</span>
   </a>
 </nav>
 <main class="student-hub" id="content"><div class="student-loading">جارٍ التحميل…</div></main>
-<script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
+<div id="variationModal" class="variation-modal-overlay" hidden aria-hidden="true">
+  <div class="variation-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="variationModalTitle">
+    <button type="button" class="variation-modal-close" id="closeVariationModal" onclick="closeVariationModal()" aria-label="إغلاق">×</button>
+    <div class="variation-modal-header">
+      <div class="variation-topic-header" id="variationTopicBadge">
+        <span class="variation-topic-icon" id="variationTopicIcon" aria-hidden="true">📖</span>
+        <strong class="variation-topic-name" id="variationTopicName"></strong>
+        <span class="variation-topic-trans" id="variationTopicTrans"></span>
+      </div>
+      <h2 class="variation-modal-title" id="variationModalTitle">التعديلات المتاحة</h2>
+      <p class="variation-modal-subtitle" id="variationModalSub"></p>
+    </div>
+    <div class="variation-modal-list" id="variationList"></div>
+  </div>
+</div>
+<div id="lockModal" class="variation-modal-overlay" hidden aria-hidden="true">
+  <div class="variation-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="lockModalTitle" style="max-width:440px;text-align:center;padding:32px 24px;">
+    <button type="button" class="variation-modal-close" onclick="closeLockModal()" aria-label="إغلاق">×</button>
+    <div style="font-size:46px;margin-bottom:12px;">🔒</div>
+    <h2 id="lockModalTitle" style="font-size:22px;margin:0 0 10px;color:var(--ink);">محتوى مدفوع</h2>
+    <p id="lockModalMsg" class="muted" style="font-size:14px;line-height:1.6;margin-bottom:24px;">
+      هذا التمرين متاح فقط لأصحاب الاشتراكات المدفوعة. حسابك الحالي مجاني ويتيح لك الوصول إلى جميع التمارين المصنفة كمجانية.
+    </p>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+      <a href="/#plans" class="btn" style="padding:12px 24px;font-size:14px;font-weight:900;">ترقية الحساب والاشتراك الآن ←</a>
+      <button type="button" class="btn light" onclick="closeLockModal()" style="padding:12px 18px;font-size:14px;">إغلاق</button>
+    </div>
+  </div>
+</div>
+<script src="/assets/i18n.js?v=20260922"></script><script src="/assets/app.js?v=20260922"></script>
 <script>
 const SECTION_ORDER=['Lesen','Hören','Sprachbausteine','Schreiben','Sprechen'];
 const TEIL_ORDER={Lesen:['Teil 1','Teil 2','Teil 3'],Hören:['Teil 1','Teil 2','Teil 3'],Sprachbausteine:['Teil 1','Teil 2'],Schreiben:['Teil 1'],Sprechen:['Teil 1','Teil 2','Teil 3']};
@@ -48,46 +265,125 @@ let shuffleEnabled=true;
 let shuffleOrderKey='';
 let shuffleOrder=[];
 let selectedTeil='';
+let renderedTopicGroups=[];
+function norm(v){return String(v||'').trim().toLowerCase().replace(/\s+/g,'');}
 function calcRemainingDays(){const raw=state.subscription?.expires_at;if(!raw)return 0;const ms=new Date(raw).getTime()-Date.now();return Math.max(0,Math.ceil(ms/86400000));}
 const $=id=>document.getElementById(id);
 function lang(){return getLang();}
-function text(ar,de){return lang()==='ar'?ar:de;}
-function exerciseDuration(x){return Number(x.settings_json?.duration_seconds||x.duration_seconds||90)||90;}
-function sectionIcon(s){return ({Lesen:'◫',Hören:'◉',Sprachbausteine:'⌘',Schreiben:'✎',Sprechen:'◌'})[s]||'•';}
+var text = window.text || ((ar,de)=>(typeof getLang==='function' && getLang()==='de')?de:ar);
+var sectionIcon = window.sectionIcon || (s=>({Lesen:'📖',Hören:'🎧',Sprachbausteine:'🧩',Schreiben:'✍️',Sprechen:'🎙️'})[s]||'📄');
+const TELC_DURATIONS = {
+  B1: {
+    Lesen: { 'Teil 1': 20, 'Teil 2': 20, 'Teil 3': 15, _default: 20 },
+    Sprachbausteine: { 'Teil 1': 10, 'Teil 2': 10, _default: 10 },
+    Hören: { 'Teil 1': 10, 'Teil 2': 10, 'Teil 3': 10, _default: 10 },
+    Schreiben: { 'Teil 1': 30, _default: 30 },
+    Sprechen: { 'Teil 1': 4, 'Teil 2': 5, 'Teil 3': 5, _default: 5 }
+  },
+  B2: {
+    Lesen: { 'Teil 1': 20, 'Teil 2': 25, 'Teil 3': 20, _default: 20 },
+    Sprachbausteine: { 'Teil 1': 15, 'Teil 2': 10, _default: 15 },
+    Hören: { 'Teil 1': 6, 'Teil 2': 8, 'Teil 3': 6, _default: 7 },
+    Schreiben: { 'Teil 1': 30, _default: 30 },
+    Sprechen: { 'Teil 1': 5, 'Teil 2': 5, 'Teil 3': 5, _default: 5 }
+  },
+  C1: {
+    Lesen: { 'Teil 1': 25, 'Teil 2': 25, 'Teil 3': 20, _default: 25 },
+    Sprachbausteine: { 'Teil 1': 20, 'Teil 2': 20, _default: 20 },
+    Hören: { 'Teil 1': 12, 'Teil 2': 15, 'Teil 3': 13, _default: 13 },
+    Schreiben: { 'Teil 1': 70, _default: 70 },
+    Sprechen: { 'Teil 1': 6, 'Teil 2': 6, 'Teil 3': 6, _default: 6 }
+  }
+};
+function exerciseDuration(x){
+  const explicit = Number(x?.settings_json?.duration_seconds || x?.duration_seconds || x?.time_limit_seconds || 0);
+  if(explicit > 0 && explicit <= 180) return explicit;
+  if(explicit > 180) return Math.round(explicit / 60);
+  const lvl = String(x?.level || 'B2').toUpperCase();
+  const sec = String(x?.section || '');
+  const teil = String(x?.teil || 'Teil 1').trim();
+  const lvlMap = TELC_DURATIONS[lvl] || TELC_DURATIONS.B2;
+  const secMap = lvlMap[sec] || TELC_DURATIONS.B2[sec];
+  if(!secMap) return 20;
+  for(const k of Object.keys(secMap)){
+    if(k !== '_default' && (teil.includes(k) || k.includes(teil))) return secMap[k];
+  }
+  return secMap._default || 20;
+}
 function sectionLabel(s){return ({Lesen:'Lesen',Hören:'Hören',Sprachbausteine:'Sprachbausteine',Schreiben:'Schreiben',Sprechen:'Sprechen'})[s]||s;}
 function taskTypeLabel(type){const map={MATCHING:{ar:'مطابقة',de:'Zuordnung'},MCQ:{ar:'اختيار من متعدد',de:'Multiple Choice'},AUDIO_TF:{ar:'صحيح / خطأ',de:'Richtig / Falsch'},WRITING:{ar:'كتابة',de:'Schreiben'},SPEAKING:{ar:'تحدث',de:'Sprechen'}};const x=map[type];return x?text(x.ar,x.de):type;}
 function levelAvailable(level){return state.exercises.some(x=>(x.level||'B2')===level);}
-function availableTeileFor(section, level=state.level){const order=TEIL_ORDER[section]||[];const present=new Set(state.exercises.filter(x=>(x.level||'B2')===level&&x.section===section).map(x=>String(x.teil||'').trim()).filter(Boolean));return order.filter(t=>present.has(t)).concat([...present].filter(t=>!order.includes(t)).sort((a,b)=>a.localeCompare(b,'de',{numeric:true})));}
+function availableTeileFor(section, level=state.level){
+  const order=TEIL_ORDER[section]||['Teil 1'];
+  const present=new Set(state.exercises.filter(x=>(x.level||'B2')===level&&x.section===section).map(x=>String(x.teil||'').trim()).filter(Boolean));
+  if(!present.size) return order.slice();
+  return order.filter(t=>present.has(t)).concat([...present].filter(t=>!order.includes(t)).sort((a,b)=>a.localeCompare(b,'de',{numeric:true})));
+}
 function levelExercises(level=state.level){return state.exercises.filter(x=>(x.level||'B2')===level);}
 function totalCountForLevel(){return levelExercises().length;}
 function completedCountForLevel(){return levelExercises().filter(x=>isExerciseCompleted(x.id)).length;}
 function levelProgressPercent(){const total=totalCountForLevel();return total?Math.round((completedCountForLevel()/total)*100):0;}
 function render(){
+  const contentEl = $('content');
+  if(!contentEl) return;
   const list=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===state.section);
   const availableTeile=availableTeileFor(state.section);
   if(!availableTeile.includes(selectedTeil)) selectedTeil=availableTeile[0]||'';
   const has=levelAvailable(state.level);
-  $('content').innerHTML=`
+  contentEl.innerHTML=`
     <section class="hub-head">
-      <div><span class="tag">${text('منصة الطالب','Schülerbereich')}</span><h1>${text('تدريب TELC Voll','TELC Voll Training')}</h1><p class="muted">${text('مرحباً '+(state.student?.name||'Student')+' — اختر المستوى والقسم ثم افتح التمرين.','Hallo '+(state.student?.name||'Student')+' — wähle Niveau und Prüfungsteil.')}</p></div>
+      <div class="hub-title-block"><span class="hub-greeting"><span>✨</span> ${text('مرحباً، '+(state.student?.name||'الطالب'),'Hallo, '+(state.student?.name||'Student'))}</span><h1>${text('منصة الطالب','Student Platform')}</h1><p class="muted">${text('اختر المستوى والقسم ثم افتح التمرين.','Wähle Niveau und Prüfungsteil und öffne anschließend die Übung.')}</p></div>
       <div class="hub-kpis">
-        <div class="hub-kpi days-kpi ${remainingDays<=2?'warning':''}"><strong>${remainingDays}</strong><span>${text('يوم متبقٍ','Tage verbleibend')}</span></div>
+        ${(state.subscription?.is_paid || state.subscription?.active) ? `
+          <div class="hub-status-card">
+            <div class="hub-status-card-top">
+              <span class="hub-status-card-title">${text('نوع الحساب','Kontoart')}</span>
+              <span class="hub-badge-pill paid"><i class="hub-badge-dot"></i>${text('حساب مميز','Premium')}</span>
+            </div>
+            <div style="font-size:13px;font-weight:800;color:var(--ink);">${text(remainingDays + ' يوم متبقٍ في الاشتراك', remainingDays + ' Tage verbleibend')}</div>
+            <a href="/plans.html" class="hub-status-card-action">
+              <span>${text('تفاصيل الخطة','Plan-Details')}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </a>
+          </div>
+        ` : `
+          <div class="hub-status-card">
+            <div class="hub-status-card-top">
+              <span class="hub-status-card-title">${text('نوع الحساب','Kontoart')}</span>
+              <span class="hub-badge-pill free"><i class="hub-badge-dot"></i>${text('حساب تجريبي مجاني','Kostenloses Konto')}</span>
+            </div>
+            <div style="font-size:12px;color:var(--muted);">${text('الترقية تفتح الاستديو والمساعد والامتحانات','Upgrade schaltet Studio & Assistent frei')}</div>
+            <a href="/plans.html" class="hub-status-card-action" style="background:var(--green);color:#fff;border-color:var(--green);">
+              <span>${text('ترقية الاشتراك ⚡','Upgrade ⚡')}</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </a>
+          </div>
+        `}
         <div class="hub-progress-card" aria-label="${text('تقدم الطالب','Lernfortschritt')}">
-          <div class="hub-progress-top"><span>${text('تقدمك','Dein Fortschritt')}</span><strong>${levelProgressPercent()}%</strong></div>
-          <div class="hub-progress-bar"><i style="width:${levelProgressPercent()}%"></i></div>
-          <div class="hub-progress-bottom"><span>${completedCountForLevel()} / ${totalCountForLevel()} ${text('تمرين','Übungen')}</span><span>${text('المستوى','Niveau')} ${state.level}</span></div>
+          <div class="hub-progress-top">
+            <span class="hub-progress-title">${text('إنجاز المستوى','Niveau-Fortschritt')} (Telc ${state.level})</span>
+            <strong class="hub-progress-val">${levelProgressPercent()}%</strong>
+          </div>
+          <div class="hub-progress-track"><span class="hub-progress-fill" style="width:${levelProgressPercent()}%"></span></div>
+          <div class="hub-progress-bottom">
+            <span>${completedCountForLevel()} / ${totalCountForLevel()} ${text('تمرين مكتمل','Übungen')}</span>
+            <span>Telc ${state.level}</span>
+          </div>
         </div>
       </div>
     </section>
     <section class="level-switch" aria-label="TELC Voll Niveau">
-      ${['B1','B2','C1'].map(l=>`<button class="level-btn ${state.level===l?'active':''} ${!levelAvailable(l)?'empty':''}" data-level="${l}">Telc ${l}</button>`).join('')}
+      ${['B1','B2','C1'].map(l=>`<button type="button" class="level-btn ${String(state.level).toUpperCase()===l?'active':''} ${!levelAvailable(l)?'empty':''}" data-level="${l}" aria-pressed="${String(state.level).toUpperCase()===l?'true':'false'}">Telc ${l}</button>`).join('')}
     </section>
     <nav class="section-switch" aria-label="Prüfungsteile">
       ${SECTION_ORDER.map(s=>{const count=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===s).length;return `<button class="section-btn ${state.section===s?'active':''}" data-section="${s}"><span>${sectionIcon(s)}</span><span class="section-btn-copy"><b>${s}</b><small>${count} ${text('تمرين','Übungen')}</small></span></button>`}).join('')}
     </nav>
-    <section class="topic-toolbar">
-      <div class="topic-title-block"><div class="topic-title-line"><span class="topic-title-icon">${sectionIcon(state.section)}</span><h2>${sectionLabel(state.section)}</h2><span class="topic-title-level">${state.level}</span></div><p class="muted">${text('تمارين '+state.section+' للمستوى '+state.level,'Übungen für '+state.section+' · Niveau '+state.level)}</p></div>
-      <div class="topic-tools"><input id="search" placeholder="${text('ابحث عن الموضوع…','Thema suchen…')}"/><div class="teil-tabs" role="tablist" aria-label="Teil auswählen">${availableTeile.map(t=>`<button type="button" class="teil-tab ${selectedTeil===t?'active':''}" data-teil="${t}">${t}</button>`).join('')}</div><button id="shuffleToggle" class="shuffle-toggle" type="button" aria-pressed="${shuffleEnabled?'true':'false'}" title="${shuffleEnabled?text('الخلط مفعّل — اضغط لإيقافه','Shuffle aktiv — klicken zum Ausschalten'):text('الترتيب العادي — اضغط لتفعيل الخلط','Normale Reihenfolge — klicken zum Aktivieren')}"><span class="shuffle-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h4.5c3.8 0 4.7 5 8.5 5H21"/><path d="m18 8 3-1-3-1"/><path d="M3 17h4.5c3.8 0 4.7 5 8.5 5H21"/><path d="m18 16 3 1-3 1"/></svg></span><span class="shuffle-label">${shuffleEnabled?text('خلط','Mischen'):text('ترتيب','Reihenfolge')}</span></button></div>
+    <section class="topic-toolbar ${availableTeile.length <= 1 ? 'no-teil-tabs' : ''}">
+      <button id="shuffleToggle" class="shuffle-toggle" type="button" aria-pressed="${shuffleEnabled?'true':'false'}" title="${shuffleEnabled?text('الخلط مفعّل — اضغط لإيقافه','Shuffle aktiv — klicken zum Ausschalten'):text('الترتيب العادي — اضغط لتفعيل الخلط','Normale Reihenfolge — klicken zum Aktivieren')}"><span class="shuffle-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h4.5c3.8 0 4.7 5 8.5 5H21"/><path d="m18 8 3-1-3-1"/><path d="M3 17h4.5c3.8 0 4.7 5 8.5 5H21"/><path d="m18 16 3 1-3 1"/></svg></span><span class="shuffle-label">${shuffleEnabled?text('خلط','Mischen'):text('ترتيب','Reihenfolge')}</span></button>
+      ${availableTeile.length > 1 ? `<div class="teil-tabs" role="tablist" aria-label="Teil auswählen">${availableTeile.map(t=>`<button type="button" class="teil-tab ${selectedTeil===t?'active':''}" data-teil="${t}">${t}</button>`).join('')}</div>` : ''}
+      <div class="topic-search-wrap">
+        <input id="search" class="topic-search-input" type="search" placeholder="${text('ابحث عن الموضوع…','Thema suchen…')}" autocomplete="off" aria-label="${text('ابحث عن الموضوع','Thema suchen')}"/>
+      </div>
     </section>
     <div id="topicGrid" class="topic-grid"></div>
 
@@ -103,11 +399,11 @@ function render(){
       </div>
       <a class="btn self-test-btn" href="/self-test.html?level=${encodeURIComponent(state.level)}">${text('ابدأ امتحان عشوائي','Zufällige Prüfung starten')} <span>←</span></a>
     </section>`;
-  document.querySelectorAll('[data-level]').forEach(b=>b.onclick=()=>{state.level=b.dataset.level;state.section='Lesen';selectedTeil=availableTeileFor('Lesen',state.level)[0]||'';render();});
+  document.querySelectorAll('.level-switch .level-btn[data-level]').forEach(b=>b.onclick=()=>{state.level=String(b.dataset.level||'B2').toUpperCase();state.section='Lesen';selectedTeil=availableTeileFor('Lesen',state.level)[0]||'';render();});
   document.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>{state.section=b.dataset.section;selectedTeil=availableTeileFor(state.section)[0]||'';render();});
   document.querySelectorAll('[data-teil]').forEach(b=>b.onclick=()=>{selectedTeil=b.dataset.teil;renderTopics();});
   const nav=$('telcChatNav'); if(nav) nav.href='/telc-chat.html';
-  $('search').oninput=renderTopics;
+  const searchInput=$('search'); if(searchInput) searchInput.oninput=renderTopics;
   const shuffleBtn=$('shuffleToggle'); if(shuffleBtn) shuffleBtn.onclick=()=>{shuffleEnabled=!shuffleEnabled; shuffleOrderKey=''; shuffleOrder=[]; updateShuffleButton(); renderTopics();};
   renderTopics();
 }
@@ -123,32 +419,1049 @@ function updateShuffleButton(){
   b.title=shuffleEnabled?text('الخلط مفعّل — اضغط لإيقافه','Shuffle aktiv — klicken zum Ausschalten'):text('الترتيب العادي — اضغط لتفعيل الخلط','Normale Reihenfolge — klicken zum Aktivieren');
   const label=b.querySelector('.shuffle-label'); if(label) label.textContent=shuffleEnabled?text('خلط','Mischen'):text('ترتيب','Reihenfolge');
 }
-function renderTopics(){
-  const q=($('search')?.value||'').trim().toLowerCase(); const teil=selectedTeil || (TEIL_ORDER[state.section]||[])[0] || '';
-  const base=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===state.section);
-  const orderKey=state.level+'|'+state.section;
-  if(orderKey!==shuffleOrderKey || !shuffleOrder.length || shuffleOrder.length!==base.length){
-    shuffleOrderKey=orderKey;
-    shuffleOrder=shuffleEnabled?shuffleArray(base):base.slice();
-  }else if(!shuffleEnabled){
-    shuffleOrder=base.slice();
+let activeSpeakButton=null;
+function stopSpeaking(){
+  if('speechSynthesis' in window){
+    window.speechSynthesis.cancel();
   }
-  let list=shuffleOrder.slice();
-  if(teil) list=list.filter(x=>x.teil===teil);
-  if(q) list=list.filter(x=>(x.title+' '+(x.body||'')).toLowerCase().includes(q));
+  if(activeSpeakButton){
+    activeSpeakButton.classList.remove('speaking-active');
+    activeSpeakButton.setAttribute('aria-pressed','false');
+    activeSpeakButton=null;
+  }
+}
+function speakGerman(raw,btn=null){
+  const source=String(raw||'').trim();
+  if(!source)return;
+  if(btn && activeSpeakButton===btn && window.speechSynthesis.speaking){
+    stopSpeaking();
+    return;
+  }
+  stopSpeaking();
+  const u=new SpeechSynthesisUtterance(source);
+  u.lang='de-DE';
+  u.rate=.9;
+  if(btn){
+    activeSpeakButton=btn;
+    btn.classList.add('speaking-active');
+    btn.setAttribute('aria-pressed','true');
+    u.onend=()=>{
+      if(activeSpeakButton===btn){
+        btn.classList.remove('speaking-active');
+        btn.setAttribute('aria-pressed','false');
+        activeSpeakButton=null;
+      }
+    };
+    u.onerror=u.onend;
+  }
+  window.speechSynthesis.speak(u);
+}
+async function translateText(source,target='ar'){
+  const raw=String(source||'').trim();
+  if(!raw) return '';
+  const url='https://translate.googleapis.com/translate_a/single?client=gtx&sl=de&tl='+encodeURIComponent(target)+'&dt=t&q='+encodeURIComponent(raw);
+  const r=await fetch(url);
+  if(!r.ok) throw new Error('translation failed');
+  const d=await r.json();
+  return (d?.[0]||[]).map(x=>x?.[0]||'').join('').trim();
+}
+
+let currentPresCategory = 'Reise';
+let presRecognition = null;
+let presRecording = false;
+let presTranscript = '';
+let presTimer = null;
+let presSeconds = 0;
+
+const TELC_SPRECHEN_TEIL1_THEMEN = [
+  {
+    key: 'Reise',
+    icon: '✈️',
+    title: '1. Reise',
+    arTitle: 'رحلة',
+    pointsDe: 'Ziel, Zeit, Land und Leute, Sehenswürdigkeiten',
+    pointsAr: 'الوجهة، التوقيت، البلد والناس، المعالم السياحية',
+    placeholderDe: 'z. B. Ziel: Rom / Zeit: Sommer 2024 / Land und Leute: Gastfreundlich, leckeres Essen / Sehenswürdigkeiten: Kolosseum, Vatikan…',
+    placeholderAr: 'مثال: الوجهة: روما / التوقيت: الصيف الماضي / البلد والناس: شعب مضياف وطعام رائع / المعالم: الكولوسيوم والفاتيكان…'
+  },
+  {
+    key: 'Buch',
+    icon: '📖',
+    title: '2. Buch',
+    arTitle: 'كتاب',
+    pointsDe: 'Thema, Autor, Meinung',
+    pointsAr: 'الموضوع، المؤلف، الرأي الشخصي',
+    placeholderDe: 'z. B. Thema: Gesellschaftsroman / Autor: Hermann Hesse / Meine Meinung: Tiefgründig und regt zum Nachdenken an…',
+    placeholderAr: 'مثال: الموضوع: رواية اجتماعية / المؤلف: هرمان هيسه / رأيي: عمل عميق يدعو للتفكير والتأمل…'
+  },
+  {
+    key: 'Film',
+    icon: '🎬',
+    title: '3. Film',
+    arTitle: 'فيلم',
+    pointsDe: 'Thema, Handlung, Schauspieler, Meinung',
+    pointsAr: 'الموضوع، الحبكة، الممثلون، الرأي الشخصي',
+    placeholderDe: 'z. B. Thema: Historisches Drama / Handlung: Flucht aus Berlin / Schauspieler: Herausragende Besetzung / Meinung: Sehr emotional…',
+    placeholderAr: 'مثال: الموضوع: دراما تاريخية / الحبكة: الهروب من برلين / الممثلون: أداء رائع / رأيي: مؤثر ومثير جداً…'
+  },
+  {
+    key: 'Sportereignis',
+    icon: '⚽',
+    title: '4. Sportereignis',
+    arTitle: 'حدث رياضي',
+    pointsDe: 'Sportart, Ort, Personen, Ergebnis',
+    pointsAr: 'نوع الرياضة، المكان، الأشخاص، النتيجة',
+    placeholderDe: 'z. B. Sportart: Fußball-EM / Ort: München / Personen: Mit Freunden im Stadion / Ergebnis: Spannender 2:1 Sieg, tolle Stimmung…',
+    placeholderAr: 'مثال: الرياضة: بطولة كرة القدم / المكان: ميونيخ / الأشخاص: مع أصدقائي في الملعب / النتيجة: فوز مثير 2-1 وأجواء حماسية…'
+  },
+  {
+    key: 'Musikveranstaltung',
+    icon: '🎵',
+    title: '5. Musikveranstaltung',
+    arTitle: 'أمسية أو حفل موسيقي',
+    pointsDe: 'Musikrichtung, Musiker, Ort',
+    pointsAr: 'النمط الموسيقي، الموسيقيون، المكان',
+    placeholderDe: 'z. B. Musikrichtung: Klassik & Jazz / Musiker: Sinfonieorchester / Ort: Elbphilharmonie Hamburg, beeindruckende Akustik…',
+    placeholderAr: 'مثال: النمط الموسيقي: كلاسيكي وجاز / الموسيقيون: أوركسترا سيمفوني شهير / المكان: قاعة إلبفيلهارموني هامبورغ، صوتيات مذهلة…'
+  },
+  {
+    key: 'Person',
+    icon: '👤',
+    title: '6. Wichtige Person',
+    arTitle: 'شخصية مهمة في حياتك',
+    pointsDe: 'wer, wann, warum wichtig',
+    pointsAr: 'من هو، متى عرفته، لماذا هو مهم',
+    placeholderDe: 'z. B. Wer: Mein Großvater / Wann: Begleitet mich seit meiner Kindheit / Warum wichtig: Vorbild für Fleiß und Geduld…',
+    placeholderAr: 'مثال: من هو: جدي / متى: منذ طفولتي / لماذا هو مهم: قدوة في العمل الدؤوب والصبر والإنسانية…'
+  },
+  {
+    key: 'Erfahrung',
+    icon: '🌟',
+    title: '7. Wichtige Erfahrung',
+    arTitle: 'تجربة شخصية مهمة',
+    pointsDe: 'was, wann, wo, mit wem, warum wichtig',
+    pointsAr: 'ماذا حدث، متى، أين، مع من، لماذا هي مهمة',
+    placeholderDe: 'z. B. Was: Mein erstes Auslandspraktikum / Wann: Vor zwei Jahren / Wo: Frankfurt / Mit wem: Team / Warum wichtig: Große Selbstständigkeit…',
+    placeholderAr: 'مثال: ماذا: أول تدريب بالخارج / متى: قبل سنتين / أين: فرانكفورت / مع من: فريق العمل / لماذا مهم: عزز استقلاليتي…'
+  }
+];
+
+function getTeil1Topic(catKey){
+  return TELC_SPRECHEN_TEIL1_THEMEN.find(t=>t.key===catKey) || TELC_SPRECHEN_TEIL1_THEMEN[0];
+}
+
+function renderTeil1StudioDashboard(){
+  const activeTopic = getTeil1Topic(currentPresCategory);
+  const activePoints = text(activeTopic.pointsAr, activeTopic.pointsDe);
+  const activePlaceholder = text(activeTopic.placeholderAr, activeTopic.placeholderDe);
+  return `
+  <section class="pres-studio-wrap" style="grid-column: 1 / -1; width: 100%;">
+    <div class="pres-input-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+        <div><h3 style="margin:0;font-size:18px">${text('استوديو العرض التقديمي (Präsentation Studio)','Präsentations-Studio')}</h3><small class="muted">${text('اختر أحد مواضيع TELC الرسمية الـ 7، واكتب أفكارك لإنشاء عرض متكامل وفق العناصر الإلزامية (Leitpunkte).','Wähle eines der 7 offiziellen telc-Themen und erstelle eine vollständige Präsentation anhand der Leitpunkte.')}</small></div>
+        <span class="tag">Teil 1 Präsentation</span>
+      </div>
+      <div class="pres-categories">
+        ${TELC_SPRECHEN_TEIL1_THEMEN.map(c => `
+          <button type="button" class="pres-cat-btn ${currentPresCategory === c.key ? 'active' : ''}" data-cat="${c.key}">
+            <span>${c.icon}</span>
+            <span>${c.title}</span>
+            <small style="font-size:10.5px;opacity:.85">${text(c.arTitle, c.title)}</small>
+            <span class="pres-cat-points">${c.pointsDe}</span>
+          </button>
+        `).join('')}
+      </div>
+      <div class="pres-leitpunkte-banner">
+        <span class="pres-leitpunkte-tag">TELC Leitpunkte</span>
+        <span class="pres-leitpunkte-text" id="presLeitpunkteText">${text('العناصر الرسمية المطلوبة: ', 'Pflichtpunkte: ')}${activePoints}</span>
+      </div>
+      <label style="font-size:12px;font-weight:800;color:var(--muted)">${text('اكتب أفكارك أو تفاصيل تريد تضمينها (بالعربية أو الألمانية):','Schreiben Sie Ihre Notizen oder Stichpunkte (auf Arabisch oder Deutsch):')}</label>
+      <textarea id="presNotes" placeholder="${esc(activePlaceholder)}">${esc(localStorage.getItem('telc_pres_notes_'+currentPresCategory)||'')}</textarea>
+      <button type="button" class="pres-generate-btn" id="presGenBtn">✦ ${text('إنشاء العرض التقديمي بالذكاء الاصطناعي مع أسئلة اللجنة','Präsentation mit KI & Jury-Fragen generieren')}</button>
+      <div id="presResultWrap"></div>
+    </div>
+  </section>`;
+}
+
+function loadSavedPres(catKey, lvl){
+  try {
+    const key = 'telc_saved_pres_' + catKey + '_' + (lvl || state?.level || 'B2');
+    const fallbackKey = 'telc_saved_pres_' + catKey;
+    const raw = localStorage.getItem(key) || localStorage.getItem(fallbackKey);
+    return raw ? JSON.parse(raw) : null;
+  } catch(_){ return null; }
+}
+
+function savePresData(data){
+  if(!data) return;
+  const cat = data.category || currentPresCategory;
+  const lvl = data.level || state?.level || 'B2';
+  try {
+    const str = JSON.stringify(data);
+    localStorage.setItem('telc_saved_pres_' + cat + '_' + lvl, str);
+    localStorage.setItem('telc_saved_pres_' + cat, str);
+  } catch(_){}
+}
+
+function deleteSavedPres(catKey, lvl){
+  try {
+    localStorage.removeItem('telc_saved_pres_' + catKey + '_' + (lvl || state?.level || 'B2'));
+    localStorage.removeItem('telc_saved_pres_' + catKey);
+  } catch(_){}
+}
+
+async function copyPresText(str, btn){
+  let ok = false;
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(str);
+      ok = true;
+    }
+  } catch(_) {}
+  if (!ok) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = str;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      ok = true;
+    } catch(_) {}
+  }
+  if (btn) {
+    const span = btn.querySelector('span') || btn;
+    const old = span.textContent;
+    btn.style.borderColor = '#228151';
+    btn.style.color = '#228151';
+    span.textContent = text('تم النسخ بنجاح ✓','Kopiert ✓');
+    setTimeout(() => {
+      span.textContent = old;
+      btn.style.borderColor = '';
+      btn.style.color = '';
+    }, 2200);
+  }
+}
+
+function bindTeil1StudioDashboardEvents(){
+  document.querySelectorAll('.pres-cat-btn').forEach(btn=>{
+    btn.onclick=()=>{
+      currentPresCategory=btn.dataset.cat;
+      document.querySelectorAll('.pres-cat-btn').forEach(b=>b.classList.toggle('active',b===btn));
+      const top = getTeil1Topic(currentPresCategory);
+      const notesEl = document.getElementById('presNotes');
+      if(notesEl) {
+        notesEl.value = localStorage.getItem('telc_pres_notes_'+currentPresCategory) || '';
+        notesEl.placeholder = text(top.placeholderAr, top.placeholderDe);
+      }
+      const banner = document.getElementById('presLeitpunkteText');
+      if(banner) {
+        banner.textContent = text('العناصر الرسمية المطلوبة: ', 'Pflichtpunkte: ') + text(top.pointsAr, top.pointsDe);
+      }
+      const saved = loadSavedPres(currentPresCategory, state.level);
+      if (saved) {
+        renderPresResultDashboard(saved, true);
+      } else {
+        const wrap = document.getElementById('presResultWrap');
+        if (wrap) wrap.innerHTML = '';
+      }
+    };
+  });
+  const notesEl = document.getElementById('presNotes');
+  if(notesEl){
+    notesEl.oninput=()=>{
+      try { localStorage.setItem('telc_pres_notes_'+currentPresCategory, notesEl.value); } catch(_){}
+    };
+  }
+function showPaidOnlyModal(msg) {
+  let modal = document.getElementById('paidOnlyModal');
+  if (modal) modal.remove();
+  modal = document.createElement('div');
+  modal.id = 'paidOnlyModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+  modal.innerHTML = `
+    <div style="background:var(--white);border:1px solid var(--line);border-radius:22px;padding:32px;max-width:440px;width:100%;text-align:center;box-shadow:var(--shadow);">
+      <div style="width:54px;height:54px;border-radius:16px;background:var(--green-soft);color:var(--green);font-size:26px;display:grid;place-items:center;margin:0 auto 16px;">✦</div>
+      <h3 style="margin:0 0 10px;font-size:21px;color:var(--ink);">${text('ميزة حصرية للمشتركين','Exklusiv für Abonnenten')}</h3>
+      <p class="muted" style="margin:0 0 24px;font-size:14px;line-height:1.7;">${esc(msg || text('توليد نموذج العرض الكامل وأسئلة اللجنة متاح في الباقات المدفوعة فقط. يمكنك استعراض كافة المحاور مجاناً.','Die KI-Generierung von Präsentationen ist Abonnenten vorbehalten.'))}</p>
+      <div style="display:flex;gap:10px;flex-direction:column;">
+        <a href="/plans.html" class="btn" style="width:100%;">${text('ترقية الاشتراك الآن ⚡','Jetzt upgraden ⚡')}</a>
+        <button type="button" class="btn light" onclick="document.getElementById('paidOnlyModal').remove()">${text('إغلاق','Schließen')}</button>
+      </div>
+    </div>
+  `;
+  modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+  document.body.appendChild(modal);
+}
+
+  const genBtn = document.getElementById('presGenBtn');
+  if(genBtn){
+    genBtn.onclick=async()=>{
+      if (!state.subscription?.is_paid && !state.subscription?.active) {
+        showPaidOnlyModal();
+        return;
+      }
+      const notes = document.getElementById('presNotes')?.value || '';
+      genBtn.disabled=true;
+      genBtn.textContent=text('⏳ جارٍ توليد العرض وأسئلة اللجنة…','⏳ Präsentation wird generiert…');
+      const wrap = document.getElementById('presResultWrap');
+      wrap.innerHTML=`<div style="padding:20px;text-align:center;color:var(--muted)">${text('جارٍ صياغة العرض التقديمي وفق معايير TELC الرسمية…','Präsentation wird nach offiziellen telc-Standards erstellt…')}</div>`;
+      try{
+        const r = await api('ai-speaking-session', {
+          method: 'POST',
+          body: {
+            id: 0,
+            mode: 'generate-presentation',
+            category: currentPresCategory,
+            notes,
+            level: state.level || 'B2'
+          }
+        });
+        savePresData(r);
+        renderPresResultDashboard(r, true);
+      }catch(err){
+        wrap.innerHTML=`<div class="alert bad">${esc(err.message||'حدث خطأ أثناء توليد العرض.')}</div>`;
+      }finally{
+        genBtn.disabled=false;
+        genBtn.textContent=text('✦ إنشاء العرض التقديمي بالذكاء الاصطناعي مع أسئلة اللجنة','✦ Präsentation mit KI & Jury-Fragen generieren');
+      }
+    };
+  }
+
+  // Restore saved presentation for current category on load
+  const initialSaved = loadSavedPres(currentPresCategory, state.level);
+  if (initialSaved) {
+    renderPresResultDashboard(initialSaved, true);
+  }
+}
+
+function renderPresResultDashboard(data, isSaved){
+  const wrap = document.getElementById('presResultWrap');
+  if(!wrap) return;
+  const juryList = Array.isArray(data.jury_questions) ? data.jury_questions : [];
+  const redemittel = Array.isArray(data.redemittel) ? data.redemittel : [];
+
+  wrap.innerHTML = `
+  <div class="pres-result-box" data-allow-copy="true">
+    <div class="pres-result-head">
+      <div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px">
+          <span class="tag">TELC ${esc(data.level||state.level||'B2')} · ${esc(data.category||currentPresCategory)}</span>
+          ${isSaved ? `<span class="tag" style="background:#dff5e8;color:#186b3e;border-color:#bce5ce;font-weight:800">💾 ${text('عرض محفوظ مسبقاً','Gespeicherte Präsentation')}</span>` : ''}
+        </div>
+        <h3>${esc(data.title||'Ihre Präsentation')}</h3>
+      </div>
+      <div class="pres-actions-row">
+        <button type="button" class="btn light" id="presCopyBtn" title="${text('نسخ نص العرض التقديمي','Präsentation kopieren')}">📋 <span id="presCopyBtnText">${text('نسخ العرض','Kopieren')}</span></button>
+        <button type="button" class="btn light" id="presSaveBtn" title="${text('حفظ العرض في هذا المتصفح للرجوع إليه دائماً','Im Browser speichern')}">💾 <span id="presSaveBtnText">${isSaved ? text('محفوظ في جهازك ✓','Gespeichert ✓') : text('حفظ العرض','Speichern')}</span></button>
+        <button type="button" class="btn light" id="presSpeakBtn">🔊 ${text('استماع للعرض','Anhören')}</button>
+        <button type="button" class="btn light" id="presTransBtn">文 ${text('الترجمة العربية','Arabische Übersetzung')}</button>
+        ${isSaved ? `<button type="button" class="btn light" id="presDeleteBtn" style="color:#bd3f35;border-color:#f5c2bd;font-size:12px" title="${text('حذف هذا العرض المحفوظ','Gespeicherte Präsentation löschen')}">🗑️ ${text('حذف المحفوظ','Löschen')}</button>` : ''}
+      </div>
+    </div>
+    <div class="pres-text-de" id="presTextDe" data-allow-copy="true">${esc(data.presentation_de||'')}</div>
+    <div class="pres-text-ar" id="presTextAr" hidden data-allow-copy="true">${esc(data.presentation_ar||'')}</div>
+
+    <div class="pres-practice-bar">
+      <div>
+        <strong>🎙️ ${text('تدرّب على إلقاء العرض بصوتك','Präsentation mündlich üben')}</strong>
+        <p class="muted" style="margin:2px 0 0;font-size:12px">${text('اضغط الميكروفون وسجل إلقاءك للحصول على تحليل ذكي لنطقك وطلاقتك.','Klicken Sie auf das Mikrofon, um Ihre Rede aufzunehmen und KI-Feedback zu erhalten.')}</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span id="presTimerDisplay" style="font-weight:900;font-variant-numeric:tabular-nums">00:00</span>
+        <button type="button" class="pres-mic-record" id="presMicBtn">🎙️ ${text('بدء الإلقاء','Aufnahme starten')}</button>
+        <button type="button" class="btn dark" id="presEvalBtn" style="display:none">✦ ${text('تقييم الإلقاء','Bewerten')}</button>
+      </div>
+    </div>
+    <div id="presLiveText" style="margin-top:10px;font-size:13px;color:var(--muted);min-height:22px;direction:ltr;text-align:left"></div>
+    <div id="presEvalOutput" hidden style="margin-top:14px"></div>
+
+    <div class="speaking-model-questions" style="margin-top:24px">
+      <div class="speaking-model-questions-head">
+        <h4>${text('أسئلة اللجنة والممتحن (Jury-Fragen) مع إجابات نموذجية','Jury-Fragen & Antwortvorschläge')}</h4>
+        <small>${text('أسئلة يطرحها الممتحن لاختبار فهمك لما قدمته والقدرة على الدفاع عنه، مرفقة بإجابات نموذجية متوقعة.','Fragen der Prüfer zur Überprüfung Ihres Textverständnisses mit vorgeschlagenen Antworten.')}</small>
+      </div>
+      <div class="speaking-qa-list">
+        ${juryList.map((item, i) => {
+          const qText = item.question || item.q || '';
+          const aText = item.answer || item.a || '';
+          return `
+          <div class="speaking-model-qa-card" data-allow-copy="true">
+            <div class="speaking-model-q-row">
+              <span class="speaking-qa-badge q-badge">${text('سؤال اللجنة','Jury-Frage')} ${i+1}</span>
+              <div class="speaking-qa-text"><b>${esc(qText)}</b></div>
+              <span class="speaking-model-tools">
+                <button type="button" class="speaking-voice-btn" data-speak-q="${esc(qText)}" aria-label="${text('استماع','Anhören')}">🔊</button>
+                <button type="button" class="speaking-translate-btn" data-translate-q aria-label="${text('ترجمة','Übersetzen')}">文</button>
+              </span>
+            </div>
+            <div class="speaking-qa-translation" hidden></div>
+            ${aText ? `
+            <div class="speaking-model-a-row">
+              <span class="speaking-qa-badge a-badge">${text('الإجابة المقترحة','Vorgeschlagene Antwort')}</span>
+              <div class="speaking-qa-text"><p>${esc(aText)}</p></div>
+              <span class="speaking-model-tools">
+                <button type="button" class="speaking-voice-btn" data-speak-q="${esc(aText)}" aria-label="${text('استماع','Anhören')}">🔊</button>
+                <button type="button" class="speaking-translate-btn" data-translate-q aria-label="${text('ترجمة','Übersetzen')}">文</button>
+              </span>
+            </div>
+            <div class="speaking-qa-translation" hidden></div>` : ''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    ${redemittel.length ? `
+    <div class="speaking-model-phrases" style="margin-top:20px">
+      <h4>${text('عبارات مفيدة للعرض التقديمي','Redemittel für die Präsentation')}</h4>
+      <div>${redemittel.map(r => `<span>${esc(r)}</span>`).join('')}</div>
+    </div>` : ''}
+  </div>`;
+
+  const copyBtn = document.getElementById('presCopyBtn');
+  if(copyBtn){
+    copyBtn.onclick = () => copyPresText(data.presentation_de || '', copyBtn);
+  }
+
+  const saveBtn = document.getElementById('presSaveBtn');
+  if(saveBtn){
+    saveBtn.onclick = () => {
+      savePresData(data);
+      const span = document.getElementById('presSaveBtnText') || saveBtn;
+      saveBtn.style.borderColor = '#228151';
+      saveBtn.style.color = '#228151';
+      span.textContent = text('تم الحفظ بنجاح ✓','Gespeichert ✓');
+      setTimeout(() => {
+        span.textContent = text('محفوظ في جهازك ✓','Gespeichert ✓');
+      }, 2000);
+    };
+  }
+
+  const delBtn = document.getElementById('presDeleteBtn');
+  if(delBtn){
+    delBtn.onclick = () => {
+      deleteSavedPres(data.category || currentPresCategory, state.level);
+      const wrap = document.getElementById('presResultWrap');
+      if(wrap) wrap.innerHTML = `<div style="padding:16px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:15px">${text('تم حذف العرض المحفوظ. يمكنك إنشاء عرض جديد الآن.','Gespeicherte Präsentation gelöscht.')}</div>`;
+    };
+  }
+
+  document.getElementById('presSpeakBtn').onclick = () => speakGerman(data.presentation_de);
+  document.getElementById('presTransBtn').onclick = () => {
+    const el = document.getElementById('presTextAr');
+    el.hidden = !el.hidden;
+  };
+
+  const micBtn = document.getElementById('presMicBtn');
+  const evalBtn = document.getElementById('presEvalBtn');
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (SR) {
+    presRecognition = new SR();
+    presRecognition.lang = 'de-DE';
+    presRecognition.continuous = true;
+    presRecognition.interimResults = true;
+
+    presRecognition.onresult = (ev) => {
+      let interim = '';
+      for (let i = ev.resultIndex; i < ev.results.length; i++) {
+        const textVal = ev.results[i][0].transcript;
+        if (ev.results[i].isFinal) presTranscript += textVal + ' ';
+        else interim += textVal;
+      }
+      document.getElementById('presLiveText').textContent = (presTranscript + ' ' + interim).trim() || '…';
+    };
+
+    micBtn.onclick = () => {
+      if (!presRecording) {
+        presRecording = true;
+        presTranscript = '';
+        presSeconds = 0;
+        micBtn.classList.add('recording');
+        micBtn.textContent = '⏹️ ' + text('إيقاف التسجيل','Aufnahme stoppen');
+        evalBtn.style.display = 'none';
+        document.getElementById('presLiveText').textContent = text('تحدث الآن بالألمانية لإلقاء عرضك…','Sprechen Sie jetzt auf Deutsch…');
+        presTimer = setInterval(() => {
+          presSeconds++;
+          const m = String(Math.floor(presSeconds / 60)).padStart(2, '0');
+          const s = String(presSeconds % 60).padStart(2, '0');
+          document.getElementById('presTimerDisplay').textContent = `${m}:${s}`;
+        }, 1000);
+        try { presRecognition.start(); } catch (_) {}
+      } else {
+        presRecording = false;
+        clearInterval(presTimer);
+        micBtn.classList.remove('recording');
+        micBtn.textContent = '🎙️ ' + text('إعادة الإلقاء','Neu aufnehmen');
+        try { presRecognition.stop(); } catch (_) {}
+        if (presTranscript.trim().length > 10) {
+          evalBtn.style.display = 'inline-block';
+        }
+      }
+    };
+
+    evalBtn.onclick = async () => {
+      evalBtn.disabled = true;
+      evalBtn.textContent = text('⏳ جارٍ التقييم…','⏳ Bewertung läuft…');
+      const out = document.getElementById('presEvalOutput');
+      out.hidden = false;
+      out.innerHTML = `<div style="padding:15px;text-align:center">${text('جارٍ تحليل الإلقاء والنطق ومعايير TELC…','Präsentation wird bewertet…')}</div>`;
+      try {
+        const res = await api('ai-speaking-session', {
+          method: 'POST',
+          body: {
+            id: 0,
+            mode: 'evaluate-presentation',
+            transcript: presTranscript,
+            category: data.category,
+            level: data.level || state.level || 'B2'
+          }
+        });
+        out.innerHTML = `
+        <div class="speaking-eval" style="border:1px solid var(--line);border-radius:16px;padding:20px;background:var(--white)">
+          <div class="speaking-eval-head">
+            <strong>${text('تقييم Jerry للعرض التقديمي','Jerry-Bewertung')}</strong>
+            <b>${esc(res.total)} / 25</b>
+          </div>
+          <div class="speaking-eval-grid" style="margin:14px 0">
+            ${(res.criteria || []).map(c => `
+              <article>
+                <b>${esc(c.label)}</b>
+                <strong>${esc(c.score)} / ${esc(c.max || 5)}</strong>
+                <p>${esc(c.comment)}</p>
+              </article>
+            `).join('')}
+          </div>
+          <div class="speaking-feedback">
+            <h3>${text('نقاط القوة','Stärken')}</h3><ul>${(res.strengths || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+            <h3>${text('أولوية التحسين','Prioritäten')}</h3><ul>${(res.priorities || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+            <p>${esc(getLang()==='ar'?(res.summary_ar||res.summary_de||''):(res.summary_de||res.summary_ar||''))}</p>
+          </div>
+        </div>`;
+      } catch (e) {
+        out.innerHTML = `<div class="alert bad">${esc(e.message)}</div>`;
+      } finally {
+        evalBtn.disabled = false;
+        evalBtn.textContent = text('✦ تقييم الإلقاء','✦ Bewerten');
+      }
+    };
+  } else {
+    micBtn.style.display = 'none';
+  }
+
+  wrap.querySelectorAll('[data-speak-q]').forEach(b => b.onclick = () => speakGerman(b.dataset.speakQ, b));
+  wrap.querySelectorAll('[data-translate-q]').forEach(b => b.onclick = async () => {
+    const row = b.closest('.speaking-model-q-row') || b.closest('.speaking-model-a-row');
+    const box = row?.nextElementSibling;
+    const source = row?.querySelector('.speaking-qa-text')?.textContent || '';
+    if(!box || !source) return;
+    if(!box.hidden){ box.hidden = true; return; }
+    b.disabled = true;
+    box.textContent = text('جارٍ الترجمة…','Übersetzung…');
+    box.hidden = false;
+    try {
+      box.textContent = await translateText(source, 'ar');
+    } catch(e) {
+      box.textContent = text('تعذرت الترجمة.','Übersetzung nicht verfügbar.');
+    } finally {
+      b.disabled = false;
+    }
+  });
+}
+
+function renderTopics(){
+  const q=($('search')?.value||'').trim().toLowerCase();
+  const availableTeile=availableTeileFor(state.section);
+  const teil=selectedTeil || availableTeile[0] || (TEIL_ORDER[state.section]||[])[0] || '';
+  const isTeil1Speaking = (state.section==='Sprechen' && teil==='Teil 1');
+
+  const shuffleToggle = $('shuffleToggle');
+  const searchWrap = document.querySelector('.topic-search-wrap');
+  if(shuffleToggle) shuffleToggle.style.display = isTeil1Speaking ? 'none' : '';
+  if(searchWrap) searchWrap.style.display = isTeil1Speaking ? 'none' : '';
+
   updateShuffleButton();
   document.querySelectorAll('.teil-tab').forEach(b=>b.classList.toggle('active',b.dataset.teil===selectedTeil));
-  $('topicGrid').innerHTML=list.length?list.map((x,i)=>`<article class="topic-card"><div class="topic-card-head"><span class="topic-index">${String(i+1).padStart(2,'0')}</span><span class="tag">Telc ${esc(x.level||'B2')}</span></div><h3 class="topic-card-title"><span class="topic-status-dot ${isExerciseCompleted(x.id)?'is-done':'is-new'}" title="${isExerciseCompleted(x.id)?text('تم التدريب على هذا الموضوع من قبل','Bereits trainiert'):text('لم يتم التدريب على هذا الموضوع بعد','Noch nicht trainiert')}" aria-label="${isExerciseCompleted(x.id)?text('تم التدريب من قبل','Bereits trainiert'):text('لم يتم التدريب بعد','Noch nicht trainiert')}"></span><span>${esc(x.title)}</span></h3><div class="topic-meta"><span>${esc(x.teil)}</span><span>${esc(taskTypeLabel(x.task_type))}</span><span>${exerciseDuration(x)} ${text('دقيقة','Min.')}</span></div><a class="btn light" href="/exercise.html?id=${x.id}">${text('فتح التمرين','Übung öffnen')} →</a></article>`).join(''):`<div class="empty-panel"><h3>${text('لا توجد تمارين منشورة هنا','Keine veröffentlichten Übungen')}</h3><p class="muted">${text('يمكن للمشرف إضافة الموضوع من لوحة الإدارة.','Der Administrator kann Aufgaben im Adminbereich hinzufügen.')}</p></div>`;
+  const gridEl=$('topicGrid');
+  if(gridEl){
+    if(isTeil1Speaking){
+      gridEl.className = 'topic-grid pres-studio-active-grid';
+      gridEl.innerHTML = renderTeil1StudioDashboard();
+      bindTeil1StudioDashboardEvents();
+      return;
+    }
+    gridEl.className = 'topic-grid';
+    const base=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===state.section);
+    const orderKey=state.level+'|'+state.section;
+    if(orderKey!==shuffleOrderKey || !shuffleOrder.length || shuffleOrder.length!==base.length){
+      shuffleOrderKey=orderKey;
+      shuffleOrder=shuffleEnabled?shuffleArray(base):base.slice();
+    }else if(!shuffleEnabled){
+      shuffleOrder=base.slice();
+    }
+    let list=shuffleOrder.slice();
+    if(teil) list=list.filter(x=>x.teil===teil);
+    if(q) list=list.filter(x=>{
+      const isAudioQuery = (q === 'صوت' || q === 'صوتي' || q === 'audio' || q === 'hör') && (!!x.audio_url || x.section === 'Hören');
+      const isVarQuery = (q === 'معدل' || q === 'تعديل' || q === 'تعديلات') && (parseVariationInfo(x.title, x.settings_json).isVariation);
+      return isAudioQuery || isVarQuery || ((x.title||'')+' '+(x.body||'')+' '+(x.teil||'')+' '+(taskTypeLabel(x.task_type)||'')).toLowerCase().includes(q);
+    });
+
+    const groups = groupTopicExercises(list);
+    // Free exercises first: sort groups so free-access ones appear before paid
+    groups.sort((a, b) => {
+      const aFree = (a.items[0]?.ex?.access_mode || 'paid') === 'free' ? 0 : 1;
+      const bFree = (b.items[0]?.ex?.access_mode || 'paid') === 'free' ? 0 : 1;
+      return aFree - bFree;
+    });
+    renderedTopicGroups = groups;
+
+    gridEl.innerHTML = groups.length ? groups.map((g, i) => {
+      const primaryItem = g.items[0];
+      const primaryEx = primaryItem.ex;
+      const anyDone = g.items.some(it => isExerciseCompleted(it.ex.id));
+      const hasAudio = g.items.some(it => !!it.ex.audio_url);
+      const dur = exerciseDuration(primaryEx);
+      const isMulti = g.items.length > 1;
+      const isUserPaid = !!(state.subscription?.is_paid || state.subscription?.active);
+      const isExFree = (primaryEx.access_mode || 'paid') === 'free';
+      const isLocked = !isUserPaid && !isExFree;
+
+      const accessBadge = isExFree
+        ? `<span class="card-access-pill pill-free" title="${text('تمرين مجاني','Kostenlose Übung')}">${text('مجاني','Kostenlos')}</span>`
+        : `<span class="card-access-pill pill-paid" title="${text('تمرين مدفوع','Kostenpflichtige Übung')}">${text('مدفوع','Kostenpflichtig')}</span>`;
+
+      return `<article class="topic-card ${isMulti ? 'has-variations' : ''}">
+        <div class="topic-card-head">
+          <div class="topic-head-start">
+            <span class="topic-level-badge">${String(i+1).padStart(2,'0')} · Telc ${esc(primaryEx.level||'B2')}</span>
+          </div>
+          <div class="topic-head-end">
+            ${accessBadge}
+          </div>
+        </div>
+        <h3 class="topic-card-title">
+          <span class="topic-status-dot ${isLocked ? 'is-locked-dot' : (anyDone?'is-done':'is-new')}" title="${isLocked ? text('محتوى مخصص للمشتركين','Nur für Abonnenten') : (anyDone?text('تم التدريب على هذا الموضوع من قبل','Bereits trainiert'):text('لم يتم التدريب على هذا الموضوع بعد','Noch nicht trainiert'))}"></span>
+          <span>${esc(g.baseTitle)}</span>
+        </h3>
+        <div class="topic-meta">
+          <span class="topic-meta-pill">${esc(primaryEx.teil)}</span>
+          <span class="topic-meta-pill">${esc(taskTypeLabel(primaryEx.task_type))}</span>
+          <span class="topic-meta-pill">⏱ ${dur} ${text('دقيقة','Min.')}</span>
+          ${isMulti ? `<span class="topic-meta-pill topic-variation-pill" title="${g.items.length} ${text('تعديلات متاحة لهذا التمرين','Versionen verfügbar')}">📑 ${g.items.length} ${text('تعديلات','Versionen')}</span>` : ''}
+        </div>
+        ${isMulti ? `
+          <button type="button" class="btn light topic-open-btn topic-variation-btn" data-group-idx="${i}">
+            ${text('فتح التمرين','Übung öffnen')} ▾
+          </button>
+        ` : (isLocked ? `
+          <button type="button" class="btn light topic-open-btn locked-topic-btn" data-topic-title="${esc(g.baseTitle)}">
+            ${text('فتح التمرين','Übung öffnen')} →
+          </button>
+        ` : `
+          <a class="btn light topic-open-btn" href="/exercise.html?id=${primaryEx.id}&duration=${dur*60}">${text('فتح التمرين','Übung öffnen')} →</a>
+        `)}
+      </article>`;
+    }).join('') : `<div class="empty-panel"><h3>${text('لا توجد تمارين متاحة حالياً','Keine Übungen verfügbar')}</h3><p class="muted">${text('سنقوم بإضافتها قريباً.','Wir werden sie in Kürze hinzufügen.')}</p></div>`;
+
+    gridEl.querySelectorAll('.topic-variation-btn[data-group-idx]').forEach(btn => {
+      btn.onclick = () => {
+        const idx = Number(btn.dataset.groupIdx);
+        const group = renderedTopicGroups[idx];
+        if (group) openVariationModal(group);
+      };
+    });
+    gridEl.querySelectorAll('.locked-topic-btn[data-topic-title]').forEach(btn => {
+      btn.onclick = () => openLockModal(btn.dataset.topicTitle);
+    });
+  }
 }
+
+function parseVariationInfo(rawTitle, settings = {}) {
+  const str = String(rawTitle || '').trim();
+  if (settings && settings.variation_label) {
+    return {
+      baseTitle: String(settings.base_title || str).trim(),
+      isVariation: true,
+      variationNumber: Number(settings.variation_no || 1),
+      label: String(settings.variation_label).trim()
+    };
+  }
+
+  // 1. Explicit Arabic variation keywords: "معدل", "تعديل", "نسخة"
+  const arabicMatch = str.match(/^(.*?)(?:[\s\-_–—]+|\s*[\(\[])(?:معدل|تعديل|نسخة|النسخة المعدلة)[\s\-_–—]*(\d+)?[\)\]]?$/i);
+  if (arabicMatch && arabicMatch[1].trim()) {
+    const base = arabicMatch[1].trim();
+    const num = arabicMatch[2] ? parseInt(arabicMatch[2], 10) : 1;
+    return {
+      baseTitle: base,
+      isVariation: true,
+      variationNumber: num,
+      label: num > 1 ? `المعدل ${num}` : (arabicMatch[2] ? `المعدل ${num}` : 'المعدل 1')
+    };
+  }
+
+  // 2. Explicit Latin variation keywords: "modifiziert", "variant", "variation", "v1", "v2"
+  const latinMatch = str.match(/^(.*?)(?:[\s\-_–—]+|\s*[\(\[])(?:modifiziert|variant|variation|var\.?|v\.?)[\s\-_–—]*(\d+)?[\)\]]?$/i);
+  if (latinMatch && latinMatch[1].trim()) {
+    const base = latinMatch[1].trim();
+    const num = latinMatch[2] ? parseInt(latinMatch[2], 10) : 1;
+    return {
+      baseTitle: base,
+      isVariation: true,
+      variationNumber: num,
+      label: num > 1 ? `المعدل ${num}` : `المعدل 1`
+    };
+  }
+
+  // 3. Trailing number after hyphen or space e.g. "Sport ist gesund - 1", "Sport ist gesund 1", "Sport ist gesund (1)"
+  const numMatch = str.match(/^(.*?)(?:[\s\-_–—]+|\s*[\(\[])(\d+)[\)\]]?$/);
+  if (numMatch && numMatch[1].trim()) {
+    const base = numMatch[1].trim();
+    const num = parseInt(numMatch[2], 10);
+    if (base.length >= 3 && num >= 1 && num <= 20) {
+      return {
+        baseTitle: base,
+        isVariation: true,
+        variationNumber: num,
+        label: `المعدل ${num}`
+      };
+    }
+  }
+
+  return {
+    baseTitle: str,
+    isVariation: false,
+    variationNumber: 0,
+    label: text('الأساسي', 'Standard')
+  };
+}
+
+function groupTopicExercises(exercisesList) {
+  const groupsMap = new Map();
+
+  exercisesList.forEach(ex => {
+    const settings = ex.settings_json && typeof ex.settings_json === 'object' ? ex.settings_json : {};
+    const info = parseVariationInfo(ex.title, settings);
+    const groupKey = norm(info.baseTitle);
+
+    if (!groupsMap.has(groupKey)) {
+      groupsMap.set(groupKey, {
+        groupKey,
+        baseTitle: info.baseTitle,
+        items: []
+      });
+    }
+    groupsMap.get(groupKey).items.push({ ex, info });
+  });
+
+  const grouped = [];
+  groupsMap.forEach(group => {
+    group.items.sort((a, b) => {
+      if (!a.info.isVariation && b.info.isVariation) return -1;
+      if (a.info.isVariation && !b.info.isVariation) return 1;
+      return (a.info.variationNumber - b.info.variationNumber) || (a.ex.id - b.ex.id);
+    });
+
+    if (group.items.length > 1) {
+      const hasBase = group.items.some(x => !x.info.isVariation);
+      if (!hasBase) {
+        group.items[0].info.label = text('الأساسي', 'Standard');
+        for (let j = 1; j < group.items.length; j++) {
+          group.items[j].info.label = (typeof getLang === 'function' && getLang() === 'de') ? `Modifiziert ${j}` : `المعدل ${j}`;
+        }
+      }
+    }
+
+    grouped.push(group);
+  });
+
+  return grouped;
+}
+
+function openVariationModal(group) {
+  if (!group || !group.items || !group.items.length) return;
+  const modalEl = $('variationModal');
+  if (!modalEl) return;
+
+  const titleEl = $('variationModalTitle');
+  const subEl = $('variationModalSub');
+  const listEl = $('variationList');
+  const topicNameEl = $('variationTopicName');
+  const topicTransEl = $('variationTopicTrans');
+  const topicIconEl = $('variationTopicIcon');
+
+  const primaryEx = group.items[0]?.ex;
+  const translation = primaryEx?.translation || primaryEx?.settings_json?.translation || '';
+
+  if (topicNameEl) topicNameEl.textContent = group.baseTitle;
+  if (topicTransEl) topicTransEl.textContent = translation ? `(${translation})` : '';
+  if (topicIconEl) topicIconEl.textContent = sectionIcon(primaryEx?.section || state.section);
+
+  if (titleEl) titleEl.textContent = text('التعديلات المتاحة', 'Verfügbare Versionen');
+  if (subEl) subEl.textContent = text(`اختر من النسخ الـ ${group.items.length} المتاحة لهذا التمرين`, `Wähle aus den ${group.items.length} verfügbaren Versionen`);
+
+  if (listEl) {
+    const isUserPaid = !!(state.subscription?.is_paid || state.subscription?.active);
+    listEl.innerHTML = group.items.map((it, idx) => {
+      const ex = it.ex;
+      const dur = exerciseDuration(ex);
+      const isCompleted = isExerciseCompleted(ex.id);
+      const isExFree = (ex.access_mode || 'paid') === 'free';
+      const isLocked = !isUserPaid && !isExFree;
+      const accessBadge = isExFree
+        ? `<span class="card-access-pill pill-free">${text('مجاني','Kostenlos')}</span>`
+        : `<span class="card-access-pill pill-paid">${text('مدفوع','Kostenpflichtig')}</span>`;
+      const label = it.info.label || (idx === 0 ? text('الأساسي', 'Standard') : ((typeof getLang === 'function' && getLang() === 'de') ? `Modifiziert ${idx}` : `المعدل ${idx}`));
+
+      if (isLocked) {
+        return `
+          <a href="javascript:void(0)" class="variation-item-btn locked-var-item" data-ex-title="${esc(group.baseTitle + ' (' + label + ')')}" style="opacity:0.9;">
+            <span class="variation-item-content">
+              <span class="variation-item-label">${esc(label)}</span>
+              ${accessBadge}
+              ${ex.audio_url ? `<span class="variation-audio-badge" title="${text('ملف صوتي','Audio')}">🎧</span>` : ''}
+            </span>
+            <span class="variation-play-icon" aria-hidden="true" style="color:#991b1b">🔒</span>
+          </a>
+        `;
+      }
+
+      return `
+        <a href="/exercise.html?id=${ex.id}&duration=${dur * 60}" class="variation-item-btn">
+          <span class="variation-item-content">
+            <span class="variation-item-label">${esc(label)}</span>
+            ${accessBadge}
+            ${ex.audio_url ? `<span class="variation-audio-badge" title="${text('ملف صوتي','Audio')}">🎧</span>` : ''}
+            ${isCompleted ? `<span class="variation-done-badge" title="${text('تم التدريب مسبقاً','Bereits trainiert')}">✓</span>` : ''}
+          </span>
+          <span class="variation-play-icon" aria-hidden="true">▷</span>
+        </a>
+      `;
+    }).join('');
+
+    listEl.querySelectorAll('.locked-var-item').forEach(b => {
+      b.onclick = (e) => {
+        e.preventDefault();
+        openLockModal(b.dataset.exTitle);
+      };
+    });
+  }
+
+  modalEl.hidden = false;
+  document.body.classList.add('modal-open');
+}
+
+
+function openLockModal(title) {
+  const m = $('lockModal');
+  if (!m) return;
+  const isDe = (typeof getLang === 'function' && getLang() === 'de');
+  $('lockModalTitle').textContent = isDe ? 'Kostenpflichtige Übung' : 'محتوى مخصص للمشتركين';
+  $('lockModalMsg').textContent = isDe
+    ? `Die Übung "${title || ''}" ist nur mit einem aktiven Premium-Abonnement verfügbar.`
+    : `التمرين «${title || ''}» متاح فقط للمشتركين في الباقات المدفوعة. حسابك الحالي مجاني. يمكنك الاشتراك لفتح جميع المحتويات فوراً.`;
+  m.hidden = false;
+  document.body.classList.add('modal-open');
+}
+function closeLockModal() {
+  const m = $('lockModal');
+  if (m) m.hidden = true;
+  document.body.classList.remove('modal-open');
+}
+window.openLockModal = openLockModal;
+window.closeLockModal = closeLockModal;
+
+function closeVariationModal() {
+  const modalEl = $('variationModal');
+  if (modalEl) modalEl.hidden = true;
+  document.body.classList.remove('modal-open');
+}
+window.closeVariationModal = closeVariationModal;
+
+document.addEventListener('click', (e) => {
+  if (e.target && (e.target.id === 'closeVariationModal' || e.target.closest('#closeVariationModal') || e.target.classList?.contains('variation-modal-close'))) {
+    closeVariationModal();
+  } else if (e.target && (e.target.id === 'variationModal' || e.target.classList?.contains('variation-modal-overlay'))) {
+    closeVariationModal();
+  }
+});
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !$('variationModal')?.hidden) closeVariationModal();
+});
 
 document.addEventListener('click',e=>{const a=e.target.closest('a[href*="/exercise.html"]');if(!a)return;try{sessionStorage.setItem('telc_dashboard_return',JSON.stringify({level:state.level,section:state.section,teil:selectedTeil,search:$('search')?.value||'',scrollY:window.scrollY}));}catch{}});
 
-logoutLink.onclick=async e=>{e.preventDefault();await api('auth-logout',{method:'POST'});location.href='/';};
-(async()=>{try{const d=await api('me');state.exercises=d.exercises||[];state.student=d.student;state.subscription=d.subscription||null;remainingDays=calcRemainingDays();const urlLevel=qs('level');if(['B1','B2','C1'].includes(urlLevel))state.level=urlLevel;
-try{const saved=JSON.parse(sessionStorage.getItem('telc_dashboard_return')||'null');if(saved){if(['B1','B2','C1'].includes(saved.level))state.level=saved.level;if(SECTION_ORDER.includes(saved.section))state.section=saved.section;if(availableTeileFor(state.section).includes(saved.teil))selectedTeil=saved.teil;window.__telcRestoreSearch=saved.search||'';window.__telcRestoreScroll=Number(saved.scrollY)||0;sessionStorage.removeItem('telc_dashboard_return');}}catch{}
-render();if(window.__telcRestoreSearch&&$('search'))$('search').value=window.__telcRestoreSearch;renderTopics();setTimeout(()=>{if(window.__telcRestoreScroll)window.scrollTo(0,window.__telcRestoreScroll);},80);}catch(e){location.href='/?error=session';}})();
-document.addEventListener('langchange',render);
+const logoutBtn=$('logoutLink');
+if(logoutBtn) logoutBtn.onclick=async e=>{e.preventDefault();try{localStorage.removeItem('telc_student_token');}catch(_){}await api('auth-logout',{method:'POST'});location.href='/';};
 
+// Student Notifications
+let dashboardNotifications = [];
+const notifBellBtn = $('notifBellBtn');
+const notifBadge = $('notifBadge');
+const notifDropdown = $('notifDropdown');
+const notifList = $('notifList');
+const notifCountTag = $('notifCountTag');
+const markAllReadBtn = $('markAllReadBtn');
+
+function formatNotifDate(d) {
+  if (!d) return '';
+  const dt = new Date(d);
+  return dt.toLocaleDateString('ar-u-nu-latn', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function renderNotifications() {
+  const unreadCount = dashboardNotifications.filter(n => !n.read_at).length;
+  if (unreadCount > 0) {
+    notifBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+    notifBadge.style.display = 'inline-flex';
+  } else {
+    notifBadge.style.display = 'none';
+  }
+  if (notifCountTag) notifCountTag.textContent = dashboardNotifications.length;
+
+  if (!dashboardNotifications.length) {
+    notifList.innerHTML = `<div class="notif-empty">${text('لا توجد تنبيهات حالياً', 'Keine Benachrichtigungen vorhanden')}</div>`;
+    return;
+  }
+
+  notifList.innerHTML = dashboardNotifications.map(n => {
+    const isUnread = !n.read_at;
+    const typeClass = (n.type === 'important' || n.priority === 'urgent' || n.priority === 'high' || n.type === 'code_expired') ? 'notif-pill-important' :
+                      (n.type === 'warning' || n.type === 'code_expiry') ? 'notif-pill-warning' :
+                      (n.type === 'success') ? 'notif-pill-success' :
+                      (n.type === 'announcement') ? 'notif-pill-announcement' : 'notif-pill-info';
+
+    const typeName = (n.type === 'code_expiry' || n.type === 'code_expired') ? 'تنبيه اشتراك' :
+                     (n.type === 'important') ? 'هام' :
+                     (n.type === 'warning') ? 'تحذير' :
+                     (n.type === 'success') ? 'تأكيد' :
+                     (n.type === 'announcement') ? 'إعلان' : 'تنبيه';
+
+    return `
+      <div class="notif-item ${isUnread ? 'unread' : ''}" data-id="${esc(n.id)}" data-source="${esc(n.source || 'system')}">
+        <div class="notif-item-top">
+          <h4 class="notif-title">${esc(n.title)}</h4>
+          <span class="notif-badge-pill ${typeClass}">${typeName}</span>
+        </div>
+        <div class="notif-msg">${esc(n.message)}</div>
+        <div class="notif-meta">
+          <span>${formatNotifDate(n.created_at)}</span>
+          ${isUnread ? `<button type="button" class="notif-mark-single-btn" onclick="markNotificationRead('${esc(n.id)}', '${esc(n.source || 'system')}')">${text('تحديد كمقروء', 'Als gelesen markieren')}</button>` : '<span style="color:#a0b0a8;">✓ مقروء</span>'}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+async function loadNotifications() {
+  try {
+    const res = await api('notifications');
+    dashboardNotifications = Array.isArray(res?.notifications) ? res.notifications : [];
+    renderNotifications();
+  } catch (err) {
+    console.warn('[NOTIFICATIONS LOAD ERROR]', err);
+  }
+}
+
+async function markNotificationRead(id, source) {
+  try {
+    await api('notifications-read', {
+      method: 'POST',
+      body: source === 'admin' ? { admin_id: id } : { id: id }
+    });
+    const found = dashboardNotifications.find(n => String(n.id) === String(id) && (n.source || 'system') === source);
+    if (found) found.read_at = new Date().toISOString();
+    renderNotifications();
+  } catch (err) {
+    console.error('Failed to mark read', err);
+  }
+}
+window.markNotificationRead = markNotificationRead;
+
+if (notifBellBtn) {
+  notifBellBtn.onclick = (e) => {
+    e.stopPropagation();
+    const isShown = notifDropdown.style.display === 'flex';
+    notifDropdown.style.display = isShown ? 'none' : 'flex';
+  };
+}
+
+if (markAllReadBtn) {
+  markAllReadBtn.onclick = async () => {
+    try {
+      await api('notifications-read', { method: 'POST', body: { all: true } });
+      dashboardNotifications.forEach(n => { n.read_at = new Date().toISOString(); });
+      renderNotifications();
+    } catch (err) {
+      console.error('Failed to mark all read', err);
+    }
+  };
+}
+
+document.addEventListener('click', (e) => {
+  if (notifDropdown && notifDropdown.style.display === 'flex' && !notifDropdown.contains(e.target) && e.target !== notifBellBtn) {
+    notifDropdown.style.display = 'none';
+  }
+});
+
+(async()=>{
+  try {
+    const d = await api('me');
+    state.exercises = Array.isArray(d?.exercises) ? d.exercises : [];
+    state.student = d?.student || {};
+    state.subscription = d?.subscription || null;
+    if (state.subscription && (d?.is_paid || state.subscription.active || state.subscription.is_paid)) {
+      state.subscription.is_paid = true;
+      state.subscription.active = true;
+    }
+    remainingDays = calcRemainingDays();
+    const urlLevel = qs('level');
+    if (['B1','B2','C1'].includes(String(urlLevel||'').toUpperCase())) state.level = String(urlLevel).toUpperCase();
+    try {
+      const saved = JSON.parse(sessionStorage.getItem('telc_dashboard_return') || 'null');
+      if (saved) {
+        if (['B1','B2','C1'].includes(String(saved.level||'').toUpperCase())) state.level = String(saved.level).toUpperCase();
+        if (SECTION_ORDER.includes(saved.section)) state.section = saved.section;
+        if (availableTeileFor(state.section).includes(saved.teil)) selectedTeil = saved.teil;
+        window.__telcRestoreSearch = saved.search || '';
+        window.__telcRestoreScroll = Number(saved.scrollY) || 0;
+        sessionStorage.removeItem('telc_dashboard_return');
+      }
+    } catch (_) {}
+    render();
+    if (window.__telcRestoreSearch && $('search')) $('search').value = window.__telcRestoreSearch;
+    renderTopics();
+    loadNotifications();
+    setTimeout(() => {
+      if (window.__telcRestoreScroll) window.scrollTo(0, window.__telcRestoreScroll);
+    }, 80);
+  } catch(e) {
+    console.error('Dashboard init error:', e);
+    if (e?.status === 401) {
+      try { localStorage.removeItem('telc_student_token'); } catch (_) {}
+      location.href = '/login.html?error=session';
+    } else {
+      const isDe = (typeof getLang === 'function' && getLang() === 'de');
+      const title = isDe ? 'Fehler beim Laden' : 'تعذر تحميل بيانات التمارين';
+      const msg = isDe ? 'Beim Laden der Aufgaben ist ein Fehler aufgetreten. Bitte erneut versuchen.' : 'حدث خطأ أثناء تحميل التمارين. يرجى الضغط على زر إعادة المحاولة.';
+      const retry = isDe ? 'Erneut versuchen' : 'إعادة المحاولة';
+      const contentEl = $('content');
+      if (contentEl) {
+        contentEl.innerHTML = `
+          <div class="empty-panel" style="margin:60px auto;max-width:520px;text-align:center;padding:30px;border-radius:20px;background:var(--white)">
+            <h3 style="margin-bottom:10px">${esc(title)}</h3>
+            <p class="muted" style="margin-bottom:20px">${esc(msg)}</p>
+            <button class="btn" type="button" onclick="location.reload()">${esc(retry)}</button>
+          </div>`;
+      }
+    }
+  }
+})();
+document.addEventListener('langchange', render);
 // Mobile navigation toggle
 (function(){
   var toggle=document.getElementById('mobileNavToggle');
@@ -168,5 +1481,8 @@ document.addEventListener('langchange',render);
     }
   });
   var ml=document.getElementById('mobileLogoutLink');
-  if(ml) ml.onclick=async function(e){e.preventDefault();await api('auth-logout',{method:'POST'});location.href='/';};
-})();</script></body></html>
+  var lk=document.getElementById('logoutLink');
+  if(ml&&lk) ml.onclick=function(e){e.preventDefault();lk.onclick(e);};
+})();
+</script>
+</body></html>
