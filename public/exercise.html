@@ -601,10 +601,34 @@ function renderChoiceQuestions(){
   }
 
   document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>selectAnswer(b.dataset.q,b.dataset.o));
+  const refreshSpb2UniqueOptions=()=>{
+    if(!(model.exercise.section==='Sprachbausteine'&&model.exercise.teil==='Teil 2')) return;
+    const selects=[...document.querySelectorAll('[data-gap-select]')];
+    const used=new Set(selects.map(s=>String(s.value||'').trim().toLowerCase()).filter(Boolean));
+    selects.forEach(sel=>{
+      const own=String(sel.value||'').trim().toLowerCase();
+      [...sel.options].forEach(opt=>{
+        if(!opt.value){ opt.disabled=false; return; }
+        const key=String(opt.value||'').trim().toLowerCase();
+        opt.disabled=used.has(key)&&key!==own;
+      });
+    });
+  };
   document.querySelectorAll('[data-gap-select]').forEach(sel=>sel.onchange=e=>{
     e.stopPropagation();
+    if(model.exercise.section==='Sprachbausteine'&&model.exercise.teil==='Teil 2'){
+      const chosen=String(sel.value||'').trim().toLowerCase();
+      const duplicate=[...document.querySelectorAll('[data-gap-select]')].some(other=>other!==sel&&String(other.value||'').trim().toLowerCase()===chosen&&chosen);
+      if(duplicate){
+        sel.value='';
+        refreshSpb2UniqueOptions();
+        return;
+      }
+    }
     selectAnswer(sel.dataset.gapSelect,sel.value);
+    refreshSpb2UniqueOptions();
   });
+  refreshSpb2UniqueOptions();
 
   bindTextTools();
 }
