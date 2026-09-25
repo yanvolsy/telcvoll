@@ -704,11 +704,13 @@ html[dir="rtl"] .topic-tools select{background-position:calc(0% + 17px) 19px,cal
 }
 
 /* Unified exercise navigation and speaking workspace */
-.exercise-topbar{display:grid!important;grid-template-columns:48px 1fr 180px!important;align-items:center!important;min-height:62px!important;height:62px!important;padding:0 24px!important;gap:12px!important;direction:ltr!important}
-.exercise-topbar .back-link{grid-column:1!important;justify-self:start!important;position:static!important;margin:0!important}
-.exercise-topbar .exercise-header-actions{grid-column:3!important;justify-self:end!important;display:flex!important;align-items:center!important;gap:8px!important;margin:0!important}
-.exercise-topbar .exercise-header-actions .header-actions{display:flex!important;gap:8px!important;align-items:center!important}
-.exercise-topbar .exercise-header-actions .icon-btn{width:40px;height:40px;border-radius:50%}
+.exercise-topbar{display:flex!important;align-items:center!important;justify-content:space-between!important;min-height:60px!important;height:60px!important;padding:0 24px!important;gap:16px!important;direction:ltr!important;position:sticky!important;top:0!important;z-index:60!important}
+.exercise-topbar-left{display:flex!important;align-items:center!important;gap:14px!important}
+.exercise-topbar .back-link{width:40px!important;height:40px!important;border-radius:50%!important;background:var(--white)!important;border:1px solid var(--line)!important;text-decoration:none!important;font-size:20px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;color:var(--ink)!important;flex:none!important;position:static!important;margin:0!important;transition:border-color .2s,background .2s!important}
+.exercise-topbar .back-link:hover{border-color:var(--green)!important;color:var(--green)!important}
+.exercise-topbar .brand{text-decoration:none!important;display:inline-flex!important;align-items:center!important}
+.exercise-topbar .header-actions{display:flex!important;align-items:center!important;gap:8px!important;margin-inline-start:auto!important}
+.exercise-topbar .header-actions .icon-btn{width:40px!important;height:40px!important;border-radius:50%!important;display:inline-flex!important;align-items:center!important;justify-content:center!important}
 .exercise-topbar .exercise-session{display:none!important}
 .teil-tabs{display:flex;align-items:stretch;justify-content:stretch;gap:5px;border:1px solid var(--line);border-radius:15px;background:var(--white);padding:4px;min-height:46px;min-width:210px;direction:ltr;box-shadow:0 5px 18px rgba(16,35,30,.035)}
 .teil-tab{flex:1;min-width:0;border:1px solid transparent;background:transparent;color:var(--muted);font:inherit;font-weight:900;border-radius:11px;padding:9px 13px;cursor:pointer;white-space:nowrap;transition:background .18s ease,color .18s ease,border-color .18s ease,box-shadow .18s ease}
@@ -4709,233 +4711,89 @@ html[data-theme="dark"] .hoeren-audio-player-card {
   }
 }
 
-/* ========================================================
-   TELC VOLL — EXERCISE DISPLAY CORRECTION
-   Based on the uploaded latest exercise presentation reference.
-   Scoped strictly to exercise pages; authentication, dashboard,
-   payment, admin and database logic remain untouched.
-   ======================================================== */
-
-/* Exercise header: one clean horizontal bar. */
-.exercise-topbar {
-  min-height: 62px !important;
-  height: 62px !important;
-  padding: 0 18px !important;
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 12px !important;
-  direction: ltr !important;
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 120 !important;
+/* Universal Plans Cards (shared between plans.html and index.html) */
+.plans-grid-wrap {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  align-items: stretch;
+  margin-bottom: 56px;
 }
-.exercise-topbar .back-link {
-  flex: 0 0 40px !important;
-  margin: 0 !important;
+.plans-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 32px 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: var(--shadow);
+  position: relative;
+  transition: transform 0.22s, border-color 0.22s, box-shadow 0.22s;
 }
-.exercise-header-actions {
-  margin-inline-start: auto !important;
-  margin-inline-end: 0 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: flex-end !important;
-  gap: 8px !important;
-  flex-wrap: nowrap !important;
+.plans-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--green);
+  box-shadow: 0 16px 36px rgba(0,0,0,0.08);
 }
-.exercise-header-actions .icon-btn,
-.exercise-header-actions button,
-.exercise-header-actions a {
-  flex: 0 0 auto !important;
+.plans-card.featured {
+  border: 2px solid var(--green);
+  background: color-mix(in srgb, var(--white) 96%, var(--green-soft));
 }
-
-/* Exercise title: centered independently from RTL/LTR body direction. */
-.exercise-heading {
-  min-height: 144px !important;
-  padding: 24px 22px 18px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  position: relative !important;
-  direction: ltr !important;
+.plans-card-badge {
+  position: absolute;
+  top: -12px;
+  right: 24px;
+  background: var(--green);
+  color: #fff;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 12px rgba(255,122,47,0.35);
 }
-.exercise-heading-title {
-  margin: 0 !important;
-  width: min(760px, 100%) !important;
-  flex: 0 1 760px !important;
-  text-align: center !important;
-  direction: ltr !important;
+[dir="ltr"] .plans-card-badge {
+  right: auto;
+  left: 24px;
 }
-.exercise-heading-title h1,
-.thema-title-row h1 {
-  text-align: center !important;
-  direction: ltr !important;
+.plans-card-header h3 {
+  font-size: 22px;
+  margin: 0 0 6px;
+  color: var(--ink);
 }
-.exercise-heading-title small {
-  display: block !important;
-  text-align: center !important;
+.plans-card-price {
+  font-size: 38px;
+  font-weight: 950;
+  color: var(--green);
+  margin: 16px 0 6px;
+  letter-spacing: -0.04em;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
 }
-.exercise-heading .progress-pill,
-.exercise-heading > .timer {
-  position: absolute !important;
-  inset-inline-end: 20px !important;
-  top: 20px !important;
+.plans-card-price small {
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 700;
 }
-
-/* Stable two-column exercise workspace. Main content remains readable,
-   right answer panel stays fixed and independently scrollable. */
-.exam-workspace {
-  display: grid !important;
-  grid-template-columns: minmax(0, 1fr) 360px !important;
-  direction: ltr !important;
-  align-items: stretch !important;
-  width: 100% !important;
-  max-width: none !important;
-  min-height: calc(100vh - 206px) !important;
+.plans-card-features {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
-.exam-main {
-  min-width: 0 !important;
-  width: 100% !important;
-  max-width: none !important;
-  margin: 0 !important;
-  padding: 18px clamp(24px, 5vw, 76px) 110px 24px !important;
-  direction: rtl !important;
-  overflow: auto !important;
+.plans-card-features li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--ink);
+  font-weight: 600;
 }
-.exam-side {
-  width: 360px !important;
-  min-width: 360px !important;
-  max-width: 360px !important;
-  height: calc(100vh - 62px) !important;
-  max-height: calc(100vh - 62px) !important;
-  position: sticky !important;
-  top: 62px !important;
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  direction: ltr !important;
-  border-inline-start: 1px solid var(--line) !important;
-}
-
-/* Lesen Teil 1 assignment row: Arabic labels follow RTL correctly. */
-.exam-main .paragraph-assignment {
-  direction: rtl !important;
-  display: flex !important;
-  flex-direction: row !important;
-  align-items: center !important;
-  justify-content: stretch !important;
-  gap: 12px !important;
-  width: 100% !important;
-  text-align: right !important;
-}
-.exam-main .paragraph-assignment .assignment-label {
-  order: 1 !important;
-  flex: 0 0 auto !important;
-  white-space: nowrap !important;
-  text-align: right !important;
-}
-.exam-main .paragraph-assignment select {
-  order: 2 !important;
-  flex: 1 1 auto !important;
-  min-width: 0 !important;
-  direction: rtl !important;
-  text-align: right !important;
-  margin: 0 !important;
-}
-.exam-main .paragraph-assignment .assignment-selected,
-.exam-main .paragraph-assignment .assignment-empty {
-  order: 3 !important;
-  flex: 0 0 auto !important;
-  white-space: nowrap !important;
-  text-align: left !important;
-}
-
-/* Cards: consistent width, spacing and text direction. */
-.exam-main .exam-text-card,
-.exam-main .question-card,
-.exam-main .lesen2-question {
-  width: 100% !important;
-  max-width: none !important;
-  direction: rtl !important;
-  text-align: right !important;
-}
-.exam-main .exam-text-card {
-  padding: 22px 28px !important;
-  margin-bottom: 16px !important;
-}
-.exam-main .exam-text {
-  direction: ltr !important;
-  text-align: left !important;
-  unicode-bidi: plaintext !important;
-  font-size: 17px !important;
-  line-height: 1.95 !important;
-}
-.exam-main .exam-card-top {
-  display: flex !important;
-  justify-content: flex-end !important;
-  direction: ltr !important;
-}
-
-/* Right-side headings panel. */
-.exam-side .side-title,
-.exam-side .heading-list,
-.exam-side .choice-list,
-.exam-side .side-question {
-  direction: ltr !important;
-}
-.exam-side .side-title-large {
-  text-align: left !important;
-}
-.exam-side .side-title-large small {
-  display: block !important;
-  text-align: left !important;
-}
-
-/* Keep tool buttons compact and aligned. */
-.exercise-page .mini-tool,
-.exercise-page .side-icon {
-  flex: 0 0 auto !important;
-}
-
-@media (max-width: 900px) {
-  .exam-workspace {
-    grid-template-columns: 1fr !important;
-  }
-  .exam-side {
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: none !important;
-    height: auto !important;
-    max-height: 360px !important;
-    position: relative !important;
-    top: auto !important;
-    border-inline-start: 0 !important;
-    border-top: 1px solid var(--line) !important;
-  }
-  .exam-main {
-    padding: 16px 14px 80px !important;
-  }
-  .exercise-heading {
-    min-height: 120px !important;
-  }
-}
-
-@media (max-width: 600px) {
-  .exercise-topbar {
-    padding: 0 10px !important;
-  }
-  .exercise-heading {
-    padding: 18px 12px !important;
-  }
-  .exam-main .paragraph-assignment {
-    flex-wrap: wrap !important;
-  }
-  .exam-main .paragraph-assignment select {
-    flex-basis: 100% !important;
-    order: 3 !important;
-  }
-  .exam-main .paragraph-assignment .assignment-selected,
-  .exam-main .paragraph-assignment .assignment-empty {
-    order: 2 !important;
-  }
+.plans-card-features li svg {
+  color: var(--green);
+  flex: none;
 }

@@ -153,10 +153,9 @@
 <header class="top">
   <a class="brand" href="/dashboard.html"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
   <nav class="student-nav-links">
-    <a href="/dashboard.html" data-i18n="nav_home_student">منصة الطالب</a>
     <a href="/self-test.html" data-i18n="nav_mock">امتحان تجريبي</a>
     <a href="/telc-chat.html" data-i18n="nav_speaking">مساعد TELC</a>
-    <a href="/profile.html" data-i18n="profile_link">حسابي</a>
+    <a href="/profile.html" data-i18n="profile_link">ملفي</a>
     <a href="#" id="logoutLink" data-i18n="nav_logout" class="nav-logout-btn">خروج</a>
   </nav>
 </header>
@@ -389,6 +388,22 @@ async function loadPlans() {
 }
 
 (async () => {
+  const token = localStorage.getItem('telc_student_token');
+  const brandLink = document.querySelector('.brand');
+  const navContainer = document.querySelector('.student-nav-links');
+  if (!token && navContainer) {
+    if (brandLink) brandLink.href = '/';
+    navContainer.className = '';
+    navContainer.innerHTML = `
+      <a href="/#services">الخدمات</a>
+      <a href="/#plans" class="active">الخطط</a>
+      <a href="/contact.html">اتصل بنا</a>
+      <span style="display:inline-flex;gap:8px;align-items:center;">
+        <a class="btn light small-btn" href="/login.html">تسجيل الدخول</a>
+        <a class="btn small-btn" href="/register.html">إنشاء حساب</a>
+      </span>
+    `;
+  }
   try {
     const meRes = await api('me');
     if (meRes?.student) {
