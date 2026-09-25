@@ -188,11 +188,11 @@ html[data-theme="dark"] .hub-badge-pill.paid{color:#ff9838}
 /* Exercise refinements: fixed side panel, neutral selection, inline learning tools. */
 :root{--exercise-accent:var(--green);--exercise-accent-soft:var(--green-soft)}
 html[data-theme="dark"]{--exercise-accent:var(--green);--exercise-accent-soft:var(--green-soft)}
-.exercise-page:has(.exam-workspace){height:calc(100vh - 74px);overflow:hidden;padding-bottom:72px}
-.exercise-page:has(.exam-workspace) .exercise-heading{flex:0 0 145px;min-height:145px;border-bottom:1px solid var(--line)}
-.exercise-page:has(.exam-workspace) .exam-workspace{height:calc(100% - 145px);min-height:0}
-.exercise-page:has(.exam-workspace) .exam-main{height:100%;overflow-y:auto;overscroll-behavior:contain}
-.exercise-page:has(.exam-workspace) .exam-side{height:100%;max-height:none;position:relative;top:auto;overflow-y:auto;overscroll-behavior:contain}
+.exercise-page:has(.exam-workspace){height:auto;min-height:100vh;overflow-y:visible;overflow-x:hidden;padding-bottom:90px}
+.exercise-page:has(.exam-workspace) .exercise-heading{flex:none;height:auto;min-height:auto;border-bottom:1px solid var(--line)}
+.exercise-page:has(.exam-workspace) .exam-workspace{height:auto;min-height:0;overflow:visible}
+.exercise-page:has(.exam-workspace) .exam-main{height:auto;overflow:visible}
+.exercise-page:has(.exam-workspace) .exam-side{display:none}
 .exam-text-card{cursor:default}
 .exam-text-card.active-item{border-color:var(--exercise-accent);box-shadow:0 0 0 2px var(--exercise-accent-soft)}
 .exam-text-card.answered{border-color:var(--line)}
@@ -265,45 +265,32 @@ html[data-theme="dark"]{--exercise-accent:var(--green);--exercise-accent-soft:va
 
 /* Definitive Lesen Teil 1 workspace */
 .exercise-page:has(.exam-workspace){
-  height:calc(100vh - 60px);
-  min-height:0;
-  overflow:hidden;
-  padding-bottom:76px;
+  height:auto;
+  min-height:100vh;
+  overflow-y:visible;
+  overflow-x:hidden;
+  padding-bottom:90px;
 }
 .exercise-page:has(.exam-workspace) .exercise-heading{
-  height:150px;
-  min-height:150px;
+  height:auto;
+  min-height:auto;
   flex:none;
   overflow:visible;
   border-bottom:1px solid var(--line);
 }
 .exercise-page:has(.exam-workspace) .exam-workspace{
-  height:calc(100% - 150px);
+  height:auto;
   min-height:0;
-  overflow:hidden;
-  grid-template-columns:minmax(0,1fr) 390px;
+  overflow:visible;
+  grid-template-columns:1fr;
 }
 .exercise-page:has(.exam-workspace) .exam-main{
-  overflow-anchor:none;
-  height:100%;
-  min-height:0;
-  overflow-y:auto;
-  overflow-x:hidden;
-  padding:18px clamp(28px,5vw,92px) 110px 22px;
-  scrollbar-gutter:stable;
+  height:auto;
+  overflow:visible;
+  padding:18px clamp(16px,3vw,36px) 90px 16px;
 }
 .exercise-page:has(.exam-workspace) .exam-side{
-  overflow-anchor:none;
-  height:100%;
-  min-height:0;
-  max-height:none;
-  overflow-y:auto;
-  overflow-x:hidden;
-  position:relative;
-  top:auto;
-  padding:18px 18px 110px;
-  border-inline-start:1px solid var(--line);
-  scrollbar-gutter:stable;
+  display:none;
 }
 .exercise-page:has(.exam-workspace) .exam-text-card{
   position:relative;
@@ -5022,8 +5009,39 @@ html[data-theme="dark"] .hoeren-audio-player-card {
 
 
 /* ==========================================================================
-   GLOBAL EXERCISE LAYOUT OVERRIDE: FULL-WIDTH CLEAN SINGLE-COLUMN
+   GLOBAL EXERCISE LAYOUT OVERRIDE: FULL-WIDTH CLEAN SINGLE-COLUMN & NATURAL SCROLL
    ========================================================================== */
+html,
+body {
+  height: auto !important;
+  min-height: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+.exercise-page,
+.exercise-page:has(.exam-workspace),
+main.exercise-page {
+  display: block !important;
+  height: auto !important;
+  min-height: 100vh !important;
+  overflow: visible !important;
+  overflow-y: visible !important;
+  overflow-x: hidden !important;
+  padding-bottom: 120px !important;
+  position: relative !important;
+}
+
+.exercise-heading,
+.exercise-page:has(.exam-workspace) .exercise-heading {
+  display: block !important;
+  height: auto !important;
+  min-height: auto !important;
+  flex: none !important;
+  overflow: visible !important;
+  padding: 24px 20px 18px !important;
+}
+
 .exam-workspace,
 .exercise-page:has(.exam-workspace) .exam-workspace,
 .exam-workspace.lesen2,
@@ -5033,16 +5051,21 @@ html[data-theme="dark"] .hoeren-audio-player-card {
   width: 100% !important;
   max-width: 1150px !important;
   margin: 0 auto !important;
-  padding: 0 16px 80px !important;
+  padding: 0 16px 90px !important;
+  height: auto !important;
+  min-height: 0 !important;
+  overflow: visible !important;
 }
 
 .exam-main,
 .exercise-page:has(.exam-workspace) .exam-main,
 .exam-workspace.lesen2 .exam-main {
+  display: block !important;
   width: 100% !important;
   max-width: 100% !important;
   padding: 16px 0 60px !important;
   min-width: 0 !important;
+  height: auto !important;
   overflow: visible !important;
 }
 
@@ -5056,6 +5079,24 @@ html[data-theme="dark"] .hoeren-audio-player-card {
   padding: 0 !important;
   border: 0 !important;
   overflow: hidden !important;
+}
+
+.exercise-actions {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 99 !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-top: 1px solid var(--line) !important;
+  padding: 12px 20px !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06) !important;
+}
+html[data-theme="dark"] .exercise-actions {
+  background: rgba(13, 19, 16, 0.94) !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
 .shuffle-btn-styled {

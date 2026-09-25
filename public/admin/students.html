@@ -31,11 +31,19 @@
 .badge-paid{background:#e8f7ee;color:#0e7039;border:1px solid #b7ebc7;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:900;white-space:nowrap;display:inline-block}
 .badge-provider{display:inline-flex;align-items:center;gap:4px;background:#f8fafc;border:1px solid var(--line);border-radius:6px;padding:2px 6px;font-size:10px;font-weight:700;color:var(--muted);white-space:nowrap}
 .badge-blocked{background:#fef2f2;color:#991b1b;border:1px solid #fecaca;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:900;white-space:nowrap}
-.btn-toggle-block{border:1px solid var(--line);background:var(--white);border-radius:9px;padding:6px 10px;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap}
-.btn-toggle-block:hover{border-color:var(--danger);color:var(--danger)}
-.btn-toggle-block.is-blocked{background:#fef2f2;border-color:#fca5a5;color:#991b1b}
-.btn-toggle-block.is-blocked:hover{background:#e8f7ee;border-color:#86efac;color:#0e7039}
 .action-group{display:flex;gap:6px;align-items:center;flex-wrap:nowrap;white-space:nowrap}
+.student-action-btn{display:inline-flex !important;align-items:center !important;justify-content:center !important;gap:5px !important;height:32px !important;padding:0 10px !important;font-size:11.5px !important;font-weight:850 !important;border-radius:9px !important;cursor:pointer !important;white-space:nowrap !important;transition:all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;border:1px solid var(--line) !important;box-shadow:0 1px 3px rgba(0,0,0,0.03) !important;font-family:inherit !important}
+.student-action-btn:hover{transform:translateY(-1px) !important;box-shadow:0 4px 10px rgba(0,0,0,0.06) !important}
+.student-action-btn.btn-sub{background:var(--green) !important;border-color:var(--green) !important;color:#fff !important}
+.student-action-btn.btn-sub:hover{background:var(--green-dark, #047857) !important;border-color:var(--green-dark, #047857) !important}
+.student-action-btn.btn-edit{background:var(--white) !important;color:var(--ink) !important;border-color:var(--line) !important}
+.student-action-btn.btn-edit:hover{border-color:var(--green) !important;color:var(--green) !important}
+.student-action-btn.btn-block{background:var(--white) !important;color:var(--ink) !important;border-color:var(--line) !important}
+.student-action-btn.btn-block:hover{background:#fef2f2 !important;border-color:#fca5a5 !important;color:#991b1b !important}
+.student-action-btn.btn-block.is-blocked{background:#fef2f2 !important;border-color:#fca5a5 !important;color:#991b1b !important}
+.student-action-btn.btn-block.is-blocked:hover{background:#e8f7ee !important;border-color:#86efac !important;color:#0e7039 !important}
+.student-action-btn.btn-delete{background:var(--white) !important;color:#b91c1c !important;border-color:#fecaca !important}
+.student-action-btn.btn-delete:hover{background:#ef4444 !important;border-color:#ef4444 !important;color:#fff !important}
 .admin-top-links{margin-inline:auto !important;display:flex !important;justify-content:center !important;align-items:center !important;}
 .modal-backdrop{position:fixed;inset:0;background:rgba(10,16,13,.65);backdrop-filter:blur(5px);z-index:9999;display:none;align-items:center;justify-content:center;padding:16px}
 .modal-backdrop.open{display:flex}
@@ -251,7 +259,8 @@ function fmtDate(iso){
   if (!iso) return '—';
   try {
     const d = new Date(iso);
-    return d.toLocaleDateString('ar-EG', { year:'numeric', month:'short', day:'numeric' });
+    if (isNaN(d.getTime())) return '—';
+    return d.toLocaleDateString('ar-u-nu-latn', { year:'numeric', month:'short', day:'numeric' });
   } catch { return String(iso); }
 }
 
@@ -321,16 +330,16 @@ function renderStudents() {
         <td style="font-weight:800;color:${Number(s.avg_score||0)>=60?'var(--green)':'var(--muted)'};">${Number(s.avg_score||0).toFixed(1)}%</td>
         <td>
           <div class="action-group">
-            <button type="button" class="btn small-btn" style="padding:5px 9px;font-size:11px;font-weight:800;background:var(--green);border-color:var(--green);color:#fff;" onclick="openSubModal(${s.id})" title="تفعيل أو تمديد الخطة">
+            <button type="button" class="student-action-btn btn-sub" onclick="openSubModal(${s.id})" title="تفعيل أو تمديد الخطة">
               🔑 تفعيل الخطة
             </button>
-            <button type="button" class="btn small-btn light" style="padding:5px 9px;font-size:11px;font-weight:800;" onclick="openEditModal(${s.id})" title="تعديل بيانات الحساب">
+            <button type="button" class="student-action-btn btn-edit" onclick="openEditModal(${s.id})" title="تعديل بيانات الحساب">
               ✏️ تعديل
             </button>
-            <button type="button" class="btn-toggle-block ${s.is_blocked ? 'is-blocked' : ''}" data-student-id="${s.id}" data-blocked="${s.is_blocked}">
+            <button type="button" class="student-action-btn btn-block ${s.is_blocked ? 'is-blocked' : ''}" data-student-id="${s.id}" data-blocked="${s.is_blocked}" title="${s.is_blocked ? 'إلغاء حظر هذا الحساب' : 'حظر هذا الحساب'}">
               ${s.is_blocked ? 'إلغاء الحظر ✓' : 'حظر 🚫'}
             </button>
-            <button type="button" class="btn small-btn" style="padding:5px 8px;font-size:11px;font-weight:800;background:var(--white);border:1px solid #fca5a5;color:var(--danger);" onclick="deleteStudent(${s.id})" title="حذف حساب الطالب نهائياً">
+            <button type="button" class="student-action-btn btn-delete" onclick="deleteStudent(${s.id})" title="حذف حساب الطالب نهائياً">
               🗑️ حذف
             </button>
           </div>

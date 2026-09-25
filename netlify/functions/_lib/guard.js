@@ -20,6 +20,7 @@ async function getStudentSubscription(pool, studentId) {
       const c = codeRes.rows[0];
       return {
         active: true,
+        is_paid: true,
         plan: c.plan_name,
         plan_name: c.plan_name,
         plan_key: c.plan_key,
@@ -42,6 +43,7 @@ async function getStudentSubscription(pool, studentId) {
       const o = orderRes.rows[0];
       return {
         active: true,
+        is_paid: true,
         plan: o.plan_name,
         plan_name: o.plan_name,
         plan_key: o.plan_key,
@@ -50,11 +52,35 @@ async function getStudentSubscription(pool, studentId) {
         ai_enabled: o.ai_enabled !== false,
       };
     }
+
+    // 3. Fallback check on students table directly
+    try {
+      const stRes = await pool.query(
+        `SELECT is_paid, plan_id, plan_name, subscription_expires_at FROM students WHERE id = $1`,
+        [studentId]
+      );
+      if (stRes.rows[0] && stRes.rows[0].is_paid) {
+        const st = stRes.rows[0];
+        const isUnexpired = !st.subscription_expires_at || new Date(st.subscription_expires_at) > new Date();
+        if (isUnexpired) {
+          return {
+            active: true,
+            is_paid: true,
+            plan: st.plan_name || 'اشتراك كامل B1 · B2 · C1',
+            plan_name: st.plan_name || 'اشتراك كامل B1 · B2 · C1',
+            plan_key: 'b1_b2_c1',
+            duration_days: 30,
+            expires_at: st.subscription_expires_at || new Date(Date.now() + 30 * 86400000).toISOString(),
+            ai_enabled: true,
+          };
+        }
+      }
+    } catch (_) {}
   } catch (err) {
     console.error('Error fetching student subscription:', err);
   }
 
-  return { active: false, plan: null, plan_name: null, plan_key: null, expires_at: null, ai_enabled: false };
+  return { active: false, is_paid: false, plan: null, plan_name: null, plan_key: null, expires_at: null, ai_enabled: false };
 }
 
 /**
@@ -83,7 +109,7 @@ async function requireStudent(event, options = {}) {
   try {
     const sRes = await pool.query(
       `SELECT id, name, email, first_name, last_name, phone, country,
-              profile_completed, is_blocked
+              profile_completed, is_blocked, is_paid
        FROM students WHERE id = $1`,
       [studentId]
     );
@@ -93,7 +119,13 @@ async function requireStudent(event, options = {}) {
     }
 
     const subscription = await getStudentSubscription(pool, s.id);
-    const isPaid = subscription.active === true;
+    const isPaid = !!(subscription.active === true || subscription.is_paid === true || s.is_paid === true);
+    if (isPaid && !subscription.active) {
+      subscription.active = true;
+      subscription.is_paid = true;
+      subscription.plan = subscription.plan || 'اشتراك كامل B1 · B2 · C1';
+      subscription.plan_name = subscription.plan_name || 'اشتراك كامل B1 · B2 · C1';
+    }
 
     return {
       student_id: s.id,

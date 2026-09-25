@@ -32,10 +32,10 @@ exports.handler = async (event) => {
                 s.last_login_at,
                 COUNT(DISTINCT a.id)::int AS attempts,
                 COALESCE(ROUND(AVG(a.percent), 1), 0) AS avg_score,
-                sub.plan_name,
-                sub.plan_id,
-                sub.expires_at,
-                CASE WHEN (COALESCE(s.is_paid, FALSE) = TRUE OR (sub.expires_at IS NOT NULL AND sub.expires_at > NOW())) THEN TRUE ELSE FALSE END AS is_subscription_active
+                COALESCE(sub.plan_name, s.plan_name) AS plan_name,
+                COALESCE(sub.plan_id, s.plan_id) AS plan_id,
+                COALESCE(sub.expires_at, s.subscription_expires_at) AS expires_at,
+                CASE WHEN (COALESCE(s.is_paid, FALSE) = TRUE OR (sub.expires_at IS NOT NULL AND sub.expires_at > NOW()) OR (s.subscription_expires_at IS NOT NULL AND s.subscription_expires_at > NOW())) THEN TRUE ELSE FALSE END AS is_subscription_active
          FROM students s
          LEFT JOIN attempts a ON a.student_id = s.id
          LEFT JOIN LATERAL (
@@ -45,7 +45,7 @@ exports.handler = async (event) => {
            WHERE c.student_id = s.id AND c.active = TRUE AND c.expires_at > NOW()
            ORDER BY c.expires_at DESC LIMIT 1
          ) sub ON TRUE
-         GROUP BY s.id, sub.plan_name, sub.plan_id, sub.expires_at
+         GROUP BY s.id, sub.plan_name, sub.plan_id, sub.expires_at, s.plan_name, s.plan_id, s.subscription_expires_at
          ORDER BY s.id DESC`
       );
       students = res.rows;
@@ -178,8 +178,10 @@ exports.handler = async (event) => {
       if (!isActive) {
         // Revoke subscription -> set free
         try {
-          await pool.query('UPDATE students SET is_paid = FALSE, updated_at = NOW() WHERE id = $1', [id]);
-        } catch (_) {}
+          await pool.query('UPDATE students SET is_paid = FALSE, plan_id = NULL, plan_name = NULL, subscription_expires_at = NOW(), updated_at = NOW() WHERE id = $1', [id]);
+        } catch (_) {
+          try { await pool.query('UPDATE students SET is_paid = FALSE, updated_at = NOW() WHERE id = $1', [id]); } catch (_) {}
+        }
         try {
           await pool.query('UPDATE access_codes SET active = FALSE WHERE student_id = $1', [id]);
         } catch (_) {}
@@ -255,29 +257,42 @@ exports.handler = async (event) => {
             order_id, plan_id, plan_name, customer_name, customer_email, customer_phone,
             amount, currency, payment_provider, status, access_code, code_id, student_id,
             paid_at, expires_at
-          ) VALUES($1, $2, $3, $4, $5, $6, $7, 'DZD', 'manual_admin', 'CONFIRMED', $8, $9, $10, NOW(), $11)`,
+          ) VALUES($1, $2, $3, $4, $5, $6, 0, 'DZD', 'manual_admin', 'CONFIRMED', $7, $8, $9, NOW(), $10)`,
           [
             orderId, plan.id, plan.name, st.name || 'طالب', st.email, st.phone || '',
-            0, codeStr, codeId, id, expiresAt
+            codeStr, codeId, id, expiresAt
           ]
         );
       } catch (err) {
         console.warn('orders insert error:', err.message);
       }
 
-      // 3. Mark student as paid
+      // 3. Mark student as paid and store subscription directly on students row
       try {
-        await pool.query('UPDATE students SET is_paid = TRUE, updated_at = NOW() WHERE id = $1', [id]);
+        await pool.query(
+          `UPDATE students
+           SET is_paid = TRUE,
+               plan_id = $1,
+               plan_name = $2,
+               subscription_expires_at = $3,
+               updated_at = NOW()
+           WHERE id = $4`,
+          [plan.id, plan.name, expiresAt, id]
+        );
       } catch (paidErr) {
-        console.warn('students is_paid update notice:', paidErr.message);
+        console.warn('students update with plan notice:', paidErr.message);
+        try {
+          await pool.query('UPDATE students SET is_paid = TRUE, updated_at = NOW() WHERE id = $1', [id]);
+        } catch (_) {}
       }
 
+      const dateFormatted = `${String(expiresAt.getDate()).padStart(2, '0')}/${String(expiresAt.getMonth() + 1).padStart(2, '0')}/${expiresAt.getFullYear()}`;
       return json(200, {
         ok: true,
         is_paid: true,
         plan_name: plan.name,
         expires_at: expiresAt.toISOString(),
-        message: `تم تفعيل اشتراك (${plan.name}) بنجاح حتى ${expiresAt.toLocaleDateString('ar-EG')}`
+        message: `تم تفعيل اشتراك (${plan.name}) بنجاح حتى ${dateFormatted}`
       });
     }
   }

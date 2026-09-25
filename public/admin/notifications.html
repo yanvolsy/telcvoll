@@ -284,7 +284,7 @@
     function formatDate(d) {
       if (!d) return '—';
       const dt = new Date(d);
-      return dt.toLocaleDateString('ar-DZ', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      return dt.toLocaleDateString('ar-u-nu-latn', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     }
 
     function typeBadge(type, priority) {

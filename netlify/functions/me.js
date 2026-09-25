@@ -65,14 +65,23 @@ exports.handler = async (event) => {
       exams = examRes.rows;
     } catch (_) {}
 
+    const isPaid = !!(student.is_paid || student.subscription?.active || student.subscription?.is_paid);
+    const subObj = {
+      ...(student.subscription || {}),
+      active: isPaid,
+      is_paid: isPaid,
+      plan: student.subscription?.plan || (isPaid ? 'اشتراك كامل B1 · B2 · C1' : null),
+      plan_name: student.subscription?.plan_name || (isPaid ? 'اشتراك كامل B1 · B2 · C1' : null),
+    };
+
     return json(200, {
       authenticated: true,
       student: studentData,
-      subscription: student.subscription,
-      is_paid: student.is_paid,
+      subscription: subObj,
+      is_paid: isPaid,
       exercises,
       exams,
-      ai_enabled: student.ai_enabled,
+      ai_enabled: isPaid ? (student.ai_enabled || true) : false,
     });
   } catch (err) {
     console.error('Fatal error in me.js:', err);

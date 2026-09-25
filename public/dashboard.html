@@ -316,7 +316,7 @@ function render(){
     <section class="hub-head">
       <div class="hub-title-block"><span class="hub-greeting"><span>✨</span> ${text('مرحباً، '+(state.student?.name||'الطالب'),'Hallo, '+(state.student?.name||'Student'))}</span><h1>${text('منصة الطالب','Student Platform')}</h1><p class="muted">${text('اختر المستوى والقسم ثم افتح التمرين.','Wähle Niveau und Prüfungsteil und öffne anschließend die Übung.')}</p></div>
       <div class="hub-kpis">
-        ${state.subscription?.is_paid ? `
+        ${(state.subscription?.is_paid || state.subscription?.active) ? `
           <div class="hub-status-card">
             <div class="hub-status-card-top">
               <span class="hub-status-card-title">${text('نوع الحساب','Kontoart')}</span>
@@ -682,7 +682,7 @@ function showPaidOnlyModal(msg) {
   const genBtn = document.getElementById('presGenBtn');
   if(genBtn){
     genBtn.onclick=async()=>{
-      if (!state.subscription?.is_paid) {
+      if (!state.subscription?.is_paid && !state.subscription?.active) {
         showPaidOnlyModal();
         return;
       }
@@ -1008,7 +1008,7 @@ function renderTopics(){
       const hasAudio = g.items.some(it => !!it.ex.audio_url);
       const dur = exerciseDuration(primaryEx);
       const isMulti = g.items.length > 1;
-      const isUserPaid = !!state.subscription?.is_paid;
+      const isUserPaid = !!(state.subscription?.is_paid || state.subscription?.active);
       const isExFree = (primaryEx.access_mode || 'paid') === 'free';
       const isLocked = !isUserPaid && !isExFree;
 
@@ -1189,7 +1189,7 @@ function openVariationModal(group) {
   if (subEl) subEl.textContent = text(`اختر من النسخ الـ ${group.items.length} المتاحة لهذا التمرين`, `Wähle aus den ${group.items.length} verfügbaren Versionen`);
 
   if (listEl) {
-    const isUserPaid = !!state.subscription?.is_paid;
+    const isUserPaid = !!(state.subscription?.is_paid || state.subscription?.active);
     listEl.innerHTML = group.items.map((it, idx) => {
       const ex = it.ex;
       const dur = exerciseDuration(ex);
@@ -1296,7 +1296,7 @@ const markAllReadBtn = $('markAllReadBtn');
 function formatNotifDate(d) {
   if (!d) return '';
   const dt = new Date(d);
-  return dt.toLocaleDateString('ar-DZ', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return dt.toLocaleDateString('ar-u-nu-latn', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
 function renderNotifications() {
@@ -1400,6 +1400,10 @@ document.addEventListener('click', (e) => {
     state.exercises = Array.isArray(d?.exercises) ? d.exercises : [];
     state.student = d?.student || {};
     state.subscription = d?.subscription || null;
+    if (state.subscription && (d?.is_paid || state.subscription.active || state.subscription.is_paid)) {
+      state.subscription.is_paid = true;
+      state.subscription.active = true;
+    }
     remainingDays = calcRemainingDays();
     const urlLevel = qs('level');
     if (['B1','B2','C1'].includes(String(urlLevel||'').toUpperCase())) state.level = String(urlLevel).toUpperCase();

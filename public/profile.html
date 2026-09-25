@@ -33,6 +33,7 @@ function lang(){return getLang();}
 var text = window.text || ((ar,de)=>lang()==='ar'?ar:de);
 function render(){
   const s=data.student||{}, sub=data.subscription||{};
+  const isPaid = !!(data.is_paid || sub.active || sub.is_paid);
   $('content').innerHTML=`<section class="profile-shell">
     <div class="profile-head"><span class="tag">${text('الملف الشخصي','Persönliches Profil')}</span><h1>${qs('onboarding')==='1'&&!s.profile_completed?text('أكمل بياناتك','Profil vervollständigen'):text('ملفي الشخصي','Mein Profil')}</h1><p class="muted">${text('أدخل بياناتك الأساسية مرة واحدة. ستُستخدم هذه المعلومات لحفظ حسابك وإظهار بياناتك بشكل صحيح في المنصة ولوحة الإدارة.','Gib deine grundlegenden Daten einmal ein. Sie werden für dein Konto und die Anzeige deiner Daten in der Plattform und im Adminbereich verwendet.')}</p></div>
     <form id="profileForm" class="profile-form">
@@ -45,9 +46,9 @@ function render(){
       </div>
       <div class="profile-plan">
         <div>
-          ${sub.is_paid ? `
-            <strong>${text('الاشتراك الحالي: ','Aktueller Plan: ')}${esc(sub.plan_name || text('اشتراك كامل B1 · B2 · C1','Vollzugang'))}</strong>
-            <small>${text('ينتهي في: ','Gültig bis: ')}${sub.expires_at ? new Date(sub.expires_at).toLocaleDateString(lang()==='ar'?'ar-DZ':'de-DE') : ''}</small>
+          ${isPaid ? `
+            <strong>${text('الاشتراك الحالي: ','Aktueller Plan: ')}${esc(sub.plan_name || sub.plan || text('اشتراك كامل B1 · B2 · C1','Vollzugang'))}</strong>
+            <small>${text('ينتهي في: ','Gültig bis: ')}${sub.expires_at ? new Date(sub.expires_at).toLocaleDateString(lang()==='ar'?'ar-u-nu-latn':'de-DE', { year:'numeric', month:'short', day:'numeric' }) : ''}</small>
           ` : `
             <strong style="color:var(--green);">🟢 ${text('نوع الحساب: حساب مجاني','Kontotyp: Kostenlos')}</strong>
             <small>${text('وصول للتمارين المجانية. يمكنك ترقية حسابك لفتح جميع المحتويات.','Zugang zu kostenlosen Inhalten.')} <a href="/#plans" style="color:var(--green);font-weight:900;text-decoration:underline;margin-inline-start:6px;">${text('ترقية الاشتراك ⚡','Jetzt abonnieren')}</a></small>
