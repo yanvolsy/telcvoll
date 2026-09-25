@@ -636,7 +636,7 @@ function renderBody(body){
      const opts=sharedOptions();
      const selectOpts=opts.map(([k,v])=>{
        const isSel=String(displayVal).toLowerCase()===String(k).toLowerCase();
-       return `<option value="${esc(k)}" ${isSel?'selected':''}>${esc(k)}: ${esc(v)}</option>`;
+       return `<option value="${esc(k)}" ${isSel?'selected':''}>${esc(matchingDisplayLabel(k+': '+v))}</option>`;
      }).join('');
      gapHtml=`<select class="inline-gap-select ${val?'answered':''} ${resultClass} ${modelClass}" data-gap-select="${n}" aria-label="${text('الفراغ','Lücke')} ${examNo}"><option value="">(${examNo}) — ${text('اختر كلمة','Wort')}</option>${selectOpts}</select>`;
    }else{
@@ -682,7 +682,7 @@ function isUniqueAnswerExercise(){
   const sec=String(model?.exercise?.section||'');
   const teil=String(model?.exercise?.teil||'');
   const task=String(model?.exercise?.task_type||'');
-  return task==='MATCHING' || (sec==='Lesen' && ['Teil 1','Teil 3'].includes(teil)) || (sec==='Hören' && teil==='Teil 3');
+  return task==='MATCHING' || (sec==='Lesen' && ['Teil 1','Teil 3'].includes(teil)) || (sec==='Hören' && teil==='Teil 3') || (sec==='Sprachbausteine' && teil==='Teil 2');
 }
 function selectAnswer(n,val){
  const scrollState=captureExerciseScroll();
