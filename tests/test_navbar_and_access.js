@@ -31,12 +31,12 @@ studentPages.forEach(p => {
   assert(html.includes('/profile.html'), `Missing /profile.html link in ${p}`);
   assert(html.includes('logoutLink'), `Missing logoutLink in ${p}`);
   // Removed links should NOT be in the navbar
-  assert(html.includes('nav_home_student'), `Missing منصة الطالب link in ${p}`);
+  assert(!html.includes('nav_home_student'), `Removed منصة الطالب link still present in ${p}`);
   assert(!html.includes('nav_plans'), `Removed الخطط link still present in ${p}`);
   assert(!html.includes('nav_speaking_ai'), `Removed Sprechen AI link still present in ${p}`);
   assert(!html.includes('nav_errors'), `Removed أخطائي link still present in ${p}`);
 });
-console.log('✓ All 10 student pages have the correct student navbar!');
+console.log('✓ All 10 student pages have the correct 4-link navbar!');
 
 // 2. Verify Admin Pages Navbars
 console.log('\n[Test 2] Checking unified navbar in Admin pages...');
