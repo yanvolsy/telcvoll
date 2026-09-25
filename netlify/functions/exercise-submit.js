@@ -10,7 +10,7 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return json(405, { error: 'Method not allowed' });
   const student = await requireStudent(event);
   if (!student) return json(401, { error: 'unauthenticated' });
-  if (!(await rateLimit('exercise_submit', 60, 3600, String(student.student_id)))) return json(429, { error: 'Too many submissions. Please try again later.' });
+  if (!(await rateLimit('exercise_submit', 300, 3600, String(student.student_id)))) return json(429, { error: 'Too many submissions. Please try again later.' });
 
   let body;
   try { body = JSON.parse(event.body || '{}'); } catch { return json(400, { error: 'Bad request' }); }

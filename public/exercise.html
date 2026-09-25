@@ -627,9 +627,30 @@ function renderBody(body){
  });
  return html;
 }
-function escapeRegExp(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}function selectAnswer(n,val){
+function escapeRegExp(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+function isUniqueAnswerExercise(){
+  const sec=String(model?.exercise?.section||'');
+  const teil=String(model?.exercise?.teil||'');
+  const task=String(model?.exercise?.task_type||'');
+  return task==='MATCHING' || (sec==='Lesen' && ['Teil 1','Teil 3'].includes(teil)) || (sec==='Hören' && teil==='Teil 3');
+}
+function selectAnswer(n,val){
  const scrollState=captureExerciseScroll();
- activeItem=String(n);answers[String(n)]=val;
+ const key=String(n), next=String(val||'');
+ // Matching tasks use each option only once. Never allow the same option
+ // to be assigned to two different fields/questions.
+ if(isUniqueAnswerExercise() && next){
+   const duplicate=Object.entries(answers).some(([q,v])=>String(q)!==key && String(v)===next);
+   if(duplicate){
+     const msg=text('هذا الخيار مستخدم بالفعل في حقل آخر. اختر خياراً مختلفاً.','Diese Antwort wurde bereits einem anderen Feld zugeordnet. Bitte wählen Sie eine andere Antwort.');
+     const existing=document.querySelector('.unique-answer-warning');
+     if(existing)existing.remove();
+     document.getElementById('content')?.insertAdjacentHTML('afterbegin',`<div class="alert bad unique-answer-warning">${esc(msg)}</div>`);
+     return;
+   }
+ }
+ activeItem=key;
+ if(next) answers[key]=next; else delete answers[key];
  submitted=false; resultData=null; showModelAnswers=false;
  rerenderExerciseStable(scrollState);
 }
