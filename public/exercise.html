@@ -21,7 +21,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
 <script>
 const id=qs('id'); const duration=Number(qs('duration')||0); const sessionId=qs('session'); const mockMode=qs('mock')==='1' && !!sessionId; let model=null; let answers={}; let activeItem=null; let submitted=false; let resultData=null;
-let matchingOrder=null; let headingOrder=null; let optionOrders={}; let showModelAnswers=false; let titleRevealed=true; let hoerenOrder=null; let hoerenAllTranslated=false; let wordOrder=null; const translationCache=new Map();
+let matchingOrder=null; let headingOrder=null; let optionOrders={}; let showModelAnswers=false; let titleRevealed=false; let hoerenOrder=null; let hoerenAllTranslated=false; let wordOrder=null; const translationCache=new Map();
 const TELC_DUR = {
   B1: { Lesen: { 'Teil 1': 20, 'Teil 2': 20, 'Teil 3': 15, _default: 20 }, Sprachbausteine: { 'Teil 1': 10, 'Teil 2': 10, _default: 10 }, Hören: { 'Teil 1': 10, 'Teil 2': 10, 'Teil 3': 10, _default: 10 }, Schreiben: { 'Teil 1': 30, _default: 30 }, Sprechen: { 'Teil 1': 4, 'Teil 2': 5, 'Teil 3': 5, _default: 5 } },
   B2: { Lesen: { 'Teil 1': 20, 'Teil 2': 25, 'Teil 3': 20, _default: 20 }, Sprachbausteine: { 'Teil 1': 15, 'Teil 2': 10, _default: 15 }, Hören: { 'Teil 1': 6, 'Teil 2': 8, 'Teil 3': 6, _default: 7 }, Schreiben: { 'Teil 1': 30, _default: 30 }, Sprechen: { 'Teil 1': 5, 'Teil 2': 5, 'Teil 3': 5, _default: 5 } },
@@ -51,6 +51,7 @@ function answerValue(n){return answers[String(n)]||'';}
 function labelFor(n,val){const it=model.items.find(x=>String(x.position_no)===String(n));const o=(it?.options||[]).find(x=>x.option_key===val);return o?o.option_text:val;}
 function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 let activeSpeakButton=null;
+function bindTitleReveal(){document.querySelectorAll('[data-title-reveal]').forEach(btn=>{btn.onclick=()=>{titleRevealed=!titleRevealed;document.querySelectorAll('#thema-title').forEach(el=>el.classList.toggle('thema-title-hidden',!titleRevealed));document.querySelectorAll('[data-title-reveal]').forEach(b=>{b.setAttribute('aria-pressed',String(titleRevealed));b.setAttribute('aria-label',titleRevealed?text('إخفاء عنوان الموضوع','Thema ausblenden'):text('إظهار عنوان الموضوع','Thema anzeigen'));b.textContent=titleRevealed?'◉':'◌';});};});}
 function stopSpeaking(){window.speechSynthesis.cancel();if(activeSpeakButton){activeSpeakButton.classList.remove('speaking-active');activeSpeakButton.setAttribute('aria-pressed','false');activeSpeakButton=null;}}
 function speakGerman(raw,btn=null){const source=String(raw||'').trim();if(!source)return;if(btn&&activeSpeakButton===btn&&window.speechSynthesis.speaking){stopSpeaking();return;}stopSpeaking();const u=new SpeechSynthesisUtterance(source);u.lang='de-DE';u.rate=.9;if(btn){activeSpeakButton=btn;btn.classList.add('speaking-active');btn.setAttribute('aria-pressed','true');u.onend=()=>{if(activeSpeakButton===btn){btn.classList.remove('speaking-active');btn.setAttribute('aria-pressed','false');activeSpeakButton=null;}};u.onerror=u.onend;}window.speechSynthesis.speak(u);}
 async function translateText(raw,target=getLang()==='ar'?'ar':'de'){
@@ -141,7 +142,15 @@ function getExerciseBody(model) {
     model?.items?.[0]?.settings_json?.body,
     model?.items?.[0]?.settings_json?.text,
     model?.items?.[0]?.settings_json?.passage,
-    ...(Array.isArray(model?.items) ? model.items.map(it => it?.body).filter(Boolean) : [])
+    model?.items?.[0]?.text,
+    model?.items?.[0]?.passage,
+    model?.items?.[0]?.reading_text,
+    model?.items?.[0]?.content,
+    model?.items?.[0]?.text_de,
+    model?.items?.[0]?.german_text,
+    model?.items?.[0]?.settings_json?.content,
+    model?.items?.[0]?.settings_json?.text_de,
+    ...(Array.isArray(model?.items) ? model.items.map(it => it?.body || it?.text || it?.passage || it?.reading_text || it?.content).filter(Boolean) : [])
   ];
   for (const c of candidates) {
     if (typeof c === 'string' && c.trim()) return c.trim();
@@ -311,7 +320,7 @@ function renderMatching(){
  document.querySelectorAll('[data-choice]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=e=>{e.preventDefault();if(b.disabled||!activeItem)return;const st=captureExerciseScroll();const chosen=b.dataset.choice;Object.keys(answers).forEach(k=>{if(k!==String(activeItem)&&answers[k]===chosen)delete answers[k];});answers[String(activeItem)]=chosen;renderMatching();restoreExerciseScroll(st);bindActions();};});
  const sh=document.getElementById('headingShuffleBtn');
  if(sh)sh.onclick=e=>{e.stopPropagation();const st=captureExerciseScroll();matchingOrder=shuffle(matchingOrder);activeItem=null;renderMatching();restoreExerciseScroll(st);bindActions();};
- bindTextTools();
+ bindTextTools(); bindTitleReveal();
 }
 function renderSprachbausteine1(){
  const items=(model.items||[]); const longTextId='spb1-text';
@@ -380,7 +389,7 @@ function renderSprachbausteine1(){
    e.stopPropagation();
    selectAnswer(sel.dataset.gapSelect,sel.value);
  });
- bindTextTools();
+ bindTextTools(); bindTitleReveal();
 }
 
 function renderHoerenChoiceQuestions(){
@@ -388,17 +397,8 @@ function renderHoerenChoiceQuestions(){
  const activeDuration=duration || (model?.exercise ? getTelcDurationSeconds(model.exercise) : 600);
  const initialMin=String(Math.floor(activeDuration/60)).padStart(2,'0');
  const timer=(mockMode||activeDuration)?`<div class="progress-pill ${mockMode?'mock-global-timer':''}" id="timerEl"><span class="timer-icon" aria-hidden="true">⏱️</span> <span class="timer-digits">${initialMin}:00</span></div>`:'';
- const title=mockMode?'':`<div class="thema-title-row"><h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}">${esc(model.exercise.title||'')}</h1><div class="thema-tools">${textTools(model.exercise.title||'','thema-title')}<div class="inline-translation" id="thema-title-translation"></div></div></div>`;
- const heading=`<div class="exercise-heading hoeren-choice-heading">
-  <div class="exercise-heading-meta">
-    <div class="exercise-heading-tags">
-      <span class="tag tag-level-section">Telc ${esc(model.exercise.level||'B2')} · Hören</span>
-      <span class="tag tag-teil">${esc(model.exercise.teil||'')}</span>
-    </div>
-    ${timer ? `<div class="exercise-heading-timer">${timer}</div>` : ''}
-  </div>
-  <div class="exercise-heading-title">${title}</div>
- </div>`;
+
+ const heading=unifiedExerciseHeading({section:'Hören',teil:model.exercise.teil||'',timer,showTeil:true,showShuffle:true,title:model.exercise.title||'',showTitle:true,extraClass:'hoeren-choice-heading'});
  const audio=model.exercise.audio_url?renderUnifiedAudioPlayer(model.exercise.audio_url):'';
  const rows=items.map((it,index)=>{
    const n=String(it.position_no), chosen=answerValue(n);
@@ -419,7 +419,7 @@ function renderHoerenChoiceQuestions(){
  const actions=`<div class="exercise-actions"><div class="exercise-nav"><button class="btn" id="checkBtn">${text(mockMode?'إنهاء الجزء':'تحقق من الإجابات',mockMode?'Teil beenden':'Antworten prüfen')}</button>${mockMode?'':`<button class="btn model-btn" id="modelBtn">${text(showModelAnswers?'إخفاء الإجابة':'الإجابة النموذجية',showModelAnswers?'Musterlösung ausblenden':'Musterlösung')}</button>`}</div></div>`;
  document.getElementById('content').innerHTML=`${heading}<main class="hoeren-choice-page">${audio}<div class="hoeren-choice-list-head"><div><b>AUFGABEN</b><small>${text('اختر الإجابة الصحيحة لكل سؤال','Wählen Sie die richtige Antwort für jede Frage.')}</small></div>${toolbar}</div><section class="hoeren-choice-list">${rows}</section></main>${actions}`;
  document.querySelectorAll('.hoeren-choice-option[data-q]').forEach(b=>b.onclick=()=>selectAnswer(b.dataset.q,b.dataset.o));
- bindTextTools();
+ bindTextTools(); bindTitleReveal();
  bindHoerenAudioPlayer();
 }
 
@@ -577,7 +577,7 @@ function renderChoiceQuestions(){
     selectAnswer(sel.dataset.gapSelect,sel.value);
   });
 
-  bindTextTools();
+  bindTextTools(); bindTitleReveal();
 }
 
 function renderBody(body){
@@ -655,29 +655,8 @@ function renderTF(){
   const resultPanel = resultData ? `<div class="inline-result-panel ${resultData.percent >= 60 ? 'pass' : 'fail'}"><div class="result-panel-main"><span class="result-panel-label">${text('النتيجة','Ergebnis')}</span><strong>${resultData.score} / ${resultData.max}</strong></div><div class="result-panel-meta"><span>${resultData.percent}%</span><b>${esc(resultData.result || '')}</b></div></div>` : '';
 
   // 1. Standard Top Heading identical to other sections
-  const mockTitle = mockMode ? '' : `
-    <div class="thema-title-row">
-      <h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}">${esc(model.exercise.title)}</h1>
-      <div class="thema-tools">
-        ${textTools(model.exercise.title||'', 'thema-title')}
-        <div class="inline-translation" id="thema-title-translation"></div>
-      </div>
-    </div>`;
+  const headingBlock = unifiedExerciseHeading({section:model.exercise.section,teil:model.exercise.teil||'',timer,showTeil:true,showShuffle:true,title:model.exercise.title||'',showTitle:true});
 
-  const headingBlock = `
-    <div class="exercise-heading">
-      <div class="exercise-heading-meta">
-        <div class="exercise-heading-tags">
-          <span class="tag tag-level-section">Telc ${esc(model.exercise.level||'B2')} · ${esc(model.exercise.section)}</span>
-          <span class="tag tag-teil">${esc(model.exercise.teil)}</span>
-        </div>
-        ${timer ? `<div class="exercise-heading-timer">${timer}</div>` : ''}
-      </div>
-      <div class="exercise-heading-title">${mockTitle}</div>
-    </div>
-    ${resultPanel}`;
-
-  // 2. Upgraded universal audio player
   const audioBox = renderUnifiedAudioPlayer(model.exercise.audio_url);
 
   // 3. Question Rows matching media_1790111329552.png
@@ -763,7 +742,7 @@ function renderTF(){
     b.onclick = () => selectAnswer(b.dataset.q, b.dataset.o);
   });
 
-  bindTextTools();
+  bindTextTools(); bindTitleReveal();
   bindHoerenAudioPlayer();
 }
 function formatAudioTime(seconds){
@@ -853,25 +832,7 @@ function renderWriting(){
  const initialMin = String(durMin).padStart(2, '0');
 
    document.getElementById('content').innerHTML=`<div class="writing-page-shell">
-   <div class="exercise-heading writing-heading">
-     <div class="exercise-heading-meta">
-       <div class="exercise-heading-tags">
-         <span class="tag tag-level-section">Telc ${esc(model.exercise.level||'B2')} · Schreiben</span>
-       </div>
-       <div class="exercise-heading-timer">
-         <div class="progress-pill" id="timerEl"><span class="timer-icon" aria-hidden="true">⏱️</span> <span class="timer-digits">${initialMin}:00</span></div>
-       </div>
-     </div>
-     <div class="exercise-heading-title">
-       <div class="thema-title-row">
-         <h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}">${esc(model.exercise.title)}</h1>
-         <div class="thema-tools">
-           ${textTools(model.exercise.title||'','thema-title')}
-           <div class="inline-translation" id="thema-title-translation"></div>
-         </div>
-       </div>
-     </div>
-   </div>
+   ${unifiedExerciseHeading({section:'Schreiben',teil:model.exercise.teil||'',timer:`<div class="progress-pill" id="timerEl"><span class="timer-icon" aria-hidden="true">⏱️</span> <span class="timer-digits">${initialMin}:00</span></div>`,showTeil:false,showShuffle:false,title:model.exercise.title||'',showTitle:true,extraClass:'writing-heading'})}
    <div class="writing-workspace">
     <section class="writing-left">
       <div class="writing-time-rule">${text(`الوقت: ${durMin} دقيقة | الحد الأدنى ${wordLimit} كلمة`,`Zeit: ${durMin} Minuten | Mindestens ${wordLimit} Wörter`)}</div>
@@ -893,7 +854,7 @@ function renderWriting(){
  ta.oninput=update; update();
  document.querySelectorAll('[data-char]').forEach(b=>b.onclick=()=>{const a=ta.selectionStart,c=ta.selectionEnd;ta.setRangeText(b.dataset.char,a,c,'end');ta.focus();update();});
  document.getElementById('aiWritingCheck').onclick=()=>runWritingAI(ta.value);
- bindTextTools();
+ bindTextTools(); bindTitleReveal();
  if(!mockMode) startExerciseTimer();
 }
 
@@ -1512,11 +1473,10 @@ function renderSpeaking(){
      </div>
      <div class="exercise-heading-title">
        <div class="thema-title-row">
-         <h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}" class="${titleRevealed?'':'thema-title-hidden'}">${esc(model.exercise.title)}</h1>
+         <h1 id="thema-title" class="${titleRevealed?'':'thema-title-hidden'}" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}">${esc(model.exercise.title)}</h1>
          <div class="thema-tools">
            ${textTools(model.exercise.title,'thema-title')}
            <div class="inline-translation" id="thema-title-translation"></div>
-           <button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text('إظهار العنوان','Titel anzeigen')}"><span class="eye-icon eye-off"></span></button>
          </div>
        </div>
      </div>
@@ -1524,7 +1484,7 @@ function renderSpeaking(){
    ${renderTeil1Studio()}
    </div>`;
    bindTeil1StudioEvents();
-   bindTextTools();
+   bindTextTools(); bindTitleReveal();
    return;
  }
 
@@ -1538,11 +1498,11 @@ function renderSpeaking(){
    </div>
    <div class="exercise-heading-title">
      <div class="thema-title-row">
-       <h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}" class="${titleRevealed?'':'thema-title-hidden'}">${esc(model.exercise.title)}</h1>
+       <h1 id="thema-title" class="${titleRevealed?'':'thema-title-hidden'}" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}">${esc(model.exercise.title)}</h1>
        <div class="thema-tools">
          ${textTools(model.exercise.title,'thema-title')}
+         <button type="button" class="mini-tool title-reveal" data-title-reveal aria-pressed="${titleRevealed}" aria-label="${titleRevealed?text('إخفاء عنوان الموضوع','Thema ausblenden'):text('إظهار عنوان الموضوع','Thema anzeigen')}">${titleRevealed?'◉':'◌'}</button>
          <div class="inline-translation" id="thema-title-translation"></div>
-         <button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text('إظهار العنوان','Titel anzeigen')}"><span class="eye-icon eye-off"></span></button>
        </div>
      </div>
    </div>
@@ -1551,7 +1511,7 @@ function renderSpeaking(){
  <section class="speaking-simulator"><div class="speaking-sim-head"><div><span class="tag">${esc(teil)}</span><h2>${text('محادثة مع الشريك والممتحن','Gespräch mit Partner & Prüfer')}</h2><small>${text('اكتب إجابتك بالألمانية واستمع إلى رد الشريك صوتيًا.','Schreibe deine Antwort auf Deutsch und höre die Antwort deines Partners an.')}</small></div><span class="speaking-live-dot">●</span></div><div class="speaking-roles"><div class="speaking-role"><span class="speaking-avatar jerry-avatar">J</span><div><b>Jerry</b><small>${text('الممتحن والمدرب','Prüfer & Trainer')}</small></div></div><div class="speaking-role"><span class="speaking-avatar partner-avatar">P</span><div><b>${text('الشريك','Partner')}</b><small>${text('يتفاعل معك في المحادثة','Gesprächspartner')}</small></div></div></div><div class="speaking-chat" id="speakingChat"></div>
  <div class="speaking-writing-box"><div class="speaking-writing-label"><span>${text('إجابتك','Deine Antwort')}</span><small>${text('اكتب بالألمانية ثم اضغط إرسال','Auf Deutsch schreiben und Senden drücken')}</small></div><div class="speaking-input-row"><textarea id="speakingInput" placeholder="${text('اكتب ردك هنا بالألمانية…','Schreibe deine Antwort auf Deutsch…')}"></textarea><button type="button" class="btn dark" id="speakingSend">${text('إرسال','Senden')}</button></div></div>
  <div class="speaking-controls"><span class="speaking-time" id="speakingTime">00:00</span><button type="button" class="btn model-btn speaking-model-btn" id="speakingModel">${text('إجابة نموذجية بالذكاء الاصطناعي','KI-Musterantwort')}</button><button type="button" class="btn dark" id="speakingFinish">${text('إنهاء وتقييم','Beenden & bewerten')}</button></div><div id="speakingModelBox" class="speaking-model-box" hidden></div><div id="speakingEval" class="speaking-eval" hidden></div></section></div></div>`;
- initInlineSpeaking(teil);bindTextTools();
+ initInlineSpeaking(teil);bindTextTools(); bindTitleReveal();
  document.querySelector('[data-toggle-speaking-tasks]')?.addEventListener('click',e=>{const list=document.querySelector('[data-speaking-task-list]');if(!list)return;const hidden=list.hidden;list.hidden=!hidden;e.currentTarget.textContent=hidden?'▾':'▸';e.currentTarget.setAttribute('aria-expanded',String(hidden));});
 }
 function initInlineSpeaking(currentTeil){
@@ -1598,39 +1558,22 @@ function topShuffleCurrentExercise(){
   rerenderExerciseStable(st);
 }
 
+function unifiedExerciseHeading({section, teil='', timer='', showTeil=true, showShuffle=false, title='', showTitle=true, extraClass=''}){
+ const safeSection=esc(section||'');
+ const safeTeil=esc(teil||'');
+ const shuffle=showShuffle&&!mockMode?`<button type="button" class="exercise-heading-shuffle" id="headingShuffleBtn" title="${text('خلط الأسئلة','Aufgaben mischen')}" aria-label="${text('خلط الأسئلة','Aufgaben mischen')}"><span aria-hidden="true">⤨</span><span>${text('خلط الأسئلة','Aufgaben mischen')}</span></button>`:'';
+ const titleMarkup=showTitle&&!mockMode?`<div class="thema-title-row"><h1 id="thema-title" class="${titleRevealed?'':'thema-title-hidden'}" data-content-id="thema-title" data-source="${esc(title||'')}">${esc(title||'')}</h1><div class="thema-tools">${textTools(title||'','thema-title')}<button type="button" class="mini-tool title-reveal" data-title-reveal aria-pressed="${titleRevealed}" aria-label="${titleRevealed?text('إخفاء عنوان الموضوع','Thema ausblenden'):text('إظهار عنوان الموضوع','Thema anzeigen')}">${titleRevealed?'◉':'◌'}</button><div class="inline-translation" id="thema-title-translation"></div></div></div>`:'';
+ return `<div class="exercise-heading ${extraClass}"><div class="exercise-heading-meta"><div class="exercise-heading-tags"><span class="tag tag-level-section">Telc ${esc(model.exercise.level||'B2')} · ${safeSection}</span>${showTeil&&safeTeil?`<span class="tag tag-teil">${safeTeil}</span>`:''}</div><div class="exercise-heading-controls">${shuffle}${timer?`<div class="exercise-heading-timer">${timer}</div>`:''}</div></div><div class="exercise-heading-title">${titleMarkup}</div></div>`;
+}
+
 function layout(main,side,workspaceClass=''){
  const isHoeren = String(model?.exercise?.section||'').toLowerCase().includes('hör') || String(model?.exercise?.section||'').toLowerCase().includes('hoer');
  const combinedWorkspaceClass = [workspaceClass, isHoeren ? 'hoeren-workspace' : ''].filter(Boolean).join(' ');
- const mockTitle=mockMode?'':`<div class="thema-title-row"><h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}">${esc(model.exercise.title)}</h1><div class="thema-tools">${textTools(model.exercise.title,'thema-title')}<div class="inline-translation" id="thema-title-translation"></div></div></div>`;
- const headingTools=mockMode?'':mockTitle;
- const activeDuration = duration || (model?.exercise ? getTelcDurationSeconds(model.exercise) : 1200);
- const initialMin = String(Math.floor(activeDuration / 60)).padStart(2, '0');
- const timer=(mockMode||activeDuration)?`<div class="progress-pill ${mockMode?'mock-global-timer':''}" id="timerEl"><span class="timer-icon" aria-hidden="true">⏱️</span> <span class="timer-digits">${initialMin}:00</span></div>`:'';
- const resultPanel=resultData?`<div class="inline-result-panel ${resultData.percent>=60?'pass':'fail'}"><div class="result-panel-main"><span class="result-panel-label">${text('النتيجة','Ergebnis')}</span><strong>${resultData.score} / ${resultData.max}</strong></div><div class="result-panel-meta"><span>${resultData.percent}%</span><b>${esc(resultData.result||'')}</b></div></div>`:'';
- 
  const shuffleSections = ['Lesen','Hören','Sprachbausteine'];
  const hasTopShuffle = !mockMode && shuffleSections.includes(String(model.exercise.section||''));
- const headingShuffle = hasTopShuffle ? `
-    <button type="button" class="exercise-heading-shuffle" id="headingShuffleBtn" title="${text('خلط الأسئلة','Aufgaben mischen')}" aria-label="${text('خلط الأسئلة','Aufgaben mischen')}">
-      <span aria-hidden="true">⤨</span><span>${text('خلط الأسئلة','Aufgaben mischen')}</span>
-    </button>` : '';
- const headingMeta = `
-  <div class="exercise-heading-meta">
-    <div class="exercise-heading-tags">
-      <span class="tag tag-level-section">Telc ${esc(model.exercise.level||'B2')} · ${esc(model.exercise.section)}</span>
-      <span class="tag tag-teil">${esc(model.exercise.teil)}</span>
-    </div>
-    <div class="exercise-heading-controls">
-      ${headingShuffle}
-      ${timer ? `<div class="exercise-heading-timer">${timer}</div>` : ''}
-    </div>
-  </div>`;
-
- return `<div class="exercise-heading">
-  ${headingMeta}
-  <div class="exercise-heading-title">${headingTools}</div>
-  ${renderAudio()}
- </div>
+ const headingMarkup = unifiedExerciseHeading({section:model.exercise.section, teil:model.exercise.teil, timer, showTeil:true, showShuffle:hasTopShuffle, title:model.exercise.title||'', showTitle:true});
+ return `${headingMarkup}
+ ${renderAudio()}
  ${resultPanel}
  <div class="exam-workspace ${combinedWorkspaceClass}">
    <section class="exam-main">${main}</section>
@@ -1699,6 +1642,7 @@ document.addEventListener('langchange', () => {
       throw new Error(text('تعذر العثور على التمرين المطلوب. قد يكون غير منشور أو محذوف.','Übung nicht gefunden oder nicht veröffentlicht.'));
     }
     model=d;
+    titleRevealed=false;
     document.body.classList.toggle('mock-mode',mockMode);
     renderWorkspace();
     bindActions();
