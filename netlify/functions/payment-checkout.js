@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const { db } = require('./_lib/db');
 const { json, studentFromEvent } = require('./_lib/auth');
 const { requireSameOrigin, requestSize } = require('./_lib/request');
+const { getStudentSubscription } = require('./_lib/guard');
 const {
   getClientIp,
   normalizeEmail,
@@ -60,6 +61,33 @@ exports.handler = async (event) => {
   const planRes = await pool.query('SELECT * FROM plans WHERE id=$1 AND active=TRUE', [planId]);
   const plan = planRes.rows[0];
   if (!plan) return json(404, { error: 'الخطة المحددة غير موجودة أو معطلة.' });
+
+  // 2b. Enforce Active Subscription Renewal Guard:
+  // If student already has an active paid subscription, they can only renew during the last 3 days!
+  let targetStudentId = authenticatedStudentId;
+  if (!targetStudentId && email) {
+    try {
+      const sRes = await pool.query('SELECT id FROM students WHERE email = $1', [email]);
+      if (sRes.rows[0]) targetStudentId = sRes.rows[0].id;
+    } catch (_) {}
+  }
+
+  if (targetStudentId) {
+    const currentSub = await getStudentSubscription(pool, targetStudentId);
+    if (currentSub && currentSub.active && currentSub.is_paid && currentSub.expires_at) {
+      const expTime = new Date(currentSub.expires_at).getTime();
+      const now = Date.now();
+      const remainingDays = Math.ceil((expTime - now) / (1000 * 60 * 60 * 24));
+      if (remainingDays > 3) {
+        return json(400, {
+          error: `لديك اشتراك نشط حالياً ينتهي بعد ${remainingDays} يوماً. يمكنك تجديد اشتراكك فقط خلال آخر 3 أيام من نهاية الخطة الحالية.`,
+          code: 'ACTIVE_SUBSCRIPTION_RENEWAL_GUARD',
+          remaining_days: remainingDays,
+          can_renew: false
+        });
+      }
+    }
+  }
 
   if (!plan.duration_days || plan.duration_days <= 0) {
     return json(422, { error: 'مدة الخطة غير صالحة. يرجى التواصل مع الإدارة.' });

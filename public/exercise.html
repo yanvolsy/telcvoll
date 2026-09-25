@@ -232,15 +232,17 @@ function renderMatching(){
    const assignLabel = isLesen3 ? text('الإعلان المناسب لهذا الموقف:','Passende Anzeige für diese Situation:') : text('العنوان المناسب لهذه الفقرة:','Passende Überschrift für diesen Text:');
    const assignPlaceholder = isLesen3 ? text('— اختر الإعلان المناسب —','— Passende Anzeige auswählen —') : text('— اختر العنوان —','— Überschrift auswählen —');
    return `<article class="exam-text-card ${selected?'answered':''} ${resultClass} ${String(activeItem)===String(it.position_no)?'active-item':''}" data-item="${it.position_no}">
-     <div class="paragraph-assignment" style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px dashed var(--line);">
-       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;flex-wrap:wrap;">
-         <div class="assignment-label" style="font-weight:900;color:var(--primary);">${assignLabel}</div>
-         <div class="exam-card-top" style="margin:0;">${textTools(it.prompt,cid)}</div>
-       </div>
-       <select data-paragraph-select="${it.position_no}" aria-label="${assignLabel}"><option value="">${assignPlaceholder}</option>${selectOptions}</select>
-       ${shownLabel?`<button type="button" class="assignment-selected" data-clear="${it.position_no}" aria-label="${text('إلغاء الاختيار','Auswahl löschen')}"><span>${esc(shownLabel)}</span><b>×</b></button>`:`<span class="assignment-empty">${text('لم يتم الاختيار بعد','Noch nicht ausgewählt')}</span>`}
-     </div>
-     <div class="exam-text" id="${cid}" data-content-id="${cid}" data-source="${esc(it.prompt)}">${escBody(it.prompt)}</div>
+     <div class="paragraph-assignment">
+        <div class="paragraph-assignment-head">
+          <span class="assignment-label">${assignLabel}</span>
+          <div class="paragraph-assignment-tools">${textTools(it.prompt,cid)}</div>
+        </div>
+        <div class="paragraph-assignment-controls">
+          <select data-paragraph-select="${it.position_no}" aria-label="${assignLabel}"><option value="">${assignPlaceholder}</option>${selectOptions}</select>
+          ${shownLabel?`<button type="button" class="assignment-selected" data-clear="${it.position_no}" aria-label="${text('إلغاء الاختيار','Auswahl löschen')}"><span>${esc(shownLabel)}</span><b>×</b></button>`:`<span class="assignment-empty">${text('لم يتم الاختيار بعد','Noch nicht ausgewählt')}</span>`}
+        </div>
+      </div>
+      <div class="exam-text" id="${cid}" data-content-id="${cid}" data-source="${esc(it.prompt)}">${escBody(it.prompt)}</div>
      <div class="inline-translation" id="${cid}-translation"></div>
    </article>`;
  }).join('');
@@ -393,9 +395,18 @@ function renderHoerenChoiceQuestions(){
  const items=model.items||[];
  const activeDuration=duration || (model?.exercise ? getTelcDurationSeconds(model.exercise) : 600);
  const initialMin=String(Math.floor(activeDuration/60)).padStart(2,'0');
- const timer=(mockMode||activeDuration)?`<div class="progress-pill ${mockMode?'mock-global-timer':''}" id="timerEl">${initialMin}:00</div>`:'';
+ const timer=(mockMode||activeDuration)?`<div class="progress-pill ${mockMode?'mock-global-timer':''}" id="timerEl"><span class="timer-icon" aria-hidden="true">⏱️</span> <span class="timer-digits">${initialMin}:00</span></div>`:'';
  const title=mockMode?'':`<div class="thema-title-row"><h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}" class="${titleRevealed?'':'thema-title-hidden'}">${esc(model.exercise.title||'')}</h1><div class="thema-tools">${textTools(model.exercise.title||'','thema-title')}<div class="inline-translation" id="thema-title-translation"></div><button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen')}" title="${text(titleRevealed?'إخفاء العنوان':'إظهار العنوان',titleRevealed?'Titel ausblenden':'Titel anzeigen')}"><span class="eye-icon ${titleRevealed?'eye-on':'eye-off'}"></span></button></div></div>`;
- const heading=`<div class="exercise-heading hoeren-choice-heading"><div class="exercise-heading-title"><span class="tag">Telc ${esc(model.exercise.level||'B2')} · Hören</span>${title}<small>${esc(model.exercise.teil||'')}</small></div>${timer}</div>`;
+ const heading=`<div class="exercise-heading hoeren-choice-heading">
+  <div class="exercise-heading-meta">
+    <div class="exercise-heading-tags">
+      <span class="tag tag-level-section">Telc ${esc(model.exercise.level||'B2')} · Hören</span>
+      <span class="tag tag-teil">${esc(model.exercise.teil||'')}</span>
+    </div>
+    ${timer ? `<div class="exercise-heading-timer">${timer}</div>` : ''}
+  </div>
+  <div class="exercise-heading-title">${title}</div>
+ </div>`;
  const audio=model.exercise.audio_url?renderUnifiedAudioPlayer(model.exercise.audio_url):'';
  const rows=items.map((it,index)=>{
    const n=String(it.position_no), chosen=answerValue(n);
@@ -661,7 +672,7 @@ function renderTF(){
   const orderedItems = hoerenOrder.map(idx => items[idx]).filter(Boolean);
   const activeDuration = duration || (model?.exercise ? getTelcDurationSeconds(model.exercise) : 600);
   const initialMin = String(Math.floor(activeDuration / 60)).padStart(2, '0');
-  const timer = (mockMode || activeDuration) ? `<div class="progress-pill ${mockMode ? 'mock-global-timer' : ''}" id="timerEl">${initialMin}:00</div>` : '';
+  const timer = (mockMode || activeDuration) ? `<div class="progress-pill ${mockMode ? 'mock-global-timer' : ''}" id="timerEl"><span class="timer-icon" aria-hidden="true">⏱️</span> <span class="timer-digits">${initialMin}:00</span></div>` : '';
   const resultPanel = resultData ? `<div class="inline-result-panel ${resultData.percent >= 60 ? 'pass' : 'fail'}"><div class="result-panel-main"><span class="result-panel-label">${text('النتيجة','Ergebnis')}</span><strong>${resultData.score} / ${resultData.max}</strong></div><div class="result-panel-meta"><span>${resultData.percent}%</span><b>${esc(resultData.result || '')}</b></div></div>` : '';
 
   // 1. Standard Top Heading identical to other sections
@@ -679,12 +690,14 @@ function renderTF(){
 
   const headingBlock = `
     <div class="exercise-heading">
-      <div class="exercise-heading-title">
-        <span class="tag">Telc ${esc(model.exercise.level||'B2')} · ${esc(model.exercise.section)}</span>
-        ${mockTitle}
-        <small>${esc(model.exercise.teil)}</small>
+      <div class="exercise-heading-meta">
+        <div class="exercise-heading-tags">
+          <span class="tag tag-level-section">Telc ${esc(model.exercise.level||'B2')} · ${esc(model.exercise.section)}</span>
+          <span class="tag tag-teil">${esc(model.exercise.teil)}</span>
+        </div>
+        ${timer ? `<div class="exercise-heading-timer">${timer}</div>` : ''}
       </div>
-      ${timer}
+      <div class="exercise-heading-title">${mockTitle}</div>
     </div>
     ${resultPanel}`;
 
@@ -876,10 +889,18 @@ function renderWriting(){
  const wordLimit = String(model?.exercise?.level||'').toUpperCase() === 'C1' ? 350 : 150;
  const initialMin = String(durMin).padStart(2, '0');
 
- document.getElementById('content').innerHTML=`<div class="writing-page-shell">
+   document.getElementById('content').innerHTML=`<div class="writing-page-shell">
    <div class="exercise-heading writing-heading">
+     <div class="exercise-heading-meta">
+       <div class="exercise-heading-tags">
+         <span class="tag tag-level-section">Telc ${esc(model.exercise.level||'B2')} · Schreiben</span>
+         <span class="tag tag-teil">${esc(model.exercise.teil||'Teil 1')}</span>
+       </div>
+       <div class="exercise-heading-timer">
+         <div class="progress-pill" id="timerEl"><span class="timer-icon" aria-hidden="true">⏱️</span> <span class="timer-digits">${initialMin}:00</span></div>
+       </div>
+     </div>
      <div class="exercise-heading-title">
-       <span class="tag">Telc ${esc(model.exercise.level||'B2')} · Schreiben</span>
        <div class="thema-title-row">
          <h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}">${esc(model.exercise.title)}</h1>
          <div class="thema-tools">
@@ -887,9 +908,7 @@ function renderWriting(){
            <div class="inline-translation" id="thema-title-translation"></div>
          </div>
        </div>
-       <small>${esc(model.exercise.teil||'Teil 1')}</small>
      </div>
-     <div class="progress-pill" id="timerEl">${initialMin}:00</div>
    </div>
    <div class="writing-workspace">
     <section class="writing-left">
@@ -965,7 +984,8 @@ function startExerciseTimer(){
     const curEl = document.getElementById('timerEl');
     if(!curEl) return;
     const remaining = Math.max(0, Math.ceil((exerciseTimerEnd - Date.now()) / 1000));
-    curEl.textContent = String(Math.floor(remaining / 60)).padStart(2, '0') + ':' + String(remaining % 60).padStart(2, '0');
+    const timeStr = String(Math.floor(remaining / 60)).padStart(2, '0') + ':' + String(remaining % 60).padStart(2, '0');
+    curEl.innerHTML = `<span class="timer-icon" aria-hidden="true">⏱️</span> <span class="timer-digits">${timeStr}</span>`;
     curEl.classList.toggle('timer-danger', remaining <= 60);
     if(remaining <= 0){
       clearInterval(exerciseTimerInterval);
@@ -976,7 +996,7 @@ function startExerciseTimer(){
   tick();
   exerciseTimerInterval = setInterval(tick, 500);
 }
-function startMockTimer(){const el=document.getElementById('timerEl');if(!mockMode||!el||el.dataset.started)return;el.dataset.started='1';const tick=()=>{const n=mockRemaining();el.textContent=String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');el.classList.toggle('timer-danger',n<=60);if(n>0)window.setTimeout(tick,250);else finishMockSession();};tick();}
+function startMockTimer(){const el=document.getElementById('timerEl');if(!mockMode||!el||el.dataset.started)return;el.dataset.started='1';const tick=()=>{const n=mockRemaining();const timeStr=String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');el.innerHTML=`<span class="timer-icon" aria-hidden="true">⏱️</span> <span class="timer-digits">${timeStr}</span>`;el.classList.toggle('timer-danger',n<=60);if(n>0)window.setTimeout(tick,250);else finishMockSession();};tick();}
 function parseSpeakingTasks(body){
  const raw=String(body||'').replace(/\r/g,'');
  const settings=parseSettings(model.exercise);
@@ -1522,8 +1542,13 @@ function renderSpeaking(){
    }
    document.getElementById('content').innerHTML=`<div class="speaking-exercise-shell">
    <div class="exercise-heading speaking-heading">
+     <div class="exercise-heading-meta">
+       <div class="exercise-heading-tags">
+         <span class="tag tag-level-section">Telc ${esc(model.exercise.level||'B2')} · Sprechen</span>
+         <span class="tag tag-teil">${esc(teil)}</span>
+       </div>
+     </div>
      <div class="exercise-heading-title">
-       <span class="tag">Telc ${esc(model.exercise.level||'B2')} · Sprechen</span>
        <div class="thema-title-row">
          <h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}" class="${titleRevealed?'':'thema-title-hidden'}">${esc(model.exercise.title)}</h1>
          <div class="thema-tools">
@@ -1532,7 +1557,6 @@ function renderSpeaking(){
            <button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text('إظهار العنوان','Titel anzeigen')}"><span class="eye-icon eye-off"></span></button>
          </div>
        </div>
-       <small>${esc(teil)}</small>
      </div>
    </div>
    ${renderTeil1Studio()}
@@ -1544,8 +1568,13 @@ function renderSpeaking(){
 
  document.getElementById('content').innerHTML=`<div class="speaking-exercise-shell">
  <div class="exercise-heading speaking-heading">
+   <div class="exercise-heading-meta">
+     <div class="exercise-heading-tags">
+       <span class="tag tag-level-section">Telc ${esc(model.exercise.level||'B2')} · Sprechen</span>
+       <span class="tag tag-teil">${esc(teil)}</span>
+     </div>
+   </div>
    <div class="exercise-heading-title">
-     <span class="tag">Telc ${esc(model.exercise.level||'B2')} · Sprechen</span>
      <div class="thema-title-row">
        <h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}" class="${titleRevealed?'':'thema-title-hidden'}">${esc(model.exercise.title)}</h1>
        <div class="thema-tools">
@@ -1554,7 +1583,6 @@ function renderSpeaking(){
          <button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text('إظهار العنوان','Titel anzeigen')}"><span class="eye-icon eye-off"></span></button>
        </div>
      </div>
-     <small>${esc(teil)}</small>
    </div>
  </div>
  <div class="speaking-layout"><section class="speaking-task-panel"><div class="speaking-task-head"><span class="tag">${esc(model.exercise.level||'B2')} · ${esc(teil)}</span><strong>${text('الموضوع','Thema')}</strong></div><div class="speaking-task-text question-text-tools">${textTools(body,qid)}<div id="${qid}" data-content-id="${qid}" data-source="${esc(body)}">${escBody(body)}</div>${translationBox(qid+'-translation')}</div>${teil==='Teil 3'?renderSpeakingTaskList(body):''}<div class="speaking-hint">${esc(hint)}</div></section>
@@ -1589,8 +1617,33 @@ function layout(main,side,workspaceClass=''){
  const headingTools=mockMode?'':mockTitle;
  const activeDuration = duration || (model?.exercise ? getTelcDurationSeconds(model.exercise) : 1200);
  const initialMin = String(Math.floor(activeDuration / 60)).padStart(2, '0');
- const timer=(mockMode||activeDuration)?`<div class="progress-pill ${mockMode?'mock-global-timer':''}" id="timerEl">${initialMin}:00</div>`:'';
- const resultPanel=resultData?`<div class="inline-result-panel ${resultData.percent>=60?'pass':'fail'}"><div class="result-panel-main"><span class="result-panel-label">${text('النتيجة','Ergebnis')}</span><strong>${resultData.score} / ${resultData.max}</strong></div><div class="result-panel-meta"><span>${resultData.percent}%</span><b>${esc(resultData.result||'')}</b></div></div>`:''; return `<div class="exercise-heading"><div class="exercise-heading-title"><span class="tag">Telc ${esc(model.exercise.level||'B2')} · ${esc(model.exercise.section)}</span>${headingTools}<small>${esc(model.exercise.teil)}</small></div>${renderAudio()}${timer}</div>${resultPanel}<div class="exam-workspace ${combinedWorkspaceClass}"><section class="exam-main">${main}</section></div><div class="exercise-actions"><div class="exercise-nav"><button class="btn" id="checkBtn">${text(mockMode?'إنهاء الجزء':'تحقق من الإجابات',mockMode?'Teil beenden':'Antworten prüfen')}</button>${mockMode?'':`<button class="btn model-btn" id="modelBtn">${text(showModelAnswers ? 'إخفاء الإجابة' : 'الإجابة النموذجية', showModelAnswers ? 'Musterlösung ausblenden' : 'Musterlösung')}</button>`}</div></div>`;
+ const timer=(mockMode||activeDuration)?`<div class="progress-pill ${mockMode?'mock-global-timer':''}" id="timerEl"><span class="timer-icon" aria-hidden="true">⏱️</span> <span class="timer-digits">${initialMin}:00</span></div>`:'';
+ const resultPanel=resultData?`<div class="inline-result-panel ${resultData.percent>=60?'pass':'fail'}"><div class="result-panel-main"><span class="result-panel-label">${text('النتيجة','Ergebnis')}</span><strong>${resultData.score} / ${resultData.max}</strong></div><div class="result-panel-meta"><span>${resultData.percent}%</span><b>${esc(resultData.result||'')}</b></div></div>`:'';
+ 
+ const headingMeta = `
+  <div class="exercise-heading-meta">
+    <div class="exercise-heading-tags">
+      <span class="tag tag-level-section">Telc ${esc(model.exercise.level||'B2')} · ${esc(model.exercise.section)}</span>
+      <span class="tag tag-teil">${esc(model.exercise.teil)}</span>
+    </div>
+    ${timer ? `<div class="exercise-heading-timer">${timer}</div>` : ''}
+  </div>`;
+
+ return `<div class="exercise-heading">
+  ${headingMeta}
+  <div class="exercise-heading-title">${headingTools}</div>
+  ${renderAudio()}
+ </div>
+ ${resultPanel}
+ <div class="exam-workspace ${combinedWorkspaceClass}">
+   <section class="exam-main">${main}</section>
+ </div>
+ <div class="exercise-actions">
+   <div class="exercise-nav">
+     <button class="btn" id="checkBtn">${text(mockMode?'إنهاء الجزء':'تحقق من الإجابات',mockMode?'Teil beenden':'Antworten prüfen')}</button>
+     ${mockMode?'':`<button class="btn model-btn" id="modelBtn">${text(showModelAnswers ? 'إخفاء الإجابة' : 'الإجابة النموذجية', showModelAnswers ? 'Musterlösung ausblenden' : 'Musterlösung')}</button>`}
+   </div>
+ </div>`;
 }
 
 function bindActions(){
