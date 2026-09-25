@@ -42,7 +42,7 @@ exports.handler = async (event) => {
     try {
       const exRes = await pool.query(
         `SELECT id, level, section, teil, title, task_type, body, translation, audio_url,
-                COALESCE(access_mode, 'paid') AS access_mode, settings_json, duration_minutes, status, created_at
+                COALESCE(access_mode, 'paid') AS access_mode, settings_json, status, created_at
          FROM exercises
          WHERE status='published' AND deleted_at IS NULL
          ORDER BY level,

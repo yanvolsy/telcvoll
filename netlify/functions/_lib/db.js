@@ -30,6 +30,8 @@ async function ensureSchema(p) {
     `ALTER TABLE plans ADD COLUMN IF NOT EXISTS price_dzd NUMERIC(10,2) DEFAULT 0;`,
     `ALTER TABLE plans ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT FALSE;`,
     `ALTER TABLE exercises ADD COLUMN IF NOT EXISTS access_mode VARCHAR(20) NOT NULL DEFAULT 'paid';`,
+    `ALTER TABLE exercises ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP NULL;`,
+    `ALTER TABLE exercises ADD COLUMN IF NOT EXISTS duration_minutes INT DEFAULT NULL;`,
     `CREATE INDEX IF NOT EXISTS idx_students_google_id ON students (google_id) WHERE google_id IS NOT NULL;`,
     `CREATE INDEX IF NOT EXISTS idx_students_verification_token ON students (verification_token) WHERE verification_token IS NOT NULL;`,
     `CREATE INDEX IF NOT EXISTS idx_exercises_access_mode ON exercises(access_mode);`

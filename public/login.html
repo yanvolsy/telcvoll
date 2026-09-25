@@ -57,8 +57,9 @@ input:-webkit-autofill:active {
 <style><!-- TELC Voll: unified homepage typography -->
 html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
 html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}</style>
-<!-- Google Identity Services -->
+<!-- Google Identity Services & Supabase Auth -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="auth-page">
 <header class="auth-nav">
@@ -234,15 +235,18 @@ $('loginForm').onsubmit = async (e) => {
   }
 };
 
-// Google Sign-In Integration
-async function handleGoogleCredential(credential) {
+// Google Sign-In Integration (Supabase OAuth & Google GIS)
+let authConfig = null;
+let supabaseClient = null;
+
+async function handleGoogleCredential(credential, isSupabase = false) {
   clearAlert();
   showAlert('جارٍ التحقق من حساب Google…', false);
 
   try {
     const res = await api('auth-google', {
       method: 'POST',
-      body: { credential }
+      body: isSupabase ? { supabase_token: credential } : { credential }
     });
 
     if (res.token) {
@@ -260,45 +264,107 @@ async function handleGoogleCredential(credential) {
   }
 }
 
-// Fetch Google Client ID & Initialize GIS
-api('auth-config').then(cfg => {
-  if (cfg.googleClientId && window.google) {
-    window.google.accounts.id.initialize({
-      client_id: cfg.googleClientId,
-      callback: (resp) => {
-        if (resp.credential) handleGoogleCredential(resp.credential);
-      }
-    });
+// 1. Detect Supabase OAuth tokens or errors from URL callback
+async function checkOAuthCallback() {
+  const rawHash = (window.location.hash || '').replace(/^#/, '');
+  const rawSearch = (window.location.search || '').replace(/^\?/, '');
+  const hashParams = new URLSearchParams(rawHash);
+  const searchParams = new URLSearchParams(rawSearch);
 
-    const customBtn = $('googleBtnCustom');
-    if (customBtn) {
-      customBtn.onclick = () => {
-        window.google.accounts.id.prompt();
-      };
-    }
+  const errorDesc = hashParams.get('error_description') || searchParams.get('error_description') || hashParams.get('error') || searchParams.get('error');
+  if (errorDesc) {
+    showAlert('حدث خطأ أثناء المصادقة عبر Google: ' + decodeURIComponent(errorDesc.replace(/\+/g, ' ')));
+    try { history.replaceState(null, '', location.pathname); } catch (_) {}
+    return;
+  }
 
-    const officialBtnEl = $('googleOfficialBtn');
-    if (officialBtnEl) {
-      officialBtnEl.style.display = 'block';
-      if (customBtn) customBtn.style.display = 'none';
-      window.google.accounts.id.renderButton(officialBtnEl, {
-        theme: 'outline',
-        size: 'large',
-        width: '100%',
-        text: 'signin_with',
-        locale: 'ar'
+  const accessToken = hashParams.get('access_token') || searchParams.get('access_token');
+  if (accessToken) {
+    try { history.replaceState(null, '', location.pathname); } catch (_) {}
+    await handleGoogleCredential(accessToken, true);
+  }
+}
+
+// Run checkOAuthCallback immediately
+checkOAuthCallback();
+
+// 2. Trigger Google Sign-in flow when user clicks Google button
+async function startGoogleSignIn() {
+  clearAlert();
+
+  // Mode A: Supabase Client SDK (if initialized)
+  if (supabaseClient) {
+    showAlert('جارٍ التوجيه إلى Google…', false);
+    try {
+      const { error } = await supabaseClient.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin + '/login.html'
+        }
       });
+      if (error) throw error;
+      return;
+    } catch (err) {
+      console.warn('Supabase signInWithOAuth error, using direct redirect:', err);
     }
-  } else {
-    // If no client ID yet configured, keep friendly notification when custom button clicked
-    $('googleBtnCustom').onclick = () => {
-      showAlert('تسجيل الدخول عبر Google سيتوفر قريباً بعد ضبط Google Client ID في الإعدادات. يمكنك التسجيل بالبريد وكلمة المرور فوراً.');
-    };
+  }
+
+  // Mode B: Direct Supabase OAuth Authorize Endpoint
+  if (authConfig && authConfig.supabaseUrl) {
+    showAlert('جارٍ التوجيه إلى Google…', false);
+    const redirectUrl = encodeURIComponent(window.location.origin + '/login.html');
+    window.location.href = `${authConfig.supabaseUrl.replace(/\/+$/, '')}/auth/v1/authorize?provider=google&redirect_to=${redirectUrl}`;
+    return;
+  }
+
+  // Mode C: Google Identity Services Prompt (if GIS client ID configured)
+  if (authConfig && authConfig.googleClientId && window.google) {
+    window.google.accounts.id.prompt();
+    return;
+  }
+
+  showAlert('خدمة تسجيل الدخول بحساب Google قيد التفعيل. يمكنك تسجيل الدخول بالبريد الإلكتروني الآن.');
+}
+
+// 3. Fetch Auth Configuration & Bind Handlers
+api('auth-config').then(cfg => {
+  authConfig = cfg;
+
+  // Initialize Supabase Client if credentials available
+  if (window.supabase && cfg.supabaseUrl && cfg.supabaseAnonKey) {
+    try {
+      supabaseClient = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+      supabaseClient.auth.getSession().then(({ data }) => {
+        if (data?.session?.access_token) {
+          api('me').catch(() => {
+            handleGoogleCredential(data.session.access_token, true);
+          });
+        }
+      }).catch(() => {});
+    } catch (e) {
+      console.warn('Supabase client init error:', e);
+    }
+  }
+
+  // Initialize GIS if client ID configured
+  if (cfg.googleClientId && window.google) {
+    try {
+      window.google.accounts.id.initialize({
+        client_id: cfg.googleClientId,
+        callback: (resp) => {
+          if (resp.credential) handleGoogleCredential(resp.credential, false);
+        }
+      });
+    } catch (_) {}
+  }
+
+  const customBtn = $('googleBtnCustom');
+  if (customBtn) {
+    customBtn.onclick = startGoogleSignIn;
   }
 }).catch(() => {
-  $('googleBtnCustom').onclick = () => {
-    showAlert('تسجيل الدخول عبر Google سيتوفر قريباً. يمكنك التسجيل بالبريد وكلمة المرور فوراً.');
-  };
+  const customBtn = $('googleBtnCustom');
+  if (customBtn) customBtn.onclick = startGoogleSignIn;
 });
 </script>
 </body>

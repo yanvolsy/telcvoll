@@ -363,7 +363,7 @@ function renderStudents() {
 
 // ----------------- Edit Student Modal -----------------
 function openEditModal(studentId) {
-  const s = allStudents.find(x => x.id === studentId);
+  const s = allStudents.find(x => String(x.id) === String(studentId));
   if (!s) return;
   $('editStudentId').value = s.id;
   $('editStudentName').value = s.name || '';
@@ -378,7 +378,7 @@ function closeEditModal() {
 }
 
 window.deleteStudent = async function(studentId) {
-  const s = allStudents.find(x => x.id === studentId);
+  const s = allStudents.find(x => String(x.id) === String(studentId));
   const name = s ? (s.name || s.email) : 'هذا الطالب';
   if (!confirm(`هل أنت متأكد تماماً من حذف حساب (${name}) نهائياً؟ سيتم مسح كافة نتائجه ومحاولاته واشتراكاته ولا يمكن التراجع.`)) return;
 
@@ -430,10 +430,10 @@ $('editStudentForm').onsubmit = async (e) => {
 
 // ----------------- Subscription Modal -----------------
 function openSubModal(studentId) {
-  const s = allStudents.find(x => x.id === studentId);
+  const s = allStudents.find(x => String(x.id) === String(studentId));
   if (!s) return;
   $('subStudentId').value = s.id;
-  $('subStudentName').textContent = s.name || 'طالب';
+  $('subStudentName').textContent = s.name || s.email || 'طالب';
   $('subStudentEmail').textContent = s.email || '—';
 
   const isPaid = !!s.is_subscription_active;
@@ -441,13 +441,21 @@ function openSubModal(studentId) {
     ? `<span style="color:var(--green);font-weight:900;">مشترك حالياً في: ${esc(s.plan_name || 'اشتراك مدفوع')} (ينتهي: ${fmtDate(s.expires_at)})</span>`
     : `<span style="color:var(--muted);font-weight:700;">الحساب حالياً: مجاني (غير مشترك)</span>`;
 
-  $('subStatusSelect').value = isPaid ? 'active' : 'active';
+  $('subStatusSelect').value = 'active';
   toggleSubFields();
+
+  const plans = (allPlans && allPlans.length) ? allPlans : [
+    { id: 1, name: 'B1-B2-C1 الكامل (شهري)', duration_days: 30 },
+    { id: 2, name: 'B1-B2-C1 الكامل (3 أشهر)', duration_days: 90 },
+    { id: 3, name: 'B1-B2-C1 الكامل (6 أشهر)', duration_days: 180 },
+    { id: 4, name: 'B1-B2-C1 الكامل (سنة كاملة)', duration_days: 365 },
+    { id: 5, name: 'B1-B2-C1 حساب دائم مفتوح', duration_days: 3650 }
+  ];
 
   // Populate plans dropdown
   const planSelect = $('subPlanSelect');
-  planSelect.innerHTML = allPlans.map(p => {
-    const isSelected = s.plan_id === p.id || p.name.includes('B1-B2-C1');
+  planSelect.innerHTML = plans.map(p => {
+    const isSelected = String(s.plan_id) === String(p.id) || p.name.includes('B1-B2-C1');
     return `<option value="${p.id}" data-days="${p.duration_days}" ${isSelected ? 'selected' : ''}>${esc(p.name)} (${p.duration_days} يوم)</option>`;
   }).join('');
 
@@ -478,9 +486,19 @@ function onDurationPresetChange() {
   $('customDateRow').style.display = val === 'custom' ? 'block' : 'none';
 }
 
-function onPlanSelectChange() {
-  // Can adapt duration or keep preset
-}
+function onPlanSelectChange() {}
+
+// Expose modal handlers globally on window
+window.openEditModal = openEditModal;
+window.closeEditModal = closeEditModal;
+window.openSubModal = openSubModal;
+window.closeSubModal = closeSubModal;
+window.toggleSubFields = toggleSubFields;
+window.onDurationPresetChange = onDurationPresetChange;
+window.onPlanSelectChange = onPlanSelectChange;
+
+$('editStudentModal').onclick = e => { if (e.target === $('editStudentModal')) closeEditModal(); };
+$('manageSubModal').onclick = e => { if (e.target === $('manageSubModal')) closeSubModal(); };
 
 $('manageSubForm').onsubmit = async (e) => {
   e.preventDefault();

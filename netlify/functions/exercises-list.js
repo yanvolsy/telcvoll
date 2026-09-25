@@ -24,7 +24,7 @@ exports.handler = async (event) => {
   }
 
   const query = `
-    SELECT id, title, body, level, section, teil, duration_minutes, exam_id,
+    SELECT id, title, body, level, section, teil,
            COALESCE(access_mode, 'paid') AS access_mode, audio_url
     FROM exercises
     WHERE ${conditions.join(' AND ')}

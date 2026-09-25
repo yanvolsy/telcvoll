@@ -201,6 +201,23 @@ exports.handler = async (event) => {
         if (pr.rows.length) plan = pr.rows[0];
       }
       if (!plan) {
+        try {
+          const insertPlan = await pool.query(
+            "INSERT INTO plans(plan_key, name, duration_days, active) VALUES('b1_b2_c1', 'B1-B2-C1 الكامل', 30, TRUE) RETURNING *"
+          );
+          if (insertPlan.rows.length) plan = insertPlan.rows[0];
+          else {
+            const anyP = await pool.query('SELECT * FROM plans LIMIT 1');
+            if (anyP.rows.length) plan = anyP.rows[0];
+          }
+        } catch (_) {
+          try {
+            const anyP = await pool.query('SELECT * FROM plans LIMIT 1');
+            if (anyP.rows.length) plan = anyP.rows[0];
+          } catch (_) {}
+        }
+      }
+      if (!plan) {
         plan = { id: 1, name: 'B1-B2-C1 الكامل', duration_days: 30 };
       }
 

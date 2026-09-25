@@ -1,5 +1,5 @@
-const { db } = require('./_lib/db');
-const { sign, setCookie, clientIp, json, verifyGoogleIdToken } = require('./_lib/auth');
+const { db, ensureSchema } = require('./_lib/db');
+const { sign, setCookie, clientIp, json, verifyGoogleIdToken, verifySupabaseToken } = require('./_lib/auth');
 const { rateLimit } = require('./_lib/ratelimit');
 const { requireSameOrigin, requestSize } = require('./_lib/request');
 
@@ -19,26 +19,54 @@ exports.handler = async (event) => {
   let body;
   try { body = JSON.parse(event.body || '{}'); } catch { return json(400, { error: 'Bad request' }); }
 
-  const idToken = String(body.credential || body.id_token || body.token || '').trim();
-  if (!idToken) {
-    return json(422, { error: 'رمز تعريف Google مفقود.' });
+  const incomingToken = String(
+    body.supabase_token ||
+    body.access_token ||
+    body.credential ||
+    body.id_token ||
+    body.token ||
+    ''
+  ).trim();
+
+  if (!incomingToken) {
+    return json(422, { error: 'رمز تعريف Google/Supabase مفقود.' });
   }
 
-  // 1. Strict Server-Side Verification: NEVER trust client-provided email
-  const googleUser = await verifyGoogleIdToken(idToken);
-  if (!googleUser.ok || !googleUser.email) {
-    return json(401, { error: 'invalid_google_token', message: googleUser.error || 'فشل التحقق من حساب Google.' });
+  // 1. Strict Server-Side Verification: Support both Supabase OAuth & Google GIS ID tokens
+  let verifiedUser = null;
+  if (body.supabase_token || body.access_token) {
+    const sbRes = await verifySupabaseToken(incomingToken);
+    if (sbRes.ok && sbRes.email) {
+      verifiedUser = sbRes;
+    } else {
+      const gRes = await verifyGoogleIdToken(incomingToken);
+      if (gRes.ok && gRes.email) verifiedUser = gRes;
+      else return json(401, { error: 'invalid_token', message: sbRes.error || gRes.error || 'فشل التحقق من حساب Google.' });
+    }
+  } else {
+    const gRes = await verifyGoogleIdToken(incomingToken);
+    if (gRes.ok && gRes.email) {
+      verifiedUser = gRes;
+    } else {
+      const sbRes = await verifySupabaseToken(incomingToken);
+      if (sbRes.ok && sbRes.email) {
+        verifiedUser = sbRes;
+      } else {
+        return json(401, { error: 'invalid_token', message: gRes.error || sbRes.error || 'فشل التحقق من حساب Google.' });
+      }
+    }
   }
 
   const pool = db();
+  await ensureSchema(pool);
   const client = await pool.connect();
 
   try {
-    const verifiedEmail = googleUser.email.toLowerCase().trim();
-    const googleId = googleUser.sub;
-    const fullName = String(googleUser.name || `${googleUser.given_name || ''} ${googleUser.family_name || ''}`).trim() || 'Student';
-    const firstName = String(googleUser.given_name || '').trim();
-    const lastName = String(googleUser.family_name || '').trim();
+    const verifiedEmail = verifiedUser.email.toLowerCase().trim();
+    const googleId = verifiedUser.sub;
+    const fullName = String(verifiedUser.name || `${verifiedUser.first_name || ''} ${verifiedUser.last_name || ''}`).trim() || 'Student';
+    const firstName = String(verifiedUser.first_name || '').trim();
+    const lastName = String(verifiedUser.last_name || '').trim();
 
     // 2. Check if student already exists by verified email or google_id
     const existingRes = await client.query(
