@@ -116,17 +116,29 @@ function renderUnifiedAudioPlayer(audioUrl) {
 function getExerciseBody(model) {
   const ex = model?.exercise || {};
   const st = parseSettings(ex);
-  return (
-    ex.body ||
-    st.text ||
-    st.body ||
-    st.situation ||
-    st.situation_text ||
-    st.thema_text ||
-    st.prompt ||
-    model?.items?.[0]?.body ||
-    ''
-  );
+  const candidates = [
+    ex.body,
+    ex.instructions,
+    st.text,
+    st.body,
+    st.passage,
+    st.reading_text,
+    st.reading,
+    st.article,
+    st.content,
+    st.story,
+    st.situation,
+    st.situation_text,
+    st.thema_text,
+    st.prompt,
+    model?.items?.[0]?.body,
+    model?.items?.[0]?.settings_json?.body,
+    model?.items?.[0]?.settings_json?.text
+  ];
+  for (const c of candidates) {
+    if (typeof c === 'string' && c.trim()) return c.trim();
+  }
+  return '';
 }
 
 function getExerciseHeadings(model) {
@@ -220,10 +232,16 @@ function renderMatching(){
    const assignLabel = isLesen3 ? text('الإعلان المناسب لهذا الموقف:','Passende Anzeige für diese Situation:') : text('العنوان المناسب لهذه الفقرة:','Passende Überschrift für diesen Text:');
    const assignPlaceholder = isLesen3 ? text('— اختر الإعلان المناسب —','— Passende Anzeige auswählen —') : text('— اختر العنوان —','— Überschrift auswählen —');
    return `<article class="exam-text-card ${selected?'answered':''} ${resultClass} ${String(activeItem)===String(it.position_no)?'active-item':''}" data-item="${it.position_no}">
-     <div class="exam-card-top">${textTools(it.prompt,cid)}</div>
+     <div class="paragraph-assignment" style="margin-bottom:14px;padding-bottom:14px;border-bottom:1px dashed var(--line);">
+       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px;flex-wrap:wrap;">
+         <div class="assignment-label" style="font-weight:900;color:var(--primary);">${assignLabel}</div>
+         <div class="exam-card-top" style="margin:0;">${textTools(it.prompt,cid)}</div>
+       </div>
+       <select data-paragraph-select="${it.position_no}" aria-label="${assignLabel}"><option value="">${assignPlaceholder}</option>${selectOptions}</select>
+       ${shownLabel?`<button type="button" class="assignment-selected" data-clear="${it.position_no}" aria-label="${text('إلغاء الاختيار','Auswahl löschen')}"><span>${esc(shownLabel)}</span><b>×</b></button>`:`<span class="assignment-empty">${text('لم يتم الاختيار بعد','Noch nicht ausgewählt')}</span>`}
+     </div>
      <div class="exam-text" id="${cid}" data-content-id="${cid}" data-source="${esc(it.prompt)}">${escBody(it.prompt)}</div>
      <div class="inline-translation" id="${cid}-translation"></div>
-     <div class="paragraph-assignment" style="margin-top:16px;padding-top:14px;border-top:1px dashed var(--line);"><div class="assignment-label">${assignLabel}</div><select data-paragraph-select="${it.position_no}" aria-label="${assignLabel}"><option value="">${assignPlaceholder}</option>${selectOptions}</select>${shownLabel?`<button type="button" class="assignment-selected" data-clear="${it.position_no}" aria-label="${text('إلغاء الاختيار','Auswahl löschen')}"><span>${esc(shownLabel)}</span><b>×</b></button>`:`<span class="assignment-empty">${text('لم يتم الاختيار بعد','Noch nicht ausgewählt')}</span>`}</div>
    </article>`;
  }).join('');
 
@@ -248,7 +266,30 @@ function renderMatching(){
  const answeredCount=Object.keys(answers).filter(k=>answers[k]).length;
  const resultHtml='';
   const meta=matchingMeta();
-  document.getElementById('content').innerHTML=layout(main,`<div class="exam-side-sticky-header"><div class="side-title side-title-large"><div class="side-title-text"><b>${esc(meta.title)}</b><small>${esc(meta.sub)}</small></div><div class="side-title-actions"><button type="button" class="side-icon shuffle-all" aria-label="${text('خلط العناوين والفقرات','Überschriften und Texte mischen')}" title="${text('خلط العناوين والفقرات','Überschriften und Texte mischen')}">⤨</button><span class="side-counter-pill">${answeredCount} / ${items.length}</span></div></div></div><div class="heading-list">${side}</div>`);
+  const headingsBankUnder = `
+    <div class="matching-headings-bank" style="margin-top:32px;padding:24px 20px;background:var(--white);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-sm);">
+      <div class="matching-bank-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+        <div>
+          <h3 style="margin:0 0 4px;font-size:18px;font-weight:900;display:flex;align-items:center;gap:8px;">
+            <span>🏷️</span>
+            <span>${esc(meta.title)} — ${text('العناوين المتاحة للمطابقة', 'Verfügbare Überschriften')}</span>
+          </h3>
+          <small style="color:var(--muted);font-size:12.5px;">${text('يمكنك مراجعة جميع العناوين هنا أو الضغط على أي عنوان لاختياره مباشرة للفقرة المحددة.', 'Überschriften zur Auswahl für die Absätze.')}</small>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button type="button" class="btn small-btn shuffle-all shuffle-btn-styled" title="${text('خلط العناوين', 'Überschriften mischen')}">
+            <span style="font-size:16px;">⤨</span>
+            <span>${text('خلط العناوين', 'Mischen')}</span>
+          </button>
+          <span class="side-counter-pill">${answeredCount} / ${items.length}</span>
+        </div>
+      </div>
+      <div class="heading-list-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));gap:12px;">
+        ${side}
+      </div>
+    </div>
+  `;
+  document.getElementById('content').innerHTML=layout(main + headingsBankUnder, '');
  document.querySelectorAll('[data-item]').forEach(c=>{
    c.onmousedown=e=>{if(e.target.closest('select,.text-tools,.mini-tool,.clear-selection'))return;e.preventDefault();};
    c.onclick=e=>{if(e.target.closest('select,.text-tools,.mini-tool,.clear-selection'))return;activeItem=String(c.dataset.item);document.querySelectorAll('[data-item]').forEach(x=>x.classList.toggle('active-item',String(x.dataset.item)===activeItem));};
@@ -272,10 +313,19 @@ function renderSprachbausteine1(){
 
  const questionsUnderText=`
    <div class="spb-questions-container" style="margin-top:28px;padding-top:20px;border-top:1px solid var(--line);">
-     <h3 style="font-size:18px;font-weight:900;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
-       <span>🧩</span>
-       <span>${text('خيارات الفراغات (21 - 30):','Aufgaben Sprachbausteine Teil 1:')}</span>
-     </h3>
+      <div class="spb-questions-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <h3 style="margin:0;font-size:18px;font-weight:900;display:flex;align-items:center;gap:8px;">
+          <span>🧩</span>
+          <span>${text('خيارات الفراغات (21 - 30):','Aufgaben Sprachbausteine Teil 1:')}</span>
+        </h3>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button type="button" class="btn small-btn shuffle-spb1 shuffle-btn-styled" title="${text('خلط الاختيارات','Antworten mischen')}">
+            <span style="font-size:16px;">⤨</span>
+            <span>${text('خلط الاختيارات','Mischen')}</span>
+          </button>
+          <span class="side-counter-pill">${Object.keys(answers).length} / ${items.length}</span>
+        </div>
+      </div>
      <div class="spb-questions-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));gap:14px;">
        ${items.map(it=>{
          const n=String(it.position_no), examNo=Number(n)+20, chosen=answerValue(n);
@@ -323,7 +373,7 @@ function renderSprachbausteine1(){
    </div>
  </div>`;
 
- document.getElementById('content').innerHTML=layout(main,side,'spb1');
+ document.getElementById('content').innerHTML=layout(main,'','spb1');
  document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>selectAnswer(b.dataset.q,b.dataset.o));
  document.querySelectorAll('[data-gap-select]').forEach(sel=>sel.onchange=e=>{
    e.stopPropagation();
@@ -373,121 +423,171 @@ function renderHoerenChoiceQuestions(){
 }
 
 function renderChoiceQuestions(){
- const isLesen2=model.exercise.section==='Lesen'&&model.exercise.teil==='Teil 2';
- const gap2=model.exercise.section==='Sprachbausteine'&&model.exercise.teil==='Teil 2';
- const items=isLesen2?(model.items||[]).slice(0,5):(model.items||[]);
- const longTextId=isLesen2?'lesen2-text':gap2?'gap2-text':'choice-long-text';
- const bodyText=getExerciseBody(model);
+  const isLesen2=model.exercise.section==='Lesen'&&model.exercise.teil==='Teil 2';
+  const gap2=model.exercise.section==='Sprachbausteine'&&model.exercise.teil==='Teil 2';
+  const items=isLesen2?(model.items||[]).slice(0,5):(model.items||[]);
+  const longTextId=isLesen2?'lesen2-text':gap2?'gap2-text':'choice-long-text';
+  const bodyText=getExerciseBody(model);
 
- const lesen2QuestionsMarkup=isLesen2?`
-   <div class="lesen2-questions-block" style="margin-top:28px;padding-top:20px;border-top:1px solid var(--line);">
-     <h3 style="font-size:18px;font-weight:900;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
-       <span>📝</span>
-       <span>${text('أسئلة الفهم والاختيار من متعدد:','Aufgaben zum Text:')}</span>
-     </h3>
-     <div class="lesen2-questions-list" style="display:flex;flex-direction:column;gap:16px;">
-       ${items.map((it,i)=>{
-         const n=String(it.position_no);
-         const chosen=answerValue(n);
-         const detail=resultData?.details?.find(d=>String(d.prompt)===String(it.prompt));
-         const correct=detail?.correct_answer||'';
-         const showCorrect=showModelAnswers&&correct;
-         const baseOptions=(it.options||[]).slice(0,3);
-         if(!optionOrders[n]) optionOrders[n]=baseOptions.map(o=>o.option_key);
-         const byKey=new Map(baseOptions.map(o=>[String(o.option_key),o]));
-         const ordered=optionOrders[n].map(k=>byKey.get(String(k))).filter(Boolean);
-         return `<div class="side-question lesen2-question ${detail?(detail.ok?'result-correct':'result-wrong'):''}">
-           <div class="question-prompt question-text-tools">
-             ${textTools(it.prompt||'',`lesen2-q-${n}`)}
-             <div class="question-prompt-text" id="lesen2-q-${n}" data-content-id="lesen2-q-${n}" data-source="${esc(it.prompt||'')}"><b>${i+1}.</b> ${esc(it.prompt||'')}</div>
-             ${translationBox(`lesen2-q-${n}-translation`)}
-           </div>
-           <div class="side-options">
-             ${ordered.map((o,oi)=>{
-               const ocid=`lesen2-o-${n}-${oi}`;
-               return `<div class="lesen2-option-wrap">
-                 <div class="lesen2-option-row">
-                   <button type="button" class="side-option ${chosen===o.option_key?'selected':''} ${detail&&chosen===o.option_key?(detail.ok?'result-correct':'result-wrong'):''} ${showCorrect&&correct===o.option_key?'model-correct':''}" data-q="${esc(n)}" data-o="${esc(o.option_key)}">
-                     <span class="option-text" id="${ocid}" data-content-id="${ocid}" data-source="${esc(o.option_text||'')}">${esc(o.option_key)}) ${esc(o.option_text||'')}</span>
-                   </button>
-                   ${textTools(o.option_text||'',ocid)}
-                 </div>
-                 ${translationBox(`${ocid}-translation`)}
-               </div>`;
-             }).join('')}
-           </div>
-         </div>`;
-       }).join('')}
-     </div>
-   </div>
- `:'';
+  const renderQuestionList = (list) => {
+    return list.map((it,i)=>{
+      const n=String(it.position_no);
+      const chosen=answerValue(n);
+      const detail=resultData?.details?.find(d=>String(d.prompt)===String(it.prompt));
+      const correct=detail?.correct_answer||'';
+      const showCorrect=showModelAnswers&&correct;
+      const baseOptions=(it.options||[]).slice(0,3);
+      if(!optionOrders[n]) optionOrders[n]=baseOptions.map(o=>o.option_key);
+      const byKey=new Map(baseOptions.map(o=>[String(o.option_key),o]));
+      const ordered=optionOrders[n].map(k=>byKey.get(String(k))).filter(Boolean);
+      const qcid='choice-q-'+n;
+      return `<div class="lesen2-question ${detail?(detail.ok?'result-correct':'result-wrong'):''}" data-item="${esc(n)}" style="background:var(--white);border:1px solid var(--line);border-radius:18px;padding:20px 22px;box-shadow:var(--shadow-sm);">
+        <div class="question-prompt-row" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px;">
+          <div class="question-prompt-text" style="font-size:16px;font-weight:850;line-height:1.6;color:var(--ink);">
+            <span class="question-num" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:var(--green-soft);color:var(--green-dark);border-radius:8px;margin-inline-end:8px;font-size:13px;font-weight:900;">${it.position_no}</span>
+            <span id="${qcid}" data-content-id="${qcid}" data-source="${esc(it.prompt||'')}">${esc(it.prompt||'')}</span>
+          </div>
+          <div class="question-tools">${textTools(it.prompt||'',qcid)}</div>
+        </div>
+        ${translationBox(`${qcid}-translation`)}
+        <div class="options-list" style="display:flex;flex-direction:column;gap:10px;">
+          ${ordered.map((o,oi)=>{
+            const ocid='choice-o-'+n+'-'+oi;
+            const isSelected=String(chosen)===String(o.option_key);
+            const isCorrectOption=showCorrect&&String(correct)===String(o.option_key);
+            const optResultClass=detail&&isSelected?(detail.ok?'result-correct':'result-wrong'):'';
+            return `<div class="option-row" style="position:relative;">
+              <div class="option-tool-wrap" style="display:flex;align-items:center;gap:10px;">
+                <button type="button" class="side-option ${isSelected?'selected':''} ${optResultClass} ${isCorrectOption?'model-correct':''}" data-q="${esc(n)}" data-o="${esc(o.option_key)}" style="flex:1;text-align:start;justify-content:flex-start;padding:12px 16px;border-radius:12px;font-size:14.5px;font-weight:750;background:${isSelected?'var(--green)':'var(--bg)'};color:${isSelected?'#fff':'var(--ink)'};border:1.5px solid ${isSelected?'var(--green)':'var(--line)'};">
+                  <span class="option-text" id="${ocid}" data-content-id="${ocid}" data-source="${esc(o.option_text||'')}">${esc(o.option_key)}) ${esc(o.option_text||'')}</span>
+                </button>
+                ${textTools(o.option_text||'',ocid)}
+              </div>
+              ${translationBox(`${ocid}-translation`)}
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    }).join('');
+  };
 
- const gap2WordBankUnderText=gap2?`
-   <div class="gap2-wordbank-block" style="margin-top:28px;padding-top:20px;border-top:1px solid var(--line);">
-     <h3 style="font-size:18px;font-weight:900;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
-       <span>🔤</span>
-       <span>${text('بنك الكلمات للاختيار في الفراغات (WÖRTER):','Wortauswahl für die Lücken:')}</span>
-     </h3>
-     <div class="word-bank" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));gap:10px;">
-       ${sharedOptions().map(([k,v],oi)=>{
-         const wid='wordbank-'+oi;
-         const isCorrect=(resultData?.details||[]).some(d=>String(d.correct_answer)===String(k));
-         return `<div class="word-card-wrap">
-           <button class="word-card ${Object.values(answers).includes(k)?'used':''} ${showModelAnswers&&isCorrect?'model-correct':''}" data-word="${esc(k)}">
-             <small>${String.fromCharCode(65+oi)}</small>
-             <b>${esc(v)}</b>
-           </button>
-           ${textTools(v,wid)}
-           ${translationBox(wid+'-translation')}
-         </div>`;
-       }).join('')}
-     </div>
-   </div>
- `:'';
+  const questionsHead = (titleText) => `
+    <div class="lesen2-questions-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+      <h3 style="margin:0;font-size:18px;font-weight:900;display:flex;align-items:center;gap:8px;">
+        <span>📝</span>
+        <span>${titleText}</span>
+      </h3>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button type="button" class="btn small-btn shuffle-options shuffle-btn-styled" title="${text('خلط الاختيارات','Antworten mischen')}">
+          <span style="font-size:16px;">⤨</span>
+          <span>${text('خلط الاختيارات','Mischen')}</span>
+        </button>
+        <span class="side-counter-pill">${Object.keys(answers).length} / ${items.length}</span>
+      </div>
+    </div>
+  `;
 
- const main=isLesen2?`<div class="long-text lesen2-long-text">
-   <div class="long-text-tools">${textTools(bodyText,longTextId)}</div>
-   <div class="long-text-content" id="${longTextId}" data-content-id="${longTextId}" data-source="${esc(bodyText)}">${escBody(bodyText)}</div>
-   ${translationBox(longTextId+'-translation')}
-   ${lesen2QuestionsMarkup}
- </div>`:gap2?`<div class="long-text">
-   <div class="long-text-tools">${textTools(bodyText,'gap2-text')}</div>
-   <div id="gap2-text" data-content-id="gap2-text" data-source="${esc(bodyText)}">${renderBody(bodyText)}</div>
-   ${translationBox('gap2-text-translation')}
-   ${gap2WordBankUnderText}
- </div>`:`<div class="long-text">
-   <div class="long-text-tools">${textTools(bodyText,'choice-long-text')}</div>
-   <div id="choice-long-text" data-content-id="choice-long-text" data-source="${esc(bodyText)}">${escBody(bodyText)}</div>
-   ${translationBox('choice-long-text-translation')}
- </div>`;
+  const readingTextMarkup = bodyText ? `
+    <div class="long-text lesen2-long-text" style="margin-bottom:24px;">
+      <div class="long-text-tools">${textTools(bodyText,longTextId)}</div>
+      <div class="long-text-content" id="${longTextId}" data-content-id="${longTextId}" data-source="${esc(bodyText)}" style="font-size:16px;line-height:1.75;">${escBody(bodyText)}</div>
+      ${translationBox(longTextId+'-translation')}
+    </div>
+  ` : '';
 
- let side='';
- if(gap2){
-   const opts=sharedOptions();
-   side=`<div class="exam-side-sticky-header"><div class="side-title"><div class="side-title-text"><b>WÖRTER</b><small>${text('بنك الكلمات','Wortauswahl')}</small></div><div class="side-title-actions"><span class="side-counter-pill">${Object.keys(answers).length} / ${items.length}</span></div></div></div><div class="word-bank">${opts.map(([k,v],oi)=>{const wid='wordbank-'+oi;const isCorrect=(resultData?.details||[]).some(d=>String(d.correct_answer)===String(k));return `<div class="word-card-wrap"><button class="word-card ${Object.values(answers).includes(k)?'used':''} ${showModelAnswers&&isCorrect?'model-correct':''}" data-word="${esc(k)}"><small>${String.fromCharCode(65+oi)}</small><b>${esc(v)}</b></button>${textTools(v,wid)}${translationBox(wid+'-translation')}</div>`;}).join('')}</div>`;
- } else if(isLesen2){
-   side=`<div class="exam-side-sticky-header"><div class="side-title side-title-large"><div class="side-title-text"><b>LESEN TEIL 2</b><small>${text('أسئلة الاختيار من متعدد','Multiple Choice')}</small></div><div class="side-title-actions"><button type="button" class="side-icon shuffle-options" aria-label="${text('خلط الاختيارات','Antworten mischen')}" title="${text('خلط الاختيارات','Antworten mischen')}">⤨</button><span class="side-counter-pill">${Object.keys(answers).length} / ${items.length}</span></div></div></div>`;
- } else {
-   side=`<div class="exam-side-sticky-header"><div class="side-title"><div class="side-title-text"><b>${model.exercise.task_type==='MCQ'?'AUFGABEN':'LÜCKEN'}</b><small>${text('قائمة الأسئلة','Fragenliste')}</small></div><div class="side-title-actions"><span class="side-counter-pill">${Object.keys(answers).length} / ${items.length}</span></div></div></div>`+items.map((it,i)=>{const qid='generic-q-'+it.position_no;return `<div class="side-question ${(()=>{const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));return d?(d.ok?'result-correct':'result-wrong'):''})()}"><div class="question-prompt question-text-tools">${textTools(it.prompt||'',qid)}<div id="${qid}" data-content-id="${qid}" data-source="${esc(it.prompt||'')}">${esc(it.prompt||'')}</div>${translationBox(qid+'-translation')}</div><div class="side-options">${(it.options||[]).map((o,oi)=>{const oid=`generic-o-${it.position_no}-${oi}`;const d=resultData?.details?.find(x=>String(x.prompt)===String(it.prompt));const isChosen=answerValue(it.position_no)===o.option_key;const isCorrect=showModelAnswers&&String(d?.correct_answer||'')===String(o.option_key);const resultClass=d&&isChosen?(d.ok?'result-correct':'result-wrong'):'';return `<div class="option-tool-wrap"><button class="side-option ${isChosen?'selected':''} ${resultClass} ${isCorrect?'model-correct':''}" data-q="${it.position_no}" data-o="${esc(o.option_key)}">${esc(o.option_text)}</button>${textTools(o.option_text||'',oid)}${translationBox(oid+'-translation')}</div>`;}).join('')}</div></div>`;}).join('');
- }
+  const lesen2QuestionsMarkup = isLesen2 ? `
+    <div class="lesen2-questions-block" style="margin-top:28px;padding-top:20px;border-top:1px solid var(--line);">
+      ${questionsHead(text('أسئلة الفهم والاختيار من متعدد (6 - 10):','Aufgaben zum Text (6 - 10):'))}
+      <div class="lesen2-questions-list" style="display:flex;flex-direction:column;gap:16px;">
+        ${renderQuestionList(items)}
+      </div>
+    </div>
+  ` : '';
 
- document.getElementById('content').innerHTML=layout(main,side,isLesen2?'lesen2':'');
- if(gap2)document.querySelectorAll('[data-word]').forEach(b=>b.onclick=()=>{const first=items.find(it=>!answerValue(it.position_no));if(first)selectAnswer(first.position_no,b.dataset.word);});
- document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>selectAnswer(b.dataset.q,b.dataset.o));
- document.querySelectorAll('[data-gap-select]').forEach(sel=>sel.onchange=e=>{
-   e.stopPropagation();
-   selectAnswer(sel.dataset.gapSelect,sel.value);
- });
- if(isLesen2){
-   const sh=document.querySelector('.shuffle-options');
-   if(sh)sh.onclick=e=>{
-     e.preventDefault(); e.stopPropagation();
-     items.forEach(it=>{const n=String(it.position_no); optionOrders[n]=shuffle((it.options||[]).slice(0,3).map(o=>o.option_key));});
-     const st=captureExerciseScroll();
-     rerenderExerciseStable(st);
-   };
- }
- bindTextTools();
+  const gap2WordBankUnderText = gap2 ? `
+    <div class="gap2-wordbank-block" style="margin-top:28px;padding-top:20px;border-top:1px solid var(--line);">
+      <div class="gap2-wordbank-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+        <h3 style="margin:0;font-size:18px;font-weight:900;display:flex;align-items:center;gap:8px;">
+          <span>🔤</span>
+          <span>${text('بنك الكلمات للاختيار في الفراغات (WÖRTER):','Wortauswahl für die Lücken:')}</span>
+        </h3>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <button type="button" class="btn small-btn shuffle-words shuffle-btn-styled" title="${text('خلط الكلمات','Wörter mischen')}">
+            <span style="font-size:16px;">⤨</span>
+            <span>${text('خلط الكلمات','Mischen')}</span>
+          </button>
+          <span class="side-counter-pill">${Object.keys(answers).length} / ${items.length}</span>
+        </div>
+      </div>
+      <div class="word-bank" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));gap:10px;">
+        ${sharedOptions().map(([k,v],oi)=>{
+          const wid='wordbank-'+oi;
+          const isCorrect=(resultData?.details||[]).some(d=>String(d.correct_answer)===String(k));
+          return `<div class="word-card-wrap">
+            <button class="word-card ${Object.values(answers).includes(k)?'used':''} ${showModelAnswers&&isCorrect?'model-correct':''}" data-word="${esc(k)}">
+              <small>${String.fromCharCode(65+oi)}</small>
+              <b>${esc(v)}</b>
+            </button>
+            ${textTools(v,wid)}
+            ${translationBox(wid+'-translation')}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  ` : '';
+
+  const genericQuestionsMarkup = (!isLesen2 && !gap2 && items.length) ? `
+    <div class="generic-questions-block" style="margin-top:28px;padding-top:20px;border-top:1px solid var(--line);">
+      ${questionsHead(text('الأسئلة والخيارات:','Aufgaben zum Text:'))}
+      <div class="generic-questions-list" style="display:flex;flex-direction:column;gap:16px;">
+        ${renderQuestionList(items)}
+      </div>
+    </div>
+  ` : '';
+
+  const main = isLesen2 ? `
+    ${readingTextMarkup}
+    ${lesen2QuestionsMarkup}
+  ` : gap2 ? `<div class="long-text">
+    <div class="long-text-tools">${textTools(bodyText,'gap2-text')}</div>
+    <div id="gap2-text" data-content-id="gap2-text" data-source="${esc(bodyText)}">${renderBody(bodyText)}</div>
+    ${translationBox('gap2-text-translation')}
+    ${gap2WordBankUnderText}
+  </div>` : `<div class="long-text">
+    ${readingTextMarkup}
+    ${genericQuestionsMarkup}
+  </div>`;
+
+  document.getElementById('content').innerHTML = layout(main, '', isLesen2 ? 'lesen2' : '');
+
+  if(gap2){
+    document.querySelectorAll('[data-word]').forEach(b=>b.onclick=()=>{
+      const first=items.find(it=>!answerValue(it.position_no));
+      if(first)selectAnswer(first.position_no,b.dataset.word);
+    });
+    const shWords=document.querySelector('.shuffle-words');
+    if(shWords) shWords.onclick=e=>{
+      e.preventDefault(); e.stopPropagation();
+      const st=captureExerciseScroll();
+      rerenderExerciseStable(st);
+    };
+  }
+
+  document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>selectAnswer(b.dataset.q,b.dataset.o));
+  document.querySelectorAll('[data-gap-select]').forEach(sel=>sel.onchange=e=>{
+    e.stopPropagation();
+    selectAnswer(sel.dataset.gapSelect,sel.value);
+  });
+
+  const sh=document.querySelector('.shuffle-options');
+  if(sh)sh.onclick=e=>{
+    e.preventDefault(); e.stopPropagation();
+    items.forEach(it=>{const n=String(it.position_no); optionOrders[n]=shuffle((it.options||[]).slice(0,3).map(o=>o.option_key));});
+    const st=captureExerciseScroll();
+    rerenderExerciseStable(st);
+  };
+
+  bindTextTools();
 }
 
 function renderBody(body){
@@ -1490,7 +1590,7 @@ function layout(main,side,workspaceClass=''){
  const activeDuration = duration || (model?.exercise ? getTelcDurationSeconds(model.exercise) : 1200);
  const initialMin = String(Math.floor(activeDuration / 60)).padStart(2, '0');
  const timer=(mockMode||activeDuration)?`<div class="progress-pill ${mockMode?'mock-global-timer':''}" id="timerEl">${initialMin}:00</div>`:'';
- const resultPanel=resultData?`<div class="inline-result-panel ${resultData.percent>=60?'pass':'fail'}"><div class="result-panel-main"><span class="result-panel-label">${text('النتيجة','Ergebnis')}</span><strong>${resultData.score} / ${resultData.max}</strong></div><div class="result-panel-meta"><span>${resultData.percent}%</span><b>${esc(resultData.result||'')}</b></div></div>`:''; return `<div class="exercise-heading"><div class="exercise-heading-title"><span class="tag">Telc ${esc(model.exercise.level||'B2')} · ${esc(model.exercise.section)}</span>${headingTools}<small>${esc(model.exercise.teil)}</small></div>${renderAudio()}${timer}</div>${resultPanel}<div class="exam-workspace ${combinedWorkspaceClass}"><section class="exam-main">${main}</section><aside class="exam-side">${side}</aside></div><div class="exercise-actions"><div class="exercise-nav"><button class="btn" id="checkBtn">${text(mockMode?'إنهاء الجزء':'تحقق من الإجابات',mockMode?'Teil beenden':'Antworten prüfen')}</button>${mockMode?'':`<button class="btn model-btn" id="modelBtn">${text(showModelAnswers ? 'إخفاء الإجابة' : 'الإجابة النموذجية', showModelAnswers ? 'Musterlösung ausblenden' : 'Musterlösung')}</button>`}</div></div>`;
+ const resultPanel=resultData?`<div class="inline-result-panel ${resultData.percent>=60?'pass':'fail'}"><div class="result-panel-main"><span class="result-panel-label">${text('النتيجة','Ergebnis')}</span><strong>${resultData.score} / ${resultData.max}</strong></div><div class="result-panel-meta"><span>${resultData.percent}%</span><b>${esc(resultData.result||'')}</b></div></div>`:''; return `<div class="exercise-heading"><div class="exercise-heading-title"><span class="tag">Telc ${esc(model.exercise.level||'B2')} · ${esc(model.exercise.section)}</span>${headingTools}<small>${esc(model.exercise.teil)}</small></div>${renderAudio()}${timer}</div>${resultPanel}<div class="exam-workspace ${combinedWorkspaceClass}"><section class="exam-main">${main}</section></div><div class="exercise-actions"><div class="exercise-nav"><button class="btn" id="checkBtn">${text(mockMode?'إنهاء الجزء':'تحقق من الإجابات',mockMode?'Teil beenden':'Antworten prüfen')}</button>${mockMode?'':`<button class="btn model-btn" id="modelBtn">${text(showModelAnswers ? 'إخفاء الإجابة' : 'الإجابة النموذجية', showModelAnswers ? 'Musterlösung ausblenden' : 'Musterlösung')}</button>`}</div></div>`;
 }
 
 function bindActions(){

@@ -27,6 +27,28 @@ exports.handler = async (event) => {
 
     const exercise = access.exercise;
 
+    // If revision exercise has empty body, inherit from parent_exercise_id
+    if ((!exercise.body || !String(exercise.body).trim()) && exercise.parent_exercise_id) {
+      try {
+        const parentRes = await pool.query(
+          "SELECT body, instructions, settings_json FROM exercises WHERE id=$1",
+          [exercise.parent_exercise_id]
+        );
+        if (parentRes.rows[0]) {
+          const p = parentRes.rows[0];
+          if (!exercise.body && p.body) exercise.body = p.body;
+          if (!exercise.instructions && p.instructions) exercise.instructions = p.instructions;
+          if (p.settings_json && typeof p.settings_json === 'object') {
+            exercise.settings_json = { ...p.settings_json, ...(exercise.settings_json || {}) };
+          }
+        }
+      } catch (_) {}
+    }
+    // Also if body is empty but instructions contains the passage
+    if ((!exercise.body || !String(exercise.body).trim()) && exercise.instructions) {
+      exercise.body = exercise.instructions;
+    }
+
     const itemsRes = await pool.query('SELECT * FROM items WHERE exercise_id=$1 ORDER BY position_no', [id]);
     const itemsRows = itemsRes.rows || [];
 

@@ -142,11 +142,20 @@ async function requireSession(event) {
  * Server-side gatekeeper: NEVER trust frontend flags.
  */
 async function checkExerciseAccess(pool, exerciseId, student) {
-  const exRes = await pool.query(
-    "SELECT id, level, section, teil, title, task_type, access_mode, status, body, settings_json, audio_url, deleted_at FROM exercises WHERE id=$1",
-    [exerciseId]
-  );
-  const exercise = exRes.rows[0];
+  let exercise = null;
+  try {
+    const exRes = await pool.query(
+      "SELECT id, level, section, teil, title, task_type, access_mode, status, body, instructions, settings_json, audio_url, parent_exercise_id, deleted_at FROM exercises WHERE id=$1",
+      [exerciseId]
+    );
+    exercise = exRes.rows[0];
+  } catch (_) {
+    const fallbackRes = await pool.query(
+      "SELECT id, level, section, teil, title, task_type, access_mode, status, body, settings_json, audio_url, deleted_at FROM exercises WHERE id=$1",
+      [exerciseId]
+    );
+    exercise = fallbackRes.rows[0];
+  }
   if (!exercise || exercise.deleted_at || exercise.status !== 'published') {
     return { allowed: false, status: 404, error: 'Exercise not found' };
   }

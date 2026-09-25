@@ -5020,3 +5020,62 @@ html[data-theme="dark"] .hoeren-audio-player-card {
   }
 }
 
+
+/* ==========================================================================
+   GLOBAL EXERCISE LAYOUT OVERRIDE: FULL-WIDTH CLEAN SINGLE-COLUMN
+   ========================================================================== */
+.exam-workspace,
+.exercise-page:has(.exam-workspace) .exam-workspace,
+.exam-workspace.lesen2,
+.exam-workspace.spb1 {
+  display: block !important;
+  grid-template-columns: 1fr !important;
+  width: 100% !important;
+  max-width: 1150px !important;
+  margin: 0 auto !important;
+  padding: 0 16px 80px !important;
+}
+
+.exam-main,
+.exercise-page:has(.exam-workspace) .exam-main,
+.exam-workspace.lesen2 .exam-main {
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 16px 0 60px !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+}
+
+.exam-side,
+.exercise-page:has(.exam-workspace) .exam-side,
+.exam-workspace.lesen2 .exam-side {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  overflow: hidden !important;
+}
+
+.shuffle-btn-styled {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  padding: 7px 15px !important;
+  font-size: 13px !important;
+  font-weight: 850 !important;
+  border-radius: 12px !important;
+  background: var(--white) !important;
+  border: 1.5px solid var(--line) !important;
+  color: var(--ink) !important;
+  cursor: pointer !important;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+.shuffle-btn-styled:hover {
+  border-color: var(--primary, #059669) !important;
+  color: var(--primary, #059669) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06) !important;
+}
