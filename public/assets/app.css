@@ -331,7 +331,7 @@ html[data-theme="dark"]{--exercise-accent:var(--green);--exercise-accent-soft:va
 .exercise-page:has(.exam-workspace) .matching-controls{display:none!important}
 .exercise-page:has(.exam-workspace) .thema-title-row{justify-content:center}
 .exercise-page:has(.exam-workspace) .thema-title-row h1{font-size:clamp(34px,4vw,58px)}
-.exercise-page:has(.exam-workspace) .thema-title-hidden{filter:blur(10px) !important;opacity:.78 !important}
+.exercise-page:has(.exam-workspace) .thema-title-hidden{filter:blur(10px);opacity:.72}
 .exercise-page:has(.exam-workspace) .thema-tools{position:relative;display:flex;align-items:center;gap:6px}
 .exercise-page:has(.exam-workspace) .thema-tools .inline-translation{position:absolute;top:42px;left:50%;transform:translateX(-50%);width:min(760px,80vw);z-index:20}
 .exercise-actions{direction:ltr!important;display:flex!important;align-items:center!important;justify-content:center!important}
@@ -5669,69 +5669,4 @@ html[data-theme="dark"] .card-access-pill.pill-paid {
   display: inline-flex !important;
   align-items: center !important;
   gap: 6px !important;
-}
-
-
-/* FINAL UI — unified topic-title presentation across exercise sections */
-.exercise-heading,
-.exercise-heading.writing-heading,
-.exercise-heading.speaking-heading,
-.exercise-heading.hoeren-choice-heading {
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  max-width: min(1380px,94vw) !important;
-  margin: 0 auto !important;
-}
-.exercise-heading .exercise-heading-title {
-  min-height: 56px !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-.exercise-heading .thema-title-row {
-  width: auto !important;
-  max-width: 100% !important;
-  margin: 0 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 10px !important;
-  flex-wrap: wrap !important;
-}
-.exercise-heading .thema-title-row h1 {
-  opacity: 1 !important;
-  visibility: visible !important;
-  text-shadow: none !important;
-  transition: filter .2s ease, opacity .2s ease;
-}
-.exercise-heading .thema-title-row h1.thema-title-hidden {
-  filter: blur(10px) !important;
-  opacity: .78 !important;
-  user-select: none !important;
-}
-.exercise-heading .thema-tools {
-  position: relative !important;
-  top: auto !important;
-  left: auto !important;
-  transform: none !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-}
-.exercise-heading .thema-tools .inline-translation {
-  position: absolute !important;
-  top: calc(100% + 8px) !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  width: min(760px,80vw) !important;
-  z-index: 20 !important;
-}
-/* Keep the TELC level switch visually single-layered */
-.level-switch,
-.level-switch .level-btn,
-.level-switch .level-btn.active,
-.level-switch .level-btn:hover,
-.level-switch .level-btn.active:hover {
-  box-shadow: none !important;
 }
