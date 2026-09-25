@@ -279,10 +279,6 @@ function renderMatching(){
           <small style="color:var(--muted);font-size:12.5px;">${text('يمكنك مراجعة جميع العناوين هنا أو الضغط على أي عنوان لاختياره مباشرة للفقرة المحددة.', 'Überschriften zur Auswahl für die Absätze.')}</small>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
-          <button type="button" class="btn small-btn shuffle-all shuffle-btn-styled" title="${text('خلط الأسئلة', 'Aufgaben mischen')}">
-            <span style="font-size:16px;">⤨</span>
-            <span>${text('خلط الأسئلة', 'Aufgaben mischen')}</span>
-          </button>
           <span class="side-counter-pill">${answeredCount} / ${items.length}</span>
         </div>
       </div>
@@ -305,7 +301,7 @@ function renderMatching(){
  });
  document.querySelectorAll('[data-clear]').forEach(b=>b.onclick=e=>{e.stopPropagation();const st=captureExerciseScroll();delete answers[String(b.dataset.clear)];activeItem=String(b.dataset.clear);renderMatching();restoreExerciseScroll(st);bindActions();});
  document.querySelectorAll('[data-choice]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=e=>{e.preventDefault();if(b.disabled||!activeItem)return;const st=captureExerciseScroll();const chosen=b.dataset.choice;Object.keys(answers).forEach(k=>{if(k!==String(activeItem)&&answers[k]===chosen)delete answers[k];});answers[String(activeItem)]=chosen;renderMatching();restoreExerciseScroll(st);bindActions();};});
- const sh=document.querySelector('.shuffle-all');
+ const sh=document.getElementById('headingShuffleBtn');
  if(sh)sh.onclick=e=>{e.stopPropagation();const st=captureExerciseScroll();matchingOrder=shuffle(matchingOrder);activeItem=null;renderMatching();restoreExerciseScroll(st);bindActions();};
  bindTextTools();
 }
@@ -1620,13 +1616,21 @@ function layout(main,side,workspaceClass=''){
  const timer=(mockMode||activeDuration)?`<div class="progress-pill ${mockMode?'mock-global-timer':''}" id="timerEl"><span class="timer-icon" aria-hidden="true">⏱️</span> <span class="timer-digits">${initialMin}:00</span></div>`:'';
  const resultPanel=resultData?`<div class="inline-result-panel ${resultData.percent>=60?'pass':'fail'}"><div class="result-panel-main"><span class="result-panel-label">${text('النتيجة','Ergebnis')}</span><strong>${resultData.score} / ${resultData.max}</strong></div><div class="result-panel-meta"><span>${resultData.percent}%</span><b>${esc(resultData.result||'')}</b></div></div>`:'';
  
+ const isMatchingExercise = model.exercise.section==='Lesen' && ['Teil 1','Teil 3'].includes(model.exercise.teil);
+ const headingShuffle = (!mockMode && isMatchingExercise) ? `
+    <button type="button" class="exercise-heading-shuffle" id="headingShuffleBtn" title="${text('خلط الأسئلة','Aufgaben mischen')}" aria-label="${text('خلط الأسئلة','Aufgaben mischen')}">
+      <span aria-hidden="true">⤨</span><span>${text('خلط الأسئلة','Aufgaben mischen')}</span>
+    </button>` : '';
  const headingMeta = `
   <div class="exercise-heading-meta">
     <div class="exercise-heading-tags">
       <span class="tag tag-level-section">Telc ${esc(model.exercise.level||'B2')} · ${esc(model.exercise.section)}</span>
       <span class="tag tag-teil">${esc(model.exercise.teil)}</span>
     </div>
-    ${timer ? `<div class="exercise-heading-timer">${timer}</div>` : ''}
+    <div class="exercise-heading-controls">
+      ${headingShuffle}
+      ${timer ? `<div class="exercise-heading-timer">${timer}</div>` : ''}
+    </div>
   </div>`;
 
  return `<div class="exercise-heading">

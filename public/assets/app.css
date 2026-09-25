@@ -5609,3 +5609,29 @@ html[data-theme="dark"] .card-access-pill.pill-paid {
   color: #fff !important;
   border-color: var(--green) !important;
 }
+
+/* TELC Voll UI correction: fixed exercise header + frameless exercise title area */
+.exercise-topbar {
+  position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important; z-index: 1000 !important;
+}
+.exercise-page { padding-top: 60px !important; }
+.exercise-heading,
+.exercise-page:has(.exam-workspace) .exercise-heading,
+.exercise-page:has(.hoeren-workspace-shell) .exercise-heading {
+  background: transparent !important; border: 0 !important; border-bottom: 0 !important; box-shadow: none !important; max-width: none !important;
+}
+.exercise-heading-controls {
+  display: inline-flex !important; align-items: center !important; justify-content: flex-end !important; gap: 10px !important; margin-inline-start: auto !important;
+}
+.exercise-heading-shuffle {
+  display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 7px !important; min-height: 38px !important; padding: 7px 13px !important;
+  border: 1px solid color-mix(in srgb, var(--green) 35%, var(--line)) !important; border-radius: 12px !important; background: var(--white) !important; color: var(--ink) !important;
+  font: inherit !important; font-size: 12px !important; font-weight: 850 !important; cursor: pointer !important;
+  transition: border-color .18s ease, background .18s ease, color .18s ease, transform .18s ease !important;
+}
+.exercise-heading-shuffle:hover { border-color: var(--green) !important; background: var(--green-soft) !important; color: var(--green-dark) !important; transform: translateY(-1px) !important; }
+.exercise-heading-shuffle span:first-child { font-size: 17px !important; line-height: 1 !important; }
+@media (max-width: 720px) {
+  .exercise-page { padding-top: 60px !important; }
+  .exercise-heading-shuffle span:last-child { display: none !important; }
+}
