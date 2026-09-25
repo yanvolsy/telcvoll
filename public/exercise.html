@@ -1567,6 +1567,9 @@ function unifiedExerciseHeading({section, teil='', timer='', showTeil=true, show
 }
 
 function layout(main,side,workspaceClass=''){
+ const activeDuration = duration || (model?.exercise ? getTelcDurationSeconds(model.exercise) : 1200);
+ const initialMin = String(Math.floor(activeDuration/60)).padStart(2,'0');
+ const timer = (mockMode || activeDuration) ? `<div class="progress-pill ${mockMode ? 'mock-global-timer' : ''}" id="timerEl"><span class="timer-icon" aria-hidden="true">⏱️</span> <span class="timer-digits">${initialMin}:00</span></div>` : '';
  const isHoeren = String(model?.exercise?.section||'').toLowerCase().includes('hör') || String(model?.exercise?.section||'').toLowerCase().includes('hoer');
  const combinedWorkspaceClass = [workspaceClass, isHoeren ? 'hoeren-workspace' : ''].filter(Boolean).join(' ');
  const shuffleSections = ['Lesen','Hören','Sprachbausteine'];
