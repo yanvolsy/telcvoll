@@ -20,7 +20,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <main id="content" class="exercise-page"><div class="student-loading">جارٍ التحميل…</div></main>
 <script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
 <script>
-const id=qs('id'); const duration=Number(qs('duration')||0); const sessionId=qs('session'); const mockMode=qs('mock')==='1' && !!sessionId; let model=null; let answers={}; let activeItem=null; let submitted=false; let resultData=null;
+const id=qs('id'); const duration=Number(qs('duration')||0); const sessionId=qs('session'); const mockMode=qs('mock')==='1' && !!sessionId; let model=null; let answers={}; let activeItem=null; let submitted=false; let resultData=null; let submitInFlight=false;
 let matchingOrder=null; let headingOrder=null; let optionOrders={}; let showModelAnswers=false; let titleRevealed=true; let hoerenOrder=null; let hoerenAllTranslated=false; let wordOrder=null; const translationCache=new Map();
 const TELC_DUR = {
   B1: { Lesen: { 'Teil 1': 20, 'Teil 2': 20, 'Teil 3': 15, _default: 20 }, Sprachbausteine: { 'Teil 1': 10, 'Teil 2': 10, _default: 10 }, Hören: { 'Teil 1': 10, 'Teil 2': 10, 'Teil 3': 10, _default: 10 }, Schreiben: { 'Teil 1': 30, _default: 30 }, Sprechen: { 'Teil 1': 4, 'Teil 2': 5, 'Teil 3': 5, _default: 5 } },
@@ -687,7 +687,11 @@ function renderTF(){
     const qid = 'hoeren-q-' + it.position_no;
     const chosen = answerValue(it.position_no);
     const detail = resultData?.details?.find(d => String(d.prompt) === String(it.prompt));
-    const correct = detail?.correct_answer || '';
+    // Hören model answers must come from the exercise item itself, not only from the submit result.
+    // The result API may omit details or correct_answer, which previously made the model answer invisible.
+    const correct = String(
+      detail?.correct_answer || it.correct_answer || it.correct || it.answer || it.solution || ''
+    ).trim();
     const showCorrect = showModelAnswers && correct;
 
     const isRChosen = chosen === 'Richtig';
@@ -1650,8 +1654,13 @@ function bindActions(){
  if(mb)mb.onclick=async()=>{
    const st=captureExerciseScroll();
    try{
-     if(!submitted && !resultData) await submit();
-     showModelAnswers=!showModelAnswers;
+     if(model?.exercise?.section==='Hören'){
+       // Hören stores the correct answer on each exercise item, so it can be shown directly.
+       showModelAnswers=!showModelAnswers;
+     }else{
+       if(!submitted && !resultData) await submit();
+       showModelAnswers=!showModelAnswers;
+     }
      rerenderExerciseStable(st);
    }catch(e){document.getElementById('content').insertAdjacentHTML('beforeend',`<div class="alert bad">${esc(e.message)}</div>`);restoreExerciseScroll(st);}
  };
@@ -1681,7 +1690,32 @@ function renderWorkspace(){
   return renderChoiceQuestions();
 }
 function renderResult(r){const st=captureExerciseScroll();submitted=true;resultData=r;rerenderExerciseStable(st);}
-async function submit(){if(!model.items.length){if(mockMode){goNextMock();}return;}showModelAnswers=false;try{const r=await api('exercise-submit',{method:'POST',body:{exercise_id:id,answers}});localStorage.setItem('last_exercise_result_'+id,JSON.stringify(r));markExerciseCompleted(id);if(mockMode){const s=getMockSession();if(s){s.results=s.results||[];s.results.push({id,title:model.exercise.title,section:model.exercise.section,teil:model.exercise.teil,score:r.score,max:r.max,percent:r.percent,result:r.result});s.index=(s.ids||[]).findIndex(x=>String(x)===String(id));localStorage.setItem('telc_self_test',JSON.stringify(s));}goNextMock();return;}renderResult(r);}catch(e){document.getElementById('content').insertAdjacentHTML('beforeend',`<div class="alert bad">${esc(e.message)}</div>`);}}
+async function submit(){
+  if(!model.items.length){if(mockMode){goNextMock();}return;}
+  if(submitInFlight || submitted) return;
+  submitInFlight=true;
+  const btn=document.getElementById('checkBtn');
+  if(btn){btn.disabled=true;btn.dataset.oldText=btn.textContent;btn.textContent=text('جارٍ التحقق…','Wird geprüft…');}
+  showModelAnswers=false;
+  try{
+    const r=await api('exercise-submit',{method:'POST',body:{exercise_id:id,answers}});
+    localStorage.setItem('last_exercise_result_'+id,JSON.stringify(r));
+    markExerciseCompleted(id);
+    if(mockMode){
+      const s=getMockSession();
+      if(s){s.results=s.results||[];s.results.push({id,title:model.exercise.title,section:model.exercise.section,teil:model.exercise.teil,score:r.score,max:r.max,percent:r.percent,result:r.result});s.index=(s.ids||[]).findIndex(x=>String(x)===String(id));localStorage.setItem('telc_self_test',JSON.stringify(s));}
+      goNextMock();return;
+    }
+    renderResult(r);
+  }catch(e){
+    const msg=String(e?.message||'');
+    const content=document.getElementById('content');
+    content.insertAdjacentHTML('beforeend',`<div class="alert bad">${esc(msg)}</div>`);
+    if(btn){btn.disabled=false;btn.textContent=btn.dataset.oldText||text('تحقق من الإجابات','Antworten prüfen');}
+  }finally{
+    submitInFlight=false;
+  }
+}
 document.addEventListener('langchange', () => {
   if (!model?.exercise || model.exercise.section !== 'Hören') return;
   const st = captureExerciseScroll();
