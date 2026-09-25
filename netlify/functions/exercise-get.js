@@ -62,6 +62,8 @@ exports.handler = async (event) => {
       id: it.id,
       position_no: it.position_no,
       prompt: it.prompt,
+      body: it.body,
+      settings_json: it.settings_json,
       points: it.points,
       options: optionsByItemId.get(it.id) || [],
     }));

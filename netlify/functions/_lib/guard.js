@@ -143,7 +143,7 @@ async function requireSession(event) {
  */
 async function checkExerciseAccess(pool, exerciseId, student) {
   const exRes = await pool.query(
-    "SELECT id, level, section, teil, title, task_type, access_mode, status, deleted_at FROM exercises WHERE id=$1",
+    "SELECT id, level, section, teil, title, task_type, access_mode, status, body, settings_json, audio_url, duration_minutes, deleted_at FROM exercises WHERE id=$1",
     [exerciseId]
   );
   const exercise = exRes.rows[0];

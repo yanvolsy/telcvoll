@@ -118,6 +118,17 @@ exports.handler = async (event) => {
     if (!studentRes.rows.length) return json(404, { error: 'حساب الطالب غير موجود.' });
     const st = studentRes.rows[0];
 
+    // 0. Delete Student Account Permanently
+    if (body.action === 'delete_student') {
+      try { await pool.query('DELETE FROM attempts WHERE student_id = $1', [id]); } catch (_) {}
+      try { await pool.query('DELETE FROM access_codes WHERE student_id = $1', [id]); } catch (_) {}
+      try { await pool.query('DELETE FROM orders WHERE student_id = $1', [id]); } catch (_) {}
+      try { await pool.query('DELETE FROM student_notifications WHERE student_id = $1', [id]); } catch (_) {}
+      try { await pool.query('DELETE FROM speaking_sessions WHERE student_id = $1', [id]); } catch (_) {}
+      await pool.query('DELETE FROM students WHERE id = $1', [id]);
+      return json(200, { ok: true, message: 'تم حذف حساب الطالب وكافة بياناته بنجاح' });
+    }
+
     // 1. Toggle Block Status
     if (body.action === 'toggle_block' || (body.is_blocked !== undefined && !body.action)) {
       const isBlocked = body.is_blocked === true || body.is_blocked === 'true';
@@ -252,6 +263,22 @@ exports.handler = async (event) => {
         message: `تم تفعيل اشتراك (${plan.name}) بنجاح حتى ${expiresAt.toLocaleDateString('ar-EG')}`
       });
     }
+  }
+
+  if (event.httpMethod === 'DELETE') {
+    if (!requireSameOrigin(event)) return json(403, { error: 'Cross-origin request blocked.' });
+    let body = {};
+    try { body = JSON.parse(event.body || '{}'); } catch {}
+    const id = Number(body.id || (event.queryStringParameters || {}).id);
+    if (!id) return json(422, { error: 'معرّف الطالب مطلوب.' });
+
+    try { await pool.query('DELETE FROM attempts WHERE student_id = $1', [id]); } catch (_) {}
+    try { await pool.query('DELETE FROM access_codes WHERE student_id = $1', [id]); } catch (_) {}
+    try { await pool.query('DELETE FROM orders WHERE student_id = $1', [id]); } catch (_) {}
+    try { await pool.query('DELETE FROM student_notifications WHERE student_id = $1', [id]); } catch (_) {}
+    try { await pool.query('DELETE FROM speaking_sessions WHERE student_id = $1', [id]); } catch (_) {}
+    await pool.query('DELETE FROM students WHERE id = $1', [id]);
+    return json(200, { ok: true, message: 'تم حذف حساب الطالب بنجاح' });
   }
 
   return json(405, { error: 'Method not allowed' });
