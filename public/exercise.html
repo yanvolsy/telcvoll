@@ -21,7 +21,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
 <script>
 const id=qs('id'); const duration=Number(qs('duration')||0); const sessionId=qs('session'); const mockMode=qs('mock')==='1' && !!sessionId; let model=null; let answers={}; let activeItem=null; let submitted=false; let resultData=null;
-let matchingOrder=null; let headingOrder=null; let optionOrders={}; let showModelAnswers=false; let titleRevealed=true; let hoerenOrder=null; let hoerenAllTranslated=false; const translationCache=new Map();
+let matchingOrder=null; let headingOrder=null; let optionOrders={}; let showModelAnswers=false; let titleRevealed=false; let hoerenOrder=null; let hoerenAllTranslated=false; const translationCache=new Map();
 const TELC_DUR = {
   B1: { Lesen: { 'Teil 1': 20, 'Teil 2': 20, 'Teil 3': 15, _default: 20 }, Sprachbausteine: { 'Teil 1': 10, 'Teil 2': 10, _default: 10 }, Hören: { 'Teil 1': 10, 'Teil 2': 10, 'Teil 3': 10, _default: 10 }, Schreiben: { 'Teil 1': 30, _default: 30 }, Sprechen: { 'Teil 1': 4, 'Teil 2': 5, 'Teil 3': 5, _default: 5 } },
   B2: { Lesen: { 'Teil 1': 20, 'Teil 2': 25, 'Teil 3': 20, _default: 20 }, Sprachbausteine: { 'Teil 1': 15, 'Teil 2': 10, _default: 15 }, Hören: { 'Teil 1': 6, 'Teil 2': 8, 'Teil 3': 6, _default: 7 }, Schreiben: { 'Teil 1': 30, _default: 30 }, Sprechen: { 'Teil 1': 5, 'Teil 2': 5, 'Teil 3': 5, _default: 5 } },
@@ -269,7 +269,7 @@ function renderMatching(){
  const resultHtml='';
   const meta=matchingMeta();
   const headingsBankUnder = `
-    <div class="matching-headings-bank" style="margin-top:32px;padding:24px 20px;background:var(--white);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow-sm);">
+    <div class="matching-headings-bank" style="margin-top:32px;padding:0;background:transparent;border:0;border-radius:0;box-shadow:none;">
       <div class="matching-bank-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
         <div>
           <h3 style="margin:0 0 4px;font-size:18px;font-weight:900;display:flex;align-items:center;gap:8px;">
@@ -279,14 +279,14 @@ function renderMatching(){
           <small style="color:var(--muted);font-size:12.5px;">${text('يمكنك مراجعة جميع العناوين هنا أو الضغط على أي عنوان لاختياره مباشرة للفقرة المحددة.', 'Überschriften zur Auswahl für die Absätze.')}</small>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
-          <button type="button" class="btn small-btn shuffle-all shuffle-btn-styled" title="${text('خلط العناوين', 'Überschriften mischen')}">
+          <button type="button" class="btn small-btn shuffle-all shuffle-btn-styled" title="${text('خلط الأسئلة', 'Aufgaben mischen')}">
             <span style="font-size:16px;">⤨</span>
-            <span>${text('خلط العناوين', 'Mischen')}</span>
+            <span>${text('خلط الأسئلة', 'Aufgaben mischen')}</span>
           </button>
           <span class="side-counter-pill">${answeredCount} / ${items.length}</span>
         </div>
       </div>
-      <div class="heading-list-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));gap:12px;">
+      <div class="heading-list-grid" style="display:flex;flex-direction:column;gap:12px;">
         ${side}
       </div>
     </div>
@@ -306,7 +306,7 @@ function renderMatching(){
  document.querySelectorAll('[data-clear]').forEach(b=>b.onclick=e=>{e.stopPropagation();const st=captureExerciseScroll();delete answers[String(b.dataset.clear)];activeItem=String(b.dataset.clear);renderMatching();restoreExerciseScroll(st);bindActions();});
  document.querySelectorAll('[data-choice]').forEach(b=>{b.onmousedown=e=>e.preventDefault();b.onclick=e=>{e.preventDefault();if(b.disabled||!activeItem)return;const st=captureExerciseScroll();const chosen=b.dataset.choice;Object.keys(answers).forEach(k=>{if(k!==String(activeItem)&&answers[k]===chosen)delete answers[k];});answers[String(activeItem)]=chosen;renderMatching();restoreExerciseScroll(st);bindActions();};});
  const sh=document.querySelector('.shuffle-all');
- if(sh)sh.onclick=e=>{e.stopPropagation();const st=captureExerciseScroll();matchingOrder=shuffle(matchingOrder);headingOrder=shuffle(headingOrder);activeItem=null;renderMatching();restoreExerciseScroll(st);bindActions();};
+ if(sh)sh.onclick=e=>{e.stopPropagation();const st=captureExerciseScroll();matchingOrder=shuffle(matchingOrder);activeItem=null;renderMatching();restoreExerciseScroll(st);bindActions();};
  bindTextTools();
 }
 function renderSprachbausteine1(){

@@ -1013,10 +1013,8 @@ function renderTopics(){
       const isLocked = !isUserPaid && !isExFree;
 
       const accessBadge = isExFree
-        ? `<span class="card-access-pill pill-free" title="${text('محتوى مجاني للجميع','Kostenlos')}"><span class="pill-dot"></span>${text('مجاني','Kostenlos')}</span>`
-        : (isUserPaid
-          ? `<span class="card-access-pill pill-unlocked" title="${text('متاح ضمن اشتراكك','Freigeschaltet')}">✨ ${text('متاح','Aktiv')}</span>`
-          : `<span class="card-access-pill pill-locked" title="${text('محتوى مخصص للمشتركين (مدفوع)','Nur für Abonnenten')}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg> ${text('مشتركين','Premium')}</span>`);
+        ? `<span class="card-access-pill pill-free" title="${text('تمرين مجاني','Kostenlose Übung')}">${text('مجاني','Kostenlos')}</span>`
+        : `<span class="card-access-pill pill-paid" title="${text('تمرين مدفوع','Kostenpflichtige Übung')}">${text('مدفوع','Kostenpflichtig')}</span>`;
 
       return `<article class="topic-card ${isMulti ? 'has-variations' : ''}">
         <div class="topic-card-head">
@@ -1042,8 +1040,8 @@ function renderTopics(){
             ${text('فتح التمرين','Übung öffnen')} ▾
           </button>
         ` : (isLocked ? `
-          <button type="button" class="btn light topic-open-btn locked-topic-btn" data-topic-title="${esc(g.baseTitle)}" style="border-color:#fecaca;color:#991b1b;">
-            🔒 ${text('فتح التمرين (اشتراك)','Freischalten')} →
+          <button type="button" class="btn light topic-open-btn locked-topic-btn" data-topic-title="${esc(g.baseTitle)}">
+            ${text('فتح التمرين','Übung öffnen')} →
           </button>
         ` : `
           <a class="btn light topic-open-btn" href="/exercise.html?id=${primaryEx.id}&duration=${dur*60}">${text('فتح التمرين','Übung öffnen')} →</a>
@@ -1197,10 +1195,8 @@ function openVariationModal(group) {
       const isExFree = (ex.access_mode || 'paid') === 'free';
       const isLocked = !isUserPaid && !isExFree;
       const accessBadge = isExFree
-        ? `<span class="card-access-pill pill-free"><span class="pill-dot"></span>${text('مجاني','Free')}</span>`
-        : (isUserPaid
-          ? `<span class="card-access-pill pill-unlocked">✨ ${text('متاح','Aktiv')}</span>`
-          : `<span class="card-access-pill pill-locked">🔒 ${text('مشتركين','Premium')}</span>`);
+        ? `<span class="card-access-pill pill-free">${text('مجاني','Kostenlos')}</span>`
+        : `<span class="card-access-pill pill-paid">${text('مدفوع','Kostenpflichtig')}</span>`;
       const label = it.info.label || (idx === 0 ? text('الأساسي', 'Standard') : ((typeof getLang === 'function' && getLang() === 'de') ? `Modifiziert ${idx}` : `المعدل ${idx}`));
 
       if (isLocked) {

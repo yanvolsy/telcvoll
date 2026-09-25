@@ -5548,3 +5548,64 @@ html[data-theme="dark"] .exercise-actions {
   transform: translateY(-1px) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06) !important;
 }
+
+/* Lesen Teil 1: keep heading choices vertically stacked for readability. */
+.exercise-page:has(.matching-headings-bank) .heading-list-grid{display:flex !important;flex-direction:column !important;gap:12px !important;}
+.exercise-page:has(.matching-headings-bank) .matching-headings-bank{background:transparent !important;border:0 !important;box-shadow:none !important;border-radius:0 !important;padding:0 !important;}
+.exercise-page:has(.matching-headings-bank) .heading-option-wrap{width:100%;}
+
+
+/* Dashboard UI refinement — access labels and level hover */
+.level-btn {
+  transition: background .18s ease, color .18s ease, box-shadow .18s ease, transform .18s ease !important;
+}
+.level-btn:hover:not(.active) {
+  background: var(--green-soft) !important;
+  color: var(--green-dark) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--green) 22%, transparent) !important;
+  transform: translateY(-1px);
+}
+.level-btn.empty { opacity: 1 !important; }
+.level-btn.empty:hover:not(.active) {
+  background: var(--green-soft) !important;
+  color: var(--green-dark) !important;
+}
+.card-access-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 24px !important;
+  padding: 4px 10px !important;
+  border-radius: 999px !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  white-space: nowrap !important;
+}
+.card-access-pill.pill-free {
+  background: color-mix(in srgb, var(--gold) 13%, var(--white)) !important;
+  color: var(--gold) !important;
+  border: 1px solid color-mix(in srgb, var(--gold) 38%, var(--line)) !important;
+}
+.card-access-pill.pill-paid {
+  background: var(--green-soft) !important;
+  color: var(--green) !important;
+  border: 1px solid color-mix(in srgb, var(--green) 35%, var(--line)) !important;
+}
+html[data-theme="dark"] .card-access-pill.pill-free {
+  background: color-mix(in srgb, var(--gold) 12%, var(--bg)) !important;
+}
+html[data-theme="dark"] .card-access-pill.pill-paid {
+  background: color-mix(in srgb, var(--green) 10%, var(--bg)) !important;
+}
+.locked-topic-btn {
+  border-color: var(--green) !important;
+  color: var(--green) !important;
+  background: transparent !important;
+}
+.locked-topic-btn:hover {
+  background: var(--green) !important;
+  color: #fff !important;
+  border-color: var(--green) !important;
+}
