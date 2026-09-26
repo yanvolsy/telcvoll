@@ -7921,57 +7921,77 @@ html[data-theme="dark"] .mock-select {
   color: #f1f5f9 !important;
 }
 
-
 /* =========================================================================
-   DEFINITIVE ZERO-CONTAINER CLEAN EXAM UI
+   TELC VOLL — DEFINITIVE EXERCISE SYSTEM CSS
    ========================================================================= */
-.exercise-content-frame,
-.hoeren-workspace-shell.exercise-content-frame,
-.exercise-page:has(.exam-workspace) .exercise-content-frame,
-.mock-root .exercise-content-frame {
-  background: transparent !important;
-  background-color: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  padding: 0 !important;
+body.exercise-page {
+  direction: ltr !important;
 }
 
-.exam-text-card,
-.exam-text-card.answer-wrong,
-.exam-text-card.answer-correct,
-.exam-text-card.active-item,
-.exam-text-card.answered,
-html[data-theme="dark"] .exam-text-card,
-.exercise-page:has(.exam-workspace) .exam-text-card,
-.exercise-page:has(.exam-workspace) .exam-text-card.answer-wrong,
-.exercise-page:has(.exam-workspace) .exam-text-card.answer-correct {
-  background: transparent !important;
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  padding: 0 0 28px 0 !important;
-  margin: 0 0 28px 0 !important;
-  border-bottom: 1px solid var(--line) !important;
-}
-
-.paragraph-assignment {
+.exam-workspace {
   display: block !important;
   width: 100% !important;
-  margin: 0 0 6px 0 !important;
-  padding: 0 !important;
+  max-width: 1140px !important;
+  margin: 0 auto !important;
+  padding: 0 16px 80px 16px !important;
+  box-sizing: border-box !important;
+  direction: ltr !important;
   background: transparent !important;
   border: none !important;
 }
 
-.paragraph-assignment-controls {
+.exam-main {
   display: block !important;
   width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
   background: transparent !important;
   border: none !important;
+}
+
+.exercise-content-frame,
+.main-exam-frame {
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  border: 1.5px solid rgba(244, 123, 32, 0.28) !important;
+  border-radius: 16px !important;
+  padding: 24px 28px !important;
+  background: rgba(18, 24, 21, 0.5) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html[data-theme="light"] .exercise-content-frame,
+html[data-theme="light"] .main-exam-frame {
+  background: rgba(255, 255, 255, 0.75) !important;
+  border-color: rgba(244, 123, 32, 0.32) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+}
+
+.exam-text-card,
+html[data-theme="dark"] .exam-text-card,
+.exercise-page:has(.exam-workspace) .exam-text-card {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-radius: 0 !important;
+  padding: 0 0 22px 0 !important;
+  margin: 0 0 22px 0 !important;
+  border-bottom: 1px solid var(--line) !important;
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.exam-text-card:last-child {
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 .paragraph-assignment select,
@@ -7980,219 +8000,62 @@ select.mock-select,
 select[data-paragraph-select] {
   display: block !important;
   width: 100% !important;
-  height: 44px !important;
-  min-height: 44px !important;
-  max-height: 44px !important;
-  line-height: 44px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
+  line-height: 42px !important;
   flex: none !important;
   margin: 0 !important;
   padding: 0 14px !important;
-  font-size: 15px !important;
+  font-size: 14.5px !important;
   font-weight: 700 !important;
-  border-radius: 10px !important;
+  border-radius: 9px !important;
   border: 1.5px solid var(--line) !important;
   background: var(--bg) !important;
   color: var(--ink) !important;
   outline: none !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
 }
 
-.assignment-correct-answer,
-html[data-theme="dark"] .assignment-correct-answer {
+.paragraph-tools-row {
+  direction: ltr !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin: 4px 0 6px 0 !important;
+  padding: 0 !important;
+}
+
+.paragraph-tools-row .text-tools {
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-left: auto !important;
+  margin-inline-start: auto !important;
+}
+
+.assignment-correct-answer {
   display: flex !important;
   align-items: center !important;
   gap: 6px !important;
-  margin: 6px 0 !important;
+  margin: 4px 0 8px 0 !important;
   padding: 2px 0 !important;
   background: transparent !important;
-  background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
-  border-radius: 0 !important;
   color: #10b981 !important;
-  font-size: 14.5px !important;
+  font-size: 14px !important;
   font-weight: 750 !important;
 }
 
-
-/* =========================================================================
-   DEFINITIVE ZERO-CONTAINER CLEAN EXAM UI
-   ========================================================================= */
-.exercise-content-frame,
-.hoeren-workspace-shell.exercise-content-frame,
-.exercise-page:has(.exam-workspace) .exercise-content-frame,
-.mock-root .exercise-content-frame {
-  background: transparent !important;
-  background-color: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-}
-
-.exam-text-card,
-.exam-text-card.answer-wrong,
-.exam-text-card.answer-correct,
-.exam-text-card.active-item,
-.exam-text-card.answered,
-html[data-theme="dark"] .exam-text-card,
-.exercise-page:has(.exam-workspace) .exam-text-card,
-.exercise-page:has(.exam-workspace) .exam-text-card.answer-wrong,
-.exercise-page:has(.exam-workspace) .exam-text-card.answer-correct {
-  background: transparent !important;
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  padding: 0 0 28px 0 !important;
-  margin: 0 0 28px 0 !important;
-  border-bottom: 1px solid var(--line) !important;
-}
-
-.paragraph-assignment {
-  display: block !important;
-  width: 100% !important;
-  margin: 0 0 6px 0 !important;
+.exam-text,
+.exam-text-card .exam-text {
+  font-size: 16px !important;
+  line-height: 1.85 !important;
+  margin: 0 0 10px 0 !important;
   padding: 0 !important;
   background: transparent !important;
-  border: none !important;
-}
-
-.paragraph-assignment-controls {
-  display: block !important;
-  width: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  background: transparent !important;
-  border: none !important;
-}
-
-.paragraph-assignment select,
-.paragraph-assignment-controls .mock-select,
-select.mock-select,
-select[data-paragraph-select] {
-  display: block !important;
-  width: 100% !important;
-  height: 44px !important;
-  min-height: 44px !important;
-  max-height: 44px !important;
-  line-height: 44px !important;
-  flex: none !important;
-  margin: 0 !important;
-  padding: 0 14px !important;
-  font-size: 15px !important;
-  font-weight: 700 !important;
-  border-radius: 10px !important;
-  border: 1.5px solid var(--line) !important;
-  background: var(--bg) !important;
-  color: var(--ink) !important;
-  outline: none !important;
-}
-
-.assignment-correct-answer,
-html[data-theme="dark"] .assignment-correct-answer {
-  display: flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  margin: 6px 0 !important;
-  padding: 2px 0 !important;
-  background: transparent !important;
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  color: #10b981 !important;
-  font-size: 14.5px !important;
-  font-weight: 750 !important;
-}
-
-
-/* =========================================================================
-   DEFINITIVE ZERO-CONTAINER CLEAN EXAM UI
-   ========================================================================= */
-.exercise-content-frame,
-.hoeren-workspace-shell.exercise-content-frame,
-.exercise-page:has(.exam-workspace) .exercise-content-frame,
-.mock-root .exercise-content-frame {
-  background: transparent !important;
-  background-color: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-}
-
-.exam-text-card,
-.exam-text-card.answer-wrong,
-.exam-text-card.answer-correct,
-.exam-text-card.active-item,
-.exam-text-card.answered,
-html[data-theme="dark"] .exam-text-card,
-.exercise-page:has(.exam-workspace) .exam-text-card,
-.exercise-page:has(.exam-workspace) .exam-text-card.answer-wrong,
-.exercise-page:has(.exam-workspace) .exam-text-card.answer-correct {
-  background: transparent !important;
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  padding: 0 0 28px 0 !important;
-  margin: 0 0 28px 0 !important;
-  border-bottom: 1px solid var(--line) !important;
-}
-
-.paragraph-assignment {
-  display: block !important;
-  width: 100% !important;
-  margin: 0 0 6px 0 !important;
-  padding: 0 !important;
-  background: transparent !important;
-  border: none !important;
-}
-
-.paragraph-assignment-controls {
-  display: block !important;
-  width: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  background: transparent !important;
-  border: none !important;
-}
-
-.paragraph-assignment select,
-.paragraph-assignment-controls .mock-select,
-select.mock-select,
-select[data-paragraph-select] {
-  display: block !important;
-  width: 100% !important;
-  height: 44px !important;
-  min-height: 44px !important;
-  max-height: 44px !important;
-  line-height: 44px !important;
-  flex: none !important;
-  margin: 0 !important;
-  padding: 0 14px !important;
-  font-size: 15px !important;
-  font-weight: 700 !important;
-  border-radius: 10px !important;
-  border: 1.5px solid var(--line) !important;
-  background: var(--bg) !important;
-  color: var(--ink) !important;
-  outline: none !important;
-}
-
-.assignment-correct-answer,
-html[data-theme="dark"] .assignment-correct-answer {
-  display: flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  margin: 6px 0 !important;
-  padding: 2px 0 !important;
-  background: transparent !important;
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  color: #10b981 !important;
-  font-size: 14.5px !important;
-  font-weight: 750 !important;
 }

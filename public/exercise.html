@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1310"><title>تمرين TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260926-user-spec-v5">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1310"><title>تمرين TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260926-final-rework-v1">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
@@ -9,29 +9,41 @@
 html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
 html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}</style>
 
-<style id="definitive-clean-paragraph-ui">
+<style id="telc-final-complete-rework-styles">
 /* ==========================================================================
-   TELC VOLL - EXACT COMPACT EXAM UI (NO UNNECESSARY CONTAINERS)
+   TELC VOLL — FINAL COMPLETE EXERCISE PRESENTATION SYSTEM
+   Centered 1140px, One Frame with Subtle Orange Outline, Clean Flow
    ========================================================================== */
 
-/* 1. Main Workspace & Frame: REMOVE THE CONTAINER ENTIRELY */
-.exam-workspace,
-.exam-main,
-.exercise-content-frame,
-.exercise-page:has(.exam-workspace) .exam-main,
-.exercise-page:has(.exam-workspace) .exam-workspace {
-  background: transparent !important;
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  padding: 0 !important;
+/* 1. Page Shell & Body */
+body.exercise-page {
+  direction: ltr !important;
+  background: var(--bg) !important;
+  color: var(--ink) !important;
   margin: 0 !important;
-  max-width: 100% !important;
+  padding: 0 !important;
+  overflow-x: hidden !important;
 }
 
-/* 2. Fixed Sticky Exercise Bar: Attached to Header, Stable Width, LTR Order */
+/* 2. Top Header & Fixed Sticky Exercise Bar */
+.exercise-topbar {
+  direction: ltr !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 90 !important;
+  min-height: 70px !important;
+  height: 70px !important;
+  background: rgba(13, 19, 16, 0.94) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border-bottom: 1px solid var(--line) !important;
+  box-sizing: border-box !important;
+}
+
+html[data-theme="light"] .exercise-topbar {
+  background: rgba(255, 255, 255, 0.94) !important;
+}
+
 .exercise-header-card.exercise-sticky-bar {
   position: sticky !important;
   top: 70px !important;
@@ -42,18 +54,19 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
   border-left: none !important;
   border-right: none !important;
   border-radius: 0 !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05) !important;
   padding: 10px 0 !important;
   margin: 0 auto 20px auto !important;
   width: 100% !important;
-  max-width: 1100px !important;
+  max-width: 1140px !important;
   box-sizing: border-box !important;
+  direction: ltr !important;
 }
 
 html[data-theme="dark"] .exercise-header-card.exercise-sticky-bar {
   background: #0d1210 !important;
   border-bottom-color: rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
 }
 
 .exercise-single-top-bar {
@@ -67,12 +80,42 @@ html[data-theme="dark"] .exercise-header-card.exercise-sticky-bar {
   direction: ltr !important;
 }
 
-/* Cluster 1: Level & Section Tags */
+/* Cluster 1: Section & Teil Tags */
 .top-bar-left-cluster {
   display: flex !important;
   align-items: center !important;
   gap: 8px !important;
   flex: 0 0 auto !important;
+}
+
+.top-bar-left-cluster .tag {
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 36px !important;
+  padding: 0 12px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  box-sizing: border-box !important;
+  white-space: nowrap !important;
+}
+
+.tag-level-section {
+  background: rgba(244, 123, 32, 0.14) !important;
+  color: #f47b20 !important;
+  border: 1px solid rgba(244, 123, 32, 0.28) !important;
+}
+
+.tag-teil {
+  background: var(--bg) !important;
+  color: var(--ink) !important;
+  border: 1.5px solid var(--line) !important;
+}
+
+html[data-theme="dark"] .tag-teil {
+  background: #121815 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #f1f5f9 !important;
 }
 
 /* Cluster 2: Controlled Title Area */
@@ -95,7 +138,87 @@ html[data-theme="dark"] .exercise-header-card.exercise-sticky-bar {
   padding: 0 !important;
 }
 
-/* Cluster 3: FIXED RESERVED RESULT AREA */
+.thema-masked-wrapper {
+  flex: 1 !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 10px !important;
+  border-radius: 8px !important;
+  background: rgba(244, 123, 32, 0.08) !important;
+  border: 1px dashed rgba(244, 123, 32, 0.35) !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+}
+
+.frosted-ghost-bars {
+  display: flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  width: 100% !important;
+}
+
+.ghost-bar {
+  display: inline-block !important;
+  height: 10px !important;
+  background: rgba(244, 123, 32, 0.25) !important;
+  border-radius: 4px !important;
+  filter: blur(2px) !important; /* ONLY MASK THE TITLE */
+}
+
+.ghost-bar-long {
+  flex: 2 !important;
+}
+
+.ghost-bar-short {
+  flex: 1 !important;
+}
+
+.title-reveal-btn.title-eye-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  border-radius: 8px !important;
+  border: 1.5px solid var(--line) !important;
+  background: var(--bg) !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  transition: all 0.15s ease !important;
+}
+
+.title-reveal-btn.title-eye-btn:hover {
+  border-color: #f47b20 !important;
+}
+
+html[data-theme="dark"] .title-reveal-btn.title-eye-btn {
+  background: #121815 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.thema-title-content {
+  flex: 1 !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.thema-title-content h1 {
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 14.5px !important;
+  font-weight: 850 !important;
+  color: var(--ink) !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Cluster 3: FIXED RESERVED RESULT AREA (170px) */
 .top-bar-result-cluster {
   width: 170px !important;
   min-width: 170px !important;
@@ -108,27 +231,30 @@ html[data-theme="dark"] .exercise-header-card.exercise-sticky-bar {
   box-sizing: border-box !important;
 }
 
-.top-bar-result-cluster .inline-result-panel {
+.inline-result-panel {
   display: inline-flex !important;
   align-items: center !important;
+  justify-content: center !important;
   gap: 6px !important;
-  padding: 4px 12px !important;
+  padding: 0 14px !important;
+  height: 36px !important;
   border-radius: 8px !important;
   font-size: 13.5px !important;
-  font-weight: 800 !important;
+  font-weight: 850 !important;
   white-space: nowrap !important;
-  border: 1px solid var(--line) !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
 }
 
-.top-bar-result-cluster .inline-result-panel.pass {
+.inline-result-panel.pass {
   background: rgba(16, 185, 129, 0.12) !important;
-  border-color: rgba(16, 185, 129, 0.3) !important;
+  border: 1px solid rgba(16, 185, 129, 0.32) !important;
   color: #10b981 !important;
 }
 
-.top-bar-result-cluster .inline-result-panel.fail {
+.inline-result-panel.fail {
   background: rgba(239, 68, 68, 0.12) !important;
-  border-color: rgba(239, 68, 68, 0.3) !important;
+  border: 1px solid rgba(239, 68, 68, 0.32) !important;
   color: #ef4444 !important;
 }
 
@@ -137,12 +263,127 @@ html[data-theme="dark"] .exercise-header-card.exercise-sticky-bar {
   flex: 0 0 auto !important;
 }
 
-/* Cluster 5: Timer */
+.exercise-heading-shuffle {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 12px !important;
+  border-radius: 8px !important;
+  border: 1.5px solid var(--line) !important;
+  background: var(--bg) !important;
+  color: var(--ink) !important;
+  font-size: 13px !important;
+  font-weight: 750 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  box-sizing: border-box !important;
+  white-space: nowrap !important;
+}
+
+.exercise-heading-shuffle:hover {
+  border-color: #f47b20 !important;
+  color: #f47b20 !important;
+}
+
+html[data-theme="dark"] .exercise-heading-shuffle {
+  background: #121815 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #f1f5f9 !important;
+}
+
+/* Cluster 5: Modern Digital Clock */
 .top-bar-timer-cluster {
   flex: 0 0 auto !important;
 }
 
-/* 3. PARAGRAPH CARD: REMOVED COMPLETELY (Sitting directly on page background) */
+.modern-digital-clock,
+.progress-pill {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 12px !important;
+  border-radius: 8px !important;
+  border: 1.5px solid var(--line) !important;
+  background: var(--bg) !important;
+  color: var(--ink) !important;
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+  font-variant-numeric: tabular-nums !important;
+  box-sizing: border-box !important;
+  white-space: nowrap !important;
+}
+
+html[data-theme="dark"] .modern-digital-clock,
+html[data-theme="dark"] .progress-pill {
+  background: #121815 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #f1f5f9 !important;
+}
+
+.modern-digital-clock .timer-icon,
+.progress-pill .timer-icon {
+  font-size: 14px !important;
+  opacity: 0.85 !important;
+}
+
+.modern-digital-clock .timer-digits,
+.progress-pill .timer-digits {
+  font-family: inherit !important;
+  font-size: 14px !important;
+  font-weight: 850 !important;
+  letter-spacing: 0.04em !important;
+}
+
+/* 3. ONE MAIN ELEGANT EXERCISE FRAME (1140px, Subtle Orange Outline, Centered) */
+.exam-workspace {
+  display: block !important;
+  width: 100% !important;
+  max-width: 1140px !important;
+  margin: 0 auto !important;
+  padding: 0 16px 80px 16px !important;
+  box-sizing: border-box !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.exam-main {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.exercise-content-frame,
+.main-exam-frame {
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  border: 1.5px solid rgba(244, 123, 32, 0.28) !important; /* SUBTLE ORANGE OUTLINE ONLY */
+  border-radius: 16px !important;
+  padding: 24px 28px !important;
+  background: rgba(18, 24, 21, 0.5) !important; /* Transparent/subtle interior in dark mode */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+html[data-theme="light"] .exercise-content-frame,
+html[data-theme="light"] .main-exam-frame {
+  background: rgba(255, 255, 255, 0.75) !important;
+  border-color: rgba(244, 123, 32, 0.32) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* 4. PARAGRAPHS INSIDE MAIN FRAME: NO SEPARATE BLUE-GRAY CARDS */
 .exam-text-card,
 .exam-text-card.answer-wrong,
 .exam-text-card.answer-correct,
@@ -159,20 +400,25 @@ html[data-theme="dark"] .exam-text-card,
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   border-radius: 0 !important;
-  padding: 0 0 28px 0 !important;
-  margin: 0 0 28px 0 !important;
+  padding: 0 0 22px 0 !important;
+  margin: 0 0 22px 0 !important;
   border-bottom: 1px solid var(--line) !important;
   display: block !important;
   width: 100% !important;
-  max-width: 100% !important;
   box-sizing: border-box !important;
+}
+
+.exam-text-card:last-child {
+  border-bottom: none !important;
+  padding-bottom: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 html[data-theme="dark"] .exam-text-card {
   border-bottom-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-/* 4. HEADING SELECTION: COMPACT HEIGHT (NO GIANT CONTAINER) */
+/* 5. HEADING SELECTION: COMPACT 42PX HEIGHT */
 .paragraph-assignment {
   display: block !important;
   width: 100% !important;
@@ -199,32 +445,42 @@ select.mock-select,
 select[data-paragraph-select] {
   display: block !important;
   width: 100% !important;
-  height: 44px !important;
-  min-height: 44px !important;
-  max-height: 44px !important;
-  line-height: 44px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
+  line-height: 42px !important;
   flex: none !important;
   margin: 0 !important;
   padding: 0 14px !important;
-  font-size: 15px !important;
+  font-size: 14.5px !important;
   font-weight: 700 !important;
-  border-radius: 10px !important;
+  border-radius: 9px !important;
   border: 1.5px solid var(--line) !important;
   background: var(--bg) !important;
   color: var(--ink) !important;
   outline: none !important;
   cursor: pointer !important;
   box-sizing: border-box !important;
+  transition: border-color 0.15s ease !important;
 }
 
 html[data-theme="dark"] .paragraph-assignment select,
 html[data-theme="dark"] .paragraph-assignment-controls .mock-select,
 html[data-theme="dark"] select.mock-select {
   background: #121815 !important;
-  border-color: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
   color: #f1f5f9 !important;
 }
 
+select.mock-select:focus {
+  border-color: #f47b20 !important;
+}
+
+select.mock-select.answered {
+  border-color: #f47b20 !important;
+}
+
+/* Validated Dropdown States */
 select.mock-select.assignment-model-correct {
   border: 2px solid #10b981 !important;
   background: rgba(16, 185, 129, 0.08) !important;
@@ -237,7 +493,7 @@ select.mock-select.assignment-model-wrong {
   color: #ef4444 !important;
 }
 
-/* 5. TRANSLATION & PRONUNCIATION: ATTACHED TO PARAGRAPH ON THE RIGHT */
+/* 6. TRANSLATION & PRONUNCIATION: ATTACHED TO PARAGRAPH ON THE RIGHT */
 .paragraph-tools-row,
 .exercise-page .paragraph-tools-row,
 html[lang="ar"] .paragraph-tools-row,
@@ -261,13 +517,43 @@ body[dir="rtl"] .paragraph-tools-row {
   margin-inline-start: auto !important;
 }
 
-/* 6. COMPACT CORRECT ANSWER FEEDBACK (NO GIANT GREEN CARD) */
+.mini-tool {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 32px !important;
+  min-height: 32px !important;
+  width: 34px !important;
+  min-width: 34px !important;
+  border-radius: 7px !important;
+  font-size: 14px !important;
+  border: 1.5px solid var(--line) !important;
+  background: var(--bg) !important;
+  color: var(--muted) !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.mini-tool:hover {
+  color: #f47b20 !important;
+  border-color: #f47b20 !important;
+}
+
+html[data-theme="dark"] .mini-tool {
+  background: #121815 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #cbd5e1 !important;
+}
+
+/* 7. COMPACT CORRECT & WRONG FEEDBACK (NO GIANT CARDS) */
 .assignment-correct-answer,
 html[data-theme="dark"] .assignment-correct-answer {
   display: flex !important;
   align-items: center !important;
   gap: 6px !important;
-  margin: 6px 0 !important;
+  margin: 4px 0 8px 0 !important;
   padding: 2px 0 !important;
   background: transparent !important;
   background-color: transparent !important;
@@ -275,7 +561,7 @@ html[data-theme="dark"] .assignment-correct-answer {
   box-shadow: none !important;
   border-radius: 0 !important;
   color: #10b981 !important;
-  font-size: 14.5px !important;
+  font-size: 14px !important;
   font-weight: 750 !important;
   width: auto !important;
 }
@@ -286,7 +572,7 @@ html[data-theme="dark"] .assignment-correct-answer {
 
 .assignment-correct-answer .correct-badge {
   font-weight: 900 !important;
-  font-size: 14.5px !important;
+  font-size: 14px !important;
   color: inherit !important;
   background: transparent !important;
   padding: 0 !important;
@@ -295,17 +581,17 @@ html[data-theme="dark"] .assignment-correct-answer {
 
 .assignment-correct-answer .correct-full-text {
   font-weight: 750 !important;
-  font-size: 14.5px !important;
+  font-size: 14px !important;
   color: inherit !important;
 }
 
-/* 7. PARAGRAPH TYPOGRAPHY */
+/* 8. PARAGRAPH TYPOGRAPHY */
 .exam-text,
 .exam-text-card .exam-text {
-  font-size: 16.5px !important;
+  font-size: 16px !important;
   line-height: 1.85 !important;
   letter-spacing: -0.01em !important;
-  margin: 0 !important;
+  margin: 0 0 10px 0 !important;
   padding: 0 !important;
   background: transparent !important;
 }
@@ -318,6 +604,58 @@ html[data-theme="dark"] .exam-text-card .exam-text {
 html[data-theme="light"] .exam-text,
 html[data-theme="light"] .exam-text-card .exam-text {
   color: #1a202c !important;
+}
+
+/* 9. BOTTOM ACTION BAR: CENTERED & CLEAN */
+.exercise-actions {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 80 !important;
+  background: rgba(13, 19, 16, 0.92) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border-top: 1px solid var(--line) !important;
+  padding: 12px 16px !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+html[data-theme="light"] .exercise-actions {
+  background: rgba(255, 255, 255, 0.92) !important;
+}
+
+.exercise-nav {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+.exercise-nav .btn {
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 24px !important;
+  border-radius: 9px !important;
+  font-size: 14.5px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+}
+
+/* 10. RESPONSIVE MEDIA QUERIES */
+@media (max-width: 900px) {
+  .exercise-single-top-bar {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    justify-content: center !important;
+  }
+  .exercise-content-frame,
+  .main-exam-frame {
+    padding: 18px 16px !important;
+    border-radius: 12px !important;
+  }
 }
 </style>
 
@@ -703,32 +1041,32 @@ function renderMatching(){
     const selectResultClass = userCheckedAnswers ? (detail?.ok ? 'assignment-model-correct' : 'assignment-model-wrong') : (showModelAnswers && correctVal ? 'assignment-model-correct' : '');
     const fullCorrectAnswerText = getFullAnswerText(it, correctVal, heads);
     const correctHint = (resultData && !detail?.ok && correctVal && selected !== correctVal) ? `
-      <div class="assignment-correct-answer" style="display:flex;align-items:center;gap:6px;margin:4px 0 8px 0;padding:2px 0;background:transparent !important;border:none !important;box-shadow:none !important;color:#10b981 !important;font-size:14.5px;font-weight:750;">
-        <span class="correct-badge" style="color:#10b981 !important;font-weight:900;">✓ ${text('الإجابة الصحيحة:','Richtige Antwort:')}</span>
-        <strong class="correct-full-text" style="color:inherit !important;font-weight:750;">${esc(fullCorrectAnswerText)}</strong>
+      <div class="assignment-correct-answer">
+        <span class="correct-badge">✓ ${text('الإجابة الصحيحة:','Richtige Antwort:')}</span>
+        <strong class="correct-full-text">${esc(fullCorrectAnswerText)}</strong>
       </div>` : (showModelAnswers && correctVal ? `
-      <div class="assignment-correct-answer model-answer-bar" style="display:flex;align-items:center;gap:6px;margin:4px 0 8px 0;padding:2px 0;background:transparent !important;border:none !important;box-shadow:none !important;color:#f97316 !important;font-size:14.5px;font-weight:750;">
-        <span class="correct-badge" style="color:#f97316 !important;font-weight:900;">★ ${text('الإجابة النموذجية:','Musterlösung:')}</span>
-        <strong class="correct-full-text" style="color:inherit !important;font-weight:750;">${esc(fullCorrectAnswerText)}</strong>
+      <div class="assignment-correct-answer model-answer-bar">
+        <span class="correct-badge">★ ${text('الإجابة النموذجية:','Musterlösung:')}</span>
+        <strong class="correct-full-text">${esc(fullCorrectAnswerText)}</strong>
       </div>` : '');
-    return `<article class="exam-text-card ${selected?'answered':''} ${resultClass} ${showModelAnswers?'model-shown':''} ${String(activeItem)===String(it.position_no)?'active-item':''}" data-item="${it.position_no}" style="background:transparent !important;background-color:transparent !important;border:none !important;box-shadow:none !important;border-radius:0 !important;padding:0 0 28px 0 !important;margin:0 0 28px 0 !important;border-bottom:1px solid var(--line) !important;display:block !important;">
-      <div class="paragraph-assignment" style="display:block !important;width:100% !important;margin:0 0 6px 0 !important;padding:0 !important;background:transparent !important;border:none !important;box-shadow:none !important;">
+    return `<article class="exam-text-card ${selected?'answered':''} ${resultClass} ${showModelAnswers?'model-shown':''} ${String(activeItem)===String(it.position_no)?'active-item':''}" data-item="${it.position_no}">
+      <div class="paragraph-assignment">
         <div class="paragraph-assignment-head" style="display:none !important;" aria-hidden="true"></div>
-        <div class="paragraph-assignment-controls" style="display:block !important;width:100% !important;margin:0 !important;padding:0 !important;background:transparent !important;border:none !important;box-shadow:none !important;">
-          <select data-paragraph-select="${it.position_no}" data-ad-select="${it.position_no}" aria-label="${assignLabel}" class="mock-select ${selected?'answered':''} ${selectResultClass}" style="display:block !important;width:100% !important;height:44px !important;min-height:44px !important;max-height:44px !important;line-height:44px !important;flex:none !important;margin:0 !important;padding:0 14px !important;font-size:15px !important;font-weight:700 !important;border-radius:10px !important;border:1.5px solid var(--line) !important;outline:none !important;box-sizing:border-box !important;">
+        <div class="paragraph-assignment-controls">
+          <select data-paragraph-select="${it.position_no}" data-ad-select="${it.position_no}" aria-label="${assignLabel}" class="mock-select ${selected?'answered':''} ${selectResultClass}">
             <option value="">${assignPlaceholder}</option>
             ${selectOptions}
           </select>
         </div>
       </div>
-      <div class="paragraph-tools-row" style="direction:ltr !important;display:flex !important;justify-content:flex-end !important;align-items:center !important;width:100% !important;margin:4px 0 6px 0 !important;padding:0 !important;">
-        <div class="text-tools" style="display:flex !important;justify-content:flex-end !important;align-items:center !important;gap:8px !important;margin-left:auto !important;margin-inline-start:auto !important;">
-          <button type="button" class="mini-tool" data-translate="${cid}-translation" data-source-id="${cid}" aria-label="${text('ترجمة','Übersetzen')}" aria-pressed="false" style="cursor:pointer;">文</button>
-          <button type="button" class="mini-tool" data-speak="${cid}" aria-label="${text('نطق بالألمانية','Deutsch vorlesen')}" aria-pressed="false" style="cursor:pointer;">◉</button>
+      <div class="paragraph-tools-row">
+        <div class="text-tools">
+          <button type="button" class="mini-tool" data-translate="${cid}-translation" data-source-id="${cid}" aria-label="${text('ترجمة','Übersetzen')}" aria-pressed="false">文</button>
+          <button type="button" class="mini-tool" data-speak="${cid}" aria-label="${text('نطق بالألمانية','Deutsch vorlesen')}" aria-pressed="false">◉</button>
         </div>
       </div>
       ${correctHint}
-       <div class="exam-text" id="${cid}" data-content-id="${cid}" data-source="${esc(it.prompt)}" style="font-size:16.5px;line-height:1.85;color:var(--ink);background:transparent !important;margin:0 0 12px 0 !important;padding:0 !important;">${escBody(it.prompt)}</div>
+       <div class="exam-text" id="${cid}" data-content-id="${cid}" data-source="${esc(it.prompt)}">${escBody(it.prompt)}</div>
       <div class="inline-translation" id="${cid}-translation"></div>
     </article>`;
   }).join('');
@@ -2210,8 +2548,8 @@ function renderExerciseHeaderCard(){
   const activeDuration = duration || (model?.exercise ? getTelcDurationSeconds(model.exercise) : 1200);
   const initialMin = String(Math.floor(activeDuration / 60)).padStart(2, '0');
   const timer = (mockMode || activeDuration) ? `
-    <div class="progress-pill ${mockMode ? 'mock-global-timer' : ''}" id="timerEl">
-      <span class="timer-icon" aria-hidden="true">⏱️</span>
+    <div class="modern-digital-clock progress-pill ${mockMode ? 'mock-global-timer' : ''}" id="timerEl" role="timer" aria-label="Timer">
+      <span class="timer-icon" aria-hidden="true">⏱</span>
       <span class="timer-digits">${initialMin}:00</span>
     </div>` : '';
 
@@ -2228,9 +2566,9 @@ function renderExerciseHeaderCard(){
   const wrongCount = resultData?.details ? resultData.details.filter(d => !d.ok).length : Math.max(0, (resultData?.max || 0) - (resultData?.score || 0));
 
   const resultPanel = `
-    <div class="top-bar-result-cluster exercise-control-panel-slot" style="width:170px;min-width:170px;max-width:170px;flex:0 0 170px;display:flex;align-items:center;justify-content:center;height:36px;box-sizing:border-box;">
+    <div class="top-bar-result-cluster exercise-control-panel-slot">
       ${showResultScore ? `
-        <div class="inline-result-panel ${isPass ? 'pass' : 'fail'}" style="margin:0;padding:4px 10px;font-size:13.5px;font-weight:800;border-radius:8px;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;">
+        <div class="inline-result-panel ${isPass ? 'pass' : 'fail'}">
           <span class="result-panel-score"><bdi>${resultData.score} / ${resultData.max}</bdi></span>
           <span>·</span>
           <span class="result-panel-percent"><bdi>${resultData.percent}%</bdi></span>
@@ -2238,7 +2576,9 @@ function renderExerciseHeaderCard(){
             <span class="result-pill-right">✓ ${rightCount} ${text('صحيح','richtig')}</span>
             <span class="result-pill-wrong">✕ ${wrongCount} ${text('خطأ','falsch')}</span>
           </span>
-        </div>` : ''}
+        </div>` : `
+        <div class="result-reserved-placeholder" style="width:100%;height:100%;" aria-hidden="true"></div>
+      `}
     </div>`;
 
   let titleMarkup = '';
@@ -2252,7 +2592,7 @@ function renderExerciseHeaderCard(){
           <div class="thema-tools">
             ${textTools(title, 'thema-title')}
             <button type="button" class="title-reveal-btn title-eye-btn is-revealed" id="titleRevealBtn" title="${text('إخفاء العنوان','Thema verbergen')}" aria-label="${text('إخفاء العنوان','Thema verbergen')}">
-              <svg class="eye-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f47b20" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+              <svg class="eye-svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#f47b20" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
             </button>
             <div class="inline-translation" id="thema-title-translation"></div>
           </div>
@@ -2269,7 +2609,7 @@ function renderExerciseHeaderCard(){
           </div>
           <div class="thema-tools">
             <button type="button" class="title-reveal-btn title-eye-btn" id="titleRevealBtn" title="${text('إظهار العنوان','Thema anzeigen')}" aria-label="${text('إظهار العنوان','Thema anzeigen')}">
-              <svg class="eye-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f47b20" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              <svg class="eye-svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#f47b20" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
             </button>
           </div>
         </div>`;
@@ -2316,8 +2656,10 @@ function layout(main, side, extraWorkspaceClass = ''){
   ${renderExerciseHeaderCard()}
   ${renderExerciseControlBar()}
   ${renderAudio()}
-  <div class="exam-workspace ${combinedWorkspaceClass}" style="max-width:1100px;margin:0 auto;padding:0 16px;background:transparent !important;border:none !important;box-shadow:none !important;">
-    <section class="exam-main" style="padding:16px 0 60px 0;background:transparent !important;border:none !important;box-shadow:none !important;"><div class="exercise-content-frame" style="padding:0 !important;background:transparent !important;border:none !important;box-shadow:none !important;">${main}</div></section>
+  <div class="exam-workspace ${combinedWorkspaceClass}">
+    <section class="exam-main">
+      <div class="exercise-content-frame main-exam-frame">${main}</div>
+    </section>
   </div>
   <div class="exercise-actions">
     <div class="exercise-nav">
