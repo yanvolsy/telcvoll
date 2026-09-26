@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>الامتحان التجريبي — TELC Voll</title>
-<link rel="stylesheet" href="/assets/app.css?v=20260926-model-review-v5">
+<link rel="stylesheet" href="/assets/app.css?v=20260926-mock-header-layout-v6">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -848,9 +848,9 @@ html[data-theme="light"] .exercise-actions {
 .mock-brand-group{display:flex;align-items:center;gap:12px;min-width:0}
 .mock-brand{color:var(--green)!important;font-size:18px;font-weight:950}
 .mock-top .header-actions{display:flex;align-items:center;gap:10px}
-.mock-top .mock-exam-controls{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:16px;padding-top:10px!important;padding-bottom:10px!important}
-.mock-top .mock-status{justify-content:flex-start;white-space:nowrap}
-.mock-top .mock-tabs{width:100%;margin:0}
+.mock-top .mock-exam-controls{display:grid!important;grid-template-columns:max-content minmax(0,1fr)!important;grid-template-areas:"status tabs"!important;align-items:center;gap:16px;padding-top:10px!important;padding-bottom:10px!important}
+.mock-top .mock-exam-controls>.mock-status{grid-area:status!important;display:flex;align-items:center;justify-content:flex-start;gap:10px;min-width:max-content;white-space:nowrap}
+.mock-top .mock-exam-controls>.mock-tabs{grid-area:tabs!important;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%;min-width:0;margin:0}
 .mock-root#app{padding-top:calc(var(--mock-header-height, 0px) + 18px)!important}
 html[data-theme="dark"] .mock-top{background:#080808!important;border-color:#303030!important}
 @media(max-width:700px){
@@ -858,9 +858,9 @@ html[data-theme="dark"] .mock-top{background:#080808!important;border-color:#303
   .mock-brand{font-size:16px}
   .mock-top .header-actions{gap:6px}
   .mock-top .header-actions .icon-btn{width:36px!important;height:36px!important;min-width:36px!important}
-  .mock-top .mock-exam-controls{grid-template-columns:minmax(0,1fr);gap:8px;padding:8px 12px!important}
-  .mock-top .mock-status{justify-content:space-between}
-  .mock-top .mock-tabs{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+  .mock-top .mock-exam-controls{grid-template-columns:minmax(0,1fr)!important;grid-template-areas:"status" "tabs"!important;gap:8px;padding:8px 12px!important}
+  .mock-top .mock-exam-controls>.mock-status{justify-content:space-between;min-width:0}
+  .mock-top .mock-exam-controls>.mock-tabs{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
   .mock-top .mock-tab{min-height:44px;padding:6px 4px;font-size:11px}
   .mock-top .mock-tab small{font-size:10px}
 }
@@ -888,7 +888,7 @@ html[data-theme="dark"] .mock-top{background:#080808!important;border-color:#303
   </div>
 </header>
 <main id="app" class="mock-root"><div class="student-loading">جارٍ تحميل الامتحان…</div></main>
-<script src="/assets/i18n.js?v=20260926-model-review-v5"></script><script src="/assets/app.js"></script>
+<script src="/assets/i18n.js?v=20260926-mock-header-layout-v6"></script><script src="/assets/app.js"></script>
 <script>
 const sessionId = qs('session');
 const SECTION_ORDER = ['Lesen','Hören','Sprachbausteine','Schreiben'];
