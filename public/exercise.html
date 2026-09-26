@@ -565,7 +565,7 @@ function renderSprachbausteine1(){
          return `<div class="side-question spb1-question ${detail?(detail.ok?'result-correct':'result-wrong'):''}">
            <div class="question-prompt question-text-tools"><strong>${examNo}</strong><span>${text('الفراغ','Lücke')} ${examNo}</span></div>
            ${correctHint}
-           <div class="side-options">`;
+           <div class="side-options">
              ${ordered.map((o,oi)=>{
                const ocid=`spb1-o-${n}-${oi}`;
                return `<div class="spb1-option-wrap">
@@ -647,7 +647,7 @@ function renderHoerenChoiceQuestions(){
    return `<article class="hoeren-choice-card ${detail?(detail.ok?'result-correct':'result-wrong'):''}" data-item="${esc(n)}">
      <div class="hoeren-choice-question-row"><span class="hoeren-choice-number">${index+1}.</span><div class="hoeren-choice-question" id="${qid}" data-content-id="${qid}" data-source="${esc(it.prompt||'')}">${esc(it.prompt||'')}</div><div class="hoeren-choice-question-tools">${textTools(it.prompt||'',qid)}</div></div>
      ${correctHint}
-     <div class="hoeren-choice-options">`;${ordered.map((o,oi)=>{const oid=`hoeren-choice-o-${n}-${oi}`;const selected=String(chosen)===String(o.option_key);const isCorrect=showModelAnswers&&String(correct)===String(o.option_key);const resultClass=detail&&selected?(detail.ok?'result-correct':'result-wrong'):'';return `<div class="hoeren-choice-option-wrap"><button type="button" class="hoeren-choice-option ${selected?'selected':''} ${resultClass} ${isCorrect?'model-correct':''}" data-q="${esc(n)}" data-o="${esc(o.option_key)}"><span class="hoeren-choice-radio"></span><span class="hoeren-choice-option-text" id="${oid}" data-content-id="${oid}" data-source="${esc(o.option_text||'')}">${esc(o.option_text||'')}</span></button>${textTools(o.option_text||'',oid)}${translationBox(oid+'-translation')}</div>`;}).join('')}</div>
+     <div class="hoeren-choice-options">${ordered.map((o,oi)=>{const oid=`hoeren-choice-o-${n}-${oi}`;const selected=String(chosen)===String(o.option_key);const isCorrect=showModelAnswers&&String(correct)===String(o.option_key);const resultClass=detail&&selected?(detail.ok?'result-correct':'result-wrong'):'';return `<div class="hoeren-choice-option-wrap"><button type="button" class="hoeren-choice-option ${selected?'selected':''} ${resultClass} ${isCorrect?'model-correct':''}" data-q="${esc(n)}" data-o="${esc(o.option_key)}"><span class="hoeren-choice-radio"></span><span class="hoeren-choice-option-text" id="${oid}" data-content-id="${oid}" data-source="${esc(o.option_text||'')}">${esc(o.option_text||'')}</span></button>${textTools(o.option_text||'',oid)}${translationBox(oid+'-translation')}</div>`;}).join('')}</div>
      <div class="inline-translation hoeren-choice-question-translation" id="${qid}-translation"></div>
    </article>`;
  }).join('');
@@ -698,7 +698,7 @@ function renderChoiceQuestions(){
         </div>
         ${translationBox(`${qcid}-translation`)}
         ${correctHint}
-        <div class="options-list" style="display:flex;flex-direction:column;gap:10px;">`;
+        <div class="options-list" style="display:flex;flex-direction:column;gap:10px;">
           ${ordered.map((o,oi)=>{
             const ocid='choice-o-'+n+'-'+oi;
             const isSelected=String(chosen)===String(o.option_key);
