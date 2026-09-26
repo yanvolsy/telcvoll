@@ -1978,6 +1978,24 @@ function renderExerciseControlBar(){
   // Fully integrated into the unified sticky exercise header card
   return '';
 }
+function layout(main, side, extraWorkspaceClass = ''){
+  const combinedWorkspaceClass = [extraWorkspaceClass, (typeof isLesen3 !== 'undefined' && isLesen3) ? 'lesen3-workspace' : ''].filter(Boolean).join(' ');
+
+  return `
+  ${renderExerciseHeaderCard()}
+  ${renderExerciseControlBar()}
+  ${renderAudio()}
+  <div class="exam-workspace ${combinedWorkspaceClass}">
+    <section class="exam-main"><div class="exercise-content-frame">${main}</div></section>
+  </div>
+  <div class="exercise-actions">
+    <div class="exercise-nav">
+      <button class="btn" id="checkBtn">${text(mockMode ? 'إنهاء الجزء' : 'تحقق من الإجابات', mockMode ? 'Teil beenden' : 'Antworten prüfen')}</button>
+      ${mockMode ? '' : `<button class="btn model-btn" id="modelBtn">${text(showModelAnswers ? 'إخفاء الإجابة' : 'الإجابة النموذجية', showModelAnswers ? 'Musterlösung ausblenden' : 'Musterlösung')}</button>`}
+    </div>
+  </div>`;
+}
+
 function bindActions(){
  const b=document.getElementById('checkBtn');
  if(b)b.onclick=()=>submit(true);
