@@ -8538,3 +8538,174 @@ html body > #content.exercise-page .exercise-actions {
   html body > #content.exercise-page .exercise-actions { width: calc(100% - 20px) !important; }
   html body > #content.exercise-page .exercise-actions { margin-top: 16px !important; padding: 8px !important; }
 }
+
+/* Final student exercise header and result experience. */
+html body > #content.exercise-page {
+  overflow-x: clip !important;
+  overflow-y: visible !important;
+  scroll-padding-top: 156px !important;
+}
+html body > #content.exercise-page .exercise-header-card.exercise-sticky-bar {
+  position: sticky !important;
+  top: 70px !important;
+  z-index: 90 !important;
+  width: min(1220px, calc(100% - 32px)) !important;
+  max-width: 1220px !important;
+  margin: 0 auto 22px !important;
+  padding: 13px 20px !important;
+  border: 1px solid color-mix(in srgb, var(--green) 18%, var(--line)) !important;
+  border-top: 0 !important;
+  border-radius: 0 0 22px 22px !important;
+  background: color-mix(in srgb, var(--bg) 96%, transparent) !important;
+  box-shadow: 0 12px 28px rgba(0,0,0,.12) !important;
+  backdrop-filter: blur(18px) !important;
+  -webkit-backdrop-filter: blur(18px) !important;
+}
+html[data-theme="dark"] body > #content.exercise-page .exercise-header-card.exercise-sticky-bar {
+  background: color-mix(in srgb, #0f1b1a 95%, transparent) !important;
+  border-color: rgba(255,122,47,.18) !important;
+  border-top: 0 !important;
+}
+html body > #content.exercise-page .exercise-single-top-bar {
+  grid-template-columns: minmax(190px,max-content) minmax(0,1fr) max-content max-content !important;
+  grid-template-areas: "meta title shuffle timer" !important;
+  min-height: 54px !important;
+  gap: 16px !important;
+}
+html body > #content.exercise-page .top-bar-left-cluster .tag { height: 36px !important; }
+html body > #content.exercise-page .top-bar-title-cluster { overflow: visible !important; }
+html body > #content.exercise-page .top-bar-title-cluster .thema-title-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 12px !important;
+  width: 100% !important;
+  height: auto !important;
+}
+html body > #content.exercise-page .top-bar-title-cluster .thema-title-content {
+  flex: 1 1 auto !important; min-width: 0 !important; overflow: hidden !important;
+}
+html body > #content.exercise-page .top-bar-title-cluster .thema-title-content h1 {
+  margin: 0 !important;
+  color: var(--ink) !important;
+  font-size: clamp(18px,1.55vw,23px) !important;
+  font-weight: 900 !important;
+  line-height: 1.35 !important;
+  letter-spacing: -.015em !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+html body > #content.exercise-page .top-bar-title-cluster .thema-tools {
+  flex: 0 0 auto !important; display: flex !important; align-items: center !important; gap: 6px !important;
+}
+html body > #content.exercise-page .top-bar-title-cluster .text-tools {
+  display: inline-flex !important; align-items: center !important; gap: 5px !important;
+}
+html body > #content.exercise-page .top-bar-title-cluster .text-tools .mini-tool {
+  width: 34px !important; min-width: 34px !important; height: 34px !important;
+  border-radius: 10px !important; border: 1px solid var(--line) !important;
+  background: color-mix(in srgb,var(--bg) 88%,var(--green) 12%) !important;
+  color: var(--green) !important; font-size: 15px !important;
+}
+html body > #content.exercise-page .top-bar-shuffle-cluster .exercise-heading-shuffle {
+  min-width: 118px !important; height: 38px !important; border-radius: 11px !important;
+}
+html body > #content.exercise-page .top-bar-shuffle-cluster { justify-self: end !important; }
+html body > #content.exercise-page .top-bar-timer-cluster .progress-pill {
+  min-width: 92px !important; height: 38px !important; border-radius: 11px !important;
+  background: color-mix(in srgb,var(--bg) 88%,var(--green) 12%) !important;
+}
+html body > #content.exercise-page .exercise-result-card {
+  width: min(1180px,calc(100% - 32px)) !important;
+  max-width: 1180px !important;
+  margin: 0 auto 22px !important;
+  padding: clamp(18px,2.4vw,28px) !important;
+  border: 1px solid var(--exercise-result-border) !important;
+  border-radius: 20px !important;
+  background: var(--exercise-result-bg) !important;
+  box-shadow: 0 12px 32px rgba(0,0,0,.07) !important;
+  scroll-margin-top: 164px !important;
+}
+html body > #content.exercise-page .exercise-result-card.is-correct {
+  --exercise-result-border: rgba(34,197,94,.38);
+  --exercise-result-bg: color-mix(in srgb,var(--bg) 95%,#22c55e 5%);
+  --exercise-result-tone: #22a360;
+}
+html body > #content.exercise-page .exercise-result-card.has-mistakes {
+  --exercise-result-border: rgba(239,68,68,.38);
+  --exercise-result-bg: color-mix(in srgb,var(--bg) 96%,#ef4444 4%);
+  --exercise-result-tone: #e0524b;
+}
+html body > #content.exercise-page .exercise-result-heading {
+  display: flex !important; align-items: center !important; gap: 14px !important;
+}
+html body > #content.exercise-page .exercise-result-mark {
+  flex: 0 0 42px !important; width: 42px !important; height: 42px !important;
+  display: grid !important; place-items: center !important; border-radius: 14px !important;
+  color: #fff !important; background: var(--exercise-result-tone) !important;
+  font-size: 22px !important; font-weight: 900 !important;
+}
+html body > #content.exercise-page .exercise-result-title { flex: 1 1 auto !important; min-width: 0 !important; }
+html body > #content.exercise-page .exercise-result-title h2 { margin: 0 !important; font-size: clamp(18px,2vw,23px) !important; font-weight: 900 !important; }
+html body > #content.exercise-page .exercise-result-title p { margin: 2px 0 0 !important; color: var(--muted) !important; font-size: 13px !important; }
+html body > #content.exercise-page .exercise-result-score { display: flex !important; align-items: baseline !important; gap: 9px !important; color: var(--exercise-result-tone) !important; }
+html body > #content.exercise-page .exercise-result-score b { font-size: 23px !important; font-weight: 900 !important; white-space: nowrap !important; }
+html body > #content.exercise-page .exercise-result-score i { font-style: normal !important; opacity: .55 !important; }
+html body > #content.exercise-page .exercise-result-score small { font-size: 15px !important; font-weight: 850 !important; }
+html body > #content.exercise-page .exercise-result-counts { display: flex !important; gap: 9px !important; margin-top: 17px !important; flex-wrap: wrap !important; }
+html body > #content.exercise-page .exercise-result-counts span { padding: 5px 10px !important; border-radius: 999px !important; background: color-mix(in srgb,var(--bg) 80%,var(--exercise-result-tone) 20%) !important; font-size: 12px !important; font-weight: 850 !important; }
+html body > #content.exercise-page .exercise-result-counts .exercise-correct-count { color: #16975a !important; }
+html body > #content.exercise-page .exercise-result-counts .exercise-wrong-count { color: #dc5148 !important; }
+html body > #content.exercise-page .exercise-mistakes-list { display: grid !important; gap: 10px !important; margin-top: 15px !important; }
+html body > #content.exercise-page .exercise-mistake-card { padding: 14px 16px !important; border: 1px solid var(--line) !important; border-inline-start: 3px solid var(--exercise-result-tone) !important; border-radius: 13px !important; background: color-mix(in srgb,var(--bg) 92%,var(--white) 8%) !important; }
+html body > #content.exercise-page .exercise-mistake-number { color: var(--exercise-result-tone) !important; font-size: 12px !important; font-weight: 900 !important; }
+html body > #content.exercise-page .exercise-mistake-prompt { margin-top: 4px !important; font-size: 14px !important; font-weight: 750 !important; line-height: 1.65 !important; }
+html body > #content.exercise-page .exercise-mistake-answers { display: grid !important; grid-template-columns: repeat(2,minmax(0,1fr)) !important; gap: 8px !important; margin-top: 10px !important; }
+html body > #content.exercise-page .exercise-mistake-answers > div { display: grid !important; gap: 3px !important; min-width: 0 !important; }
+html body > #content.exercise-page .exercise-mistake-answers small { color: var(--muted) !important; font-size: 11px !important; }
+html body > #content.exercise-page .exercise-mistake-answers b { font-size: 13px !important; line-height: 1.55 !important; }
+html body > #content.exercise-page .exercise-mistake-source-explanation { margin: 9px 0 0 !important; font-size: 13px !important; line-height: 1.7 !important; }
+html body > #content.exercise-page .exercise-ai-explainer { display: grid !important; justify-items: start !important; gap: 10px !important; margin-top: 16px !important; }
+html body > #content.exercise-page .exercise-ai-explain-btn { min-height: 40px !important; border-radius: 11px !important; }
+html body > #content.exercise-page .exercise-ai-explanation { width: 100% !important; padding: 15px 17px !important; border: 1px solid var(--line) !important; border-radius: 14px !important; background: var(--white) !important; white-space: pre-wrap !important; line-height: 1.8 !important; }
+html body > #content.exercise-page .exercise-ai-explanation[hidden] { display: none !important; }
+html body > #content.exercise-page .exercise-actions {
+  position: sticky !important; bottom: 0 !important; z-index: 80 !important;
+  margin: 18px auto 0 !important; border-radius: 16px 16px 0 0 !important;
+}
+@media (max-width: 1100px) {
+  html body > #content.exercise-page .exercise-header-card.exercise-sticky-bar { top: 70px !important; }
+  html body > #content.exercise-page .exercise-single-top-bar {
+    grid-template-columns: minmax(0,1fr) max-content max-content !important;
+    grid-template-areas: "meta shuffle timer" "title title title" !important;
+    gap: 8px 12px !important; min-height: 92px !important;
+  }
+  html body > #content.exercise-page .top-bar-title-cluster .thema-title-content h1 { font-size: 19px !important; }
+  html body > #content.exercise-page .exercise-result-card { scroll-margin-top: 198px !important; }
+}
+@media (max-width: 600px) {
+  html body > .exercise-topbar { height: 62px !important; min-height: 62px !important; }
+  html body > #content.exercise-page { min-height: calc(100vh - 62px) !important; scroll-padding-top: 220px !important; }
+  html body > #content.exercise-page .exercise-header-card.exercise-sticky-bar { top: 62px !important; width: calc(100% - 18px) !important; padding: 10px 12px !important; }
+  html body > #content.exercise-page .exercise-single-top-bar {
+    grid-template-columns: minmax(0,1fr) max-content !important;
+    grid-template-areas: "meta timer" "title title" "shuffle shuffle" !important;
+    gap: 6px 8px !important; min-height: 128px !important;
+  }
+  html body > #content.exercise-page .top-bar-left-cluster .tag { height: 32px !important; padding: 0 8px !important; font-size: 11px !important; }
+  html body > #content.exercise-page .top-bar-title-cluster .thema-title-row { gap: 7px !important; }
+  html body > #content.exercise-page .top-bar-title-cluster .thema-title-content h1 { font-size: 17px !important; }
+  html body > #content.exercise-page .top-bar-title-cluster .text-tools .mini-tool { width: 30px !important; min-width: 30px !important; height: 30px !important; }
+  html body > #content.exercise-page .top-bar-shuffle-cluster .exercise-heading-shuffle { justify-self: end !important; width: auto !important; min-width: 112px !important; height: 32px !important; }
+  html body > #content.exercise-page .exercise-result-card { width: calc(100% - 20px) !important; padding: 16px 14px !important; border-radius: 16px !important; scroll-margin-top: 220px !important; }
+  html body > #content.exercise-page .exercise-result-heading { gap: 9px !important; align-items: flex-start !important; }
+  html body > #content.exercise-page .exercise-result-mark { flex-basis: 34px !important; width: 34px !important; height: 34px !important; border-radius: 11px !important; font-size: 18px !important; }
+  html body > #content.exercise-page .exercise-result-title h2 { font-size: 16px !important; }
+  html body > #content.exercise-page .exercise-result-title p { font-size: 11px !important; }
+  html body > #content.exercise-page .exercise-result-score { display: grid !important; gap: 0 !important; justify-items: end !important; }
+  html body > #content.exercise-page .exercise-result-score b { font-size: 17px !important; }
+  html body > #content.exercise-page .exercise-result-score small { font-size: 12px !important; }
+  html body > #content.exercise-page .exercise-mistake-answers { grid-template-columns: 1fr !important; gap: 7px !important; }
+  html body > #content.exercise-page .exercise-ai-explain-btn { width: 100% !important; }
+}
