@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#080808"><title>TELC Voll · Sprechen</title>
-<link rel="stylesheet" href="/assets/app.css?v=20260926-flat-level-buttons-v4">
+<link rel="stylesheet" href="/assets/app.css?v=20260926-model-review-v5">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
@@ -43,7 +43,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <div class="speaking-model-box" id="modelBox">
   <div class="speaking-model-head">
     <div><span class="tag">AI</span><h3>الإجابة النموذجية</h3></div>
-    <div class="speaking-model-head-actions"><small>نموذج تدريبي مبني على موضوعك، مع حوار وأسئلة مشابهة لطريقة التدريب.</small><button class="btn speaking-model-btn" id="modelBtn" type="button">🧠 توليد الإجابة النموذجية</button></div>
+    <div class="speaking-model-head-actions"><small>نموذج تدريبي مبني على موضوعك، مع حوار وأسئلة مشابهة لطريقة التدريب.</small><button class="btn speaking-model-btn" id="modelBtn" type="button" aria-expanded="false">🧠 توليد الإجابة النموذجية</button></div>
   </div>
   <div id="modelContent" hidden></div>
 </div>
@@ -614,7 +614,29 @@ function renderPresResult(data, isSaved){
   });
 }
 
-async function generateModel(){if(!isPaidStudent){showPaidOnlyModal('توليد الإجابة النموذجية بالذكاء الاصطناعي متاح في الباقات المدفوعة فقط.');return;}if(modelBusy)return;modelBusy=true;$('modelBtn').disabled=true;$('modelBtn').textContent='⏳ جارٍ التوليد…';$('modelContent').hidden=false;$('modelContent').innerHTML='<div class="speaking-model-empty">جارٍ إنشاء نموذج مناسب لهذا الموضوع مع أسئلة اللجنة وإجاباتها المقترحة…</div>';try{const r=await api('ai-speaking-session',{method:'POST',body:{id,mode:'model',teil:currentTeil()}});if(r.error)throw new Error(r.error);renderModel(r)}catch(e){$('modelContent').innerHTML=`<div class="alert bad">${esc(e?.message||'حدث خطأ أثناء توليد الإجابة النموذجية.')}</div>`}finally{modelBusy=false;$('modelBtn').disabled=false;$('modelBtn').textContent='🧠 توليد الإجابة النموذجية'}}
+async function generateModel(){
+  const button=$('modelBtn'), box=$('modelContent');
+  if(box.dataset.generated==='true'){
+    box.hidden=!box.hidden;
+    button.setAttribute('aria-expanded',String(!box.hidden));
+    button.textContent=box.hidden?'إظهار الإجابة النموذجية':'إخفاء الإجابة النموذجية';
+    if(!box.hidden)box.scrollIntoView({behavior:'smooth',block:'nearest'});
+    return;
+  }
+  if(!isPaidStudent){showPaidOnlyModal('توليد الإجابة النموذجية بالذكاء الاصطناعي متاح في الباقات المدفوعة فقط.');return;}
+  if(modelBusy)return;
+  modelBusy=true;button.disabled=true;button.textContent='⏳ جارٍ التوليد…';
+  box.hidden=false;box.innerHTML='<div class="speaking-model-empty">جارٍ إنشاء نموذج مناسب لهذا الموضوع مع أسئلة اللجنة وإجاباتها المقترحة…</div>';
+  try{
+    const r=await api('ai-speaking-session',{method:'POST',body:{id,mode:'model',teil:currentTeil()}});
+    if(r.error)throw new Error(r.error);
+    renderModel(r);box.dataset.generated='true';button.setAttribute('aria-expanded','true');
+  }catch(e){box.innerHTML=`<div class="alert bad">${esc(e?.message||'حدث خطأ أثناء توليد الإجابة النموذجية.')}</div>`;}
+  finally{
+    modelBusy=false;button.disabled=false;
+    button.textContent=box.dataset.generated==='true'?(box.hidden?'إظهار الإجابة النموذجية':'إخفاء الإجابة النموذجية'):'🧠 توليد الإجابة النموذجية';
+  }
+}
 async function load(){try{
  const wanted=new URLSearchParams(location.search).get('teil');
  let data=await api('exercise-get?id='+encodeURIComponent(id));

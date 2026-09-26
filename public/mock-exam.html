@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>الامتحان التجريبي — TELC Voll</title>
-<link rel="stylesheet" href="/assets/app.css?v=20260926-flat-level-buttons-v4">
+<link rel="stylesheet" href="/assets/app.css?v=20260926-model-review-v5">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -842,34 +842,64 @@ html[data-theme="light"] .exercise-actions {
   }
 }
 </style>
+<style id="mock-exam-brand-header">
+.mock-top{position:fixed!important;inset:0 0 auto!important;width:100%;z-index:1000;background:var(--bg)!important;border-bottom:1px solid var(--line)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;padding:0!important}
+.mock-top .mock-brand-bar{display:flex;align-items:center;justify-content:space-between;min-height:64px;width:100%;max-width:none!important;margin:0!important;padding:10px 24px!important;border-bottom:1px solid var(--line);box-sizing:border-box}
+.mock-brand-group{display:flex;align-items:center;gap:12px;min-width:0}
+.mock-brand{color:var(--green)!important;font-size:18px;font-weight:950}
+.mock-top .header-actions{display:flex;align-items:center;gap:10px}
+.mock-top .mock-exam-controls{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:16px;padding-top:10px!important;padding-bottom:10px!important}
+.mock-top .mock-status{justify-content:flex-start;white-space:nowrap}
+.mock-top .mock-tabs{width:100%;margin:0}
+.mock-root#app{padding-top:calc(var(--mock-header-height, 0px) + 18px)!important}
+html[data-theme="dark"] .mock-top{background:#080808!important;border-color:#303030!important}
+@media(max-width:700px){
+  .mock-top .mock-brand-bar{min-height:58px;padding-left:12px!important;padding-right:12px!important}
+  .mock-brand{font-size:16px}
+  .mock-top .header-actions{gap:6px}
+  .mock-top .header-actions .icon-btn{width:36px!important;height:36px!important;min-width:36px!important}
+  .mock-top .mock-exam-controls{grid-template-columns:minmax(0,1fr);gap:8px;padding:8px 12px!important}
+  .mock-top .mock-status{justify-content:space-between}
+  .mock-top .mock-tabs{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+  .mock-top .mock-tab{min-height:44px;padding:6px 4px;font-size:11px}
+  .mock-top .mock-tab small{font-size:10px}
+}
+</style>
 
 </head>
 <body>
 <header class="mock-top">
-  <div class="mock-root" style="padding:0 22px">
-    <div class="mock-top-inner">
+  <div class="mock-root mock-brand-bar">
+    <div class="mock-brand-group">
       <a class="back-link" href="/dashboard.html" aria-label="العودة">←</a>
       <a class="mock-brand" href="/dashboard.html">
         <span class="brand-dot"></span>
-        <span>TELC Voll · Prüfungssimulation</span>
+        <span>TELC Voll</span>
       </a>
-      <div class="mock-status">
-        <span class="muted" data-i18n="time_left">الوقت المتبقي للامتحان</span>
-        <strong id="examTimer" class="mock-timer">--:--</strong>
-        <span class="header-actions"></span>
-      </div>
-      <nav id="mockTabs" class="mock-tabs" aria-label="أقسام الامتحان"></nav>
     </div>
+    <span class="header-actions"></span>
+  </div>
+  <div class="mock-root mock-exam-controls">
+    <div class="mock-status">
+      <span class="muted" data-i18n="time_left">الوقت المتبقي للامتحان</span>
+      <strong id="examTimer" class="mock-timer">--:--</strong>
+    </div>
+    <nav id="mockTabs" class="mock-tabs" aria-label="أقسام الامتحان"></nav>
   </div>
 </header>
 <main id="app" class="mock-root"><div class="student-loading">جارٍ تحميل الامتحان…</div></main>
-<script src="/assets/i18n.js?v=20260926-flat-level-buttons-v4"></script><script src="/assets/app.js"></script>
+<script src="/assets/i18n.js?v=20260926-model-review-v5"></script><script src="/assets/app.js"></script>
 <script>
 const sessionId = qs('session');
 const SECTION_ORDER = ['Lesen','Hören','Sprachbausteine','Schreiben'];
 const SECTION_LABEL = {Lesen:'Lesen',Hören:'Hören',Sprachbausteine:'Sprachbausteine',Schreiben:'Schreiben'};
 const state = {session:null,models:{},currentIndex:0,timerHandle:null,finishing:false};
 const app = document.getElementById('app');
+const mockTop = document.querySelector('.mock-top');
+function syncMockHeaderSpace(){if(mockTop)document.documentElement.style.setProperty('--mock-header-height',`${Math.ceil(mockTop.getBoundingClientRect().height)}px`)}
+if(mockTop&&typeof ResizeObserver!=='undefined')new ResizeObserver(syncMockHeaderSpace).observe(mockTop);
+window.addEventListener('resize',syncMockHeaderSpace,{passive:true});
+syncMockHeaderSpace();
 var text = window.text || ((ar,de)=>getLang()==='ar'?ar:de);
 
 function escBody(v){return esc(v||'').replace(/\n/g,'<br>')}
@@ -1766,29 +1796,6 @@ function bind(){
     }
   });
 
-    document.querySelectorAll('[data-mock-ad-select]').forEach(sel => sel.onchange = () => {
-    const letter = sel.dataset.mockAdSelect;
-    const sitNo = sel.value;
-    const task = currentTask();
-    const m = state.models[task.id];
-    const items = m?.items || [];
-    window.__mockAnswers = window.__mockAnswers || {};
-
-    items.forEach(it => {
-      const q = String(it.position_no);
-      if (String(window.__mockAnswers[q] || '').toUpperCase() === letter) {
-        delete window.__mockAnswers[q];
-      }
-    });
-
-    if (sitNo && sitNo !== 'X') {
-      window.__mockAnswers[sitNo] = letter;
-    }
-
-    state.session.answersByExercise[String(task.id)] = {...window.__mockAnswers};
-    saveSession();
-    render();
-  });
   const ta = document.getElementById('writingAnswer');
   if (ta) {
     const update = () => {

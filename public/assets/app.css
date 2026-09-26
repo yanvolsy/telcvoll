@@ -9112,6 +9112,15 @@ html[data-theme="dark"] body > #content.exercise-page .exercise-actions {
 html[data-theme="dark"] body > #content.exercise-page .exercise-header-card.exercise-sticky-bar {
   box-shadow: 0 12px 28px rgba(0, 0, 0, .5) !important;
 }
+.model-answer-load-error {
+  display: block !important;
+  width: 100% !important;
+  margin: 8px 0 0 !important;
+  color: var(--danger) !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+}
 
 /* Dark mode level switch: flat, single-layer buttons with no inset shading. */
 html[data-theme="dark"] .level-switch {

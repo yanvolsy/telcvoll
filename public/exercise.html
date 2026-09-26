@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1310"><title>تمرين TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260926-flat-level-buttons-v4">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1310"><title>تمرين TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260926-model-review-v5">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
@@ -743,10 +743,10 @@ html[data-theme="dark"] body.exercise-page .exercise-nav .model-btn {
   <div class="header-actions"></div>
 </header>
 <main id="content" class="exercise-page"><div class="student-loading">جارٍ التحميل…</div></main>
-<script src="/assets/i18n.js?v=20260926-flat-level-buttons-v4"></script><script src="/assets/app.js"></script>
+<script src="/assets/i18n.js?v=20260926-model-review-v5"></script><script src="/assets/app.js"></script>
 <script>
 const id=qs('id'); const duration=Number(qs('duration')||0); const sessionId=qs('session'); const mockMode=qs('mock')==='1' && !!sessionId; let model=null; let answers={}; let activeItem=null; let submitted=false; let resultData=null; let submitInFlight=false; let userCheckedAnswers=false;
-let matchingOrder=null; let headingOrder=null; let optionOrders={}; let showModelAnswers=false; let hoerenOrder=null; let hoerenAllTranslated=false; let wordOrder=null; const translationCache=new Map();
+let matchingOrder=null; let headingOrder=null; let optionOrders={}; let showModelAnswers=false; let modelAnswerData=null; let hoerenOrder=null; let hoerenAllTranslated=false; let wordOrder=null; const translationCache=new Map();
 const TELC_DUR = {
   B1: { Lesen: { 'Teil 1': 20, 'Teil 2': 20, 'Teil 3': 15, _default: 20 }, Sprachbausteine: { 'Teil 1': 10, 'Teil 2': 10, _default: 10 }, Hören: { 'Teil 1': 10, 'Teil 2': 10, 'Teil 3': 10, _default: 10 }, Schreiben: { 'Teil 1': 30, _default: 30 }, Sprechen: { 'Teil 1': 4, 'Teil 2': 5, 'Teil 3': 5, _default: 5 } },
   B2: { Lesen: { 'Teil 1': 20, 'Teil 2': 25, 'Teil 3': 20, _default: 20 }, Sprachbausteine: { 'Teil 1': 15, 'Teil 2': 10, _default: 15 }, Hören: { 'Teil 1': 6, 'Teil 2': 8, 'Teil 3': 6, _default: 7 }, Schreiben: { 'Teil 1': 30, _default: 30 }, Sprechen: { 'Teil 1': 5, 'Teil 2': 5, 'Teil 3': 5, _default: 5 } },
@@ -932,8 +932,27 @@ function matchingDisplayLabel(value, index){
   return cleanOptionPrefix(raw) || raw;
 }
 function visibleExerciseAnswerDetail(prompt){
-  if(!showModelAnswers||!resultData)return null;
+  if(!resultData)return null;
   return (resultData.details||[]).find(d=>String(d.prompt)===String(prompt))||null;
+}
+function modelAnswerDetailFor(item){
+  const details=[...(resultData?.details||[]),...(modelAnswerData?.details||[])];
+  const position=String(item?.position_no??'');
+  const prompt=String(item?.prompt??'');
+  return details.find(d=>position&&String(d.position_no??'')===position)
+    || details.find(d=>prompt&&String(d.prompt??'')===prompt)
+    || null;
+}
+function correctAnswerFor(item){
+  const detail=modelAnswerDetailFor(item);
+  const value=[detail?.correct_answer,item?.correct_answer,item?.correct,item?.answer,item?.solution]
+    .find(candidate=>candidate!==undefined&&candidate!==null&&String(candidate).trim()!=='');
+  return String(value??'').trim();
+}
+function modelAnswerToggleMarkup(){
+  if(mockMode)return '';
+  const label=showModelAnswers ? 'إخفاء الإجابة' : 'الإجابة النموذجية';
+  return `<button type="button" class="btn model-btn" id="modelBtn" aria-expanded="${showModelAnswers?'true':'false'}">${text(label,showModelAnswers?'Musterlösung ausblenden':'Musterlösung anzeigen')}</button>`;
 }
 let exerciseChromeSyncQueued=false;
 function syncExerciseChromeSpacing(){
@@ -1100,7 +1119,7 @@ function renderMatching(){
     const selected=answerValue(it.position_no);
     const cid='para-'+it.position_no;
     const detail=visibleExerciseAnswerDetail(it.prompt);
-    const rawCorrectVal=String(detail?.correct_answer||it.correct_answer||'').trim();
+    const rawCorrectVal=correctAnswerFor(it);
     const correctVal=resolveMatchingCorrectKey(rawCorrectVal,heads);
     const shownAnswer=showModelAnswers&&correctVal?correctVal:selected;
     const shownLabel=shownAnswer?(isLesen3?(shownAnswer==='X'?text('X — لا يوجد عنوان مناسب','X — Keine passende Anzeige'):`Text ${shownAnswer}`):labelFor(it.position_no,shownAnswer)):'';
@@ -1185,8 +1204,7 @@ function renderMatching(){
    const identity=matchingAnswerIdentity(String(i+1));
    const owner=items.find(it=>{const v=answerValue(it.position_no); return v && matchingAnswerIdentity(v)===identity;});
    const ownerDetail=owner?visibleExerciseAnswerDetail(owner.prompt):null;
-   const modelDetail=showModelAnswers?(resultData?.details||[]).find(d=>String(d.correct_answer)===key):null;
-   const modelOwner=modelDetail?items.find(it=>String(it.prompt)===String(modelDetail.prompt)):null;
+   const modelOwner=showModelAnswers?items.find(it=>resolveMatchingCorrectKey(correctAnswerFor(it),heads)===key):null;
    const selectedForActive=activeItem&&answerValue(activeItem)===key;
    const isUsed=!!owner && String(owner.position_no)!==String(activeItem||'');
    const resultClass=ownerDetail?(ownerDetail.ok?'result-correct':'result-wrong'):'';
@@ -1324,7 +1342,7 @@ function renderSprachbausteine1(){
        ${items.map(it=>{
          const n=String(it.position_no), examNo=Number(n)+20, chosen=answerValue(n);
          const detail=visibleExerciseAnswerDetail(it.prompt);
-         const correct=String(detail?.correct_answer || it.correct_answer || it.correct || '').trim();
+          const correct=correctAnswerFor(it);
          const showCorrect=showModelAnswers&&correct;
          const base=(it.options||[]).slice(0,3);
          if(!optionOrders[n]) optionOrders[n]=base.map(o=>o.option_key);
@@ -1406,7 +1424,7 @@ function renderHoerenChoiceQuestions(){
  const rows=items.map((it,index)=>{
    const n=String(it.position_no), chosen=answerValue(n);
    const detail=visibleExerciseAnswerDetail(it.prompt);
-   const correct=String(detail?.correct_answer || it.correct_answer || it.correct || '').trim();
+    const correct=correctAnswerFor(it);
    const qid=`hoeren-choice-q-${n}`;
    const options=(it.options||[]).slice(0,4);
    if(!optionOrders[n])optionOrders[n]=options.map(o=>o.option_key);
@@ -1430,7 +1448,7 @@ function renderHoerenChoiceQuestions(){
    </article>`;
  }).join('');
  const toolbar=`<div class="hoeren-choice-toolbar"><span class="hoeren-choice-count">${Object.keys(answers).length} / ${items.length}</span></div>`;
- const actions=`<div class="exercise-actions">${renderExerciseResultCard()}<div class="exercise-nav"><button class="btn" id="checkBtn">${text(mockMode?'إنهاء الجزء':'تحقق من الإجابات',mockMode?'Teil beenden':'Antworten prüfen')}</button>${mockMode?'':`<button class="btn model-btn" id="modelBtn">${text(showModelAnswers?'إخفاء الإجابة':'الإجابة النموذجية',showModelAnswers?'Musterlösung ausblenden':'Musterlösung')}</button>`}</div></div>`;
+ const actions=`<div class="exercise-actions">${renderExerciseResultCard()}<div class="exercise-nav"><button class="btn" id="checkBtn">${text(mockMode?'إنهاء الجزء':'تحقق من الإجابات',mockMode?'Teil beenden':'Antworten prüfen')}</button>${modelAnswerToggleMarkup()}</div></div>`;
  document.getElementById('content').innerHTML=`${heading}${renderExerciseControlBar()}<main class="hoeren-choice-page"><div class="exercise-content-frame">${audio}<div class="hoeren-choice-list-head"><div><b>AUFGABEN</b><small>${text('اختر الإجابة الصحيحة لكل سؤال','Wählen Sie die richtige Antwort für jede Frage.')}</small></div>${toolbar}</div><section class="hoeren-choice-list">${rows}</section></div></main>${actions}`;
  document.querySelectorAll('.hoeren-choice-option[data-q]').forEach(b=>b.onclick=()=>selectAnswer(b.dataset.q,b.dataset.o));
  bindTextTools();
@@ -1449,7 +1467,7 @@ function renderChoiceQuestions(){
       const n=String(it.position_no);
       const chosen=answerValue(n);
       const detail=visibleExerciseAnswerDetail(it.prompt);
-      const correct=String(detail?.correct_answer || it.correct_answer || it.correct || '').trim();
+      const correct=correctAnswerFor(it);
       const showCorrect=showModelAnswers&&correct;
       const baseOptions=(it.options||[]).slice(0,3);
       if(!optionOrders[n]) optionOrders[n]=baseOptions.map(o=>o.option_key);
@@ -1545,7 +1563,7 @@ function renderChoiceQuestions(){
         ${(wordOrder || sharedOptions().map(([k])=>k)).map((k,oi)=>{
           const v=(sharedOptions().find(([key])=>String(key)===String(k))||[])[1]||k;
           const wid='wordbank-'+oi;
-          const isCorrect=showModelAnswers&&(resultData?.details||[]).some(d=>String(d.correct_answer)===String(k));
+          const isCorrect=showModelAnswers&&(model.items||[]).some(it=>String(correctAnswerFor(it))===String(k));
           return `<div class="word-card-wrap">
             <button class="word-card ${Object.values(answers).includes(k)?'used':''} ${showModelAnswers&&isCorrect?'model-correct':''}" data-word="${esc(k)}">
               <b>${esc(cleanOptionPrefix(v||k))}</b>
@@ -1635,7 +1653,7 @@ function renderBody(body){
    const n=String(i.position_no);
    const val=answerValue(n);
    const detail=visibleExerciseAnswerDetail(i.prompt);
-    const correct=String(detail?.correct_answer || i.correct_answer || i.correct || i.answer || i.solution || '');
+     const correct=correctAnswerFor(i);
     // Keep the learner's selection visible during review; the solution is
     // shown alongside the gap so a wrong answer is not silently replaced.
     const displayVal=val;
@@ -1763,7 +1781,7 @@ function renderTF(){
     // Hören model answers must come from the exercise item itself, not only from the submit result.
     // The result API may omit details or correct_answer, which previously made the model answer invisible.
     const correct = String(
-      detail?.correct_answer || it.correct_answer || it.correct || it.answer || it.solution || ''
+      correctAnswerFor(it)
     ).trim();
     const showCorrect = showModelAnswers && correct;
 
@@ -1836,7 +1854,7 @@ function renderTF(){
       ${renderExerciseResultCard()}
       <div class="exercise-nav">
         <button class="btn" id="checkBtn">${text(mockMode ? 'إنهاء الجزء' : (userCheckedAnswers&&resultData?'إعادة التمرين':'تحقق من الإجابات'), mockMode ? 'Teil beenden' : (userCheckedAnswers&&resultData?'Übung wiederholen':'Antworten prüfen'))}</button>
-        ${mockMode ? '' : `<button class="btn model-btn" id="modelBtn">${text(showModelAnswers ? 'إخفاء الإجابة النموذجية' : 'الإجابة النموذجية', showModelAnswers ? 'Musterlösung ausblenden' : 'Musterlösung')}</button>`}
+        ${modelAnswerToggleMarkup()}
       </div>
     </div>`;
 
@@ -2590,7 +2608,7 @@ function renderSpeaking(){
    <div class="speaking-layout"><section class="speaking-task-panel"><div class="speaking-task-head"><span class="tag">${esc(model.exercise.level||'B2')} · ${esc(teil)}</span><strong>${text('الموضوع','Thema')}</strong></div><div class="speaking-task-text question-text-tools">${textTools(body,qid)}<div id="${qid}" data-content-id="${qid}" data-source="${esc(body)}">${escBody(body)}</div>${translationBox(qid+'-translation')}</div>${teil==='Teil 3'?renderSpeakingTaskList(body):''}<div class="speaking-hint">${esc(hint)}</div></section>
  <section class="speaking-simulator"><div class="speaking-sim-head"><div><span class="tag">${esc(teil)}</span><h2>${text('محادثة مع الشريك والممتحن','Gespräch mit Partner & Prüfer')}</h2><small>${text('اكتب إجابتك بالألمانية واستمع إلى رد الشريك صوتيًا.','Schreibe deine Antwort auf Deutsch und höre die Antwort deines Partners an.')}</small></div><span class="speaking-live-dot">●</span></div><div class="speaking-roles"><div class="speaking-role"><span class="speaking-avatar jerry-avatar">J</span><div><b>Jerry</b><small>${text('الممتحن والمدرب','Prüfer & Trainer')}</small></div></div><div class="speaking-role"><span class="speaking-avatar partner-avatar">P</span><div><b>${text('الشريك','Partner')}</b><small>${text('يتفاعل معك في المحادثة','Gesprächspartner')}</small></div></div></div><div class="speaking-chat" id="speakingChat"></div>
  <div class="speaking-writing-box"><div class="speaking-writing-label"><span>${text('إجابتك','Deine Antwort')}</span><small>${text('اكتب بالألمانية ثم اضغط إرسال','Auf Deutsch schreiben und Senden drücken')}</small></div><div class="speaking-input-row"><textarea id="speakingInput" placeholder="${text('اكتب ردك هنا بالألمانية…','Schreibe deine Antwort auf Deutsch…')}"></textarea><button type="button" class="btn dark" id="speakingSend">${text('إرسال','Senden')}</button></div></div>
- <div class="speaking-controls"><span class="speaking-time" id="speakingTime">00:00</span><button type="button" class="btn model-btn speaking-model-btn" id="speakingModel">${text('إجابة نموذجية بالذكاء الاصطناعي','KI-Musterantwort')}</button><button type="button" class="btn dark" id="speakingFinish">${text('إنهاء وتقييم','Beenden & bewerten')}</button></div><div id="speakingModelBox" class="speaking-model-box" hidden></div><div id="speakingEval" class="speaking-eval" hidden></div></section></div></div>`;
+ <div class="speaking-controls"><span class="speaking-time" id="speakingTime">00:00</span><button type="button" class="btn model-btn speaking-model-btn" id="speakingModel" aria-expanded="false">${text('إجابة نموذجية بالذكاء الاصطناعي','KI-Musterantwort')}</button><button type="button" class="btn dark" id="speakingFinish">${text('إنهاء وتقييم','Beenden & bewerten')}</button></div><div id="speakingModelBox" class="speaking-model-box" hidden></div><div id="speakingEval" class="speaking-eval" hidden></div></section></div></div>`;
  initInlineSpeaking(teil);bindTextTools();bindActions();
  document.querySelector('[data-toggle-speaking-tasks]')?.addEventListener('click',e=>{const list=document.querySelector('[data-speaking-task-list]');if(!list)return;const hidden=list.hidden;list.hidden=!hidden;e.currentTarget.textContent=hidden?'▾':'▸';e.currentTarget.setAttribute('aria-expanded',String(hidden));});
 }
@@ -2609,7 +2627,7 @@ function initInlineSpeaking(currentTeil){
   else add('partner','Hallo! Schön, dich zu sehen. Lass uns die Aufgabe gemeinsam planen.');
   send.onclick=()=>sendText(input.value);input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendText(input.value)}});
   finish.onclick=async()=>{if(busy||!transcript.length)return;busy=true;finish.disabled=true;try{const r=await api('ai-speaking-session',{method:'POST',body:{id,mode:'evaluate',transcript:transcript.join('\n'),teil:currentTeil}});evalBox.hidden=false;evalBox.innerHTML=`<div class="speaking-eval-head"><strong>${text('تقييم Jerry','Jerry · Bewertung')}</strong><b>${esc(r.total??0)} / 25</b></div><div class="speaking-eval-grid">${(r.criteria||[]).map(c=>`<article><b>${esc(c.label)}</b><strong>${esc(c.score)} / ${esc(c.max||5)}</strong><p>${esc(c.comment)}</p></article>`).join('')}</div><div class="speaking-feedback"><h3>${text('نقاط القوة','Stärken')}</h3><ul>${(r.strengths||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul><h3>${text('أولوية التحسين','Prioritäten')}</h3><ul>${(r.priorities||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul><p>${esc(getLang()==='ar'?(r.summary_ar||''):(r.summary_de||''))}</p></div>`;evalBox.scrollIntoView({behavior:'smooth',block:'nearest'})}catch(e){add('jerry',e?.message||'AI-Fehler')}finally{busy=false;finish.disabled=false}};
-  modelBtn.onclick=async()=>{if(busy)return;busy=true;modelBtn.disabled=true;const old= modelBox.innerHTML;try{const r=await api('ai-speaking-session',{method:'POST',body:{id,mode:'model',teil:currentTeil}});modelBox.hidden=false;const isT3=currentTeil==='Teil 3';modelBox.innerHTML=`<div class="speaking-model-head"><div><span class="tag">${text('تدريب بالذكاء الاصطناعي','KI-Training')}</span><h3>${esc(r.title||(isT3?text('تخطيط مشترك للمهمة','Gemeinsam etwas planen'):text('إجابة نموذجية','Musterantwort')))}</h3></div><small>${esc(r.note||'')}</small></div><div class="speaking-model-dialogue">${(r.dialogue||[]).map((m,i)=>{const who=String(m.speaker||'').toLowerCase();const label=who==='student'?(isT3?text('الطالب (Kandidat A) — نموذج إجابة','Kandidat A — Musterantwort'):text('الطالب — إجابة نموذجية','Kandidat — Musterantwort')):(isT3?text('الشريك (Kandidat B)','Partner (Kandidat B)'):text('الشريك','Partner'));const cls=who==='student'?'model-student':'model-partner';const phaseLabels={inhalt:text('Inhalt — المحتوى','Inhalt'),meinung1:text('Meinung 1 — رأي الطالب','Meinung 1 — Kandidat'),meinung2:text('Meinung 2 — رأي الشريك','Meinung 2 — Partner'),erfahrung1:text('Erfahrung 1 — تجربة الطالب','Erfahrung 1 — Kandidat'),erfahrung2:text('Erfahrung 2 — تجربة الشريك','Erfahrung 2 — Partner'),vorteile:text('Vorteile — مزايا','Vorteile'),nachteile:text('Nachteile — عيوب','Nachteile'),abschluss:text('الخلاصة','Abschluss'),planung:text('التخطيط','Planung')};const phase=phaseLabels[String(m.phase||'').toLowerCase()]||'';return `<article class="speaking-model-line ${cls}"><div>${phase?`<span class="speaking-model-phase">${phase}</span>`:''}<b>${label}</b><p>${esc(m.text||'')}</p></div>${m.text?`<span class="speaking-model-tools"><button type="button" class="speaking-voice-btn" data-model-voice="${esc(m.text)}" aria-label="${text('سماع الإجابة','Antwort anhören')}">🔊</button><button type="button" class="speaking-translate-btn" data-model-translate aria-label="${text('ترجمة الرسالة','Nachricht übersetzen')}">文</button></span>`:''}<div class="speaking-model-translation" hidden></div></article>`;}).join('')}</div>${(()=>{const st=r.structure||{};if(isT3){const t3Map=[['planung',text('Planungsschritte — خطوات التخطيط','Planungsschritte')],['verteilung',text('Aufgabenverteilung — توزيع المهام','Aufgabenverteilung')],['vereinbarung',text('Vereinbarung & Treffen — الاتفاق النهائي وموعد اللقاء','Vereinbarung & Treffen')]];return t3Map.filter(([k])=>Array.isArray(st[k])&&st[k].length).map(([k,l])=>`<div class="speaking-model-section"><h4>${l}</h4><ul class="speaking-model-list">${st[k].map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`).join('');}const map=[['inhalt',text('Inhalt — المحتوى','Inhalt')],['meinung1',text('Meinung 1 — رأي الطالب','Meinung 1 — Kandidat')],['meinung2',text('Meinung 2 — رأي الشريك','Meinung 2 — Partner')],['erfahrung1',text('Erfahrung 1 — تجربة الطالب','Erfahrung 1 — Kandidat')],['erfahrung2',text('Erfahrung 2 — تجربة الشريك','Erfahrung 2 — Partner')],['vorteile',text('Vorteile — مزايا','Vorteile')],['nachteile',text('Nachteile — عيوب','Nachteile')],['planung',text('التخطيط','Planung')]];return map.filter(([k])=>Array.isArray(st[k])&&st[k].length).map(([k,l])=>`<div class="speaking-model-section"><h4>${l}</h4><ul class="speaking-model-list">${st[k].map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')})()}<div class="speaking-model-questions"><div class="speaking-model-questions-head"><h4>${text('أسئلة للتدرب مع إجابات مقترحة','Fragen zum Üben mit vorgeschlagenen Antworten')}</h4><small>${text('نماذج أسئلة وإجابات متوقعة للتدرب عليها مع الشريك أو الممتحن.','Typische Fragen und Antwortvorschläge zum Üben mit dem Partner oder Prüfer.')}</small></div><div class="speaking-qa-list">${(r.questions||[]).map((item,i)=>{const qText=typeof item==='string'?item:(item.question||item.q||'');const aText=typeof item==='object'?(item.answer||item.a||''):'';return `<div class="speaking-model-qa-card"><div class="speaking-model-q-row"><span class="speaking-qa-badge q-badge">${text('سؤال','Frage')} ${i+1}</span><div class="speaking-qa-text"><b>${esc(qText)}</b></div><span class="speaking-model-tools"><button type="button" class="speaking-voice-btn" data-model-voice="${esc(qText)}" aria-label="${text('سماع السؤال','Frage anhören')}">🔊</button><button type="button" class="speaking-translate-btn" data-qa-translate aria-label="${text('ترجمة السؤال','Frage übersetzen')}">文</button></span></div><div class="speaking-qa-translation" hidden></div>${aText?`<div class="speaking-model-a-row"><span class="speaking-qa-badge a-badge">${text('الإجابة المقترحة','Vorgeschlagene Antwort')}</span><div class="speaking-qa-text"><p>${esc(aText)}</p></div><span class="speaking-model-tools"><button type="button" class="speaking-voice-btn" data-model-voice="${esc(aText)}" aria-label="${text('سماع الإجابة','Antwort anhören')}">🔊</button><button type="button" class="speaking-translate-btn" data-qa-translate aria-label="${text('ترجمة الإجابة','Antwort übersetzen')}">文</button></span></div><div class="speaking-qa-translation" hidden></div>`:''}</div>`}).join('')}</div></div><div class="speaking-model-phrases"><h4>${text('عبارات مفيدة','Nützliche Redemittel')}</h4><div>${(r.redemittel||[]).map(x=>`<span>${esc(x)}</span>`).join('')}</div></div>`;modelBox.querySelectorAll('[data-model-voice]').forEach(b=>b.onclick=()=>speakGerman(b.dataset.modelVoice,b));modelBox.querySelectorAll('[data-model-translate]').forEach(b=>b.onclick=async()=>{const line=b.closest('.speaking-model-line');const source=line?.querySelector('p')?.textContent||'';const box=line?.querySelector('.speaking-model-translation');if(!box||!source)return;if(!box.hidden){box.hidden=true;return}b.disabled=true;box.textContent=text('جارٍ الترجمة…','Übersetzung…');box.hidden=false;try{box.textContent=await translateText(source,'ar')}catch{box.textContent=text('تعذرت الترجمة.','Übersetzung nicht verfügbar.')}finally{b.disabled=false}});modelBox.querySelectorAll('[data-qa-translate]').forEach(b=>b.onclick=async()=>{const row=b.closest('.speaking-model-q-row')||b.closest('.speaking-model-a-row');const box=row?.nextElementSibling;const source=row?.querySelector('.speaking-qa-text')?.textContent||'';if(!box||!source)return;if(!box.hidden){box.hidden=true;return}b.disabled=true;box.textContent=text('جارٍ الترجمة…','Übersetzung…');box.hidden=false;try{box.textContent=await translateText(source,'ar')}catch{box.textContent=text('تعذرت الترجمة.','Übersetzung nicht verfügbar.')}finally{b.disabled=false}});modelBox.scrollIntoView({behavior:'smooth',block:'nearest'})}catch(e){modelBox.hidden=false;modelBox.innerHTML=`<div class="alert bad">${esc(e.message)}</div>`;}finally{busy=false;modelBtn.disabled=false}};
+  modelBtn.onclick=async()=>{if(modelBox.dataset.generated==='true'){modelBox.hidden=!modelBox.hidden;modelBtn.setAttribute('aria-expanded',String(!modelBox.hidden));modelBtn.textContent=modelBox.hidden?text('إظهار الإجابة النموذجية','Musterlösung anzeigen'):text('إخفاء الإجابة النموذجية','Musterlösung ausblenden');if(!modelBox.hidden)modelBox.scrollIntoView({behavior:'smooth',block:'nearest'});return;}if(busy)return;busy=true;modelBtn.disabled=true;const old= modelBox.innerHTML;try{const r=await api('ai-speaking-session',{method:'POST',body:{id,mode:'model',teil:currentTeil}});modelBox.hidden=false;const isT3=currentTeil==='Teil 3';modelBox.innerHTML=`<div class="speaking-model-head"><div><span class="tag">${text('تدريب بالذكاء الاصطناعي','KI-Training')}</span><h3>${esc(r.title||(isT3?text('تخطيط مشترك للمهمة','Gemeinsam etwas planen'):text('إجابة نموذجية','Musterantwort')))}</h3></div><small>${esc(r.note||'')}</small></div><div class="speaking-model-dialogue">${(r.dialogue||[]).map((m,i)=>{const who=String(m.speaker||'').toLowerCase();const label=who==='student'?(isT3?text('الطالب (Kandidat A) — نموذج إجابة','Kandidat A — Musterantwort'):text('الطالب — إجابة نموذجية','Kandidat — Musterantwort')):(isT3?text('الشريك (Kandidat B)','Partner (Kandidat B)'):text('الشريك','Partner'));const cls=who==='student'?'model-student':'model-partner';const phaseLabels={inhalt:text('Inhalt — المحتوى','Inhalt'),meinung1:text('Meinung 1 — رأي الطالب','Meinung 1 — Kandidat'),meinung2:text('Meinung 2 — رأي الشريك','Meinung 2 — Partner'),erfahrung1:text('Erfahrung 1 — تجربة الطالب','Erfahrung 1 — Kandidat'),erfahrung2:text('Erfahrung 2 — تجربة الشريك','Erfahrung 2 — Partner'),vorteile:text('Vorteile — مزايا','Vorteile'),nachteile:text('Nachteile — عيوب','Nachteile'),abschluss:text('الخلاصة','Abschluss'),planung:text('التخطيط','Planung')};const phase=phaseLabels[String(m.phase||'').toLowerCase()]||'';return `<article class="speaking-model-line ${cls}"><div>${phase?`<span class="speaking-model-phase">${phase}</span>`:''}<b>${label}</b><p>${esc(m.text||'')}</p></div>${m.text?`<span class="speaking-model-tools"><button type="button" class="speaking-voice-btn" data-model-voice="${esc(m.text)}" aria-label="${text('سماع الإجابة','Antwort anhören')}">🔊</button><button type="button" class="speaking-translate-btn" data-model-translate aria-label="${text('ترجمة الرسالة','Nachricht übersetzen')}">文</button></span>`:''}<div class="speaking-model-translation" hidden></div></article>`;}).join('')}</div>${(()=>{const st=r.structure||{};if(isT3){const t3Map=[['planung',text('Planungsschritte — خطوات التخطيط','Planungsschritte')],['verteilung',text('Aufgabenverteilung — توزيع المهام','Aufgabenverteilung')],['vereinbarung',text('Vereinbarung & Treffen — الاتفاق النهائي وموعد اللقاء','Vereinbarung & Treffen')]];return t3Map.filter(([k])=>Array.isArray(st[k])&&st[k].length).map(([k,l])=>`<div class="speaking-model-section"><h4>${l}</h4><ul class="speaking-model-list">${st[k].map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`).join('');}const map=[['inhalt',text('Inhalt — المحتوى','Inhalt')],['meinung1',text('Meinung 1 — رأي الطالب','Meinung 1 — Kandidat')],['meinung2',text('Meinung 2 — رأي الشريك','Meinung 2 — Partner')],['erfahrung1',text('Erfahrung 1 — تجربة الطالب','Erfahrung 1 — Kandidat')],['erfahrung2',text('Erfahrung 2 — تجربة الشريك','Erfahrung 2 — Partner')],['vorteile',text('Vorteile — مزايا','Vorteile')],['nachteile',text('Nachteile — عيوب','Nachteile')],['planung',text('التخطيط','Planung')]];return map.filter(([k])=>Array.isArray(st[k])&&st[k].length).map(([k,l])=>`<div class="speaking-model-section"><h4>${l}</h4><ul class="speaking-model-list">${st[k].map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')})()}<div class="speaking-model-questions"><div class="speaking-model-questions-head"><h4>${text('أسئلة للتدرب مع إجابات مقترحة','Fragen zum Üben mit vorgeschlagenen Antworten')}</h4><small>${text('نماذج أسئلة وإجابات متوقعة للتدرب عليها مع الشريك أو الممتحن.','Typische Fragen und Antwortvorschläge zum Üben mit dem Partner oder Prüfer.')}</small></div><div class="speaking-qa-list">${(r.questions||[]).map((item,i)=>{const qText=typeof item==='string'?item:(item.question||item.q||'');const aText=typeof item==='object'?(item.answer||item.a||''):'';return `<div class="speaking-model-qa-card"><div class="speaking-model-q-row"><span class="speaking-qa-badge q-badge">${text('سؤال','Frage')} ${i+1}</span><div class="speaking-qa-text"><b>${esc(qText)}</b></div><span class="speaking-model-tools"><button type="button" class="speaking-voice-btn" data-model-voice="${esc(qText)}" aria-label="${text('سماع السؤال','Frage anhören')}">🔊</button><button type="button" class="speaking-translate-btn" data-qa-translate aria-label="${text('ترجمة السؤال','Frage übersetzen')}">文</button></span></div><div class="speaking-qa-translation" hidden></div>${aText?`<div class="speaking-model-a-row"><span class="speaking-qa-badge a-badge">${text('الإجابة المقترحة','Vorgeschlagene Antwort')}</span><div class="speaking-qa-text"><p>${esc(aText)}</p></div><span class="speaking-model-tools"><button type="button" class="speaking-voice-btn" data-model-voice="${esc(aText)}" aria-label="${text('سماع الإجابة','Antwort anhören')}">🔊</button><button type="button" class="speaking-translate-btn" data-qa-translate aria-label="${text('ترجمة الإجابة','Antwort übersetzen')}">文</button></span></div><div class="speaking-qa-translation" hidden></div>`:''}</div>`}).join('')}</div></div><div class="speaking-model-phrases"><h4>${text('عبارات مفيدة','Nützliche Redemittel')}</h4><div>${(r.redemittel||[]).map(x=>`<span>${esc(x)}</span>`).join('')}</div></div>`;modelBox.querySelectorAll('[data-model-voice]').forEach(b=>b.onclick=()=>speakGerman(b.dataset.modelVoice,b));modelBox.querySelectorAll('[data-model-translate]').forEach(b=>b.onclick=async()=>{const line=b.closest('.speaking-model-line');const source=line?.querySelector('p')?.textContent||'';const box=line?.querySelector('.speaking-model-translation');if(!box||!source)return;if(!box.hidden){box.hidden=true;return}b.disabled=true;box.textContent=text('جارٍ الترجمة…','Übersetzung…');box.hidden=false;try{box.textContent=await translateText(source,'ar')}catch{box.textContent=text('تعذرت الترجمة.','Übersetzung nicht verfügbar.')}finally{b.disabled=false}});modelBox.querySelectorAll('[data-qa-translate]').forEach(b=>b.onclick=async()=>{const row=b.closest('.speaking-model-q-row')||b.closest('.speaking-model-a-row');const box=row?.nextElementSibling;const source=row?.querySelector('.speaking-qa-text')?.textContent||'';if(!box||!source)return;if(!box.hidden){box.hidden=true;return}b.disabled=true;box.textContent=text('جارٍ الترجمة…','Übersetzung…');box.hidden=false;try{box.textContent=await translateText(source,'ar')}catch{box.textContent=text('تعذرت الترجمة.','Übersetzung nicht verfügbar.')}finally{b.disabled=false}});modelBox.scrollIntoView({behavior:'smooth',block:'nearest'});modelBox.dataset.generated='true';modelBtn.setAttribute('aria-expanded','true')}catch(e){modelBox.hidden=false;modelBox.innerHTML=`<div class="alert bad">${esc(e.message)}</div>`;}finally{busy=false;modelBtn.disabled=false}};
 
 }
 function topShuffleCurrentExercise(){
@@ -2693,20 +2711,44 @@ function layout(main, side, extraWorkspaceClass = ''){
     ${renderExerciseResultCard()}
     <div class="exercise-nav">
       <button class="btn" id="checkBtn">${text(mockMode ? 'إنهاء الجزء' : (userCheckedAnswers&&resultData?'إعادة التمرين':'تحقق من الإجابات'), mockMode ? 'Teil beenden' : (userCheckedAnswers&&resultData?'Übung wiederholen':'Antworten prüfen'))}</button>
-      ${mockMode ? '' : `<button class="btn model-btn" id="modelBtn">${text(showModelAnswers ? 'إخفاء الإجابة النموذجية' : 'الإجابة النموذجية', showModelAnswers ? 'Musterlösung ausblenden' : 'Musterlösung')}</button>`}
+      ${modelAnswerToggleMarkup()}
     </div>
   </div>`;
+}
+
+async function toggleModelAnswers(button){
+  const scrollState=captureExerciseScroll();
+  if(showModelAnswers){
+    showModelAnswers=!showModelAnswers;
+    rerenderExerciseStable(scrollState);
+    return;
+  }
+  if(!resultData?.details?.length&&!modelAnswerData?.details?.length){
+    button.disabled=true;
+    button.textContent=text('جارٍ تحميل الإجابة النموذجية…','Musterlösung wird geladen…');
+    button.closest('.exercise-actions')?.querySelector('.model-answer-load-error')?.remove();
+    try{
+      const data=await api(`exercise-model-answer?id=${encodeURIComponent(id)}`);
+      if(!Array.isArray(data?.details)||!data.details.length) throw new Error(text('لا تتوفر إجابة نموذجية لهذا التمرين.','Für diese Übung ist keine Musterlösung verfügbar.'));
+      modelAnswerData=data;
+    }catch(error){
+      const message=error?.data?.message||error?.message||text('تعذر تحميل الإجابة النموذجية. حاول مرة أخرى.','Die Musterlösung konnte nicht geladen werden. Bitte versuchen Sie es erneut.');
+      const nav=button.closest('.exercise-nav');
+      nav?.insertAdjacentHTML('afterend',`<small class="model-answer-load-error" role="alert">${esc(message)}</small>`);
+      button.disabled=false;
+      button.textContent=text('الإجابة النموذجية','Musterlösung anzeigen');
+      return;
+    }
+  }
+  showModelAnswers=!showModelAnswers;
+  rerenderExerciseStable(scrollState);
 }
 
 function bindActions(){
  const b=document.getElementById('checkBtn');
  if(b)b.onclick=()=>userCheckedAnswers&&resultData&&!mockMode?restartExercise():submit(true);
  const mb=document.getElementById('modelBtn');
- if(mb)mb.onclick=()=>{
-   const st=captureExerciseScroll();
-   showModelAnswers=!showModelAnswers;
-   rerenderExerciseStable(st);
- };
+  if(mb)mb.onclick=e=>{e.preventDefault();toggleModelAnswers(mb);};
   const topShuffle=document.getElementById('headingShuffleBtn');
   if(topShuffle) topShuffle.onclick=e=>{e.preventDefault();e.stopPropagation();topShuffleCurrentExercise();};
 
@@ -2759,7 +2801,7 @@ function animateExerciseFooter(footer,fromHeight,toHeight){
   animation.oncancel=finish;
 }
 function renderResult(r,collapsedFooterHeight){
-  submitted=true;resultData=r;
+  submitted=true;resultData=r;showModelAnswers=true;
   rerenderExerciseStable(captureExerciseScroll());
   const footer=document.querySelector('.exercise-actions');
   if(footer)animateExerciseFooter(footer,collapsedFooterHeight||footer.getBoundingClientRect().height,footer.getBoundingClientRect().height);
@@ -2780,7 +2822,6 @@ async function submit(isExplicitCheck = true){
   const collapsedFooterHeight=document.querySelector('.exercise-actions')?.getBoundingClientRect().height||78;
   const btn=document.getElementById('checkBtn');
   if(isExplicitCheck && btn){btn.disabled=true;btn.dataset.oldText=btn.textContent;btn.textContent=text('جارٍ التحقق…','Wird geprüft…');}
-  if(isExplicitCheck && !mockMode) showModelAnswers=true;
   try{
     const r=await api('exercise-submit',{method:'POST',body:{exercise_id:id,answers:buildSubmissionAnswers()}});
     localStorage.setItem('last_exercise_result_'+id,JSON.stringify(r));
