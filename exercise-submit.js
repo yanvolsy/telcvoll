@@ -1,11 +1,16 @@
 const { db } = require('./_lib/db');
 const { json } = require('./_lib/auth');
 const { requireStudent } = require('./_lib/guard');
+const { requireSameOrigin, requestSize } = require('./_lib/request');
+const { rateLimit } = require('./_lib/ratelimit');
 
 exports.handler = async (event) => {
+  if (!requireSameOrigin(event)) return json(403, { error: 'Cross-origin request blocked.' });
+  if (!requestSize(event)) return json(413, { error: 'Request too large.' });
   if (event.httpMethod !== 'POST') return json(405, { error: 'Method not allowed' });
   const student = await requireStudent(event);
   if (!student) return json(401, { error: 'unauthenticated' });
+  if (!(await rateLimit('exercise_submit', 300, 3600, String(student.student_id)))) return json(429, { error: 'Too many submissions. Please try again later.' });
 
   let body;
   try { body = JSON.parse(event.body || '{}'); } catch { return json(400, { error: 'Bad request' }); }
@@ -14,12 +19,17 @@ exports.handler = async (event) => {
   if (!id) return json(400, { error: 'Missing exercise_id' });
 
   const pool = db();
-  await pool.query("ALTER TABLE exercises ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMP NULL");
   const client = await pool.connect();
   try {
     const exRes = await client.query("SELECT * FROM exercises WHERE id=$1 AND status='published' AND deleted_at IS NULL", [id]);
     const exercise = exRes.rows[0];
     if (!exercise) return json(404, { error: 'Not found' });
+
+    const mode = String(exercise.access_mode || 'paid').toLowerCase();
+    if (mode === 'paid' && (!student.is_paid || !student.subscription?.active)) {
+      return json(403, { error: 'payment_required', message: 'هذا التمرين مدفوع ويتطلب اشتراكاً مفعلاً.' });
+    }
+
 
     const itemsRes = await client.query('SELECT * FROM items WHERE exercise_id=$1 ORDER BY position_no', [id]);
     let score = 0, max = 0;
@@ -76,7 +86,7 @@ exports.handler = async (event) => {
     });
   } catch (e) {
     await client.query('ROLLBACK');
-    return json(500, { error: e.message });
+    return json(500, { error: 'تعذر حفظ الإجابة. حاول مرة أخرى.' });
   } finally {
     client.release();
   }
