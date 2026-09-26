@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1310"><title>تمرين TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260926-answer-feedback-colors-v8">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1310"><title>تمرين TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260927-reversed-matching-import-v9">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
@@ -743,7 +743,7 @@ html[data-theme="dark"] body.exercise-page .exercise-nav .model-btn {
   <div class="header-actions"></div>
 </header>
 <main id="content" class="exercise-page"><div class="student-loading">جارٍ التحميل…</div></main>
-<script src="/assets/i18n.js?v=20260926-answer-feedback-colors-v8"></script><script src="/assets/app.js"></script>
+<script src="/assets/i18n.js?v=20260927-reversed-matching-import-v9"></script><script src="/assets/app.js"></script>
 <script>
 const id=qs('id'); const duration=Number(qs('duration')||0); const sessionId=qs('session'); const mockMode=qs('mock')==='1' && !!sessionId; let model=null; let answers={}; let activeItem=null; let submitted=false; let resultData=null; let submitInFlight=false; let userCheckedAnswers=false;
 let matchingOrder=null; let headingOrder=null; let optionOrders={}; let showModelAnswers=false; let modelAnswerData=null; let hoerenOrder=null; let hoerenAllTranslated=false; let wordOrder=null; const translationCache=new Map();
@@ -1069,6 +1069,11 @@ function canonicalSubmissionAnswer(it, given){
     const key=resolveMatchingCorrectKey(raw,getExerciseHeadings(model)||[]);
     if(/^[A-Z]$/.test(key)) return `W${key.charCodeAt(0)-64}`;
   }
+  if(/^(?:situation\s*)?\d+\.?$/i.test(expected)){
+    const key=resolveMatchingCorrectKey(raw,getExerciseHeadings(model)||[]);
+    if(key==='X') return 'X';
+    if(/^[A-Z]$/.test(key)) return String(key.charCodeAt(0)-64);
+  }
   return raw;
 }
 
@@ -1136,6 +1141,7 @@ function renderMatching(){
  const items=model.items||[];
  const bodyText=getExerciseBody(model);
  const isLesen3=model.exercise.section==='Lesen'&&model.exercise.teil==='Teil 3';
+ const isReversedLesen3=isLesen3&&String(parseSettings(model.exercise).mapping_mode||'').toUpperCase()==='REVERSED';
   if(!matchingOrder)matchingOrder=items.map(it=>String(it.position_no));
   if(!headingOrder)headingOrder=heads.map((_,i)=>i);
   const usedAnswerIds=new Set(Object.values(answers).filter(Boolean).map(v=>matchingAnswerIdentity(v)));
@@ -1249,9 +1255,9 @@ function renderMatching(){
        <div>
          <h3 style="margin:0 0 6px;font-size:19px;font-weight:900;display:flex;align-items:center;gap:8px;">
            <span>📰</span>
-           <span>${text('قائمة العناوين والإعلانات المتاحة (12 إعلاناً — Anzeigen A bis L):', 'Verfügbare Anzeigen (Text A bis L):')}</span>
+           <span>${isReversedLesen3?text('المواقف المتاحة للاختيار (1–'+heads.length+')','Verfügbare Situationen (1–'+heads.length+')'):text('قائمة العناوين والإعلانات المتاحة (12 إعلاناً — Anzeigen A bis L):', 'Verfügbare Anzeigen (Text A bis L):')}</span>
          </h3>
-         <small style="color:var(--muted);font-size:13.5px;line-height:1.6;">${text('اقرأ الفقرات الـ 10 بالأعلى واختر لكل فقرة العنوان/الإعلان المناسب لها، أو اختر (X) إذا لم يكن لها عنوان مناسب. لا يمكن استخدام العنوان لأكثر من فقرة واحدة.', 'Wählen Sie oben für jeden Absatz die passende Anzeige aus, oder X wenn keine Anzeige passt. Jede Anzeige kann nur einmal zugeordnet werden.')}</small>
+         <small style="color:var(--muted);font-size:13.5px;line-height:1.6;">${isReversedLesen3?text('طابق كل إعلان بالأعلى مع الموقف المناسب، أو اختر (X) إذا لم يناسبه أي موقف. لا يمكن استخدام الموقف لأكثر من إعلان واحد.','Ordnen Sie jeder Anzeige oben die passende Situation zu oder wählen Sie X, wenn keine Situation passt. Jede Situation kann nur einmal verwendet werden.'):text('اقرأ الفقرات الـ 10 بالأعلى واختر لكل فقرة العنوان/الإعلان المناسب لها، أو اختر (X) إذا لم يكن لها عنوان مناسب. لا يمكن استخدام العنوان لأكثر من فقرة واحدة.', 'Wählen Sie oben für jeden Absatz die passende Anzeige aus, oder X wenn keine Anzeige passt. Jede Anzeige kann nur einmal zugeordnet werden.')}</small>
        </div>
        <div style="display:flex;align-items:center;gap:10px;">
          <span class="side-counter-pill">${answeredCount} / ${items.length}</span>
@@ -1265,19 +1271,21 @@ function renderMatching(){
          const assignedItem = items.find(it => String(answerValue(it.position_no)).toUpperCase() === letter);
          const assignedSitNo = assignedItem ? String(assignedItem.position_no) : '';
          const rawText = (typeof h === 'object') ? [h.title, h.body || h.text || h.content].filter(Boolean).join('\n\n') : String(h).trim();
+         const cardTitle = isReversedLesen3 ? `Situation ${i + 1}` : `Text ${letter}`;
+         const cardBody = isReversedLesen3 ? rawText : (ad.body || (ad.title ? '' : rawText));
          return `
          <div class="heading-entry lesen3-ad-card ${assignedSitNo ? 'is-used' : ''}" id="card-ad-${letter}" style="background:var(--bg);border:1.5px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:12px;">
            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
              <strong style="font-size:16px;font-weight:950;color:#f47b20;display:inline-flex;align-items:center;gap:8px;">
-               <span>Text ${letter}</span>
-               ${ad.title ? `<span style="color:var(--ink);font-weight:800;">— ${esc(ad.title)}</span>` : ''}
+               <span>${cardTitle}</span>
+               ${!isReversedLesen3&&ad.title ? `<span style="color:var(--ink);font-weight:800;">— ${esc(ad.title)}</span>` : ''}
              </strong>
              <div style="display:flex;align-items:center;gap:10px;">
                ${assignedSitNo ? `<span class="badge" style="background:#0f172a;color:#fff;font-weight:800;font-size:12px;padding:4px 10px;border-radius:8px;">✓ ${text('مخصص للفقرة ' + assignedSitNo, 'Zugeordnet zu Absatz ' + assignedSitNo)}</span>` : ''}
                ${textTools(rawText, adCid)}
              </div>
            </div>
-           <div class="exam-text ad-body" id="${adCid}" data-content-id="${adCid}" data-source="${esc(rawText)}" style="font-size:15px;line-height:1.85;color:var(--ink);white-space:normal;word-break:break-word;">${escBody(ad.body || (ad.title ? '' : rawText))}</div>
+           <div class="exam-text ad-body" id="${adCid}" data-content-id="${adCid}" data-source="${esc(rawText)}" style="font-size:15px;line-height:1.85;color:var(--ink);white-space:normal;word-break:break-word;">${escBody(cardBody)}</div>
            <div class="inline-translation" id="${adCid}-translation"></div>
          </div>`;
        }).join('')}

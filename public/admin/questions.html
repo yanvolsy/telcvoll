@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TELC Voll — إدارة التمارين</title>
-<link rel="stylesheet" href="/assets/app.css?v=20260926-answer-feedback-colors-v8">
+<link rel="stylesheet" href="/assets/app.css?v=20260927-reversed-matching-import-v9">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
@@ -124,7 +124,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
     </div>
   </div>
 </div><div class="modal-footer"><button class="btn" id="confirmImportBtn">بدء الاستيراد الآن ←</button><button class="small-btn" id="cancelImportBtn">إلغاء</button></div></div></div>
-<script src="/assets/i18n.js?v=20260926-answer-feedback-colors-v8"></script><script src="/assets/app.js"></script><script src="/assets/admin-guard.js"></script>
+<script src="/assets/i18n.js?v=20260927-reversed-matching-import-v9"></script><script src="/assets/app.js"></script><script src="/assets/admin-guard.js"></script>
 <script>
 const state={editId:null,cloneMode:false,exercises:[],activeModalContext:null,selectedIds:new Set(),currentVisibleRows:[]};
 const teilMap={Lesen:['Teil 1','Teil 2','Teil 3'],Hören:['Teil 1','Teil 2','Teil 3'],Sprachbausteine:['Teil 1','Teil 2'],Schreiben:['Teil 1'],Sprechen:['Teil 1','Teil 2','Teil 3']};
@@ -510,6 +510,73 @@ function renderBrowser(){
 async function load(){const r=await api('admin-questions');state.exercises=r.exercises||[];updateContext();renderBrowser();}
 let pendingImportList = [];
 
+function importTextValue(value) {
+  if (typeof value === 'string') return value.trim();
+  if (!value || typeof value !== 'object') return '';
+  return String(value.text || value.statement || value.description || value.situation || value.prompt || value.content || value.title || value.label || value.value || '').trim();
+}
+
+function numberedSituationHeadings(raw) {
+  const candidates = [
+    raw.source_situations,
+    raw.source_situation_texts,
+    raw.numbered_situations,
+    raw.situations,
+    raw.settings?.source_situations,
+    raw.settings?.source_situation_texts,
+    raw.settings?.numbered_situations,
+    raw.settings?.situations,
+    raw.settings?.situation_texts
+  ];
+  for (const candidate of candidates) {
+    if (!Array.isArray(candidate)) continue;
+    const rows = candidate.map((value, index) => ({
+      number: Number(value?.number || value?.position_no || value?.id || index + 1),
+      text: importTextValue(value)
+    })).filter(row => Number.isFinite(row.number) && row.text);
+    if (rows.length >= 2) return rows.sort((a, b) => a.number - b.number).map(row => row.text);
+  }
+  return [];
+}
+
+function reversedAdsAsMatchingItems(raw, situations) {
+  const ads = Array.isArray(raw.settings?.source_ads) ? raw.settings.source_ads :
+    (Array.isArray(raw.source_ads) ? raw.source_ads : []);
+  if (!ads.length) {
+    throw new Error('لم يُستورد التمرين: الملف يحدد mapping_mode = REVERSED لكنه لا يحتوي قائمة settings.source_ads اللازمة لبناء الفقرات.');
+  }
+  const expectedSituationCount = Number(raw.settings?.source_situation_count || 0);
+  if (situations.length < Math.max(2, expectedSituationCount)) {
+    const needed = expectedSituationCount || 2;
+    throw new Error(`لم يُستورد التمرين: الملف يحدد mapping_mode = REVERSED ويحتوي الإعلانات، لكنه لا يحتوي نصوص المواقف الـ ${needed}. أضف settings.source_situations (أو source_situations) كاملة ثم أعد الاستيراد.`);
+  }
+  return ads.map((ad, index) => {
+    const key = String(ad?.key || ad?.letter || String.fromCharCode(65 + index)).trim().toUpperCase();
+    const prompt = String(ad?.text || ad?.body || ad?.content || ad?.full_text || '').trim();
+    const rawSituation = String(ad?.correct_situation ?? ad?.correctSituation ?? '').trim();
+    let correct = '';
+    if (/^x(?:\s|$)/i.test(rawSituation)) correct = 'X';
+    else {
+      const match = rawSituation.match(/^(?:situation\s*)?(\d+)\.?$/i);
+      if (match) {
+        const number = Number(match[1]);
+        if (number >= 1 && number <= situations.length) correct = String.fromCharCode(64 + number);
+      }
+    }
+    if (!prompt || !correct) {
+      throw new Error(`لم يُستورد التمرين: بيانات الإعلان ${key || index + 1} أو إجابته غير مكتملة في source_ads.`);
+    }
+    return {
+      prompt,
+      correct,
+      correct_answer: correct,
+      points: Number.parseFloat(raw.settings?.points_per_item ?? 1) || 1,
+      explanation: '',
+      options: {}
+    };
+  });
+}
+
 function normalizeImportBatch(pack) {
   let list = [];
   if (Array.isArray(pack)) list = pack;
@@ -550,10 +617,16 @@ function normalizeImportBatch(pack) {
     else if (ctx.teil !== 'ALL' && teilMap[section]?.includes(ctx.teil)) teil = ctx.teil;
     else teil = (teilMap[section] || ['Teil 1'])[0];
 
+    // REVERSED Lesen 3 packs list advertisements as prompts and numbered
+    // situations as answer choices. Convert them to the normal matching shape.
+    const isReversedAds = String(raw.settings?.mapping_mode || raw.mapping_mode || '').trim().toUpperCase() === 'REVERSED';
+    const reversedHeadings = isReversedAds ? numberedSituationHeadings(raw) : [];
+    const reversedItems = isReversedAds ? reversedAdsAsMatchingItems(raw, reversedHeadings) : null;
+
     // Items (Questions / Gaps)
-    const rawItems = Array.isArray(raw.items) ? raw.items :
+    const rawItems = reversedItems ? [] : (Array.isArray(raw.items) ? raw.items :
       (Array.isArray(raw.questions) ? raw.questions :
-      (Array.isArray(raw.gaps) ? raw.gaps : []));
+      (Array.isArray(raw.gaps) ? raw.gaps : [])));
 
     // Translation & Audio (support all aliases!)
     const translation = String(raw.translation || raw.arabic_translation || raw.translation_ar || '').trim();
@@ -575,7 +648,9 @@ function normalizeImportBatch(pack) {
 
     // Task type detection
     let task_type = String(raw.task_type || raw.type || raw.format || '').toUpperCase().trim();
-    if (section === 'Hören' || isTF) {
+    if (reversedItems) {
+      task_type = 'MATCHING';
+    } else if (section === 'Hören' || isTF) {
       task_type = 'AUDIO_TF';
     } else if (!['MATCHING', 'MCQ', 'AUDIO_MCQ', 'AUDIO_TF', 'GAP', 'WRITING', 'SPEAKING'].includes(task_type)) {
       task_type = taskMap[section]?.[teil] || (section === 'Schreiben' ? 'WRITING' : section === 'Sprechen' ? 'SPEAKING' : section === 'Sprachbausteine' ? 'GAP' : 'MCQ');
@@ -591,7 +666,7 @@ function normalizeImportBatch(pack) {
       (Array.isArray(raw.ads) ? raw.ads :
       (Array.isArray(raw.anzeigen) ? raw.anzeigen : []))));
 
-    const headings = rawHeads.map(h => {
+    let headings = rawHeads.map(h => {
       if (typeof h === 'string') return h.trim();
       if (h && typeof h === 'object') {
         const t = String(h.title || h.heading || h.ad_title || '').trim();
@@ -601,7 +676,7 @@ function normalizeImportBatch(pack) {
       return String(h || '').trim();
     }).filter(Boolean);
 
-    const items = rawItems.map((it, iIdx) => {
+    let items = rawItems.map((it, iIdx) => {
       let prompt = String(it.prompt || it.question || it.statement || it.text || it.word || it.correctText || '').trim();
       let correct = String(it.correct || it.correct_answer || it.correct_key || it.answer || it.solution || '').trim();
       if (section === 'Lesen' && teil === 'Teil 3' && /^x$/i.test(correct)) correct = 'X';
@@ -660,6 +735,11 @@ function normalizeImportBatch(pack) {
         options
       };
     });
+
+    if (reversedItems) {
+      headings = reversedHeadings;
+      items = reversedItems;
+    }
 
     // Formatting for Sprachbausteine Teil 1
     if (section === 'Sprachbausteine' && teil === 'Teil 1') {
