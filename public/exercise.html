@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1310"><title>تمرين TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260926-black-orange-v1">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1310"><title>تمرين TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260926-flat-level-buttons-v4">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
@@ -743,7 +743,7 @@ html[data-theme="dark"] body.exercise-page .exercise-nav .model-btn {
   <div class="header-actions"></div>
 </header>
 <main id="content" class="exercise-page"><div class="student-loading">جارٍ التحميل…</div></main>
-<script src="/assets/i18n.js?v=20260926-black-orange-v1"></script><script src="/assets/app.js"></script>
+<script src="/assets/i18n.js?v=20260926-flat-level-buttons-v4"></script><script src="/assets/app.js"></script>
 <script>
 const id=qs('id'); const duration=Number(qs('duration')||0); const sessionId=qs('session'); const mockMode=qs('mock')==='1' && !!sessionId; let model=null; let answers={}; let activeItem=null; let submitted=false; let resultData=null; let submitInFlight=false; let userCheckedAnswers=false;
 let matchingOrder=null; let headingOrder=null; let optionOrders={}; let showModelAnswers=false; let hoerenOrder=null; let hoerenAllTranslated=false; let wordOrder=null; const translationCache=new Map();
@@ -838,6 +838,13 @@ function renderUnifiedAudioPlayer(audioUrl) {
       </div>
     </div>`;
 }
+function cleanExerciseBodyForDisplay(value, exercise) {
+  let body = String(value || '').trim();
+  if (exercise?.section === 'Lesen' && exercise?.teil === 'Teil 1') {
+    body = body.replace(/^\s*Lesen Sie die Texte\s+1\s+bis\s+5\.\s*Welche Überschrift\s*\(\s*A\s*[–—-]\s*J\s*\)\s*passt zu welchem Text\?\s*Es gibt mehr Überschriften als Texte\.\s*Jede Überschrift kann nur einmal verwendet werden\.?\s*/i, '').trim();
+  }
+  return body;
+}
 function getExerciseBody(model) {
   const ex = model?.exercise || {};
   const st = parseSettings(ex);
@@ -869,7 +876,7 @@ function getExerciseBody(model) {
     ...(Array.isArray(model?.items) ? model.items.map(it => it?.body).filter(Boolean) : [])
   ];
   for (const c of candidates) {
-    if (typeof c === 'string' && c.trim()) return c.trim();
+    if (typeof c === 'string' && c.trim()) return cleanExerciseBodyForDisplay(c, ex);
   }
   return '';
 }
@@ -1628,8 +1635,10 @@ function renderBody(body){
    const n=String(i.position_no);
    const val=answerValue(n);
    const detail=visibleExerciseAnswerDetail(i.prompt);
-   const correct=String(detail?.correct_answer||'');
-   const displayVal=showModelAnswers&&correct?correct:val;
+    const correct=String(detail?.correct_answer || i.correct_answer || i.correct || i.answer || i.solution || '');
+    // Keep the learner's selection visible during review; the solution is
+    // shown alongside the gap so a wrong answer is not silently replaced.
+    const displayVal=val;
    const resultClass=detail&&val?(detail.ok?'result-correct':'result-wrong'):'';
    const modelClass=showModelAnswers&&correct?'model-correct':'';
    const isSpb1=model.exercise.section==='Sprachbausteine'&&model.exercise.teil==='Teil 1';
@@ -1698,7 +1707,8 @@ function isUniqueAnswerExercise(){
   const sec=String(model?.exercise?.section||'');
   const teil=String(model?.exercise?.teil||'');
   const task=String(model?.exercise?.task_type||'');
-  return task==='MATCHING' || (sec==='Lesen' && ['Teil 1','Teil 3'].includes(teil)) || (sec==='Hören' && teil==='Teil 3') || (sec==='Sprachbausteine' && teil==='Teil 2');
+  if(sec==='Hören')return false;
+  return task==='MATCHING' || (sec==='Lesen' && ['Teil 1','Teil 3'].includes(teil)) || (sec==='Sprachbausteine' && teil==='Teil 2');
 }
 function selectAnswer(n,val){
  const scrollState=captureExerciseScroll();
@@ -2770,7 +2780,7 @@ async function submit(isExplicitCheck = true){
   const collapsedFooterHeight=document.querySelector('.exercise-actions')?.getBoundingClientRect().height||78;
   const btn=document.getElementById('checkBtn');
   if(isExplicitCheck && btn){btn.disabled=true;btn.dataset.oldText=btn.textContent;btn.textContent=text('جارٍ التحقق…','Wird geprüft…');}
-  if(isExplicitCheck) showModelAnswers=false;
+  if(isExplicitCheck && !mockMode) showModelAnswers=true;
   try{
     const r=await api('exercise-submit',{method:'POST',body:{exercise_id:id,answers:buildSubmissionAnswers()}});
     localStorage.setItem('last_exercise_result_'+id,JSON.stringify(r));

@@ -8811,7 +8811,8 @@ html body > #content.exercise-page .top-bar-title-cluster .thema-title-content h
   letter-spacing: -.015em !important;
   text-align: center !important;
   white-space: normal !important;
-  overflow-wrap: anywhere !important;
+  overflow-wrap: break-word !important;
+  word-break: normal !important;
 }
 html body > #content.exercise-page .top-bar-title-cluster .thema-tools {
   flex: 0 0 auto !important;
@@ -9110,4 +9111,104 @@ html[data-theme="dark"] body > #content.exercise-page .exercise-actions {
 }
 html[data-theme="dark"] body > #content.exercise-page .exercise-header-card.exercise-sticky-bar {
   box-shadow: 0 12px 28px rgba(0, 0, 0, .5) !important;
+}
+
+/* Dark mode level switch: flat, single-layer buttons with no inset shading. */
+html[data-theme="dark"] .level-switch {
+  display: flex !important;
+  gap: 8px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+html[data-theme="dark"] .level-switch .level-btn,
+html[data-theme="dark"] .level-switch .level-btn:not(.active):hover {
+  background: #141414 !important;
+  border: 1px solid #303030 !important;
+  color: #f5f5f5 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+html[data-theme="dark"] .level-switch .level-btn.active,
+html[data-theme="dark"] .level-switch .level-btn.active:hover,
+html[data-theme="dark"] .level-switch .level-btn[aria-pressed="true"] {
+  background: #ff7a2f !important;
+  border: 1px solid #ff7a2f !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Give exercise passages and inline gaps a clear reading rhythm. */
+body.exercise-page .main-exam-frame > .long-text {
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+}
+body.exercise-page .main-exam-frame #gap2-text,
+body.exercise-page .main-exam-frame #spb1-text,
+body.exercise-page .main-exam-frame .long-text-content {
+  display: block !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: clamp(18px, 2.2vw, 30px) !important;
+  border-radius: 14px !important;
+  font-family: "Segoe UI", Arial, sans-serif !important;
+  font-size: clamp(16px, 1.15vw, 18px) !important;
+  line-height: 2.05 !important;
+  letter-spacing: 0 !important;
+  color: var(--ink) !important;
+  overflow-wrap: break-word !important;
+  word-break: normal !important;
+}
+body.exercise-page .main-exam-frame #gap2-text {
+  border: 1px solid var(--line) !important;
+  background: color-mix(in srgb, var(--white) 72%, transparent) !important;
+}
+body.exercise-page .main-exam-frame .long-text-content {
+  margin: 0 !important;
+}
+body.exercise-page .exam-text-card {
+  padding: clamp(18px, 2vw, 26px) !important;
+  margin: 0 0 18px !important;
+  border-bottom: 1px solid var(--line) !important;
+}
+body.exercise-page .exam-text-card .exam-text {
+  max-width: 92ch !important;
+  font-family: "Segoe UI", Arial, sans-serif !important;
+  font-size: clamp(16px, 1.15vw, 18px) !important;
+  line-height: 1.95 !important;
+  letter-spacing: 0 !important;
+  overflow-wrap: anywhere !important;
+}
+body.exercise-page .main-exam-frame #gap2-text .inline-gap-select {
+  min-width: 132px !important;
+  min-height: 42px !important;
+  max-width: min(230px, 42vw) !important;
+  margin: 5px 6px !important;
+  padding: 8px 30px 8px 12px !important;
+  border-radius: 10px !important;
+  font-family: "Segoe UI", Arial, sans-serif !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  vertical-align: middle !important;
+}
+@media (max-width: 600px) {
+  body.exercise-page .main-exam-frame #gap2-text,
+  body.exercise-page .main-exam-frame #spb1-text,
+  body.exercise-page .main-exam-frame .long-text-content {
+    padding: 16px !important;
+    font-size: 16px !important;
+    line-height: 1.95 !important;
+  }
+  body.exercise-page .exam-text-card { padding: 16px !important; }
+  body.exercise-page .main-exam-frame #gap2-text .inline-gap-select {
+    min-width: 118px !important;
+    max-width: min(195px, 58vw) !important;
+    margin: 4px 3px !important;
+  }
 }

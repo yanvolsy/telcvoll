@@ -1,5 +1,5 @@
-const CACHE='telc-voll-20260926-black-orange-v1';
-const CORE=['/','/dashboard.html','/contact.html','/assets/app.css?v=20260926-black-orange-v1','/assets/app.js','/assets/i18n.js?v=20260926-black-orange-v1','/manifest.webmanifest','/assets/favicon-light.svg','/assets/favicon-dark.svg'];
+const CACHE='telc-voll-20260926-flat-level-buttons-v4';
+const CORE=['/','/dashboard.html','/contact.html','/assets/app.css?v=20260926-flat-level-buttons-v4','/assets/app.js','/assets/i18n.js?v=20260926-flat-level-buttons-v4','/manifest.webmanifest','/assets/favicon-light.svg','/assets/favicon-dark.svg'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));
 self.addEventListener('fetch',e=>{ if(e.request.method!=='GET'||e.request.url.includes('/api/')) return; e.respondWith(fetch(e.request).then(r=>{const copy=r.clone();caches.open(CACHE).then(c=>c.put(e.request,copy));return r}).catch(()=>caches.match(e.request))); });
