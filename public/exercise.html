@@ -1931,7 +1931,7 @@ function renderExerciseHeaderCard(){
           <div class="thema-tools">
             ${textTools(title, 'thema-title')}
             <button type="button" class="title-reveal-btn title-eye-btn is-revealed" id="titleRevealBtn" title="${text('إخفاء العنوان','Thema verbergen')}" aria-label="${text('إخفاء العنوان','Thema verbergen')}">
-              <svg class="eye-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f47b20" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+              <svg class="eye-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f47b20" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
             </button>
             <div class="inline-translation" id="thema-title-translation"></div>
           </div>
@@ -1948,7 +1948,7 @@ function renderExerciseHeaderCard(){
           </div>
           <div class="thema-tools">
             <button type="button" class="title-reveal-btn title-eye-btn" id="titleRevealBtn" title="${text('إظهار العنوان','Thema anzeigen')}" aria-label="${text('إظهار العنوان','Thema anzeigen')}">
-              <svg class="eye-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f47b20" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              <svg class="eye-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f47b20" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
             </button>
           </div>
         </div>`;
@@ -1957,19 +1957,31 @@ function renderExerciseHeaderCard(){
 
   return `
     <header class="exercise-header-card exercise-heading exercise-sticky-bar" id="exerciseStickyBar">
-      <div class="exercise-card-top-bar exercise-heading-meta">
-        <div class="exercise-card-tags exercise-heading-tags">
+      <div class="exercise-single-top-bar exercise-heading-meta exercise-control-bar exercise-sub-bar" id="exerciseControlBar">
+        <div class="top-bar-left-cluster exercise-heading-tags">
           <span class="tag tag-level-section">
             <span class="brand-dot" aria-hidden="true"></span>Telc ${esc(level)} · ${esc(sec)}
           </span>
           ${teil ? `<span class="tag tag-teil">${esc(teil)}</span>` : ''}
         </div>
-        ${timer ? `<div class="exercise-card-timer exercise-heading-timer">${timer}</div>` : ''}
-      </div>
-      <div class="exercise-card-title-bar exercise-heading-title exercise-control-bar exercise-sub-bar" id="exerciseControlBar">
-        <div class="exercise-title-slot">${titleMarkup}</div>
-        <div class="exercise-control-panel-slot">${resultPanel}</div>
-        <div class="exercise-control-shuffle-slot">${headingShuffle}</div>
+
+        ${titleMarkup ? `
+          <div class="top-bar-title-cluster exercise-card-title-bar exercise-heading-title">
+            ${titleMarkup}
+          </div>` : ''}
+
+        <div class="top-bar-result-cluster exercise-control-panel-slot">
+          ${resultPanel}
+        </div>
+
+        <div class="top-bar-shuffle-cluster exercise-control-shuffle-slot">
+          ${headingShuffle}
+        </div>
+
+        ${timer ? `
+          <div class="top-bar-timer-cluster exercise-card-timer exercise-heading-timer">
+            ${timer}
+          </div>` : ''}
       </div>
     </header>`;
 }

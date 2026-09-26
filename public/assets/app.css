@@ -7617,3 +7617,176 @@ option.opt-wrong {
   padding: 0 4px !important;
   width: 100% !important;
 }
+
+
+/* =========================================================================
+   SINGLE UNIFIED FIXED TOP BAR (Left to Right: Section -> Teil -> Hidden Title -> Result -> Shuffle -> Timer)
+   ========================================================================= */
+
+.exercise-header-card.exercise-sticky-bar {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 95 !important;
+  background: var(--bg) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border-bottom: 1.5px solid var(--line) !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04) !important;
+  padding: 8px 18px !important;
+  margin-bottom: 18px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.exercise-single-top-bar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  width: 100% !important;
+  flex-wrap: nowrap !important;
+  box-sizing: border-box !important;
+}
+
+/* 1. Left Cluster: [ Section ] [ Teil ] */
+.top-bar-left-cluster {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  flex-shrink: 0 !important;
+}
+
+.top-bar-left-cluster .tag {
+  font-size: 13px !important;
+  padding: 4px 10px !important;
+  height: 28px !important;
+  box-sizing: border-box !important;
+}
+
+/* 2. Hidden Title Cluster: [ Hidden Title Placeholder + Eye Button ] */
+.top-bar-title-cluster {
+  flex: 0 1 340px !important;
+  min-width: 200px !important;
+  max-width: 360px !important;
+  height: 36px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  overflow: hidden !important;
+}
+
+.top-bar-title-cluster .thema-title-row {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+}
+
+.top-bar-title-cluster .thema-title-content {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.top-bar-title-cluster .thema-title-content h1 {
+  font-size: 15px !important;
+  font-weight: 850 !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.25 !important;
+  color: var(--ink) !important;
+}
+
+.top-bar-title-cluster .thema-masked-wrapper {
+  flex: 1 1 auto !important;
+  min-width: 140px !important;
+  max-width: 300px !important;
+  height: 32px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 0 4px !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+}
+
+.top-bar-title-cluster .frosted-ghost-bars {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  width: 100% !important;
+}
+
+.top-bar-title-cluster .title-eye-btn {
+  flex-shrink: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  border: 1px solid rgba(244, 123, 32, 0.35) !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+}
+
+.top-bar-title-cluster .title-eye-btn:hover {
+  background: rgba(244, 123, 32, 0.1) !important;
+  border-color: #f47b20 !important;
+}
+
+/* 3. Result Cluster: [ Result Area (Reserved Space) ] */
+.top-bar-result-cluster {
+  flex: 1 1 auto !important;
+  display: inline-flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  min-width: 140px !important;
+}
+
+.top-bar-result-cluster .inline-result-panel {
+  margin: 0 auto !important;
+  padding: 5px 12px !important;
+  font-size: 13px !important;
+  height: 32px !important;
+  box-sizing: border-box !important;
+}
+
+/* 4. Shuffle Cluster: [ Shuffle Button ] */
+.top-bar-shuffle-cluster {
+  flex-shrink: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.top-bar-shuffle-cluster .exercise-heading-shuffle {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 5px 12px !important;
+  font-size: 13px !important;
+  height: 32px !important;
+  box-sizing: border-box !important;
+  border-radius: 999px !important;
+}
+
+/* 5. Timer Cluster: [ Timer (Final element on the right) ] */
+.top-bar-timer-cluster {
+  flex-shrink: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  margin-inline-start: 4px !important;
+}
+
+.top-bar-timer-cluster .progress-pill {
+  padding: 5px 12px !important;
+  font-size: 13px !important;
+  height: 32px !important;
+  box-sizing: border-box !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
