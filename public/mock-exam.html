@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -9,8 +9,8 @@
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="/manifest.webmanifest">
 <style>
-.mock-root{max-width:1280px;margin:0 auto;padding:18px 22px 130px}
-.mock-top{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid var(--line);padding:10px 0}
+.mock-root{direction:ltr;max-width:1280px;margin:0 auto;padding:18px 22px 130px}
+.mock-top{direction:ltr;position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid var(--line);padding:10px 0}
 .mock-top-inner{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px}
 .mock-brand{font-weight:950;color:var(--ink);text-decoration:none;white-space:nowrap;display:flex;align-items:center;gap:8px}
 .mock-status{display:flex;align-items:center;gap:10px;justify-content:flex-end}
@@ -25,8 +25,8 @@
 .mock-progress{display:flex;justify-content:space-between;gap:14px;align-items:center;margin:16px 0}
 .mock-progress-bar{height:8px;background:var(--line);border-radius:999px;overflow:hidden;flex:1}
 .mock-progress-bar i{display:block;height:100%;background:linear-gradient(90deg,#f47b20,#ff9a4d);border-radius:inherit;transition:width .25s ease}
-.mock-card{background:var(--white);border:1.5px solid var(--line);border-radius:24px;box-shadow:0 8px 30px rgba(0,0,0,0.04);padding:32px;box-sizing:border-box}
-html[data-theme="dark"] .mock-card{background:rgba(18,24,21,0.85);backdrop-filter:blur(16px);border-color:rgba(255,255,255,0.08);box-shadow:0 12px 36px rgba(0,0,0,0.4)}
+.mock-card{direction:ltr;background:var(--white);border:1.5px solid var(--line);border-radius:24px;box-shadow:0 8px 30px rgba(0,0,0,0.04);padding:32px;box-sizing:border-box}
+html[data-theme="dark"] .mock-card{direction:ltr;background:rgba(18,24,21,0.85);backdrop-filter:blur(16px);border-color:rgba(255,255,255,0.08);box-shadow:0 12px 36px rgba(0,0,0,0.4)}
 .mock-section-label{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
 .mock-section-label .tag{font-weight:900;background:rgba(244,123,32,0.12);color:#f47b20;border:1px solid rgba(244,123,32,0.3);padding:5px 14px;border-radius:999px;font-size:13px}
 .mock-task-count{font-size:14px;font-weight:850;color:var(--muted);background:var(--bg);border:1px solid var(--line);padding:5px 12px;border-radius:999px}
@@ -108,7 +108,7 @@ html[data-theme="dark"] .mock-word-card{background:#1a231f;border-color:rgba(255
 .mock-editor-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;font-weight:800;margin-top:8px}
 
 /* Bottom Actions Toolbar */
-.mock-actions{position:fixed;bottom:0;left:0;right:0;z-index:60;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-top:1.5px solid var(--line);padding:14px 20px;box-shadow:0 -4px 24px rgba(0,0,0,0.06)}
+.mock-actions{direction:ltr;position:fixed;bottom:0;left:0;right:0;z-index:60;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-top:1.5px solid var(--line);padding:14px 20px;box-shadow:0 -4px 24px rgba(0,0,0,0.06)}
 .mock-actions-inner{max-width:1280px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:12px}
 .mock-nav-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:14px;font-size:15px;font-weight:900;cursor:pointer;transition:all .2s ease;text-decoration:none;border:none}
 .mock-nav-btn.light{background:var(--white);border:1.5px solid var(--line);color:var(--ink)}
@@ -1192,7 +1192,15 @@ async function finishExam(){
   }
 }
 
+function enforceMockLTR(){
+  document.documentElement.setAttribute('dir','ltr');
+  document.body.setAttribute('dir','ltr');
+  document.documentElement.classList.add('mock-ltr');
+}
+
+enforceMockLTR();
 window.addEventListener('langchange', () => {
+  enforceMockLTR();
   render();
 });
 

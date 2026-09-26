@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -9,7 +9,7 @@
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="/manifest.webmanifest">
 <style>
-.result-page{max-width:1100px;margin:0 auto;padding:32px 20px 80px}
+.result-page{direction:ltr;max-width:1100px;margin:0 auto;padding:32px 20px 80px}
 
 /* Liquid Glass Hero Card */
 .result-hero{border-radius:28px;padding:36px;background:rgba(255,255,255,0.85);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1.5px solid var(--line);box-shadow:0 10px 36px rgba(0,0,0,0.05);text-align:center;position:relative;overflow:hidden}
@@ -128,12 +128,7 @@ function render() {
   const schriftMax = 225;
   const writtenPass = schrift >= 135;
   const passed = writtenPass;
-
-  let grade = 'Nicht bestanden';
-  if (schrift >= 210) grade = 'Sehr gut (1)';
-  else if (schrift >= 180) grade = 'Gut (2)';
-  else if (schrift >= 157.5) grade = 'Befriedigend (3)';
-  else if (schrift >= 135) grade = 'Ausreichend (4)';
+  const grade = writtenPass ? (schrift >= 210 ? 'Sehr gut' : schrift >= 180 ? 'Gut' : schrift >= 157.5 ? 'Befriedigend' : 'Ausreichend') : 'Nicht bestanden';
 
   const cards = sectionNames.map(name => {
     const fallback = name === 'Lesen' ? 75 : name === 'Sprachbausteine' ? 30 : name === 'Hören' ? 75 : 45;
@@ -178,21 +173,21 @@ function render() {
       <div class="tag">TELC Voll · Prüfungssimulation · ${esc(r.level || 'B2')}</div>
       <h1 class="result-status">
         ${passed 
-          ? text('تهانينا الحارة! لقد اجتزت الامتحان بنجاح 🎉', 'Herzlichen Glückwunsch! Schriftliche Prüfung bestanden 🎉')
-          : text('محاولة قيّمة وممتازة! أنت قريب جداً من النجاح 🚀', 'Toller Einsatz! Du machst große Fortschritte 🚀')}
+          ? text('أحسنت. اجتزت معيار الجزء الكتابي في هذه المحاكاة.', 'Gut gemacht. Du hast die Bestehensgrenze der schriftlichen Prüfungssimulation erreicht.')
+          : text('هذه محاولة قيّمة وممتازة للتدريب. الجزء الكتابي لم يصل بعد إلى حد النجاح، ويمكنك تحديد نقاط الضعف من التفصيل أدناه.', 'Ein aussagekräftiges Trainingsergebnis. Die schriftliche Bestehensgrenze wurde noch nicht erreicht. Die Auswertung zeigt dir die Bereiche mit Verbesserungsbedarf.')}
       </h1>
       <p class="result-sub">
         ${passed 
-          ? text('أداء رائع ومبهر! لقد حققت ' + formatGermanScore(schrift) + ' نقطة من أصل 225 وتجاوزت نسبة 60% المطلوبة رسميًا. هذا يثبت جاهزيتك التامة لامتحان TELC B2 الحقيقي!', 'Hervorragende Leistung! Du hast ' + formatGermanScore(schrift) + ' von 225 Punkten erreicht und die 60%-Bestehensgrenze gemeistert. Du bist optimal auf die offizielle Prüfung vorbereitet!')
-          : text('الامتحان التجريبي هو خطوتك الأهم نحو التفوق؛ فهو يكشف لك بدقة النقاط التي تحتاج تعزيزًا قبل الامتحان الرسمي. راجع حلول التمارين وأعد المحاكاة، وستتجاوز حد النجاح (135 نقطة) بكل ثقة!', 'Kein Grund zur Sorge! Die Simulation ist das beste Training, um gezielt Schwachstellen vor dem echten Prüfungstermin zu beheben. Nutze die Auswertung und starte einen neuen Versuch – der Erfolg ist nah!')}
+          ? text('حققت ' + formatGermanScore(schrift) + ' من 225 نقطة. في امتحان TELC B2 الرسمي، يحتاج الجزء الكتابي إلى 135 نقطة على الأقل، كما يتطلب النجاح في الامتحان الكامل اجتياز الجزء الشفهي أيضًا.', 'Du hast ' + formatGermanScore(schrift) + ' von 225 Punkten erreicht. Im offiziellen telc B2 sind mindestens 135 Punkte im schriftlichen Teil erforderlich; für die gesamte Prüfung muss zusätzlich der mündliche Teil bestanden werden.')
+          : text('حققت ' + formatGermanScore(schrift) + ' من 225 نقطة. حد الجزء الكتابي هو 135 نقطة. استخدم تفاصيل الأقسام لمعرفة أين تحتاج إلى مزيد من التدريب، ثم أعد المحاكاة.', 'Du hast ' + formatGermanScore(schrift) + ' von 225 Punkten erreicht. Die Bestehensgrenze des schriftlichen Teils liegt bei 135 Punkten. Nutze die Bereichsauswertung, um gezielt weiterzuüben und die Simulation erneut zu absolvieren.')}
       </p>
       <div class="result-badges-row">
         <div class="result-badge-item">
-          <small>${text('التقدير الرسمي', 'Prädikat')}</small>
+          <small>${text('التقدير التقريبي', 'Prädikat')}</small>
           <strong>${grade}</strong>
         </div>
         <div class="result-badge-item">
-          <small>${text('حد النجاح المطلوب', 'Bestehensgrenze')}</small>
+          <small>${text('حد الجزء الكتابي', 'Bestehensgrenze schriftlich')}</small>
           <strong>135 / 225 (60%)</strong>
         </div>
         <div class="result-badge-item">
@@ -209,7 +204,7 @@ function render() {
           <span>📜</span>
           <span>${text('كشف درجات الامتحان الكتابي (TELC B2)', 'Ergebnis der schriftlichen Prüfung (TELC B2)')}</span>
         </div>
-        <span class="telc-cert-pill">${text('نموذج شهادة TELC الرسمية', 'Offizielles TELC-Muster')}</span>
+        <span class="telc-cert-pill">${text('تنسيق قريب من كشف الدرجات', 'Ergebnisübersicht im Prüfungsformat')}</span>
       </div>
 
       <div class="telc-cert-table">
@@ -269,7 +264,15 @@ function render() {
   `;
 }
 
+function enforceResultLTR(){
+  document.documentElement.setAttribute('dir','ltr');
+  document.body.setAttribute('dir','ltr');
+  document.documentElement.classList.add('mock-result-ltr');
+}
+
+enforceResultLTR();
 window.addEventListener('langchange', () => {
+  enforceResultLTR();
   render();
 });
 

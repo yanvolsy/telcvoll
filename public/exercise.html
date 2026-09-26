@@ -525,7 +525,7 @@ function renderHoerenChoiceQuestions(){
  }).join('');
  const toolbar=`<div class="hoeren-choice-toolbar"><span class="hoeren-choice-count">${Object.keys(answers).length} / ${items.length}</span></div>`;
  const actions=`<div class="exercise-actions"><div class="exercise-nav"><button class="btn" id="checkBtn">${text(mockMode?'إنهاء الجزء':'تحقق من الإجابات',mockMode?'Teil beenden':'Antworten prüfen')}</button>${mockMode?'':`<button class="btn model-btn" id="modelBtn">${text(showModelAnswers?'إخفاء الإجابة':'الإجابة النموذجية',showModelAnswers?'Musterlösung ausblenden':'Musterlösung')}</button>`}</div></div>`;
- document.getElementById('content').innerHTML=`${heading}<main class="hoeren-choice-page">${audio}<div class="hoeren-choice-list-head"><div><b>AUFGABEN</b><small>${text('اختر الإجابة الصحيحة لكل سؤال','Wählen Sie die richtige Antwort für jede Frage.')}</small></div>${toolbar}</div><section class="hoeren-choice-list">${rows}</section></main>${actions}`;
+ document.getElementById('content').innerHTML=`${heading}${renderExerciseControlBar()}<main class="hoeren-choice-page"><div class="exercise-content-frame">${audio}<div class="hoeren-choice-list-head"><div><b>AUFGABEN</b><small>${text('اختر الإجابة الصحيحة لكل سؤال','Wählen Sie die richtige Antwort für jede Frage.')}</small></div>${toolbar}</div><section class="hoeren-choice-list">${rows}</section></div></main>${actions}`;
  document.querySelectorAll('.hoeren-choice-option[data-q]').forEach(b=>b.onclick=()=>selectAnswer(b.dataset.q,b.dataset.o));
  bindTextTools();
  bindHoerenAudioPlayer();
@@ -907,7 +907,8 @@ function renderTF(){
 
   document.getElementById('content').innerHTML = `
     ${headingBlock}
-    <div class="hoeren-workspace-shell">
+    ${renderExerciseControlBar()}
+    <div class="hoeren-workspace-shell exercise-content-frame">
       ${audioBox}
       ${tableCard}
     </div>
@@ -1697,6 +1698,8 @@ function topShuffleCurrentExercise(){
   }else if(sec==='Sprachbausteine' && teil==='Teil 2'){
     const opts=sharedOptions();
     wordOrder=shuffle((wordOrder||opts.map(([k])=>k)));
+  }else if(sec==='Sprachbausteine' && teil==='Teil 3'){
+    items.forEach(it=>{const n=String(it.position_no);const opts=(it.options||[]).map(o=>o.option_key);if(opts.length>1)optionOrders[n]=shuffle(opts);});
   }
   const st=captureExerciseScroll();
   rerenderExerciseStable(st);
@@ -1780,15 +1783,6 @@ function renderExerciseHeaderCard(){
     }
   }
 
-  const hasBottomBar = Boolean(headingShuffle || resultPanel);
-  const bottomBar = hasBottomBar ? `
-    <div class="exercise-sub-bar exercise-card-bottom-bar" id="exerciseSubBar">
-      <div class="exercise-sub-items">
-        ${resultPanel}
-        ${headingShuffle}
-      </div>
-    </div>` : '';
-
   return `
     <div class="exercise-header-card exercise-heading">
       <div class="exercise-card-top-bar exercise-heading-meta">
@@ -1801,8 +1795,32 @@ function renderExerciseHeaderCard(){
         ${timer ? `<div class="exercise-card-timer exercise-heading-timer">${timer}</div>` : ''}
       </div>
       ${titleMarkup ? `<div class="exercise-card-title-bar exercise-heading-title">${titleMarkup}</div>` : ''}
-      ${bottomBar}
     </div>`;
+}
+
+function renderExerciseControlBar(){
+  const sec=String(model?.exercise?.section||'');
+  const teil=String(model?.exercise?.teil||'');
+  const canShuffle=!mockMode && isShuffleAllowed(sec,teil);
+  const shuffleBtn=canShuffle ? `
+    <button type="button" class="exercise-heading-shuffle" id="headingShuffleBtn" title="${text('خلط الأسئلة','Aufgaben mischen')}" aria-label="${text('خلط الأسئلة','Aufgaben mischen')}">
+      <span class="shuffle-icon" aria-hidden="true">⤨</span>
+      <span>${text('خلط الأسئلة','Aufgaben mischen')}</span>
+    </button>` : '';
+  const showResultScore=userCheckedAnswers && resultData;
+  const isPass=(resultData?.percent||0)>=60;
+  const resultPanel=showResultScore ? `
+    <div class="inline-result-panel ${isPass?'pass':'fail'}" role="status">
+      <span class="result-panel-icon" aria-hidden="true">${isPass?'✓':'✕'}</span>
+      <span class="result-panel-label">${text('النتيجة:','Ergebnis:')}</span>
+      <strong class="result-panel-score">${resultData.score} / ${resultData.max}</strong>
+      <span class="result-panel-percent">(${resultData.percent}%)</span>
+    </div>` : '';
+  if(!shuffleBtn && !resultPanel) return '';
+  return `<div class="exercise-control-bar" id="exerciseControlBar">
+    <div class="exercise-control-result">${resultPanel}</div>
+    <div class="exercise-control-shuffle">${shuffleBtn}</div>
+  </div>`;
 }
 
 function layout(main,side,workspaceClass=''){
@@ -1811,9 +1829,10 @@ function layout(main,side,workspaceClass=''){
 
  return `
   ${renderExerciseHeaderCard()}
+  ${renderExerciseControlBar()}
   ${renderAudio()}
   <div class="exam-workspace ${combinedWorkspaceClass}">
-    <section class="exam-main">${main}</section>
+    <section class="exam-main"><div class="exercise-content-frame">${main}</div></section>
   </div>
   <div class="exercise-actions">
     <div class="exercise-nav">
