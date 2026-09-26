@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+Allow: /plans.html
+Allow: /self-test.html
+Allow: /login.html
+Allow: /register.html
+Allow: /contact.html
+Allow: /install.html
+Disallow: /admin/
+Disallow: /api/
+Disallow: /dashboard.html
+Disallow: /profile.html
+Disallow: /exercise.html
+Disallow: /exam.html
+Disallow: /mock-exam.html
+Disallow: /self-test-result.html
+Disallow: /payment-success.html
+Disallow: /verify-email.html
+Disallow: /reset-password.html
+Disallow: /forgot-password.html
+
+Sitemap: https://telcvoll.de/sitemap.xml

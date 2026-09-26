@@ -210,6 +210,17 @@ function captureExerciseScroll(){
 function restoreExerciseScroll(state){if(!state)return;const restore=()=>{const m=document.querySelector('.exam-main'),sd=document.querySelector('.exam-side'),ws=document.querySelector('.exam-workspace');if(m)m.scrollTop=state.main;if(sd)sd.scrollTop=state.side;if(ws)ws.scrollTop=state.workspace;window.scrollTo(state.x,state.y);if(state.anchorTop!==null){const anchor=document.querySelector('.exam-main .active-item, .exam-main .exam-text-card, .exam-main .tf-row, .exam-side .side-question');if(anchor){const delta=anchor.getBoundingClientRect().top-state.anchorTop;if(Math.abs(delta)>1)window.scrollTo(state.x,window.scrollY+delta);}}};restore();requestAnimationFrame(restore);requestAnimationFrame(()=>requestAnimationFrame(restore));setTimeout(restore,40);}
 function rerenderExerciseStable(state){renderWorkspace(false);bindActions();restoreExerciseScroll(state);}
 
+function parseAdText(raw){
+  if(!raw) return {title:'', body:''};
+  if(typeof raw === 'object') return {title: String(raw.title||raw.ad_title||'').trim(), body: String(raw.body||raw.text||raw.content||'').trim()};
+  const str = String(raw).trim();
+  const nl = str.indexOf('\n');
+  if(nl !== -1){
+    return { title: str.slice(0, nl).trim(), body: str.slice(nl+1).trim() };
+  }
+  return { title: str, body: '' };
+}
+
 function renderMatching(){
  const heads=getExerciseHeadings(model);
  const items=model.items||[];
@@ -219,7 +230,7 @@ function renderMatching(){
  if(!headingOrder)headingOrder=heads.map((_,i)=>i);
  const usedAnswerIds=new Set(Object.values(answers).filter(Boolean).map(v=>matchingAnswerIdentity(v)));
 
- const bodySection = bodyText ? `
+ const bodySection = (bodyText && !isLesen3) ? `
    <div class="long-text matching-reading-panel" style="margin-bottom:24px;">
      <div class="long-text-tools">${textTools(bodyText, 'matching-main-body')}</div>
      <div class="long-text-content" id="matching-main-body" data-content-id="matching-main-body" data-source="${esc(bodyText)}">${escBody(bodyText)}</div>
@@ -227,12 +238,57 @@ function renderMatching(){
    </div>
  ` : '';
 
- const situationsHeader = (isLesen3 && bodyText) ? `
-   <div class="matching-situations-head" style="margin:20px 0 14px;padding-top:16px;border-top:1px solid var(--line);">
-     <h3 style="margin:0;font-size:18px;font-weight:900;display:flex;align-items:center;gap:8px;">
-       <span>📋</span>
-       <span>${text('المواقف والمطلوب مطابقتها مع الإعلانات:','Situationen (Zuordnung zu den Anzeigen):')}</span>
-     </h3>
+ const lesen3ResultsCard = (isLesen3 && resultData) ? `
+   <div class="lesen3-results-card" style="background:var(--white);border:1.5px solid var(--line);border-radius:18px;padding:20px;margin-bottom:26px;box-shadow:var(--shadow);">
+     <div class="lesen3-results-head" style="display:flex;align-items:center;gap:8px;font-size:17px;font-weight:900;color:#2d9b68;margin-bottom:14px;">
+       <span>☑</span>
+       <span>${text('الإجابات الصحيحة', 'Richtige Lösungen')}</span>
+     </div>
+     <div class="lesen3-results-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(190px, 1fr));gap:10px;">
+       ${items.map(it => {
+         const n = String(it.position_no);
+         const detail = resultData?.details?.find(d => String(d.prompt) === String(it.prompt));
+         const correct = String(detail?.correct_answer || it.correct_answer || 'X').trim().toUpperCase();
+         const isX = correct === 'X';
+         const pillText = isX ? 'X' : `Text  ${correct}`;
+         return `
+         <div class="lesen3-res-row" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg);border:1px solid var(--line);border-radius:12px;">
+           <strong style="font-size:14.5px;">Titre ${n}</strong>
+           <span style="display:inline-flex;align-items:center;justify-content:center;padding:5px 14px;border-radius:9px;font-weight:900;font-size:13.5px;color:#fff;background:${isX ? '#94a3b8' : '#2d9b68'};">
+             ${pillText}
+           </span>
+         </div>`;
+       }).join('')}
+     </div>
+   </div>
+ ` : '';
+
+ const lesen3AdsMarkup = isLesen3 ? `
+   <div class="lesen3-ads-section" style="margin-bottom:32px;">
+     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+       <h3 style="margin:0;font-size:18px;font-weight:900;display:flex;align-items:center;gap:8px;">
+         <span>📰</span>
+         <span>${text('الإعلانات (12 إعلاناً — Anzeigen A bis L):','Anzeigen (Text A bis L):')}</span>
+       </h3>
+       <small class="muted">${text('اقرأ الإعلانات واختر الإعلان المناسب لكل موقف بالأسفل. إعلانان لا يناسبان أي موقف (X).','Lesen Sie die Anzeigen und ordnen Sie die passenden Situationen zu.')}</small>
+     </div>
+     <div class="lesen3-ads-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(310px, 1fr));gap:16px;">
+       ${heads.map((h, i) => {
+         const letter = String.fromCharCode(65 + i);
+         const ad = parseAdText(h);
+         const adCid = 'ad-text-' + letter;
+         return `
+         <article class="lesen3-ad-card" id="card-ad-${letter}" style="background:var(--white);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;">
+           <div class="ad-card-top" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+             <span class="ad-tag" style="background:#0f172a;color:#fff;font-weight:900;font-size:13px;padding:4px 12px;border-radius:8px;">Text ${letter}</span>
+             <div class="ad-tools">${textTools(ad.body || ad.title, adCid)}</div>
+           </div>
+           ${ad.title ? `<h4 class="ad-title" style="margin:4px 0 8px;font-size:16px;font-weight:850;color:var(--green);">${esc(ad.title)}</h4>` : ''}
+           <div class="ad-body" id="${adCid}" data-content-id="${adCid}" data-source="${esc(ad.body || ad.title)}" style="font-size:14px;line-height:1.75;color:var(--ink);">${escBody(ad.body || ad.title)}</div>
+           <div class="inline-translation" id="${adCid}-translation"></div>
+         </article>`;
+       }).join('')}
+     </div>
    </div>
  ` : '';
 
@@ -244,15 +300,29 @@ function renderMatching(){
    const shownAnswer=showModelAnswers&&correctVal?correctVal:selected;
    const shownLabel=shownAnswer?labelFor(it.position_no,shownAnswer):'';
    const resultClass=detail?(detail.ok?'answer-correct':'answer-wrong'):'';
-   const options=heads.map((h,i)=>({key:String.fromCharCode(65+i),text:matchingDisplayLabel(h,i)}));
+   
+   let options = [];
+   if (isLesen3) {
+     options = heads.map((h, i) => {
+       const letter = String.fromCharCode(65 + i);
+       const ad = parseAdText(h);
+       const label = `Text ${letter}${ad.title ? ': ' + ad.title : ''}`;
+       return { key: letter, text: label };
+     });
+     options.push({ key: 'X', text: text('X — لا يوجد إعلان مناسب لهذا الموقف', 'X — Keine passende Anzeige') });
+   } else {
+     options = heads.map((h,i)=>({key:String.fromCharCode(65+i),text:matchingDisplayLabel(h,i)}));
+   }
+
    const selectedIdentity=selected?matchingAnswerIdentity(selected):'';
    const selectOptions=options.map(o=>{
      const identity=matchingAnswerIdentity(o.key);
-     const used=usedAnswerIds.has(identity)&&selectedIdentity!==identity;
+     const isX = isLesen3 && o.key === 'X';
+     const used = !isX && usedAnswerIds.has(identity) && selectedIdentity !== identity;
      return `<option value="${esc(o.key)}" ${selected===o.key?'selected':''} ${used?'disabled':''}>${esc(o.text)}${used?' — '+text('تم اختياره','Bereits ausgewählt'):''}</option>`;
    }).join('');
-   const assignLabel = isLesen3 ? text('الإعلان المناسب لهذا الموقف:','Passende Anzeige für diese Situation:') : text('العنوان المناسب لهذه الفقرة:','Passende Überschrift für diesen Text:');
-   const assignPlaceholder = isLesen3 ? text('— اختر الإعلان المناسب —','— Passende Anzeige auswählen —') : text('— اختر العنوان —','— Überschrift auswählen —');
+   const assignLabel = isLesen3 ? `Titre ${it.position_no} — ` + text('الإعلان المناسب لهذا الموقف:','Passende Anzeige für diese Situation:') : text('العنوان المناسب لهذه الفقرة:','Passende Überschrift für diesen Text:');
+   const assignPlaceholder = isLesen3 ? text('— اختر الإعلان المناسب (Text A - L أو X) —','— Passende Anzeige auswählen (Text A - L oder X) —') : text('— اختر العنوان —','— Überschrift auswählen —');
    return `<article class="exam-text-card ${selected?'answered':''} ${resultClass} ${String(activeItem)===String(it.position_no)?'active-item':''}" data-item="${it.position_no}">
      <div class="paragraph-assignment">
         <div class="paragraph-assignment-head">
@@ -269,7 +339,21 @@ function renderMatching(){
    </article>`;
  }).join('');
 
- const main = `${bodySection}${situationsHeader}${cards}`;
+ const main = isLesen3 ? `
+   ${lesen3ResultsCard}
+   ${lesen3AdsMarkup}
+   <div class="lesen3-situations-section">
+     <div style="margin-bottom:14px;">
+       <h3 style="margin:0 0 4px;font-size:18px;font-weight:900;display:flex;align-items:center;gap:8px;">
+         <span>📋</span>
+         <span>${text('المواقف (10 مواقف — Situationen 1 bis 10):', 'Situationen (1 bis 10):')}</span>
+       </h3>
+       <small class="muted">${text('حدد الإعلان المناسب لكل موقف من القائمة المنسدلة:','Wählen Sie für jede Situation die passende Anzeige aus:')}</small>
+     </div>
+     ${cards}
+   </div>
+ ` : `${bodySection}${cards}`;
+
  const side=headingOrder.map(i=>({h:heads[i],i})).map(({h,i})=>{
    const key=String.fromCharCode(65+i);
    const displayHeading=matchingDisplayLabel(h,i);
@@ -289,39 +373,42 @@ function renderMatching(){
       <div class="inline-translation" id="${cid}-translation"></div>
    </div>`;
  }).join('');
+
  const answeredCount=Object.keys(answers).filter(k=>answers[k]).length;
- const resultHtml='';
-  const meta=matchingMeta();
-  const headingsBankUnder = `
-    <div class="matching-headings-bank" style="margin-top:32px;padding:0;background:transparent;border:0;border-radius:0;box-shadow:none;">
-      <div class="matching-bank-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
-        <div>
-          <h3 style="margin:0 0 4px;font-size:18px;font-weight:900;display:flex;align-items:center;gap:8px;">
-            <span>🏷️</span>
-            <span>${esc(meta.title)} — ${text('العناوين المتاحة للمطابقة', 'Verfügbare Überschriften')}</span>
-          </h3>
-          <small style="color:var(--muted);font-size:12.5px;">${text('يمكنك مراجعة جميع العناوين هنا أو الضغط على أي عنوان لاختياره مباشرة للفقرة المحددة.', 'Überschriften zur Auswahl für die Absätze.')}</small>
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;">
-          <span class="side-counter-pill">${answeredCount} / ${items.length}</span>
-        </div>
-      </div>
-      <div class="heading-list-grid" style="display:flex;flex-direction:column;gap:12px;">
-        ${side}
-      </div>
-    </div>
-  `;
-  document.getElementById('content').innerHTML=layout(main + headingsBankUnder, '');
+ const meta=matchingMeta();
+ const headingsBankUnder = !isLesen3 ? `
+   <div class="matching-headings-bank" style="margin-top:32px;padding:0;background:transparent;border:0;border-radius:0;box-shadow:none;">
+     <div class="matching-bank-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+       <div>
+         <h3 style="margin:0 0 4px;font-size:18px;font-weight:900;display:flex;align-items:center;gap:8px;">
+           <span>🏷️</span>
+           <span>${esc(meta.title)} — ${text('العناوين المتاحة للمطابقة', 'Verfügbare Überschriften')}</span>
+         </h3>
+         <small style="color:var(--muted);font-size:12.5px;">${text('يمكنك مراجعة جميع العناوين هنا أو الضغط على أي عنوان لاختياره مباشرة للفقرة المحددة.', 'Überschriften zur Auswahl für die Absätze.')}</small>
+       </div>
+       <div style="display:flex;align-items:center;gap:10px;">
+         <span class="side-counter-pill">${answeredCount} / ${items.length}</span>
+       </div>
+     </div>
+     <div class="heading-list-grid" style="display:flex;flex-direction:column;gap:12px;">
+       ${side}
+     </div>
+   </div>
+ ` : '';
+
+ document.getElementById('content').innerHTML = layout(main + headingsBankUnder, '', isLesen3 ? 'lesen3-workspace' : '');
+
  document.querySelectorAll('[data-item]').forEach(c=>{
    c.onmousedown=e=>{if(e.target.closest('select,.text-tools,.mini-tool,.clear-selection'))return;e.preventDefault();};
    c.onclick=e=>{if(e.target.closest('select,.text-tools,.mini-tool,.clear-selection'))return;activeItem=String(c.dataset.item);document.querySelectorAll('[data-item]').forEach(x=>x.classList.toggle('active-item',String(x.dataset.item)===activeItem));};
  });
- // Enforce one-to-one matching at DOM level as well as in the state layer.
+
  document.querySelectorAll('[data-paragraph-select]').forEach(sel=>{
    const refreshUniqueOptions=()=>{
      const selectedKeys=new Set([...document.querySelectorAll('[data-paragraph-select]')].filter(x=>x!==sel).map(x=>String(x.value||'')).filter(Boolean).map(matchingAnswerIdentity));
      [...sel.options].forEach(opt=>{
        if(!opt.value){opt.disabled=false;return;}
+       if(opt.value==='X'||opt.value==='x'){opt.disabled=false;return;}
        const id=matchingAnswerIdentity(opt.value);
        opt.disabled=selectedKeys.has(id) && String(opt.value)!==String(sel.value||'');
      });
@@ -488,7 +575,7 @@ function renderChoiceQuestions(){
             const optResultClass=detail&&isSelected?(detail.ok?'result-correct':'result-wrong'):'';
             return `<div class="option-row" style="position:relative;">
               <div class="option-tool-wrap" style="display:flex;align-items:center;gap:10px;">
-                <button type="button" class="side-option ${isSelected?'selected':''} ${optResultClass} ${isCorrectOption?'model-correct':''}" data-q="${esc(n)}" data-o="${esc(o.option_key)}" style="flex:1;text-align:start;justify-content:flex-start;padding:12px 16px;border-radius:12px;font-size:14.5px;font-weight:750;background:${isSelected?'var(--green)':'var(--bg)'};color:${isSelected?'#fff':'var(--ink)'};border:1.5px solid ${isSelected?'var(--green)':'var(--line)'};">
+                <button type="button" class="side-option ${isSelected?'selected':''} ${optResultClass} ${isCorrectOption?'model-correct':''}" data-q="${esc(n)}" data-o="${esc(o.option_key)}" style="flex:1;text-align:start;justify-content:flex-start;padding:12px 16px;border-radius:12px;font-size:14.5px;font-weight:750;background:var(--bg);color:var(--ink);border:${isSelected?'2.5px solid var(--green)':'1.5px solid var(--line)'};box-shadow:${isSelected?'0 0 0 1px var(--green)':'none'};">
                   <span class="option-text" id="${ocid}" data-content-id="${ocid}" data-source="${esc(o.option_text||'')}">${esc(o.option_key)}) ${esc(o.option_text||'')}</span>
                 </button>
                 ${textTools(o.option_text||'',ocid)}
@@ -1698,6 +1785,13 @@ function topShuffleCurrentExercise(){
   rerenderExerciseStable(st);
 }
 
+function isShuffleAllowed(sec, teil){
+  if (sec === 'Lesen' && (teil === 'Teil 1' || teil === 'Teil 3')) return true;
+  if (sec === 'Sprachbausteine' && teil === 'Teil 2') return true;
+  if (sec === 'Hören' && (teil === 'Teil 1' || teil === 'Teil 3')) return true;
+  return false;
+}
+
 function layout(main,side,workspaceClass=''){
  const isHoeren = String(model?.exercise?.section||'').toLowerCase().includes('hör') || String(model?.exercise?.section||'').toLowerCase().includes('hoer');
  const combinedWorkspaceClass = [workspaceClass, isHoeren ? 'hoeren-workspace' : ''].filter(Boolean).join(' ');
@@ -1706,32 +1800,43 @@ function layout(main,side,workspaceClass=''){
  const activeDuration = duration || (model?.exercise ? getTelcDurationSeconds(model.exercise) : 1200);
  const initialMin = String(Math.floor(activeDuration / 60)).padStart(2, '0');
  const timer=(mockMode||activeDuration)?`<div class="progress-pill ${mockMode?'mock-global-timer':''}" id="timerEl"><span class="timer-icon" aria-hidden="true">⏱️</span> <span class="timer-digits">${initialMin}:00</span></div>`:'';
- const resultPanel=resultData?`<div class="inline-result-panel ${resultData.percent>=60?'pass':'fail'}"><div class="result-panel-main"><span class="result-panel-label">${text('النتيجة','Ergebnis')}</span><strong>${resultData.score} / ${resultData.max}</strong></div><div class="result-panel-meta"><span>${resultData.percent}%</span><b>${esc(resultData.result||'')}</b></div></div>`:'';
+ const resultPanel=resultData?`<div class="inline-result-panel ${resultData.percent>=60?'pass':'fail'}"><div class="result-panel-main"><span class="result-panel-label">${text('النتيجة','Ergebnis')}</span> <strong>${resultData.score} / ${resultData.max}</strong></div><div class="result-panel-meta"><span>${resultData.percent}%</span> <b>${esc(resultData.result||'')}</b></div></div>`:'';
  
- const shuffleSections = ['Lesen','Hören','Sprachbausteine'];
- const hasTopShuffle = !mockMode && shuffleSections.includes(String(model.exercise.section||''));
- const headingShuffle = hasTopShuffle ? `
+ const sec = String(model?.exercise?.section || '');
+ const teil = String(model?.exercise?.teil || '');
+ const canShuffle = !mockMode && isShuffleAllowed(sec, teil);
+ const headingShuffle = canShuffle ? `
     <button type="button" class="exercise-heading-shuffle" id="headingShuffleBtn" title="${text('خلط الأسئلة','Aufgaben mischen')}" aria-label="${text('خلط الأسئلة','Aufgaben mischen')}">
       <span aria-hidden="true">⤨</span><span>${text('خلط الأسئلة','Aufgaben mischen')}</span>
     </button>` : '';
+
  const headingMeta = `
   <div class="exercise-heading-meta">
     <div class="exercise-heading-tags">
-      <span class="tag tag-level-section">Telc ${esc(model.exercise.level||'B2')} · ${esc(model.exercise.section)}</span>
-      <span class="tag tag-teil">${esc(model.exercise.teil)}</span>
+      <span class="tag tag-level-section">Telc ${esc(model.exercise.level||'B2')} · ${esc(sec)}</span>
+      <span class="tag tag-teil">${esc(teil)}</span>
     </div>
     <div class="exercise-heading-controls">
-      ${headingShuffle}
       ${timer ? `<div class="exercise-heading-timer">${timer}</div>` : ''}
     </div>
   </div>`;
+
+ const subBar = (headingShuffle || resultPanel) ? `
+  <div class="exercise-sub-bar" id="exerciseSubBar">
+    <div class="exercise-sub-left">
+      ${resultPanel}
+    </div>
+    <div class="exercise-sub-right">
+      ${headingShuffle}
+    </div>
+  </div>` : '';
 
  return `<div class="exercise-heading">
   ${headingMeta}
   <div class="exercise-heading-title">${headingTools}</div>
   ${renderAudio()}
+  ${subBar}
  </div>
- ${resultPanel}
  <div class="exam-workspace ${combinedWorkspaceClass}">
    <section class="exam-main">${main}</section>
  </div>
