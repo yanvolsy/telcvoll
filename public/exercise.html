@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1310"><title>تمرين TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260918-cairo-local-v2">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1310"><title>تمرين TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260926-clean-v4">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
@@ -8,6 +8,130 @@
 <link rel="manifest" href="/manifest.webmanifest"><style><!-- TELC Voll: unified homepage typography -->
 html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
 html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}</style>
+
+<style id="definitive-clean-paragraph-ui">
+/* TELC Voll - Definitive Paragraph & Frame UI Overrides */
+.exercise-content-frame {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.exam-text-card,
+html[data-theme="dark"] .exam-text-card,
+.exercise-page .exam-text-card {
+  background: transparent !important;
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 14px 0 28px 0 !important;
+  margin: 0 0 28px 0 !important;
+  border-bottom: 1px solid var(--line) !important;
+}
+
+.exam-text-card:hover,
+.exam-text-card.active-item,
+.exam-text-card.answered,
+.exam-text-card.answer-correct,
+.exam-text-card.answer-wrong {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.exam-text,
+.exam-text-card .exam-text {
+  font-size: 16.5px !important;
+  line-height: 1.9 !important;
+  letter-spacing: -0.01em !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+html[data-theme="dark"] .exam-text,
+html[data-theme="dark"] .exam-text-card .exam-text {
+  color: #f1f5f9 !important;
+}
+
+html[data-theme="light"] .exam-text,
+html[data-theme="light"] .exam-text-card .exam-text {
+  color: #1a202c !important;
+}
+
+.paragraph-tools-row,
+.exercise-page .paragraph-tools-row,
+html[lang="ar"] .paragraph-tools-row,
+body[dir="rtl"] .paragraph-tools-row {
+  direction: ltr !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 8px 0 12px 0 !important;
+  padding: 0 !important;
+}
+
+.paragraph-tools-row .text-tools {
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-left: auto !important;
+  margin-inline-start: auto !important;
+}
+
+.paragraph-assignment {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 0 10px 0 !important;
+  width: 100% !important;
+}
+
+.paragraph-assignment-controls {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+.paragraph-assignment-controls .mock-select,
+.paragraph-assignment select,
+select.mock-select {
+  width: 100% !important;
+  border-radius: 12px !important;
+  padding: 12px 16px !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+  transition: all 0.2s ease !important;
+}
+
+html[data-theme="dark"] .paragraph-assignment-controls .mock-select,
+html[data-theme="dark"] .paragraph-assignment select,
+html[data-theme="dark"] select.mock-select {
+  background: #121815 !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.14) !important;
+  color: #f1f5f9 !important;
+}
+
+html[data-theme="light"] .paragraph-assignment-controls .mock-select,
+html[data-theme="light"] .paragraph-assignment select,
+html[data-theme="light"] select.mock-select {
+  background: #ffffff !important;
+  border: 1.5px solid var(--line) !important;
+  color: #1a202c !important;
+}
+</style>
+
 </head>
 <body>
 <header class="top exercise-topbar">
@@ -398,19 +522,24 @@ function renderMatching(){
         <span class="correct-badge">★ ${text('الإجابة النموذجية:','Musterlösung:')}</span>
         <strong class="correct-full-text">${esc(fullCorrectAnswerText)}</strong>
       </div>` : '');
-    return `<article class="exam-text-card ${selected?'answered':''} ${resultClass} ${showModelAnswers?'model-shown':''} ${String(activeItem)===String(it.position_no)?'active-item':''}" data-item="${it.position_no}">
-      <div class="paragraph-assignment">
+    return `<article class="exam-text-card ${selected?'answered':''} ${resultClass} ${showModelAnswers?'model-shown':''} ${String(activeItem)===String(it.position_no)?'active-item':''}" data-item="${it.position_no}" style="background:transparent !important;background-color:transparent !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;border:none !important;border-radius:0 !important;box-shadow:none !important;padding:14px 0 28px 0 !important;margin:0 0 28px 0 !important;border-bottom:1px solid var(--line) !important;">
+      <div class="paragraph-assignment" style="background:transparent !important;border:none !important;box-shadow:none !important;padding:0 !important;margin:0 0 10px 0 !important;width:100% !important;">
         <div class="paragraph-assignment-head" style="display:none !important;" aria-hidden="true"></div>
-        <div class="paragraph-assignment-controls">
-          <select data-paragraph-select="${it.position_no}" data-ad-select="${it.position_no}" aria-label="${assignLabel}" class="mock-select ${selected?'answered':''} ${selectResultClass}">
+        <div class="paragraph-assignment-controls" style="background:transparent !important;border:none !important;box-shadow:none !important;padding:0 !important;width:100% !important;">
+          <select data-paragraph-select="${it.position_no}" data-ad-select="${it.position_no}" aria-label="${assignLabel}" class="mock-select ${selected?'answered':''} ${selectResultClass}" style="width:100% !important;border-radius:12px !important;padding:12px 16px !important;font-size:15px !important;font-weight:700 !important;outline:none !important;box-sizing:border-box !important;">
             <option value="">${assignPlaceholder}</option>
             ${selectOptions}
           </select>
         </div>
       </div>
-      <div class="paragraph-tools-row">${textTools(it.prompt,cid)}</div>
+      <div class="paragraph-tools-row" style="direction:ltr !important;display:flex !important;justify-content:flex-end !important;align-items:center !important;width:100% !important;margin:8px 0 12px 0 !important;padding:0 !important;">
+        <div class="text-tools" style="display:flex !important;justify-content:flex-end !important;align-items:center !important;gap:8px !important;margin-left:auto !important;margin-inline-start:auto !important;">
+          <button type="button" class="mini-tool" data-translate="${cid}-translation" data-source-id="${cid}" aria-label="${text('ترجمة','Übersetzen')}" aria-pressed="false">文</button>
+          <button type="button" class="mini-tool" data-speak="${cid}" aria-label="${text('نطق بالألمانية','Deutsch vorlesen')}" aria-pressed="false">◉</button>
+        </div>
+      </div>
       ${correctHint}
-       <div class="exam-text" id="${cid}" data-content-id="${cid}" data-source="${esc(it.prompt)}" style="font-size:15.5px;line-height:1.85;color:var(--ink);">${escBody(it.prompt)}</div>
+       <div class="exam-text" id="${cid}" data-content-id="${cid}" data-source="${esc(it.prompt)}" style="font-size:16.5px;line-height:1.9;color:var(--ink);background:transparent !important;">${escBody(it.prompt)}</div>
       <div class="inline-translation" id="${cid}-translation"></div>
     </article>`;
   }).join('');
