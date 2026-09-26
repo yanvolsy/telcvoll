@@ -369,12 +369,25 @@ function renderMatching(){
       const identity=matchingAnswerIdentity(o.key);
       const isX = isLesen3 && o.key.toUpperCase() === 'X';
       const used = !isX && usedAnswerIds.has(identity) && selectedIdentity !== identity;
-      return `<option value="${esc(o.key)}" ${displaySelected===o.key?'selected':''} ${used?'disabled':''}>${esc(o.text)}${used?' — '+text('تم اختياره','Bereits ausgewählt'):''}</option>`;
+      const isCorrectOption = (userCheckedAnswers || showModelAnswers) && correctVal && o.key.toUpperCase() === correctVal.toUpperCase();
+      const isUserChoice = selected && o.key.toUpperCase() === selected.toUpperCase();
+      const isUserWrongOption = userCheckedAnswers && isUserChoice && !detail?.ok;
+
+      let prefix = '';
+      let optStyle = '';
+      if (isCorrectOption) {
+        prefix = '✓ ';
+        optStyle = 'color:#10b981;font-weight:bold;background:rgba(16,185,129,0.12);';
+      } else if (isUserWrongOption) {
+        prefix = '✕ ';
+        optStyle = 'color:#ef4444;font-weight:bold;background:rgba(239,68,68,0.12);text-decoration:line-through;';
+      }
+      return `<option value="${esc(o.key)}" style="${optStyle}" class="${isCorrectOption?'opt-correct':''}${isUserWrongOption?' opt-wrong':''}" ${displaySelected===o.key?'selected':''} ${used?'disabled':''}>${prefix}${esc(o.text)}${used?' — '+text('تم اختياره','Bereits ausgewählt'):''}</option>`;
     }).join('');
     
     const assignLabel = text('اختر العنوان المناسب','Passende Überschrift auswählen');
     const assignPlaceholder = isLesen3 ? text('— اختر العنوان —','— Überschrift auswählen —') : text('— اختر العنوان —','— Überschrift auswählen —');
-    const selectResultClass = showModelAnswers && correctVal ? 'assignment-model-correct' : (detail ? (detail.ok ? 'assignment-model-correct' : 'assignment-model-wrong') : '');
+    const selectResultClass = userCheckedAnswers ? (detail?.ok ? 'assignment-model-correct' : 'assignment-model-wrong') : (showModelAnswers && correctVal ? 'assignment-model-correct' : '');
     const fullCorrectAnswerText = getFullAnswerText(it, correctVal, heads);
     const correctHint = (resultData && !detail?.ok && correctVal && selected !== correctVal) ? `
       <div class="assignment-correct-answer">
@@ -1893,12 +1906,18 @@ function renderExerciseHeaderCard(){
 
   const showResultScore = userCheckedAnswers && resultData;
   const isPass = (resultData?.percent || 0) >= 60;
+  const rightCount = resultData?.details ? resultData.details.filter(d => d.ok).length : (resultData?.score || 0);
+  const wrongCount = resultData?.details ? resultData.details.filter(d => !d.ok).length : Math.max(0, (resultData?.max || 0) - (resultData?.score || 0));
   const resultPanel = showResultScore ? `
-    <div class="inline-result-panel ${isPass ? 'pass' : 'fail'}" dir="${getLang()==='ar'?'rtl':'ltr'}">
+    <div class="inline-result-panel ${isPass ? 'pass' : 'fail'}" dir="${getLang()==='ar'?'rtl':'ltr'}" role="status">
       <span class="result-panel-icon" aria-hidden="true">${isPass ? '✓' : '✕'}</span>
       <span class="result-panel-label">${text('النتيجة:','Ergebnis:')}</span>
       <strong class="result-panel-score"><bdi>${resultData.score} / ${resultData.max}</bdi></strong>
       <span class="result-panel-percent"><bdi>(${resultData.percent}%)</bdi></span>
+      <span class="result-panel-breakdown">
+        <span class="result-pill-right"><bdi>✓ ${rightCount} ${text('صحيح','richtig')}</bdi></span>
+        <span class="result-pill-wrong"><bdi>✕ ${wrongCount} ${text('خطأ','falsch')}</bdi></span>
+      </span>
     </div>` : '';
 
   let titleMarkup = '';
@@ -1937,7 +1956,7 @@ function renderExerciseHeaderCard(){
   }
 
   return `
-    <div class="exercise-header-card exercise-heading">
+    <header class="exercise-header-card exercise-heading exercise-sticky-bar" id="exerciseStickyBar">
       <div class="exercise-card-top-bar exercise-heading-meta">
         <div class="exercise-card-tags exercise-heading-tags">
           <span class="tag tag-level-section">
@@ -1947,60 +1966,18 @@ function renderExerciseHeaderCard(){
         </div>
         ${timer ? `<div class="exercise-card-timer exercise-heading-timer">${timer}</div>` : ''}
       </div>
-      ${titleMarkup ? `<div class="exercise-card-title-bar exercise-heading-title">${titleMarkup}</div>` : ''}
-    </div>`;
+      <div class="exercise-card-title-bar exercise-heading-title exercise-control-bar exercise-sub-bar" id="exerciseControlBar">
+        <div class="exercise-title-slot">${titleMarkup}</div>
+        <div class="exercise-control-panel-slot">${resultPanel}</div>
+        <div class="exercise-control-shuffle-slot">${headingShuffle}</div>
+      </div>
+    </header>`;
 }
 
 function renderExerciseControlBar(){
-  const sec=String(model?.exercise?.section||'');
-  const teil=String(model?.exercise?.teil||'');
-  const canShuffle=!mockMode && isShuffleAllowed(sec,teil);
-  const shuffleBtn=canShuffle ? `
-    <button type="button" class="exercise-heading-shuffle" id="headingShuffleBtn" title="${text('خلط الأسئلة','Aufgaben mischen')}" aria-label="${text('خلط الأسئلة','Aufgaben mischen')}">
-      <span class="shuffle-icon" aria-hidden="true">⤨</span>
-      <span>${text('خلط الأسئلة','Aufgaben mischen')}</span>
-    </button>` : '';
-  const showResultScore = userCheckedAnswers && resultData;
-  const isPass=(resultData?.percent||0)>=60;
-  const rightCount = resultData?.details ? resultData.details.filter(d => d.ok).length : (resultData?.score || 0);
-  const wrongCount = resultData?.details ? resultData.details.filter(d => !d.ok).length : Math.max(0, (resultData?.max || 0) - (resultData?.score || 0));
-  const resultPanel=showResultScore ? `
-    <div class="inline-result-panel ${isPass?'pass':'fail'}" dir="${getLang()==='ar'?'rtl':'ltr'}" role="status">
-      <span class="result-panel-icon" aria-hidden="true">${isPass?'✓':'✕'}</span>
-      <span class="result-panel-label">${text('النتيجة:','Ergebnis:')}</span>
-      <strong class="result-panel-score"><bdi>${resultData.score} / ${resultData.max}</bdi></strong>
-      <span class="result-panel-percent"><bdi>(${resultData.percent}%)</bdi></span>
-      <span class="result-panel-breakdown">
-        <span class="result-pill-right"><bdi>✓ ${rightCount} ${text('صحيح','richtig')}</bdi></span>
-        <span class="result-pill-wrong"><bdi>✕ ${wrongCount} ${text('خطأ','falsch')}</bdi></span>
-      </span>
-    </div>` : '';
-  if(!shuffleBtn && !resultPanel) return '';
-  return `<div class="exercise-control-bar exercise-sub-bar" id="exerciseControlBar">
-    <div class="exercise-control-result">${resultPanel}</div>
-    <div class="exercise-control-shuffle">${shuffleBtn}</div>
-  </div>`;
+  // Fully integrated into the unified sticky exercise header card
+  return '';
 }
-
-function layout(main,side,workspaceClass=''){
- const isHoeren = String(model?.exercise?.section||'').toLowerCase().includes('hör') || String(model?.exercise?.section||'').toLowerCase().includes('hoer');
- const combinedWorkspaceClass = [workspaceClass, isHoeren ? 'hoeren-workspace' : ''].filter(Boolean).join(' ');
-
- return `
-  ${renderExerciseHeaderCard()}
-  ${renderExerciseControlBar()}
-  ${renderAudio()}
-  <div class="exam-workspace ${combinedWorkspaceClass}">
-    <section class="exam-main"><div class="exercise-content-frame">${main}</div></section>
-  </div>
-  <div class="exercise-actions">
-    <div class="exercise-nav">
-      <button class="btn" id="checkBtn">${text(mockMode?'إنهاء الجزء':'تحقق من الإجابات',mockMode?'Teil beenden':'Antworten prüfen')}</button>
-      ${mockMode?'':`<button class="btn model-btn" id="modelBtn">${text(showModelAnswers ? 'إخفاء الإجابة' : 'الإجابة النموذجية', showModelAnswers ? 'Musterlösung ausblenden' : 'Musterlösung')}</button>`}
-    </div>
-  </div>`;
-}
-
 function bindActions(){
  const b=document.getElementById('checkBtn');
  if(b)b.onclick=()=>submit(true);
@@ -2008,10 +1985,24 @@ function bindActions(){
  if(mb)mb.onclick=async()=>{
    const st=captureExerciseScroll();
    try{
+     showModelAnswers=!showModelAnswers;
+     if(showModelAnswers){
+       const heads = getExerciseHeadings(model) || [];
+       (model.items||[]).forEach(it=>{
+         const pos = String(it.position_no);
+         const raw = String(it.correct_answer || it.correct || '').trim();
+         let val = raw;
+         if (model.exercise.task_type === 'MATCHING' || ['Teil 1', 'Teil 3'].includes(model.exercise.teil)) {
+           val = resolveMatchingCorrectKey(raw, heads);
+         }
+         if (val) {
+           answers[pos] = val;
+         }
+       });
+     }
      if(!resultData){
        await submit(false);
      }
-     showModelAnswers=!showModelAnswers;
      rerenderExerciseStable(st);
    }catch(e){document.getElementById('content').insertAdjacentHTML('beforeend',`<div class="alert bad">${esc(e.message)}</div>`);restoreExerciseScroll(st);}
  };
