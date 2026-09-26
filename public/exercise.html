@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1310"><title>تمرين TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260926-answer-retention-v7">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1310"><title>تمرين TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260926-answer-feedback-colors-v8">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
@@ -743,7 +743,7 @@ html[data-theme="dark"] body.exercise-page .exercise-nav .model-btn {
   <div class="header-actions"></div>
 </header>
 <main id="content" class="exercise-page"><div class="student-loading">جارٍ التحميل…</div></main>
-<script src="/assets/i18n.js?v=20260926-answer-retention-v7"></script><script src="/assets/app.js"></script>
+<script src="/assets/i18n.js?v=20260926-answer-feedback-colors-v8"></script><script src="/assets/app.js"></script>
 <script>
 const id=qs('id'); const duration=Number(qs('duration')||0); const sessionId=qs('session'); const mockMode=qs('mock')==='1' && !!sessionId; let model=null; let answers={}; let activeItem=null; let submitted=false; let resultData=null; let submitInFlight=false; let userCheckedAnswers=false;
 let matchingOrder=null; let headingOrder=null; let optionOrders={}; let showModelAnswers=false; let modelAnswerData=null; let hoerenOrder=null; let hoerenAllTranslated=false; let wordOrder=null; const translationCache=new Map();
@@ -949,6 +949,39 @@ function correctAnswerFor(item){
     .find(candidate=>candidate!==undefined&&candidate!==null&&String(candidate).trim()!=='');
   return String(value??'').trim();
 }
+function answerFeedbackInfo(detail){
+  if(!detail)return {tone:'model',icon:'✓',label:text('الإجابة النموذجية:','Musterlösung:')};
+  if(detail.ok)return {tone:'correct',icon:'✓',label:text('إجابتك صحيحة:','Deine Antwort ist richtig:')};
+  const answered=String(detail.given??'').trim()!=='';
+  return {tone:'wrong',icon:'✕',label:answered?text('إجابتك خاطئة — الإجابة الصحيحة:','Deine Antwort ist falsch — richtige Antwort:'):text('لم تُجب — الإجابة الصحيحة:','Nicht beantwortet — richtige Antwort:')};
+}
+function answerFeedbackMarkup(detail,correct,answerText,extraClass=''){
+  if(correct===undefined||correct===null||String(correct).trim()==='')return '';
+  let markup='';
+  if(detail){
+    const feedback=answerFeedbackInfo(detail);
+    markup+=`<div class="assignment-correct-answer" data-feedback-tone="${feedback.tone}" data-feedback-scope="${esc(extraClass)}"><span class="correct-badge">${feedback.icon} ${feedback.label}</span><strong class="correct-full-text">${esc(answerText)}</strong></div>`;
+  }
+  if(showModelAnswers){
+    const modelFeedback=answerFeedbackInfo(null);
+    markup+=`<div class="assignment-correct-answer model-answer-bar" data-feedback-tone="model" data-feedback-scope="${esc(extraClass)}"><span class="correct-badge">${modelFeedback.icon} ${modelFeedback.label}</span><strong class="correct-full-text">${esc(answerText)}</strong></div>`;
+  }
+  return markup;
+}
+function answerFeedbackInlineMarkup(detail,correct,answerText){
+  if(correct===undefined||correct===null||String(correct).trim()==='')return '';
+  let markup='';
+  if(detail){
+    const feedback=answerFeedbackInfo(detail);
+    markup+=`<span class="spb2-gap-feedback spb2-feedback-${feedback.tone} ${feedback.tone==='wrong'?'spb2-gap-correction':''}" title="${esc(feedback.label)} ${esc(answerText)}">${feedback.icon} ${feedback.label} ${esc(answerText)}</span>`;
+  }
+  if(showModelAnswers){
+    const feedback=answerFeedbackInfo(null);
+    markup+=`<span class="spb2-gap-feedback spb2-feedback-model spb2-gap-model" title="${esc(feedback.label)} ${esc(answerText)}">${feedback.icon} ${feedback.label} ${esc(answerText)}</span>`;
+  }
+  return markup;
+}
+function shouldShowCorrectAnswer(){return showModelAnswers||Boolean(resultData);}
 function modelAnswerToggleMarkup(){
   if(mockMode)return '';
   const label=showModelAnswers ? 'إخفاء الإجابة' : 'الإجابة النموذجية';
@@ -1145,9 +1178,9 @@ function renderMatching(){
       const identity=matchingAnswerIdentity(o.key);
       const isX = isLesen3 && o.key.toUpperCase() === 'X';
       const used = !isX && usedAnswerIds.has(identity) && selectedIdentity !== identity;
-      const isCorrectOption = showModelAnswers && correctVal && o.key.toUpperCase() === correctVal.toUpperCase();
+      const isCorrectOption = shouldShowCorrectAnswer() && correctVal && o.key.toUpperCase() === correctVal.toUpperCase();
       const isUserChoice = selected && o.key.toUpperCase() === selected.toUpperCase();
-      const isUserWrongOption = showModelAnswers && isUserChoice && detail && !detail.ok;
+      const isUserWrongOption = isUserChoice && detail && !detail.ok;
 
       let prefix = '';
       let optStyle = '';
@@ -1165,15 +1198,7 @@ function renderMatching(){
     const assignPlaceholder = isLesen3 ? text('— اختر العنوان —','— Überschrift auswählen —') : text('— اختر العنوان —','— Überschrift auswählen —');
     const selectResultClass = detail && selected ? (detail.ok ? 'assignment-model-correct' : 'assignment-model-wrong') : '';
     const fullCorrectAnswerText = getFullAnswerText(it, correctVal, heads);
-    const correctHint = (showModelAnswers && !detail?.ok && correctVal && selected !== correctVal) ? `
-      <div class="assignment-correct-answer">
-        <span class="correct-badge">✓ ${text('الإجابة الصحيحة:','Richtige Antwort:')}</span>
-        <strong class="correct-full-text">${esc(fullCorrectAnswerText)}</strong>
-      </div>` : (showModelAnswers && correctVal ? `
-      <div class="assignment-correct-answer model-answer-bar">
-        <span class="correct-badge">★ ${text('الإجابة النموذجية:','Musterlösung:')}</span>
-        <strong class="correct-full-text">${esc(fullCorrectAnswerText)}</strong>
-      </div>` : '');
+    const correctHint=answerFeedbackMarkup(detail,correctVal,fullCorrectAnswerText);
     return `<article class="exam-text-card ${selected?'answered':''} ${resultClass} ${showModelAnswers?'model-shown':''} ${String(activeItem)===String(it.position_no)?'active-item':''}" data-item="${it.position_no}">
       <div class="paragraph-assignment">
         <div class="paragraph-assignment-head" style="display:none !important;" aria-hidden="true"></div>
@@ -1204,11 +1229,11 @@ function renderMatching(){
    const identity=matchingAnswerIdentity(String(i+1));
    const owner=items.find(it=>{const v=answerValue(it.position_no); return v && matchingAnswerIdentity(v)===identity;});
    const ownerDetail=owner?visibleExerciseAnswerDetail(owner.prompt):null;
-   const modelOwner=showModelAnswers?items.find(it=>resolveMatchingCorrectKey(correctAnswerFor(it),heads)===key):null;
+   const modelOwner=shouldShowCorrectAnswer()?items.find(it=>resolveMatchingCorrectKey(correctAnswerFor(it),heads)===key):null;
    const selectedForActive=activeItem&&answerValue(activeItem)===key;
    const isUsed=!!owner && String(owner.position_no)!==String(activeItem||'');
    const resultClass=ownerDetail?(ownerDetail.ok?'result-correct':'result-wrong'):'';
-   const modelClass=showModelAnswers&&modelOwner?'model-correct':'';
+   const modelClass=shouldShowCorrectAnswer()&&modelOwner?'model-correct':'';
    const cid='head-'+key;
    return `<div class="heading-option-wrap ${selectedForActive?'is-active-match':''} ${isUsed?'heading-used':''} ${selectedForActive?'heading-current':''}">
       <button type="button" class="choice-card ${selectedForActive?'selected':''} ${resultClass} ${modelClass}" data-choice="${key}" ${isUsed&&!selectedForActive?'disabled':''}><b id="${cid}" data-content-id="${cid}" data-source="${esc(displayHeading)}">${esc(displayHeading)}</b>${isUsed?`<small class="heading-used-badge">✓ ${text('تم اختياره','Ausgewählt')}</small>`:''}</button>
@@ -1343,21 +1368,13 @@ function renderSprachbausteine1(){
          const n=String(it.position_no), examNo=Number(n)+20, chosen=answerValue(n);
          const detail=visibleExerciseAnswerDetail(it.prompt);
           const correct=correctAnswerFor(it);
-         const showCorrect=showModelAnswers&&correct;
+         const showCorrect=shouldShowCorrectAnswer()&&correct;
          const base=(it.options||[]).slice(0,3);
          if(!optionOrders[n]) optionOrders[n]=base.map(o=>o.option_key);
          const byKey=new Map(base.map(o=>[String(o.option_key),o]));
          const ordered=optionOrders[n].map(k=>byKey.get(String(k))).filter(Boolean);
          const fullCorrectText = getFullAnswerText(it, correct);
-         const correctHint = (showModelAnswers && !detail?.ok && correct && chosen !== correct) ? `
-           <div class="assignment-correct-answer spb-correct-hint">
-             <span class="correct-badge">✓ ${text('الإجابة الصحيحة:','Richtige Antwort:')}</span>
-             <strong class="correct-full-text">${esc(fullCorrectText)}</strong>
-           </div>` : (showModelAnswers && correct ? `
-           <div class="assignment-correct-answer model-answer-bar spb-correct-hint">
-             <span class="correct-badge">★ ${text('الإجابة النموذجية:','Musterlösung:')}</span>
-             <strong class="correct-full-text">${esc(fullCorrectText)}</strong>
-           </div>` : '');
+         const correctHint=answerFeedbackMarkup(detail,correct,fullCorrectText,'spb-correct-hint');
          return `<div class="side-question spb1-question ${detail?(detail.ok?'result-correct':'result-wrong'):''}">
            <div class="question-prompt question-text-tools"><strong>${examNo}</strong><span>${text('الفراغ','Lücke')} ${examNo}</span></div>
            ${correctHint}
@@ -1431,19 +1448,11 @@ function renderHoerenChoiceQuestions(){
    const byKey=new Map(options.map(o=>[String(o.option_key),o]));
    const ordered=optionOrders[n].map(k=>byKey.get(String(k))).filter(Boolean);
    const fullCorrectText = getFullAnswerText(it, correct);
-   const correctHint = (showModelAnswers && !detail?.ok && correct && chosen !== correct) ? `
-     <div class="assignment-correct-answer hoeren-choice-correct-hint">
-       <span class="correct-badge">✓ ${text('الإجابة الصحيحة:','Richtige Antwort:')}</span>
-       <strong class="correct-full-text">${esc(fullCorrectText)}</strong>
-     </div>` : (showModelAnswers && correct ? `
-     <div class="assignment-correct-answer model-answer-bar hoeren-choice-correct-hint">
-       <span class="correct-badge">★ ${text('الإجابة النموذجية:','Musterlösung:')}</span>
-       <strong class="correct-full-text">${esc(fullCorrectText)}</strong>
-     </div>` : '');
+   const correctHint=answerFeedbackMarkup(detail,correct,fullCorrectText,'hoeren-choice-correct-hint');
    return `<article class="hoeren-choice-card ${detail?(detail.ok?'result-correct':'result-wrong'):''}" data-item="${esc(n)}">
      <div class="hoeren-choice-question-row"><span class="hoeren-choice-number">${index+1}.</span><div class="hoeren-choice-question" id="${qid}" data-content-id="${qid}" data-source="${esc(it.prompt||'')}">${esc(it.prompt||'')}</div><div class="hoeren-choice-question-tools">${textTools(it.prompt||'',qid)}</div></div>
      ${correctHint}
-     <div class="hoeren-choice-options">${ordered.map((o,oi)=>{const oid=`hoeren-choice-o-${n}-${oi}`;const selected=String(chosen)===String(o.option_key);const isCorrect=showModelAnswers&&String(correct)===String(o.option_key);const resultClass=detail&&selected?(detail.ok?'result-correct':'result-wrong'):'';return `<div class="hoeren-choice-option-wrap"><button type="button" class="hoeren-choice-option ${selected?'selected':''} ${resultClass} ${isCorrect?'model-correct':''}" data-q="${esc(n)}" data-o="${esc(o.option_key)}"><span class="hoeren-choice-radio"></span><span class="hoeren-choice-option-text" id="${oid}" data-content-id="${oid}" data-source="${esc(o.option_text||'')}">${esc(o.option_text||'')}</span></button>${textTools(o.option_text||'',oid)}${translationBox(oid+'-translation')}</div>`;}).join('')}</div>
+     <div class="hoeren-choice-options">${ordered.map((o,oi)=>{const oid=`hoeren-choice-o-${n}-${oi}`;const selected=String(chosen)===String(o.option_key);const isCorrect=shouldShowCorrectAnswer()&&String(correct)===String(o.option_key);const resultClass=detail&&selected?(detail.ok?'result-correct':'result-wrong'):'';return `<div class="hoeren-choice-option-wrap"><button type="button" class="hoeren-choice-option ${selected?'selected':''} ${resultClass} ${isCorrect?'model-correct':''}" data-q="${esc(n)}" data-o="${esc(o.option_key)}"><span class="hoeren-choice-radio"></span><span class="hoeren-choice-option-text" id="${oid}" data-content-id="${oid}" data-source="${esc(o.option_text||'')}">${esc(o.option_text||'')}</span></button>${textTools(o.option_text||'',oid)}${translationBox(oid+'-translation')}</div>`;}).join('')}</div>
      <div class="inline-translation hoeren-choice-question-translation" id="${qid}-translation"></div>
    </article>`;
  }).join('');
@@ -1468,22 +1477,14 @@ function renderChoiceQuestions(){
       const chosen=answerValue(n);
       const detail=visibleExerciseAnswerDetail(it.prompt);
       const correct=correctAnswerFor(it);
-      const showCorrect=showModelAnswers&&correct;
+      const showCorrect=shouldShowCorrectAnswer()&&correct;
       const baseOptions=(it.options||[]).slice(0,3);
       if(!optionOrders[n]) optionOrders[n]=baseOptions.map(o=>o.option_key);
       const byKey=new Map(baseOptions.map(o=>[String(o.option_key),o]));
       const ordered=optionOrders[n].map(k=>byKey.get(String(k))).filter(Boolean);
       const qcid='choice-q-'+n;
       const fullCorrectText = getFullAnswerText(it, correct);
-      const correctHint = (showModelAnswers && !detail?.ok && correct && chosen !== correct) ? `
-        <div class="assignment-correct-answer lesen2-correct-hint">
-          <span class="correct-badge">✓ ${text('الإجابة الصحيحة:','Richtige Antwort:')}</span>
-          <strong class="correct-full-text">${esc(fullCorrectText)}</strong>
-        </div>` : (showModelAnswers && correct ? `
-        <div class="assignment-correct-answer model-answer-bar lesen2-correct-hint">
-          <span class="correct-badge">★ ${text('الإجابة النموذجية:','Musterlösung:')}</span>
-          <strong class="correct-full-text">${esc(fullCorrectText)}</strong>
-        </div>` : '');
+      const correctHint=answerFeedbackMarkup(detail,correct,fullCorrectText,'lesen2-correct-hint');
       return `<div class="lesen2-question ${detail?(detail.ok?'result-correct':'result-wrong'):''}" data-item="${esc(n)}" style="background:var(--white);border:1px solid var(--line);border-radius:18px;padding:20px 22px;box-shadow:var(--shadow-sm);">
         <div class="question-prompt-row" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px;">
           <div class="question-prompt-text" style="font-size:16px;font-weight:850;line-height:1.6;color:var(--ink);">
@@ -1563,9 +1564,9 @@ function renderChoiceQuestions(){
         ${(wordOrder || sharedOptions().map(([k])=>k)).map((k,oi)=>{
           const v=(sharedOptions().find(([key])=>String(key)===String(k))||[])[1]||k;
           const wid='wordbank-'+oi;
-          const isCorrect=showModelAnswers&&(model.items||[]).some(it=>String(correctAnswerFor(it))===String(k));
+          const isCorrect=shouldShowCorrectAnswer()&&(model.items||[]).some(it=>String(correctAnswerFor(it))===String(k));
           return `<div class="word-card-wrap">
-            <button class="word-card ${Object.values(answers).includes(k)?'used':''} ${showModelAnswers&&isCorrect?'model-correct':''}" data-word="${esc(k)}">
+            <button class="word-card ${Object.values(answers).includes(k)?'used':''} ${shouldShowCorrectAnswer()&&isCorrect?'model-correct':''}" data-word="${esc(k)}">
               <b>${esc(cleanOptionPrefix(v||k))}</b>
             </button>
             ${textTools(v,wid)}
@@ -1658,7 +1659,7 @@ function renderBody(body){
     // shown alongside the gap so a wrong answer is not silently replaced.
     const displayVal=val;
    const resultClass=detail&&val?(detail.ok?'result-correct':'result-wrong'):'';
-   const modelClass=showModelAnswers&&correct?'model-correct':'';
+   const modelClass=shouldShowCorrectAnswer()&&correct?'model-correct':'';
    const isSpb1=model.exercise.section==='Sprachbausteine'&&model.exercise.teil==='Teil 1';
    const isSpb2=model.exercise.section==='Sprachbausteine'&&model.exercise.teil==='Teil 2';
    const examNo=isSpb1?Number(n)+20:isSpb2?Number(n)+30:Number(n);
@@ -1678,9 +1679,7 @@ function renderBody(body){
        return `<option value="${esc(k)}" ${isSel?'selected':''}>${esc(cleanOptionPrefix(v||k))}</option>`;
      }).join('');
      const fullCorrectWord = getFullAnswerText(i, correct);
-     const correctBadge = (showModelAnswers && !detail?.ok && correct) ? `
-       <span class="spb2-gap-correction" title="${text('الإجابة الصحيحة:','Richtige Antwort:')} ${esc(fullCorrectWord)}">✓ ${esc(fullCorrectWord)}</span>` : (showModelAnswers && correct ? `
-       <span class="spb2-gap-model" title="${text('الإجابة النموذجية:','Musterlösung:')} ${esc(fullCorrectWord)}">★ ${esc(fullCorrectWord)}</span>` : '');
+     const correctBadge=answerFeedbackInlineMarkup(detail,correct,fullCorrectWord);
      gapHtml=`<span class="spb2-gap-wrapper"><select class="inline-gap-select ${val?'answered':''} ${resultClass} ${modelClass}" data-gap-select="${n}" aria-label="${text('الفراغ','Lücke')} ${examNo}"><option value="">(${examNo}) — ${text('اختر كلمة','Wort')}</option>${selectOpts}</select>${correctBadge}</span>`;
    }else{
      const shown=displayVal?esc(labelFor(n,displayVal)):'('+examNo+')';
@@ -1783,7 +1782,7 @@ function renderTF(){
     const correct = String(
       correctAnswerFor(it)
     ).trim();
-    const showCorrect = showModelAnswers && correct;
+    const showCorrect = shouldShowCorrectAnswer() && correct;
 
     const isRChosen = chosen === 'Richtig';
     const isFChosen = chosen === 'Falsch';
@@ -1802,15 +1801,7 @@ function renderTF(){
     const rowStatusClass = detail ? (detail.ok ? 'row-correct' : 'row-wrong') : '';
 
     const fullCorrectText = getFullAnswerText(it, correct);
-    const correctHint = (showModelAnswers && !detail?.ok && correct) ? `
-      <div class="assignment-correct-answer hoeren-tf-correct-hint">
-        <span class="correct-badge">✓ ${text('الإجابة الصحيحة:','Richtige Antwort:')}</span>
-        <strong>${esc(fullCorrectText)}</strong>
-      </div>` : (showModelAnswers && correct ? `
-      <div class="assignment-correct-answer model-answer-bar hoeren-tf-correct-hint">
-        <span class="correct-badge">★ ${text('الإجابة النموذجية:','Musterlösung:')}</span>
-        <strong>${esc(fullCorrectText)}</strong>
-      </div>` : '');
+    const correctHint=answerFeedbackMarkup(detail,correct,fullCorrectText,'hoeren-tf-correct-hint');
     return `
       <div class="hoeren-table-row ${rowStatusClass}" data-item="${it.position_no}">
         <div class="hoeren-cell hoeren-cell-r">
@@ -2801,7 +2792,7 @@ function animateExerciseFooter(footer,fromHeight,toHeight){
   animation.oncancel=finish;
 }
 function renderResult(r,collapsedFooterHeight){
-  submitted=true;resultData=r;showModelAnswers=true;
+  submitted=true;resultData=r;
   rerenderExerciseStable(captureExerciseScroll());
   const footer=document.querySelector('.exercise-actions');
   if(footer)animateExerciseFooter(footer,collapsedFooterHeight||footer.getBoundingClientRect().height,footer.getBoundingClientRect().height);

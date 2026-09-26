@@ -9221,3 +9221,68 @@ body.exercise-page .main-exam-frame #gap2-text .inline-gap-select {
     margin: 4px 3px !important;
   }
 }
+
+/* Clear grading feedback: green for correct, red for wrong; orange is reserved for the independent model-answer toggle. */
+.assignment-correct-answer[data-feedback-tone="correct"],
+html[data-theme="dark"] .assignment-correct-answer[data-feedback-tone="correct"] {
+  color: #13834f !important;
+  border-color: rgba(19,131,79,.35) !important;
+  background: rgba(19,131,79,.10) !important;
+}
+.assignment-correct-answer[data-feedback-tone="wrong"],
+html[data-theme="dark"] .assignment-correct-answer[data-feedback-tone="wrong"] {
+  color: #c23535 !important;
+  border-color: rgba(194,53,53,.38) !important;
+  background: rgba(194,53,53,.10) !important;
+}
+.assignment-correct-answer[data-feedback-tone="model"],
+html[data-theme="dark"] .assignment-correct-answer[data-feedback-tone="model"] {
+  color: #d96814 !important;
+  border-color: rgba(244,123,32,.35) !important;
+  background: rgba(244,123,32,.10) !important;
+}
+.assignment-correct-answer[data-feedback-tone] .correct-badge,
+.assignment-correct-answer[data-feedback-tone] .correct-full-text {
+  color: inherit !important;
+}
+.spb2-gap-feedback {
+  display: inline-flex !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 4px !important;
+  padding: 3px 8px !important;
+  border: 1px solid transparent !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+}
+.spb2-gap-feedback.spb2-feedback-correct {
+  color: #13834f !important;
+  border-color: rgba(19,131,79,.35) !important;
+  background: rgba(19,131,79,.10) !important;
+}
+.spb2-gap-feedback.spb2-feedback-wrong {
+  color: #c23535 !important;
+  border-color: rgba(194,53,53,.38) !important;
+  background: rgba(194,53,53,.10) !important;
+}
+.spb2-gap-feedback.spb2-feedback-model {
+  color: #d96814 !important;
+  border-color: rgba(244,123,32,.35) !important;
+  background: rgba(244,123,32,.10) !important;
+}
+html[data-theme="dark"] .spb2-gap-feedback.spb2-feedback-correct {
+  color: #6ee7a6 !important;
+  border-color: rgba(110,231,166,.4) !important;
+  background: rgba(45,155,104,.16) !important;
+}
+html[data-theme="dark"] .spb2-gap-feedback.spb2-feedback-wrong {
+  color: #ffaaa2 !important;
+  border-color: rgba(255,170,162,.4) !important;
+  background: rgba(201,74,67,.16) !important;
+}
+html[data-theme="dark"] .spb2-gap-feedback.spb2-feedback-model {
+  color: #fb923c !important;
+  border-color: rgba(244,123,32,.4) !important;
+  background: rgba(244,123,32,.16) !important;
+}
