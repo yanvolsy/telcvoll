@@ -1,9 +1,94 @@
-<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>نتيجة الامتحان التجريبي — TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260918-cairo-local-v2"><link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)"><link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)"><link rel="manifest" href="/manifest.webmanifest"><style>
-.result-page{max-width:1100px;margin:0 auto;padding:30px 18px 70px}.result-hero{border-radius:30px;padding:34px;background:var(--white);border:1px solid var(--line);box-shadow:var(--shadow);text-align:center;position:relative;overflow:hidden}.result-hero.pass{border-color:#43a56d;background:linear-gradient(180deg,#f0fbf5,var(--white))}.result-hero.fail{border-color:#d75a50;background:linear-gradient(180deg,#fff2f0,var(--white))}.result-icon{width:76px;height:76px;border-radius:50%;display:grid;place-items:center;margin:0 auto 14px;font-size:38px;font-weight:950}.result-hero.pass .result-icon{background:#dff5e8;color:#228151}.result-hero.fail .result-icon{background:#ffe1dd;color:#bd3f35}.result-status{font-size:clamp(34px,6vw,58px);font-weight:1000;letter-spacing:-.05em;margin:4px 0 8px}.result-hero.pass .result-status{color:#228151}.result-hero.fail .result-status{color:#bd3f35}.result-sub{color:var(--muted);font-size:15px}.result-total{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:24px 0}.score-box{background:var(--bg);border:1px solid var(--line);border-radius:18px;padding:18px}.score-box small{color:var(--muted)}.score-box strong{display:block;font-size:30px;margin-top:5px}.score-box .green{color:#228151}.score-box .red{color:#bd3f35}.result-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:18px}.result-section{background:var(--white);border:1px solid var(--line);border-radius:20px;padding:18px}.result-section.pass{border-color:#75c795}.result-section.fail{border-color:#e38c84}.result-section-head{display:flex;justify-content:space-between;gap:10px;align-items:center}.result-section-head h3{margin:0;font-size:20px}.result-section-score{font-size:22px;font-weight:950}.result-bar{height:8px;background:var(--line);border-radius:999px;overflow:hidden;margin:14px 0 8px}.result-bar i{display:block;height:100%;border-radius:inherit;background:#43a56d}.result-section.fail .result-bar i{background:#d75a50}.result-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:12px}.subscores{display:grid;gap:7px;margin-top:12px}.subscore{display:flex;justify-content:space-between;padding:9px 10px;background:var(--bg);border-radius:10px;font-size:13px}.result-note{margin-top:18px;padding:15px;border-radius:15px;background:var(--bg);color:var(--muted);line-height:1.8}.result-actions{display:flex;justify-content:center;gap:9px;margin-top:20px;flex-wrap:wrap}@media(max-width:700px){.result-total,.result-grid{grid-template-columns:1fr}.result-hero{padding:25px 16px}.result-page{padding:18px 12px 60px}}
-</style><style><!-- TELC Voll: unified homepage typography -->
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>نتيجة الامتحان التجريبي — TELC Voll</title>
+<link rel="stylesheet" href="/assets/app.css?v=20260918-cairo-local-v2">
+<link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
+<link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="/manifest.webmanifest">
+<style>
+.result-page{max-width:1100px;margin:0 auto;padding:32px 20px 80px}
+
+/* Liquid Glass Hero Card */
+.result-hero{border-radius:28px;padding:36px;background:rgba(255,255,255,0.85);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border:1.5px solid var(--line);box-shadow:0 10px 36px rgba(0,0,0,0.05);text-align:center;position:relative;overflow:hidden}
+.result-hero.pass{border-color:rgba(45,155,104,0.4);background:linear-gradient(180deg,rgba(223,245,232,0.65),rgba(255,255,255,0.9))}
+.result-hero.encourage{border-color:rgba(244,123,32,0.4);background:linear-gradient(180deg,rgba(255,243,235,0.7),rgba(255,255,255,0.9))}
+html[data-theme="dark"] .result-hero{background:rgba(18,24,21,0.85);border-color:rgba(255,255,255,0.1);box-shadow:0 12px 40px rgba(0,0,0,0.5)}
+html[data-theme="dark"] .result-hero.pass{background:linear-gradient(180deg,rgba(45,155,104,0.18),rgba(18,24,21,0.95));border-color:rgba(74,222,128,0.3)}
+html[data-theme="dark"] .result-hero.encourage{background:linear-gradient(180deg,rgba(244,123,32,0.18),rgba(18,24,21,0.95));border-color:rgba(251,146,60,0.3)}
+
+.result-icon-glow{width:86px;height:86px;border-radius:50%;display:grid;place-items:center;margin:0 auto 16px;font-size:42px;box-shadow:0 8px 24px rgba(0,0,0,0.06);transition:transform .3s ease}
+.result-hero.pass .result-icon-glow{background:#dff5e8;color:#228151;border:2px solid rgba(34,129,81,0.2)}
+.result-hero.encourage .result-icon-glow{background:#fff3eb;color:#f47b20;border:2px solid rgba(244,123,32,0.25)}
+
+.result-status{font-size:clamp(26px,4.5vw,42px);font-weight:1000;letter-spacing:-.03em;margin:8px 0 12px;line-height:1.25}
+.result-hero.pass .result-status{color:#1e7e52}
+.result-hero.encourage .result-status{color:#f47b20}
+html[data-theme="dark"] .result-hero.pass .result-status{color:#4ade80}
+html[data-theme="dark"] .result-hero.encourage .result-status{color:#fb923c}
+
+.result-sub{color:var(--ink);font-size:16px;line-height:1.8;max-width:820px;margin:0 auto 24px;font-weight:700}
+.result-badges-row{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:10px}
+.result-badge-item{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:10px 18px;min-width:130px}
+.result-badge-item small{display:block;color:var(--muted);font-size:12px;font-weight:800}
+.result-badge-item strong{display:block;font-size:18px;font-weight:950;color:var(--ink);margin-top:2px}
+
+/* Official TELC Certificate Card (matches user uploaded sample media_1790422063367.png) */
+.telc-cert-card{background:var(--white);border:2px solid var(--line);border-radius:24px;padding:34px;margin:28px 0;box-shadow:0 8px 30px rgba(0,0,0,0.04);position:relative}
+html[data-theme="dark"] .telc-cert-card{background:rgba(20,28,24,0.88);border-color:rgba(255,255,255,0.1)}
+.telc-cert-head{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--line);padding-bottom:16px;margin-bottom:22px;flex-wrap:wrap;gap:10px}
+.telc-cert-title{font-size:20px;font-weight:1000;color:var(--ink);display:flex;align-items:center;gap:10px}
+.telc-cert-pill{background:rgba(244,123,32,0.12);color:#f47b20;border:1px solid rgba(244,123,32,0.3);padding:4px 14px;border-radius:999px;font-size:13px;font-weight:900}
+
+.telc-cert-table{display:flex;flex-direction:column;gap:14px;max-width:760px;margin:0 auto}
+.telc-cert-row{display:flex;align-items:baseline;justify-content:space-between;padding:10px 0;font-size:18px;font-weight:850;color:var(--ink)}
+.telc-cert-row.total-row{font-size:21px;font-weight:1000;border-bottom:2px solid var(--line);padding-bottom:14px;margin-bottom:6px}
+.telc-cert-row.sub-row{color:var(--ink);font-size:17px;font-weight:800;padding-inline-start:12px}
+.telc-cert-score-wrap{display:inline-flex;align-items:baseline;gap:8px;font-variant-numeric:tabular-nums;font-weight:900}
+.telc-cert-score-val{display:inline-block;min-width:68px;text-align:end;padding-bottom:2px;border-bottom:1.5px solid var(--ink);font-size:19px;font-weight:1000}
+.telc-cert-row.total-row .telc-cert-score-val{font-size:23px;border-bottom-width:2.5px;color:#f47b20}
+.telc-cert-max{color:var(--muted);font-size:16px;font-weight:850}
+
+/* Section Breakdown Cards */
+.result-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:24px}
+.result-section{background:var(--white);border:1.5px solid var(--line);border-radius:20px;padding:22px;box-shadow:var(--shadow-sm);transition:all .2s ease}
+.result-section.pass{border-color:rgba(45,155,104,0.4)}
+.result-section.fail{border-color:rgba(201,74,67,0.35)}
+html[data-theme="dark"] .result-section{background:rgba(20,28,24,0.85);border-color:rgba(255,255,255,0.08)}
+.result-section-head{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.result-section-head h3{margin:0;font-size:19px;font-weight:950}
+.result-section-score{font-size:21px;font-weight:1000;font-variant-numeric:tabular-nums}
+.result-bar{height:9px;background:var(--line);border-radius:999px;overflow:hidden;margin:16px 0 10px}
+.result-bar i{display:block;height:100%;border-radius:inherit;background:#2d9b68;transition:width .4s ease}
+.result-section.fail .result-bar i{background:#c94a43}
+.result-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;font-weight:850}
+.subscores{display:grid;gap:8px;margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
+.subscore{display:flex;justify-content:space-between;padding:8px 12px;background:var(--bg);border-radius:10px;font-size:13.5px;font-weight:800}
+
+/* Actions */
+.result-actions{display:flex;justify-content:center;gap:12px;margin-top:32px;flex-wrap:wrap}
+.result-actions .btn{font-size:15px;padding:12px 24px;border-radius:14px;font-weight:900}
+.result-actions .btn-orange{background:#f47b20;color:#fff;border:none;box-shadow:0 4px 16px rgba(244,123,32,0.35)}
+.result-actions .btn-orange:hover{background:#e06912}
+
+@media(max-width:760px){
+  .result-grid{grid-template-columns:1fr}
+  .telc-cert-card{padding:22px 16px}
+  .telc-cert-row{font-size:15.5px}
+  .telc-cert-row.total-row{font-size:18px}
+  .telc-cert-score-val{font-size:17px;min-width:54px}
+  .result-hero{padding:24px 16px}
+  .result-page{padding:16px 12px 60px}
+}
+</style>
+<style><!-- TELC Voll: unified homepage typography -->
 html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
 html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}</style>
-</head><body><header class="top">
+</head>
+<body>
+<header class="top">
   <a class="brand" href="/dashboard.html"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
   <nav class="student-nav-links">
     <a href="/self-test.html" data-i18n="nav_mock">امتحان تجريبي</a>
@@ -11,19 +96,184 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
     <a href="/profile.html" data-i18n="profile_link">ملفي</a>
     <a href="#" id="logoutLink" data-i18n="nav_logout" class="nav-logout-btn">خروج</a>
   </nav>
-</header><main id="content" class="result-page"></main><script src="/assets/i18n.js"></script><script src="/assets/app.js"></script><script>
-const r=JSON.parse(localStorage.getItem('telc_mock_result')||'null');if(!r){location.href='/dashboard.html';}
-const sectionNames=['Lesen','Sprachbausteine','Hören','Schreiben'];
-function pct(s){return s&&s.max?Math.round((Number(s.score)/Number(s.max))*10000)/100:0}
-function render(){
- const sections={...r.sections};
- const schrift=sectionNames.reduce((sum,name)=>sum+Number(sections[name]?.score||0),0);
- const schriftMax=225;
- const writtenPass=schrift>=135;
- const passed=writtenPass;
- const grade=schrift>=210?'Sehr gut':schrift>=180?'Gut':schrift>=157.5?'Befriedigend':schrift>=135?'Ausreichend':'—';
- const cards=sectionNames.map(name=>{const fallback=name==='Lesen'?75:name==='Sprachbausteine'?30:name==='Hören'?75:45;const s=sections[name]||{score:0,max:fallback};const p=pct(s);const ok=p>=60;let sub='';if(name==='Schreiben'&&r.writing?.criteria)sub=r.writing.criteria.map(x=>`<div class="subscore"><span>${esc(x.label)}</span><b>${x.score} / ${x.max}</b></div>`).join('');return `<article class="result-section ${ok?'pass':'fail'}"><div class="result-section-head"><h3>${name}</h3><span class="result-section-score">${Number(s.score||0).toFixed(Number(s.score)%1?1:0)} / ${s.max}</span></div><div class="result-bar"><i style="width:${Math.min(100,p)}%"></i></div><div class="result-meta"><span>${p.toFixed(1)}%</span><b>${ok?'Bestanden':'Nicht bestanden'}</b></div>${sub?`<div class="subscores">${sub}</div>`:''}</article>`}).join('');
- document.getElementById('content').innerHTML=`<section class="result-hero ${passed?'pass':'fail'}"><div class="result-icon">${passed?'✓':'×'}</div><div class="tag">TELC Voll · Prüfungssimulation · ${esc(r.level||'B2')}</div><div class="result-status">${passed?'مبروك! لقد نجحت':'للأسف، لم تنجح هذه المرة'}</div><p class="result-sub">${passed?'لقد تجاوزت 60% من نقاط الامتحان الكتابي.':'لم تصل إلى 60% من نقاط الامتحان الكتابي. يمكنك إعادة المحاكاة ومحاولة تحسين النتيجة.'}</p></section><section class="result-total"><div class="score-box"><small>Schriftliche Prüfung</small><strong class="${writtenPass?'green':'red'}">${schrift.toFixed(schrift%1?1:0)} / 225 Punkte</strong><span>${(schrift/225*100).toFixed(1)}%</span></div><div class="score-box"><small>Bestehensgrenze</small><strong>${writtenPass?'135 / 225':'135 / 225'}</strong><span>${writtenPass?'Bestanden':'Nicht bestanden'}</span></div></section><div class="result-grid">${cards}</div><div class="result-note"><b>Prädikat:</b> ${grade}<br>هذه نتيجة تدريبية داخل TELC Voll وليست شهادة رسمية من telc. الامتحان التجريبي هنا <b>كتابي فقط</b> ويشمل Lesen وSprachbausteine وHören وSchreiben. يتم تقييم Schreiben بالذكاء الاصطناعي فقط بعد إنهاء الامتحان.</div><div class="result-actions"><button class="btn light" onclick="window.print()">طباعة النتيجة</button><a class="btn" href="/self-test.html?level=${encodeURIComponent(r.level||'B2')}">إعادة الامتحان</a><a class="btn dark" href="/dashboard.html">العودة إلى المنصة</a></div>`
+</header>
+<main id="content" class="result-page"></main>
+<script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
+<script>
+const r = JSON.parse(localStorage.getItem('telc_mock_result') || 'null');
+if (!r) { location.href = '/dashboard.html'; }
+
+const sectionNames = ['Lesen', 'Sprachbausteine', 'Hören', 'Schreiben'];
+const SECTION_DE_NAMES = {
+  Lesen: 'Leseverstehen',
+  Sprachbausteine: 'Sprachbausteine',
+  Hören: 'Hörverstehen',
+  Schreiben: 'Schriftlicher Ausdruck'
+};
+
+var text = window.text || ((ar, de) => getLang() === 'ar' ? ar : de);
+
+function formatGermanScore(num) {
+  const n = Number(num || 0);
+  return n.toFixed(1).replace('.', ',');
 }
+
+function pct(s) {
+  return s && s.max ? Math.round((Number(s.score) / Number(s.max)) * 10000) / 100 : 0;
+}
+
+function render() {
+  const sections = {...(r?.sections || {})};
+  const schrift = sectionNames.reduce((sum, name) => sum + Number(sections[name]?.score || 0), 0);
+  const schriftMax = 225;
+  const writtenPass = schrift >= 135;
+  const passed = writtenPass;
+
+  let grade = 'Nicht bestanden';
+  if (schrift >= 210) grade = 'Sehr gut (1)';
+  else if (schrift >= 180) grade = 'Gut (2)';
+  else if (schrift >= 157.5) grade = 'Befriedigend (3)';
+  else if (schrift >= 135) grade = 'Ausreichend (4)';
+
+  const cards = sectionNames.map(name => {
+    const fallback = name === 'Lesen' ? 75 : name === 'Sprachbausteine' ? 30 : name === 'Hören' ? 75 : 45;
+    const s = sections[name] || { score: 0, max: fallback };
+    const p = pct(s);
+    const ok = p >= 60;
+    const deTitle = SECTION_DE_NAMES[name] || name;
+
+    let sub = '';
+    if (name === 'Schreiben' && r.writing?.criteria && r.writing.criteria.length) {
+      sub = r.writing.criteria.map(x => `
+        <div class="subscore">
+          <span>${esc(x.label || x.name)}</span>
+          <b>${formatGermanScore(x.score)} / ${x.max}</b>
+        </div>`).join('');
+    }
+
+    return `
+      <article class="result-section ${ok ? 'pass' : 'fail'}">
+        <div class="result-section-head">
+          <div>
+            <h3>${esc(deTitle)}</h3>
+            <small class="muted">${esc(name)}</small>
+          </div>
+          <span class="result-section-score">${formatGermanScore(s.score)} / ${s.max}</span>
+        </div>
+        <div class="result-bar"><i style="width:${Math.min(100, p)}%"></i></div>
+        <div class="result-meta">
+          <span>${p.toFixed(1)}%</span>
+          <b>${ok ? text('ناجح ✓', 'Bestanden ✓') : text('غير مجتاز', 'Nicht bestanden')}</b>
+        </div>
+        ${sub ? `<div class="subscores">${sub}</div>` : ''}
+      </article>`;
+  }).join('');
+
+  document.getElementById('content').innerHTML = `
+    <!-- Hero Status & Encouragement -->
+    <section class="result-hero ${passed ? 'pass' : 'encourage'}">
+      <div class="result-icon-glow">
+        <span class="result-icon">${passed ? '🏆' : '💪'}</span>
+      </div>
+      <div class="tag">TELC Voll · Prüfungssimulation · ${esc(r.level || 'B2')}</div>
+      <h1 class="result-status">
+        ${passed 
+          ? text('تهانينا الحارة! لقد اجتزت الامتحان بنجاح 🎉', 'Herzlichen Glückwunsch! Schriftliche Prüfung bestanden 🎉')
+          : text('محاولة قيّمة وممتازة! أنت قريب جداً من النجاح 🚀', 'Toller Einsatz! Du machst große Fortschritte 🚀')}
+      </h1>
+      <p class="result-sub">
+        ${passed 
+          ? text('أداء رائع ومبهر! لقد حققت ' + formatGermanScore(schrift) + ' نقطة من أصل 225 وتجاوزت نسبة 60% المطلوبة رسميًا. هذا يثبت جاهزيتك التامة لامتحان TELC B2 الحقيقي!', 'Hervorragende Leistung! Du hast ' + formatGermanScore(schrift) + ' von 225 Punkten erreicht und die 60%-Bestehensgrenze gemeistert. Du bist optimal auf die offizielle Prüfung vorbereitet!')
+          : text('الامتحان التجريبي هو خطوتك الأهم نحو التفوق؛ فهو يكشف لك بدقة النقاط التي تحتاج تعزيزًا قبل الامتحان الرسمي. راجع حلول التمارين وأعد المحاكاة، وستتجاوز حد النجاح (135 نقطة) بكل ثقة!', 'Kein Grund zur Sorge! Die Simulation ist das beste Training, um gezielt Schwachstellen vor dem echten Prüfungstermin zu beheben. Nutze die Auswertung und starte einen neuen Versuch – der Erfolg ist nah!')}
+      </p>
+      <div class="result-badges-row">
+        <div class="result-badge-item">
+          <small>${text('التقدير الرسمي', 'Prädikat')}</small>
+          <strong>${grade}</strong>
+        </div>
+        <div class="result-badge-item">
+          <small>${text('حد النجاح المطلوب', 'Bestehensgrenze')}</small>
+          <strong>135 / 225 (60%)</strong>
+        </div>
+        <div class="result-badge-item">
+          <small>${text('النسبة المحققة', 'Erreichte Quote')}</small>
+          <strong style="color:${passed ? '#228151' : '#f47b20'}">${((schrift/225)*100).toFixed(1)}%</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- Official TELC Certificate Score Card (Exact Match to media_1790422063367.png) -->
+    <div class="telc-cert-card">
+      <div class="telc-cert-head">
+        <div class="telc-cert-title">
+          <span>📜</span>
+          <span>${text('كشف درجات الامتحان الكتابي (TELC B2)', 'Ergebnis der schriftlichen Prüfung (TELC B2)')}</span>
+        </div>
+        <span class="telc-cert-pill">${text('نموذج شهادة TELC الرسمية', 'Offizielles TELC-Muster')}</span>
+      </div>
+
+      <div class="telc-cert-table">
+        <div class="telc-cert-row total-row">
+          <span>Schriftliche Prüfung</span>
+          <span class="telc-cert-score-wrap">
+            <span class="telc-cert-score-val">${formatGermanScore(schrift)}</span>
+            <span class="telc-cert-max">/ 225 Punkte</span>
+          </span>
+        </div>
+
+        <div class="telc-cert-row sub-row">
+          <span>• Leseverstehen</span>
+          <span class="telc-cert-score-wrap">
+            <span class="telc-cert-score-val">${formatGermanScore(sections.Lesen?.score || 0)}</span>
+            <span class="telc-cert-max">/ 75 Punkte</span>
+          </span>
+        </div>
+
+        <div class="telc-cert-row sub-row">
+          <span>• Sprachbausteine</span>
+          <span class="telc-cert-score-wrap">
+            <span class="telc-cert-score-val">${formatGermanScore(sections.Sprachbausteine?.score || 0)}</span>
+            <span class="telc-cert-max">/ 30 Punkte</span>
+          </span>
+        </div>
+
+        <div class="telc-cert-row sub-row">
+          <span>• Hörverstehen</span>
+          <span class="telc-cert-score-wrap">
+            <span class="telc-cert-score-val">${formatGermanScore(sections.Hören?.score || 0)}</span>
+            <span class="telc-cert-max">/ 75 Punkte</span>
+          </span>
+        </div>
+
+        <div class="telc-cert-row sub-row">
+          <span>• Schriftlicher Ausdruck</span>
+          <span class="telc-cert-score-wrap">
+            <span class="telc-cert-score-val">${formatGermanScore(sections.Schreiben?.score || 0)}</span>
+            <span class="telc-cert-max">/ 45 Punkte</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Breakdown Grid -->
+    <div class="result-grid">
+      ${cards}
+    </div>
+
+    <!-- Actions -->
+    <div class="result-actions">
+      <button class="btn light" onclick="window.print()">🖨️ ${text('طباعة النتيجة', 'Ergebnis drucken')}</button>
+      <a class="btn btn-orange" href="/self-test.html?level=${encodeURIComponent(r.level || 'B2')}">🔄 ${text('إعادة الامتحان التجريبي', 'Prüfung wiederholen')}</a>
+      <a class="btn dark" href="/dashboard.html">🏠 ${text('العودة إلى المنصة', 'Zurück zur Plattform')}</a>
+    </div>
+  `;
+}
+
+window.addEventListener('langchange', () => {
+  render();
+});
+
 render();
-</script></body></html>
+</script>
+</body>
+</html>

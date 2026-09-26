@@ -5951,16 +5951,18 @@ html[data-theme="dark"] .side-option.selected span {
   color: #fff !important;
 }
 
-/* ─── TELC Voll: Unified Exercise Header Card & Aesthetic System ─── */
+/* ─── TELC Voll: Unified Exercise Header Card & Aesthetic System (Liquid Glass) ─── */
 .exercise-header-card {
   width: 100% !important;
   max-width: min(1380px, 94vw) !important;
   margin: 0 auto 24px auto !important;
   padding: 20px 24px !important;
   border-radius: 20px !important;
-  background: var(--white) !important;
-  border: 1.5px solid var(--line) !important;
-  box-shadow: 0 4px 24px rgba(16, 35, 30, 0.05) !important;
+  background: rgba(255, 255, 255, 0.78) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.65) !important;
+  box-shadow: 0 10px 30px rgba(16, 35, 30, 0.05), 0 1px 3px rgba(0, 0, 0, 0.02) !important;
   box-sizing: border-box !important;
   display: flex !important;
   flex-direction: column !important;
@@ -5969,9 +5971,11 @@ html[data-theme="dark"] .side-option.selected span {
 }
 
 html[data-theme="dark"] .exercise-header-card {
-  background: #111815 !important;
-  border-color: #24352e !important;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35) !important;
+  background: rgba(17, 24, 21, 0.76) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45) !important;
 }
 
 .exercise-card-top-bar {
@@ -6049,17 +6053,19 @@ html[data-theme="dark"] .exercise-card-timer .progress-pill {
   gap: 16px !important;
   width: 100% !important;
   padding: 12px 18px !important;
-  background: var(--bg) !important;
-  border: 1.5px solid var(--line) !important;
-  border-radius: 14px !important;
+  background: rgba(0, 0, 0, 0.02) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.06) !important;
+  border-radius: 16px !important;
   box-sizing: border-box !important;
   flex-wrap: wrap !important;
   transition: all 0.2s ease !important;
 }
 
 html[data-theme="dark"] .exercise-header-card .thema-title-row {
-  background: rgba(0, 0, 0, 0.28) !important;
-  border-color: #22322a !important;
+  background: rgba(0, 0, 0, 0.32) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 .exercise-header-card .thema-title-content h1 {
@@ -6072,39 +6078,75 @@ html[data-theme="dark"] .exercise-header-card .thema-title-row {
   opacity: 1 !important;
 }
 
-.exercise-header-card .thema-masked-wrapper {
+/* Frosted blurred title (ضبابي) */
+.exercise-header-card .thema-masked-wrapper,
+.exercise-header-card .thema-blurred-card {
   display: inline-flex !important;
   align-items: center !important;
   gap: 12px !important;
   cursor: pointer !important;
   user-select: none !important;
   flex-wrap: wrap !important;
+  position: relative !important;
+  overflow: hidden !important;
+  padding: 6px 14px !important;
+  border-radius: 12px !important;
+  background: rgba(244, 123, 32, 0.04) !important;
+  border: 1px dashed rgba(244, 123, 32, 0.35) !important;
+  transition: all 0.2s ease !important;
+}
+
+.exercise-header-card .thema-masked-wrapper:hover,
+.exercise-header-card .thema-blurred-card:hover {
+  background: rgba(244, 123, 32, 0.08) !important;
+  border-color: #f47b20 !important;
+}
+
+.exercise-header-card .thema-blurred-text {
+  filter: blur(8px) !important;
+  -webkit-filter: blur(8px) !important;
+  opacity: 0.38 !important;
+  user-select: none !important;
+  pointer-events: none !important;
+  font-size: clamp(18px, 2.5vw, 24px) !important;
+  font-weight: 850 !important;
+  color: var(--ink) !important;
+  max-width: 520px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  letter-spacing: -0.01em !important;
+}
+
+.exercise-header-card .thema-blurred-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
 }
 
 .exercise-header-card .masked-lock-badge {
-  font-size: 16px !important;
+  font-size: 15px !important;
 }
 
 .exercise-header-card .masked-dots {
-  font-size: 22px !important;
-  letter-spacing: 4px !important;
-  color: var(--muted) !important;
-  font-weight: bold !important;
-  line-height: 1 !important;
+  display: none !important;
 }
 
 .exercise-header-card .masked-hint {
-  font-size: 13px !important;
-  font-weight: 750 !important;
-  color: var(--muted) !important;
-  background: rgba(0, 0, 0, 0.04) !important;
-  padding: 3px 10px !important;
-  border-radius: 8px !important;
+  font-size: 12.5px !important;
+  font-weight: 850 !important;
+  color: #f47b20 !important;
+  background: rgba(244, 123, 32, 0.1) !important;
+  border: 1px solid rgba(244, 123, 32, 0.22) !important;
+  padding: 3px 12px !important;
+  border-radius: 999px !important;
+  white-space: nowrap !important;
 }
 
 html[data-theme="dark"] .exercise-header-card .masked-hint {
-  background: rgba(255, 255, 255, 0.06) !important;
-  color: #9db0aa !important;
+  background: rgba(244, 123, 32, 0.16) !important;
+  color: #fb923c !important;
+  border-color: rgba(244, 123, 32, 0.35) !important;
 }
 
 .exercise-header-card .thema-tools {
@@ -6114,23 +6156,57 @@ html[data-theme="dark"] .exercise-header-card .masked-hint {
   flex-wrap: wrap !important;
 }
 
-.exercise-header-card .title-reveal-btn {
+/* Orange Icon-only Eye button */
+.exercise-header-card .title-reveal-btn,
+.exercise-header-card .title-eye-btn {
   display: inline-flex !important;
   align-items: center !important;
-  gap: 7px !important;
-  padding: 7px 15px !important;
-  border-radius: 10px !important;
+  justify-content: center !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  padding: 0 !important;
+  border-radius: 12px !important;
   font-weight: 850 !important;
-  font-size: 13px !important;
   cursor: pointer !important;
-  transition: all 0.18s ease !important;
-  border: 1px solid var(--line) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  background: rgba(244, 123, 32, 0.08) !important;
+  border: 1.5px solid rgba(244, 123, 32, 0.35) !important;
+  color: #f47b20 !important;
 }
 
-.exercise-header-card .title-reveal-btn:hover {
-  border-color: var(--green) !important;
-  color: var(--green) !important;
-  background: var(--green-soft) !important;
+.exercise-header-card .title-reveal-btn:hover,
+.exercise-header-card .title-eye-btn:hover {
+  border-color: #f47b20 !important;
+  background: rgba(244, 123, 32, 0.18) !important;
+  transform: scale(1.06) !important;
+  box-shadow: 0 4px 14px rgba(244, 123, 32, 0.25) !important;
+}
+
+.exercise-header-card .title-eye-btn .eye-svg {
+  display: block !important;
+  stroke: #f47b20 !important;
+}
+
+/* Liquid glass reading cards */
+.long-text, .exam-text-card, .lesen3-ad-card, .lesen2-question, .spb1-question, .side-question {
+  background: rgba(255, 255, 255, 0.82) !important;
+  backdrop-filter: blur(16px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
+  border: 1px solid rgba(0, 0, 0, 0.07) !important;
+  border-radius: 18px !important;
+}
+
+html[data-theme="dark"] .long-text,
+html[data-theme="dark"] .exam-text-card,
+html[data-theme="dark"] .lesen3-ad-card,
+html[data-theme="dark"] .lesen2-question,
+html[data-theme="dark"] .spb1-question,
+html[data-theme="dark"] .side-question {
+  background: rgba(18, 24, 21, 0.78) !important;
+  backdrop-filter: blur(16px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(160%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 .exercise-card-bottom-bar {

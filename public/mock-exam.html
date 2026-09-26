@@ -1,58 +1,146 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>الامتحان التجريبي — TELC Voll</title>
 <link rel="stylesheet" href="/assets/app.css?v=20260918-cairo-local-v2">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="/manifest.webmanifest">
 <style>
-.mock-root{max-width:1260px;margin:0 auto;padding:18px 22px 120px}
-.mock-top{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 96%,transparent);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);padding:10px 0}
+.mock-root{max-width:1280px;margin:0 auto;padding:18px 22px 130px}
+.mock-top{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid var(--line);padding:10px 0}
 .mock-top-inner{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px}
-.mock-brand{font-weight:950;color:var(--ink);text-decoration:none;white-space:nowrap}
-.mock-status{display:flex;align-items:center;gap:8px;justify-content:flex-end}
-.mock-timer{font-variant-numeric:tabular-nums;font-weight:950;font-size:21px;padding:9px 14px;border-radius:14px;background:var(--exercise-accent-soft);color:var(--exercise-accent);min-width:108px;text-align:center;border:1px solid color-mix(in srgb,var(--exercise-accent) 22%,var(--line))}
-.mock-timer.danger{background:#fff0ee;color:#b7372d;border-color:#e6a39d}
-.mock-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
-.mock-tab{border:1px solid var(--line);background:var(--white);color:var(--ink);border-radius:13px;padding:10px 9px;cursor:pointer;font:inherit;font-weight:900;box-shadow:var(--shadow);min-width:0}
-.mock-tab small{display:block;color:var(--muted);font-size:10px;margin-top:2px}
-.mock-tab.active{border-color:var(--exercise-accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--exercise-accent) 16%,transparent);background:var(--exercise-accent-soft)}
-.mock-tab:disabled{opacity:.45;cursor:not-allowed}
-.mock-progress{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:12px 0}
-.mock-progress-bar{height:7px;background:var(--line);border-radius:999px;overflow:hidden;flex:1}
-.mock-progress-bar i{display:block;height:100%;background:var(--exercise-accent);border-radius:inherit;transition:width .2s}
-.mock-card{background:var(--white);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow);padding:30px}
-.mock-section-label{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.mock-section-label .tag{font-weight:900}
-.mock-task-count{color:var(--muted);font-size:13px}
-.mock-task-body{margin-top:22px;font-size:18px;line-height:2}
-.mock-audio{padding:16px 20px;border:1px solid var(--line);background:var(--white);border-radius:18px;margin:18px 0;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:10px}
-.mock-audio-header{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;font-weight:900;color:var(--muted)}
-.mock-audio-header span:first-child{color:var(--green);display:flex;align-items:center;gap:6px}
-.mock-audio audio{width:100%;height:44px;border-radius:12px;accent-color:var(--green)}
-.mock-item{border:1px solid var(--line);border-radius:17px;padding:17px;margin:14px 0;background:var(--bg)}
-.mock-item-prompt{font-weight:800;line-height:1.7;margin-bottom:12px}
-.mock-options{display:grid;gap:9px}
-.mock-option{display:flex;align-items:flex-start;gap:10px;width:100%;border:1px solid var(--line);background:var(--white);color:var(--ink);border-radius:13px;padding:13px;text-align:start;cursor:pointer;font:inherit}
-.mock-option:hover{border-color:var(--exercise-accent)}
-.mock-option.selected{border-color:var(--exercise-accent);background:var(--exercise-accent-soft);box-shadow:0 0 0 2px color-mix(in srgb,var(--exercise-accent) 12%,transparent)}
-.mock-option-key{font-weight:950;color:var(--exercise-accent);min-width:26px}
-.mock-select{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--white);font:inherit}
-.mock-writing-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.mock-writing-box{border:1px solid var(--line);border-radius:18px;padding:18px;background:var(--bg)}
-.mock-writing-box h3{margin-top:0}
-.mock-writing-editor textarea{width:100%;min-height:390px;resize:vertical;border:1px solid var(--line);border-radius:15px;padding:16px;background:var(--white);font:inherit;line-height:1.8}
-.mock-editor-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-top:7px}
-.mock-actions{position:fixed;bottom:0;left:0;right:0;z-index:60;background:color-mix(in srgb,var(--bg) 96%,transparent);backdrop-filter:blur(15px);border-top:1px solid var(--line);padding:12px 20px}
-.mock-actions-inner{max-width:1260px;margin:auto;display:flex;justify-content:space-between;gap:10px}
-.mock-error{margin-top:15px}
-.mock-finish{max-width:720px;margin:80px auto;text-align:center}
-.mock-finish .spinner{width:44px;height:44px;border:4px solid var(--line);border-top-color:var(--exercise-accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 18px}
+.mock-brand{font-weight:950;color:var(--ink);text-decoration:none;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.mock-status{display:flex;align-items:center;gap:10px;justify-content:flex-end}
+.mock-timer{font-variant-numeric:tabular-nums;font-weight:950;font-size:20px;padding:8px 16px;border-radius:14px;background:rgba(244,123,32,0.1);color:#f47b20;min-width:105px;text-align:center;border:1.5px solid rgba(244,123,32,0.3);box-shadow:0 2px 10px rgba(244,123,32,0.1)}
+.mock-timer.danger{background:#fff0ee;color:#b7372d;border-color:#e6a39d;animation:pulseTimer 1s infinite alternate}
+@keyframes pulseTimer{from{transform:scale(1)}to{transform:scale(1.03)}}
+.mock-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.mock-tab{border:1.5px solid var(--line);background:var(--white);color:var(--ink);border-radius:14px;padding:9px 12px;cursor:pointer;font:inherit;font-weight:900;box-shadow:var(--shadow-sm);min-width:0;transition:all .18s ease;text-align:center}
+.mock-tab small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.mock-tab.active{border-color:#f47b20;box-shadow:0 0 0 2px rgba(244,123,32,0.18);background:rgba(244,123,32,0.08);color:#f47b20}
+.mock-tab:disabled{opacity:.4;cursor:not-allowed}
+.mock-progress{display:flex;justify-content:space-between;gap:14px;align-items:center;margin:16px 0}
+.mock-progress-bar{height:8px;background:var(--line);border-radius:999px;overflow:hidden;flex:1}
+.mock-progress-bar i{display:block;height:100%;background:linear-gradient(90deg,#f47b20,#ff9a4d);border-radius:inherit;transition:width .25s ease}
+.mock-card{background:var(--white);border:1.5px solid var(--line);border-radius:24px;box-shadow:0 8px 30px rgba(0,0,0,0.04);padding:32px;box-sizing:border-box}
+html[data-theme="dark"] .mock-card{background:rgba(18,24,21,0.85);backdrop-filter:blur(16px);border-color:rgba(255,255,255,0.08);box-shadow:0 12px 36px rgba(0,0,0,0.4)}
+.mock-section-label{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.mock-section-label .tag{font-weight:900;background:rgba(244,123,32,0.12);color:#f47b20;border:1px solid rgba(244,123,32,0.3);padding:5px 14px;border-radius:999px;font-size:13px}
+.mock-task-count{font-size:14px;font-weight:850;color:var(--muted);background:var(--bg);border:1px solid var(--line);padding:5px 12px;border-radius:999px}
+.mock-reading-panel{font-size:17px;line-height:1.9;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:18px;padding:24px;margin:20px 0}
+
+/* Inline select inside Sprachbausteine text */
+.mock-inline-gap-select{display:inline-block;vertical-align:middle;padding:5px 12px;margin:3px 5px;border:1.5px solid var(--line);border-radius:10px;background:var(--white);color:var(--ink);font-weight:850;font-size:14px;cursor:pointer;transition:all .18s ease;box-shadow:0 2px 6px rgba(0,0,0,0.03);outline:none;max-width:230px}
+.mock-inline-gap-select:hover{border-color:#f47b20}
+.mock-inline-gap-select.answered{border-color:#f47b20;background:rgba(244,123,32,0.1);color:#f47b20;font-weight:900}
+html[data-theme="dark"] .mock-inline-gap-select{background:#1a231f;border-color:rgba(255,255,255,0.12);color:#fff}
+html[data-theme="dark"] .mock-inline-gap-select.answered{background:rgba(244,123,32,0.2);border-color:#f47b20;color:#ff9a4d}
+
+/* Questions container below text */
+.mock-spb-container{margin-top:28px;padding-top:22px;border-top:1.5px solid var(--line)}
+.mock-spb-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.mock-spb-head h3{margin:0;font-size:18px;font-weight:900;display:flex;align-items:center;gap:8px}
+.mock-spb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.mock-spb-card{background:var(--bg);border:1.5px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;transition:all .18s ease}
+.mock-spb-card.answered{border-color:rgba(244,123,32,0.4);background:rgba(244,123,32,0.02)}
+.mock-spb-card-title{display:flex;align-items:center;gap:8px;font-weight:900;font-size:14.5px;color:var(--ink)}
+.mock-spb-card-title .mock-num-badge{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:rgba(244,123,32,0.12);color:#f47b20;font-size:13px;font-weight:950}
+.mock-spb-options{display:grid;gap:8px}
+.mock-spb-option-btn{display:flex;align-items:center;gap:10px;width:100%;border:1.5px solid var(--line);background:var(--white);color:var(--ink);border-radius:12px;padding:10px 14px;text-align:start;cursor:pointer;font:inherit;font-size:14px;font-weight:750;transition:all .18s ease}
+.mock-spb-option-btn:hover{border-color:#f47b20;background:rgba(244,123,32,0.04)}
+.mock-spb-option-btn.selected{border-color:#f47b20;background:rgba(244,123,32,0.12);color:#f47b20;box-shadow:0 0 0 1px #f47b20;font-weight:900}
+.mock-btn-key{font-weight:950;color:#f47b20;min-width:24px}
+html[data-theme="dark"] .mock-spb-card{background:#141c18;border-color:rgba(255,255,255,0.08)}
+html[data-theme="dark"] .mock-spb-option-btn{background:#1b2520;border-color:rgba(255,255,255,0.1);color:#fff}
+
+/* Word Bank (Sprachbausteine 2) */
+.mock-wordbank-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.mock-word-card{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--white);border:1.5px solid var(--line);border-radius:12px;font-size:14px;font-weight:800;color:var(--ink);transition:all .18s ease;box-shadow:0 1px 4px rgba(0,0,0,0.02)}
+.mock-word-card small{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;background:rgba(244,123,32,0.12);color:#f47b20;font-size:12px;font-weight:950}
+.mock-word-card.used{opacity:.5;background:var(--bg);border-style:dashed}
+.mock-word-card .mock-word-check{margin-inline-start:auto;color:#2d9b68;font-weight:950}
+html[data-theme="dark"] .mock-word-card{background:#1a231f;border-color:rgba(255,255,255,0.1);color:#fff}
+
+/* Headings Bank (Lesen 1) */
+.mock-headings-bank{background:var(--bg);border:1.5px solid var(--line);border-radius:18px;padding:20px;margin-bottom:24px}
+.mock-headings-bank h3{margin:0 0 12px;font-size:17px;font-weight:900;display:flex;align-items:center;gap:8px}
+.mock-headings-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px}
+.mock-heading-item{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--white);border:1px solid var(--line);border-radius:12px;font-size:14px;line-height:1.6}
+.mock-heading-letter{font-weight:950;color:#f47b20;min-width:24px}
+
+/* Lesen 3: Ads and situations */
+.mock-ads-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:32px}
+.mock-ad-card{background:var(--white);border:1.5px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,0.03)}
+.mock-ad-card .ad-tag{display:inline-block;background:#0f172a;color:#fff;font-weight:900;font-size:12.5px;padding:3px 10px;border-radius:6px;align-self:flex-start}
+.mock-ad-card h4{margin:4px 0 6px;font-size:16px;font-weight:850;color:#2d9b68}
+.mock-ad-card .ad-body{font-size:14px;line-height:1.75;color:var(--ink)}
+
+/* Audio player */
+.mock-audio{padding:18px 22px;border:1.5px solid var(--line);background:var(--white);border-radius:20px;margin:20px 0;box-shadow:0 4px 16px rgba(0,0,0,0.04);display:flex;flex-direction:column;gap:12px}
+.mock-audio-header{display:flex;align-items:center;justify-content:space-between;font-size:13.5px;font-weight:900}
+.mock-audio-header span:first-child{color:#2d9b68;display:flex;align-items:center;gap:6px}
+.mock-audio audio{width:100%;height:46px;border-radius:12px;accent-color:#2d9b68}
+
+/* Generic question item */
+.mock-item{border:1.5px solid var(--line);border-radius:18px;padding:20px;margin:16px 0;background:var(--bg);transition:all .18s ease}
+.mock-item.answered{border-color:rgba(244,123,32,0.35)}
+.mock-item-prompt{font-weight:850;font-size:16px;line-height:1.7;margin-bottom:14px;color:var(--ink)}
+.mock-select{width:100%;padding:13px 16px;border:1.5px solid var(--line);border-radius:12px;background:var(--white);font:inherit;font-size:14.5px;font-weight:800;color:var(--ink);cursor:pointer;outline:none;transition:all .18s ease}
+.mock-select:hover,.mock-select:focus{border-color:#f47b20}
+.mock-select.answered{border-color:#f47b20;background:rgba(244,123,32,0.04)}
+
+/* True/False buttons */
+.mock-tf-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mock-tf-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border:1.5px solid var(--line);border-radius:14px;background:var(--white);color:var(--ink);font-size:15px;font-weight:900;cursor:pointer;transition:all .18s ease}
+.mock-tf-btn:hover{border-color:#f47b20}
+.mock-tf-btn.selected.tf-richtig{background:rgba(45,155,104,0.15);border-color:#2d9b68;color:#2d9b68;box-shadow:0 0 0 1px #2d9b68}
+.mock-tf-btn.selected.tf-falsch{background:rgba(201,74,67,0.15);border-color:#c94a43;color:#c94a43;box-shadow:0 0 0 1px #c94a43}
+
+/* Writing Box */
+.mock-writing-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.mock-writing-box{border:1.5px solid var(--line);border-radius:20px;padding:22px;background:var(--bg)}
+.mock-writing-box h3{margin-top:0;font-size:18px;font-weight:900;color:var(--ink)}
+.mock-writing-editor textarea{width:100%;min-height:420px;resize:vertical;border:1.5px solid var(--line);border-radius:16px;padding:18px;background:var(--white);font:inherit;font-size:15.5px;line-height:1.85;box-sizing:border-box;color:var(--ink);outline:none;transition:border-color .18s ease}
+.mock-writing-editor textarea:focus{border-color:#f47b20;box-shadow:0 0 0 2px rgba(244,123,32,0.15)}
+.mock-editor-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;font-weight:800;margin-top:8px}
+
+/* Bottom Actions Toolbar */
+.mock-actions{position:fixed;bottom:0;left:0;right:0;z-index:60;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-top:1.5px solid var(--line);padding:14px 20px;box-shadow:0 -4px 24px rgba(0,0,0,0.06)}
+.mock-actions-inner{max-width:1280px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.mock-nav-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:14px;font-size:15px;font-weight:900;cursor:pointer;transition:all .2s ease;text-decoration:none;border:none}
+.mock-nav-btn.light{background:var(--white);border:1.5px solid var(--line);color:var(--ink)}
+.mock-nav-btn.light:hover:not(:disabled){border-color:#f47b20;color:#f47b20}
+.mock-nav-btn.light:disabled{opacity:.4;cursor:not-allowed}
+.mock-nav-btn.dark{background:#111827;color:#fff}
+.mock-nav-btn.dark:hover{background:#1f2937;transform:translateY(-1px)}
+.mock-nav-btn.btn-finish-mock{background:#f47b20 !important;color:#fff !important;box-shadow:0 4px 18px rgba(244,123,32,0.4) !important}
+.mock-nav-btn.btn-finish-mock:hover{background:#e06912 !important;transform:scale(1.02)}
+
+.mock-finish{max-width:720px;margin:80px auto;text-align:center;padding:40px;border-radius:24px;background:var(--white);border:1.5px solid var(--line);box-shadow:var(--shadow)}
+.mock-finish .spinner{width:48px;height:48px;border:4px solid var(--line);border-top-color:#f47b20;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px}
 @keyframes spin{to{transform:rotate(360deg)}}
-@media(max-width:900px){.mock-top-inner{grid-template-columns:auto 1fr}.mock-status{grid-column:2;grid-row:1}.mock-tabs{grid-column:1/-1;grid-row:2}.mock-writing-grid{grid-template-columns:1fr}}
-@media(max-width:600px){.mock-root{padding:12px 12px 110px}.mock-top-inner{gap:8px}.mock-brand{font-size:13px}.mock-status{gap:5px}.mock-status .muted{display:none}.mock-timer{font-size:18px;min-width:96px;padding:8px 10px}.mock-tabs{grid-template-columns:repeat(2,1fr)}.mock-card{padding:18px}.mock-task-body{font-size:16px}.mock-actions{padding:9px 10px}.mock-actions-inner .btn{font-size:12px;padding:10px 12px}}
+
+@media(max-width:900px){
+  .mock-top-inner{grid-template-columns:auto 1fr}
+  .mock-status{grid-column:2;grid-row:1}
+  .mock-tabs{grid-column:1/-1;grid-row:2}
+  .mock-writing-grid{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+  .mock-root{padding:12px 12px 120px}
+  .mock-top-inner{gap:8px}
+  .mock-brand{font-size:13px}
+  .mock-status .muted{display:none}
+  .mock-timer{font-size:17px;min-width:92px;padding:7px 10px}
+  .mock-tabs{grid-template-columns:repeat(2,1fr)}
+  .mock-card{padding:18px}
+  .mock-reading-panel{font-size:15px;padding:16px}
+  .mock-actions{padding:10px 14px}
+  .mock-nav-btn{font-size:13px;padding:10px 14px}
+}
 </style>
 <style><!-- TELC Voll: unified homepage typography -->
 html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
@@ -63,8 +151,15 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
   <div class="mock-root" style="padding:0 22px">
     <div class="mock-top-inner">
       <a class="back-link" href="/dashboard.html" aria-label="العودة">←</a>
-      <a class="mock-brand" href="/dashboard.html">TELC Voll · Prüfungssimulation</a>
-      <div class="mock-status"><span class="muted">الوقت المتبقي للامتحان</span><strong id="examTimer" class="mock-timer">--:--</strong><span class="header-actions"></span></div>
+      <a class="mock-brand" href="/dashboard.html">
+        <span class="brand-dot"></span>
+        <span>TELC Voll · Prüfungssimulation</span>
+      </a>
+      <div class="mock-status">
+        <span class="muted" data-i18n="time_left">الوقت المتبقي للامتحان</span>
+        <strong id="examTimer" class="mock-timer">--:--</strong>
+        <span class="header-actions"></span>
+      </div>
       <nav id="mockTabs" class="mock-tabs" aria-label="أقسام الامتحان"></nav>
     </div>
   </div>
@@ -72,91 +167,867 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <main id="app" class="mock-root"><div class="student-loading">جارٍ تحميل الامتحان…</div></main>
 <script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
 <script>
-const sessionId=qs('session');
-const SECTION_ORDER=['Lesen','Hören','Sprachbausteine','Schreiben'];
-const SECTION_LABEL={Lesen:'Lesen',Hören:'Hören',Sprachbausteine:'Sprachbausteine',Schreiben:'Schreiben'};
-const state={session:null,models:{},currentIndex:0,timerHandle:null,finishing:false};
-const app=document.getElementById('app');
+const sessionId = qs('session');
+const SECTION_ORDER = ['Lesen','Hören','Sprachbausteine','Schreiben'];
+const SECTION_LABEL = {Lesen:'Lesen',Hören:'Hören',Sprachbausteine:'Sprachbausteine',Schreiben:'Schreiben'};
+const state = {session:null,models:{},currentIndex:0,timerHandle:null,finishing:false};
+const app = document.getElementById('app');
 var text = window.text || ((ar,de)=>getLang()==='ar'?ar:de);
-function escBody(v){return esc(v).replace(/\n/g,'<br>')}
-function getSession(){try{const s=JSON.parse(localStorage.getItem('telc_mock_exam')||'null');return s&&s.id===sessionId?s:null}catch{return null}}
-function saveSession(){state.session.currentIndex=state.currentIndex;localStorage.setItem('telc_mock_exam',JSON.stringify(state.session))}
+
+function escBody(v){return esc(v||'').replace(/\n/g,'<br>')}
+function getSession(){
+  try{
+    const s = JSON.parse(localStorage.getItem('telc_mock_exam')||'null');
+    return s && s.id === sessionId ? s : null;
+  }catch{return null;}
+}
+function saveSession(){
+  if(!state.session) return;
+  state.session.currentIndex = state.currentIndex;
+  localStorage.setItem('telc_mock_exam', JSON.stringify(state.session));
+}
 function currentTask(){return state.session?.tasks?.[state.currentIndex]}
 function currentSection(){return currentTask()?.section||'Lesen'}
-function sectionIndexes(section){return state.session.tasks.map((x,i)=>x.section===section?i:-1).filter(i=>i>=0)}
-function remaining(){return Math.max(0,Math.ceil((Number(state.session.examEndsAt||0)-Date.now())/1000))}
+function sectionIndexes(section){return (state.session?.tasks||[]).map((x,i)=>x.section===section?i:-1).filter(i=>i>=0)}
+function remaining(){return Math.max(0,Math.ceil((Number(state.session?.examEndsAt||0)-Date.now())/1000))}
 function formatTime(n){return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0')}
 function tick(){
-  const n=remaining();
-  const el=document.getElementById('examTimer');
+  const n = remaining();
+  const el = document.getElementById('examTimer');
   if(el){el.textContent=formatTime(n);el.classList.toggle('danger',n<=300)}
   if(n<=0){finishExam();return}
-  state.timerHandle=setTimeout(tick,500);
+  state.timerHandle = setTimeout(tick, 500);
 }
-function sectionFirstIndex(section){const i=state.session.tasks.findIndex(x=>x.section===section);return i<0?0:i}
-function jumpToSection(section){const i=sectionFirstIndex(section);if(i<0)return;persistCurrent();state.currentIndex=i;render()}
+function sectionFirstIndex(section){const i = (state.session?.tasks||[]).findIndex(x=>x.section===section);return i<0?0:i}
+function jumpToSection(section){
+  const i = sectionFirstIndex(section);
+  if(i<0) return;
+  persistCurrent();
+  state.currentIndex = i;
+  render();
+}
 function renderTabs(){
-  document.getElementById('mockTabs').innerHTML=SECTION_ORDER.map(s=>{const inds=sectionIndexes(s);const exists=inds.length>0;return `<button class="mock-tab ${currentSection()===s?'active':''}" data-section="${s}" ${exists?'':'disabled'}>${SECTION_LABEL[s]}<small>${exists?inds.length+' Aufgabe':'nicht verfügbar'}</small></button>`}).join('');
+  const tabs = document.getElementById('mockTabs');
+  if(!tabs) return;
+  tabs.innerHTML = SECTION_ORDER.map(s=>{
+    const inds = sectionIndexes(s);
+    const exists = inds.length > 0;
+    return `<button class="mock-tab ${currentSection()===s?'active':''}" data-section="${s}" ${exists?'':'disabled'}>${SECTION_LABEL[s]}<small>${exists?inds.length+' Aufgabe':'nicht verfügbar'}</small></button>`;
+  }).join('');
   document.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>jumpToSection(b.dataset.section));
 }
 function baseShell(inner){
-  const sec=currentSection();const inds=sectionIndexes(sec);const local=Math.max(0,inds.indexOf(state.currentIndex));const total=inds.length;const pct=total?((local+1)/total)*100:0;
-  return `<div class="mock-progress"><strong>${esc(SECTION_LABEL[sec])}</strong><span class="muted">${local+1} / ${total}</span><div class="mock-progress-bar"><i style="width:${pct}%"></i></div></div><div class="mock-card">${inner}</div>`;
+  const sec = currentSection();
+  const inds = sectionIndexes(sec);
+  const local = Math.max(0, inds.indexOf(state.currentIndex));
+  const total = inds.length;
+  const pct = total ? ((local+1)/total)*100 : 0;
+  return `
+    <div class="mock-progress">
+      <strong>${esc(SECTION_LABEL[sec])}</strong>
+      <span class="muted">${local+1} / ${total}</span>
+      <div class="mock-progress-bar"><i style="width:${pct}%"></i></div>
+    </div>
+    <div class="mock-card">${inner}</div>`;
 }
-function itemAnswer(id){return state.session.answersByExercise?.[String(id)]||{}}
+
+function itemAnswer(id){return state.session?.answersByExercise?.[String(id)]||{}}
+
+function parseSettings(x){
+  if(!x||!x.settings_json)return {};
+  if(typeof x.settings_json==='object')return x.settings_json;
+  try{return JSON.parse(x.settings_json);}catch(_){return {};}
+}
+
+function getExerciseBody(model){
+  const ex = model?.exercise || {};
+  const st = parseSettings(ex);
+  const candidates = [
+    ex.body,
+    ex.instructions,
+    st.text,
+    st.body,
+    st.passage,
+    st.reading_text,
+    st.reading,
+    st.article,
+    st.content,
+    st.situation,
+    st.situation_text,
+    st.thema_text,
+    model?.items?.[0]?.body,
+    ...(Array.isArray(model?.items) ? model.items.map(it => it?.body).filter(Boolean) : [])
+  ];
+  for (const c of candidates) {
+    if (typeof c === 'string' && c.trim()) return c.trim();
+  }
+  return '';
+}
+
+function getExerciseHeadings(model){
+  const ex = model?.exercise || {};
+  const st = parseSettings(ex);
+  if (Array.isArray(st.headings) && st.headings.filter(Boolean).length) return st.headings.filter(Boolean);
+  if (Array.isArray(ex.headings) && ex.headings.filter(Boolean).length) return ex.headings.filter(Boolean);
+  if (Array.isArray(st.situations) && st.situations.filter(Boolean).length) return st.situations.filter(Boolean);
+  if (Array.isArray(st.anzeigen) && st.anzeigen.filter(Boolean).length) return st.anzeigen.filter(Boolean);
+  if (Array.isArray(st.ads) && st.ads.filter(Boolean).length) return st.ads.filter(Boolean);
+
+  const optMap = new Map();
+  (model?.items || []).forEach(it => {
+    (it.options || []).forEach(o => {
+      const k = String(o.option_key || '').trim().toUpperCase();
+      const txt = String(o.option_text || '').trim();
+      if (k && !optMap.has(k)) optMap.set(k, txt || k);
+    });
+  });
+  if (optMap.size > 0) return [...optMap.entries()].sort((a,b)=>a[0].localeCompare(b[0])).map(e=>e[1]);
+  return [];
+}
+
+function parseAdText(raw){
+  if(!raw) return {title:'', body:''};
+  if(typeof raw === 'object') return {title: String(raw.title||raw.ad_title||'').trim(), body: String(raw.body||raw.text||raw.content||'').trim()};
+  const str = String(raw).trim();
+  const nl = str.indexOf('\n');
+  if(nl !== -1) return { title: str.slice(0, nl).trim(), body: str.slice(nl+1).trim() };
+  return { title: str, body: '' };
+}
+
+function sharedOptions(model){
+  const ex = model?.exercise || {};
+  const st = parseSettings(ex);
+  if (Array.isArray(st.shared_options)) return st.shared_options.map((o,i)=>[String(o.key||String.fromCharCode(97+i)), String(o.text||o)]);
+  if (Array.isArray(ex.shared_options_json)) return ex.shared_options_json.map((o,i)=>[String(o.key||String.fromCharCode(97+i)), String(o.text||o)]);
+  const map = new Map();
+  (model.items||[]).forEach(it=>(it.options||[]).forEach(o=>{
+    if(o.option_text && !map.has(o.option_key)) map.set(o.option_key, o.option_text);
+  }));
+  return [...map.entries()];
+}
+
+/* ─── 1. Sprachbausteine Teil 1 Renderer ─── */
+function renderMockSpb1(model){
+  window.__mockAnswers = {...itemAnswer(model.exercise.id)};
+  const items = model.items || [];
+  const bodyText = getExerciseBody(model);
+  let html = escBody(bodyText || '');
+
+  // Replace each gap [21]..[30] with an inline <select>
+  items.forEach(it => {
+    const n = String(it.position_no);
+    const examNo = Number(n) > 20 ? Number(n) : Number(n) + 20;
+    const val = window.__mockAnswers[n] || window.__mockAnswers[String(it.id)] || '';
+    const opts = (it.options || []).slice(0, 3);
+    const selectOpts = opts.map(o => {
+      const isSel = String(val).toLowerCase() === String(o.option_key).toLowerCase();
+      return `<option value="${esc(o.option_key)}" ${isSel ? 'selected' : ''}>${esc(o.option_key)}) ${esc(o.option_text || o.option_key)}</option>`;
+    }).join('');
+
+    const gapHtml = `<select class="mock-inline-gap-select ${val ? 'answered' : ''}" data-answer-q="${esc(n)}" data-gap-q="${esc(n)}" aria-label="${text('الفراغ', 'Lücke')} ${examNo}"><option value="">(${examNo}) — ${text('اختر', 'wählen')}</option>${selectOpts}</select>`;
+
+    const re = new RegExp('(?:_{2,}|\\(|\\[|\\{)\\s*(?:' + examNo + '|' + n + ')\\s*(?:_{2,}|\\)|\\]|\\})', 'g');
+    if (re.test(html)) {
+      html = html.replace(re, gapHtml);
+    } else {
+      const fallbackRe = new RegExp('\\b' + examNo + '\\b', 'g');
+      if (fallbackRe.test(html)) html = html.replace(fallbackRe, gapHtml);
+    }
+  });
+
+  const questionsMarkup = `
+    <div class="mock-spb-container">
+      <div class="mock-spb-head">
+        <h3><span>🧩</span> <span>${text('خيارات الفراغات (21 - 30):', 'Aufgaben Sprachbausteine Teil 1 (21 - 30):')}</span></h3>
+        <span class="mock-task-count">${Object.keys(window.__mockAnswers).length} / ${items.length}</span>
+      </div>
+      <div class="mock-spb-grid">
+        ${items.map(it => {
+          const n = String(it.position_no);
+          const examNo = Number(n) > 20 ? Number(n) : Number(n) + 20;
+          const val = window.__mockAnswers[n] || window.__mockAnswers[String(it.id)] || '';
+          const opts = (it.options || []).slice(0, 3);
+          return `
+          <div class="mock-spb-card ${val ? 'answered' : ''}" data-item="${esc(n)}">
+            <div class="mock-spb-card-title">
+              <span class="mock-num-badge">${examNo}</span>
+              <span>${text('الفراغ', 'Lücke')} ${examNo}</span>
+            </div>
+            <div class="mock-spb-options">
+              ${opts.map(o => `
+                <button type="button" class="mock-spb-option-btn ${String(val).toLowerCase() === String(o.option_key).toLowerCase() ? 'selected' : ''}" data-answer-q="${esc(n)}" data-answer="${esc(o.option_key)}">
+                  <span class="mock-btn-key">${esc(o.option_key)}</span>
+                  <span>${esc(o.option_text || o.option_key)}</span>
+                </button>
+              `).join('')}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+
+  return baseShell(`
+    <div class="mock-section-label">
+      <span class="tag">Telc ${esc(model.exercise.level||state.session.level)}</span>
+      <span class="mock-task-count">${esc(model.exercise.section)} · ${esc(model.exercise.teil)}</span>
+    </div>
+    <div class="mock-reading-panel">${html}</div>
+    ${questionsMarkup}
+  `);
+}
+
+/* ─── 2. Sprachbausteine Teil 2 Renderer ─── */
+function renderMockSpb2(model){
+  window.__mockAnswers = {...itemAnswer(model.exercise.id)};
+  const items = model.items || [];
+  const bodyText = getExerciseBody(model);
+  const sharedOpts = sharedOptions(model);
+  let html = escBody(bodyText || '');
+
+  // Replace each gap [31]..[40] with an inline <select> containing shared words
+  items.forEach(it => {
+    const n = String(it.position_no);
+    const examNo = Number(n) > 30 ? Number(n) : Number(n) + 30;
+    const val = window.__mockAnswers[n] || window.__mockAnswers[String(it.id)] || '';
+    const selectOpts = sharedOpts.map(([k, v]) => {
+      const isSel = String(val).toLowerCase() === String(k).toLowerCase();
+      return `<option value="${esc(k)}" ${isSel ? 'selected' : ''}>${esc(k)}: ${esc(v)}</option>`;
+    }).join('');
+
+    const gapHtml = `<select class="mock-inline-gap-select ${val ? 'answered' : ''}" data-answer-q="${esc(n)}" data-gap-q="${esc(n)}" aria-label="${text('الفراغ', 'Lücke')} ${examNo}"><option value="">(${examNo}) — ${text('اختر كلمة', 'Wort')}</option>${selectOpts}</select>`;
+
+    const re = new RegExp('(?:_{2,}|\\(|\\[|\\{)\\s*(?:' + examNo + '|' + n + ')\\s*(?:_{2,}|\\)|\\]|\\})', 'g');
+    if (re.test(html)) {
+      html = html.replace(re, gapHtml);
+    } else {
+      const fallbackRe = new RegExp('\\b' + examNo + '\\b', 'g');
+      if (fallbackRe.test(html)) html = html.replace(fallbackRe, gapHtml);
+    }
+  });
+
+  const wordBankMarkup = `
+    <div class="mock-spb-container">
+      <div class="mock-spb-head">
+        <h3><span>🔤</span> <span>${text('بنك الكلمات للاختيار في الفراغات (WÖRTER a bis o):', 'Wortauswahl für die Lücken (a bis o):')}</span></h3>
+        <span class="mock-task-count">${Object.keys(window.__mockAnswers).length} / ${items.length}</span>
+      </div>
+      <div class="mock-wordbank-grid">
+        ${sharedOpts.map(([k, v]) => {
+          const isUsed = Object.values(window.__mockAnswers).some(ans => String(ans).toLowerCase() === String(k).toLowerCase());
+          return `
+          <div class="mock-word-card ${isUsed ? 'used' : ''}">
+            <small>${esc(k)}</small>
+            <span>${esc(v)}</span>
+            ${isUsed ? `<span class="mock-word-check">✓</span>` : ''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+
+  return baseShell(`
+    <div class="mock-section-label">
+      <span class="tag">Telc ${esc(model.exercise.level||state.session.level)}</span>
+      <span class="mock-task-count">${esc(model.exercise.section)} · ${esc(model.exercise.teil)}</span>
+    </div>
+    <div class="mock-reading-panel">${html}</div>
+    ${wordBankMarkup}
+  `);
+}
+
+/* ─── 3. Lesen Teil 1 Renderer (Matching Headings) ─── */
+function renderMockLesen1(model){
+  window.__mockAnswers = {...itemAnswer(model.exercise.id)};
+  const items = model.items || [];
+  const heads = getExerciseHeadings(model);
+  const usedKeys = new Set(Object.values(window.__mockAnswers).filter(Boolean).map(v => String(v).toUpperCase()));
+
+  const headingsBankMarkup = `
+    <div class="mock-headings-bank">
+      <h3><span>📑</span> <span>${text('قائمة العناوين (Überschriften A bis J):', 'Überschriften (A bis J):')}</span></h3>
+      <div class="mock-headings-list">
+        ${heads.map((h, i) => {
+          const letter = String.fromCharCode(65 + i);
+          return `
+          <div class="mock-heading-item">
+            <span class="mock-heading-letter">${letter}</span>
+            <span>${esc(h)}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+
+  const cardsMarkup = items.map((it, idx) => {
+    const n = String(it.position_no);
+    const val = String(window.__mockAnswers[n] || window.__mockAnswers[String(it.id)] || '').toUpperCase();
+    const selectOptions = heads.map((h, i) => {
+      const letter = String.fromCharCode(65 + i);
+      const isSelected = val === letter;
+      const isUsed = !isSelected && usedKeys.has(letter);
+      return `<option value="${letter}" ${isSelected ? 'selected' : ''} ${isUsed ? 'disabled' : ''}>${letter}: ${esc(h)}${isUsed ? ' — ' + text('تم اختياره', 'bereits gewählt') : ''}</option>`;
+    }).join('');
+
+    return `
+    <article class="mock-item ${val ? 'answered' : ''}">
+      <div class="mock-item-prompt" style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;">
+        <strong>Text ${idx + 1}</strong>
+      </div>
+      <div style="margin-bottom:16px;">
+        <select class="mock-select ${val ? 'answered' : ''}" data-answer-q="${esc(n)}" aria-label="Text ${idx + 1}">
+          <option value="">— ${text('اختر العنوان المناسب لهذا النص', 'Passende Überschrift auswählen')} —</option>
+          ${selectOptions}
+        </select>
+      </div>
+      <div class="mock-task-body" style="font-size:16px;line-height:1.8;">${escBody(it.prompt || it.body || '')}</div>
+    </article>`;
+  }).join('');
+
+  return baseShell(`
+    <div class="mock-section-label">
+      <span class="tag">Telc ${esc(model.exercise.level||state.session.level)}</span>
+      <span class="mock-task-count">${esc(model.exercise.section)} · ${esc(model.exercise.teil)}</span>
+    </div>
+    ${headingsBankMarkup}
+    <div class="mock-spb-head">
+      <h3><span>📖</span> <span>${text('النصوص (1 إلى 5):', 'Texte (1 bis 5):')}</span></h3>
+      <span class="mock-task-count">${Object.keys(window.__mockAnswers).length} / ${items.length}</span>
+    </div>
+    ${cardsMarkup}
+  `);
+}
+
+/* ─── 4. Lesen Teil 2 Renderer (Reading Text + Multiple Choice) ─── */
+function renderMockLesen2(model){
+  window.__mockAnswers = {...itemAnswer(model.exercise.id)};
+  const items = (model.items || []).slice(0, 5);
+  const bodyText = getExerciseBody(model);
+
+  const questionsMarkup = items.map(it => {
+    const n = String(it.position_no);
+    const val = window.__mockAnswers[n] || window.__mockAnswers[String(it.id)] || '';
+    const opts = (it.options || []).slice(0, 3);
+
+    return `
+    <article class="mock-item ${val ? 'answered' : ''}" data-item="${esc(n)}">
+      <div class="mock-item-prompt">${esc(it.position_no)}. ${esc(it.prompt)}</div>
+      <div class="mock-options">
+        ${opts.map(o => `
+          <button type="button" class="mock-option ${String(val) === String(o.option_key) ? 'selected' : ''}" data-answer-q="${esc(n)}" data-answer="${esc(o.option_key)}">
+            <span class="mock-option-key">${esc(o.option_key)}</span>
+            <span>${esc(o.option_text || o.option_key)}</span>
+          </button>
+        `).join('')}
+      </div>
+    </article>`;
+  }).join('');
+
+  return baseShell(`
+    <div class="mock-section-label">
+      <span class="tag">Telc ${esc(model.exercise.level||state.session.level)}</span>
+      <span class="mock-task-count">${esc(model.exercise.section)} · ${esc(model.exercise.teil)}</span>
+    </div>
+    <div class="mock-reading-panel">${escBody(bodyText)}</div>
+    <div class="mock-spb-head" style="margin-top:24px;">
+      <h3><span>📝</span> <span>${text('أسئلة الاختيار من متعدد (6 إلى 10):', 'Aufgaben zum Text (6 bis 10):')}</span></h3>
+      <span class="mock-task-count">${Object.keys(window.__mockAnswers).length} / ${items.length}</span>
+    </div>
+    ${questionsMarkup}
+  `);
+}
+
+/* ─── 5. Lesen Teil 3 Renderer (12 Ads + 10 Situations) ─── */
+function renderMockLesen3(model){
+  window.__mockAnswers = {...itemAnswer(model.exercise.id)};
+  const items = model.items || [];
+  const heads = getExerciseHeadings(model);
+
+  const headingsOverview = `
+    <div class="mock-headings-bank" style="margin-bottom:24px;">
+      <h3><span>📋</span> <span>${text('قائمة العناوين (10 عناوين — Überschriften 1 bis 10):', 'Überschriften (1 bis 10):')}</span></h3>
+      <div class="mock-headings-list">
+        ${items.map(it => {
+          const assignedLetter = heads.map((_, hi) => String.fromCharCode(65 + hi)).find(l => String(window.__mockAnswers[String(it.position_no)] || window.__mockAnswers[String(it.id)] || '').toUpperCase() === l);
+          return `
+          <div class="mock-heading-item">
+            <span class="mock-heading-letter">Titre ${it.position_no}</span>
+            <div style="flex:1;">
+              <span>${esc(it.prompt)}</span>
+              ${assignedLetter ? ` <span style="background:#0f172a;color:#fff;font-weight:900;font-size:11px;padding:2px 7px;border-radius:6px;margin-inline-start:6px;">Text ${assignedLetter}</span>` : ''}
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+
+  const adsListMarkup = heads.map((h, i) => {
+    const letter = String.fromCharCode(65 + i);
+    const ad = parseAdText(h);
+    const assignedItem = items.find(it => String(window.__mockAnswers[String(it.position_no)] || window.__mockAnswers[String(it.id)] || '').toUpperCase() === letter);
+    const selectedSitNo = assignedItem ? String(assignedItem.position_no) : '';
+
+    const selectOptions = items.map(sit => {
+      const sNo = String(sit.position_no);
+      const isSelected = selectedSitNo === sNo;
+      const currentHolder = heads.map((_, hi) => String.fromCharCode(65 + hi)).find(l => l !== letter && String(window.__mockAnswers[sNo] || window.__mockAnswers[String(sit.id)] || '').toUpperCase() === l);
+      const isUsed = Boolean(currentHolder);
+      const preview = sit.prompt ? (sit.prompt.length > 55 ? sit.prompt.slice(0, 52) + '…' : sit.prompt) : '';
+      return `<option value="${sNo}" ${isSelected ? 'selected' : ''} ${isUsed ? 'disabled' : ''}>Titre ${sNo}: ${esc(preview)}${isUsed ? ' — ' + text('تم اختياره', 'Bereits ausgewählt') : ''}</option>`;
+    }).join('') + `<option value="X" ${selectedSitNo === 'X' ? 'selected' : ''}>${text('X — إعلان بدون عنوان (لا يناسب أي عنوان)', 'X — Keine passende Anzeige')}</option>`;
+
+    return `
+    <article class="mock-item ${selectedSitNo ? 'answered' : ''}">
+      <div class="mock-item-prompt" style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;">
+        <span style="background:#0f172a;color:#fff;font-weight:900;font-size:13px;padding:4px 12px;border-radius:8px;">Text ${letter}</span>
+        <span style="font-size:13.5px;font-weight:850;color:var(--muted);">${text('مكان اختيار العنوان لهذا الإعلان:','Überschrift für diesen Text:')}</span>
+      </div>
+      <div style="margin-bottom:14px;">
+        <select class="mock-select ${selectedSitNo ? 'answered' : ''}" data-mock-ad-select="${letter}" aria-label="Text ${letter}">
+          <option value="">— ${text('اختر العنوان المناسب (Titre 1 - 10 أو X)', 'Passende Überschrift auswählen (Titre 1 - 10 oder X)')} —</option>
+          ${selectOptions}
+        </select>
+      </div>
+      ${ad.title ? `<h4 style="margin:6px 0 8px;font-size:17px;font-weight:850;color:#2d9b68;">${esc(ad.title)}</h4>` : ''}
+      <div class="mock-task-body" style="font-size:15.5px;line-height:1.8;">${escBody(ad.body || ad.title)}</div>
+    </article>`;
+  }).join('');
+
+  return baseShell(`
+    <div class="mock-section-label">
+      <span class="tag">Telc ${esc(model.exercise.level||state.session.level)}</span>
+      <span class="mock-task-count">${esc(model.exercise.section)} · ${esc(model.exercise.teil)}</span>
+    </div>
+    ${headingsOverview}
+    <div class="mock-spb-head" style="margin-top:20px;">
+      <h3><span>📰</span> <span>${text('الإعلانات (12 إعلاناً — Anzeigen A bis L):', 'Anzeigen (Text A bis L):')}</span></h3>
+      <span class="mock-task-count">${Object.keys(window.__mockAnswers).length} / ${items.length}</span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      ${adsListMarkup}
+    </div>
+  `);
+}
+
+/* ─── 6. Hören Renderer (Audio + TF / Choice) ─── */
+function renderMockHoeren(model){
+  window.__mockAnswers = {...itemAnswer(model.exercise.id)};
+  const items = model.items || [];
+  const isTF = items.every(it => {
+    const keys = (it.options || []).map(o => String(o.option_key||'').toLowerCase());
+    return keys.length === 0 || keys.includes('richtig') || keys.includes('falsch');
+  });
+
+  let audioHtml = '';
+  if (model.exercise.audio_url) {
+    audioHtml = `
+      <div class="mock-audio">
+        <div class="mock-audio-header">
+          <span>🎧 ${text('الملف الصوتي TELC Hören', 'Audiodatei TELC Hören')}</span>
+          <span>${esc(model.exercise.teil)}</span>
+        </div>
+        <audio controls preload="metadata" src="${esc(model.exercise.audio_url)}"></audio>
+      </div>`;
+  }
+
+  const itemsHtml = items.map((it, idx) => {
+    const n = String(it.position_no);
+    const val = String(window.__mockAnswers[n] || window.__mockAnswers[String(it.id)] || '').toLowerCase();
+
+    if (isTF) {
+      return `
+      <article class="mock-item ${val ? 'answered' : ''}">
+        <div class="mock-item-prompt">${idx + 1}. ${esc(it.prompt)}</div>
+        <div class="mock-tf-row">
+          <button type="button" class="mock-tf-btn tf-richtig ${val === 'richtig' ? 'selected' : ''}" data-answer-q="${esc(n)}" data-answer="richtig">
+            <span>✓</span>
+            <span>Richtig</span>
+          </button>
+          <button type="button" class="mock-tf-btn tf-falsch ${val === 'falsch' ? 'selected' : ''}" data-answer-q="${esc(n)}" data-answer="falsch">
+            <span>✕</span>
+            <span>Falsch</span>
+          </button>
+        </div>
+      </article>`;
+    }
+
+    const opts = it.options && it.options.length ? it.options : [{option_key:'a',option_text:'a'},{option_key:'b',option_text:'b'},{option_key:'c',option_text:'c'}];
+    return `
+    <article class="mock-item ${val ? 'answered' : ''}">
+      <div class="mock-item-prompt">${idx + 1}. ${esc(it.prompt)}</div>
+      <div class="mock-options">
+        ${opts.map(o => `
+          <button type="button" class="mock-option ${val === String(o.option_key).toLowerCase() ? 'selected' : ''}" data-answer-q="${esc(n)}" data-answer="${esc(o.option_key)}">
+            <span class="mock-option-key">${esc(o.option_key)}</span>
+            <span>${esc(o.option_text || o.option_key)}</span>
+          </button>
+        `).join('')}
+      </div>
+    </article>`;
+  }).join('');
+
+  return baseShell(`
+    <div class="mock-section-label">
+      <span class="tag">Telc ${esc(model.exercise.level||state.session.level)}</span>
+      <span class="mock-task-count">${esc(model.exercise.section)} · ${esc(model.exercise.teil)}</span>
+    </div>
+    ${audioHtml}
+    <div class="mock-spb-head">
+      <h3><span>👂</span> <span>${text('الأسئلة:', 'Aufgaben:')}</span></h3>
+      <span class="mock-task-count">${Object.keys(window.__mockAnswers).length} / ${items.length}</span>
+    </div>
+    ${itemsHtml}
+  `);
+}
+
+/* ─── 7. Schreiben Renderer ─── */
+function renderWriting(model){
+  const settings = parseSettings(model.exercise);
+  const answer = state.session?.writingByExercise?.[String(model.exercise.id)] || '';
+  return baseShell(`
+    <div class="mock-section-label">
+      <span class="tag">Telc ${esc(model.exercise.level||state.session.level)}</span>
+      <span class="mock-task-count">Schreiben · ${esc(model.exercise.teil)}</span>
+    </div>
+    <div class="mock-writing-grid">
+      <div>
+        <div class="mock-writing-box">
+          <h3>Situation</h3>
+          <div class="mock-task-body">${escBody(settings.situation_text||model.exercise.body||'')}</div>
+        </div>
+        ${settings.task_text ? `
+          <div class="mock-writing-box" style="margin-top:14px">
+            <h3>Aufgabe</h3>
+            <div class="mock-task-body">${escBody(settings.task_text)}</div>
+          </div>` : ''}
+      </div>
+      <div class="mock-writing-box mock-writing-editor">
+        <h3>${text('إجابتك','Deine Antwort')}</h3>
+        <textarea id="writingAnswer" placeholder="${text('اكتب إجابتك بالألمانية هنا…','Schreibe deine Antwort auf Deutsch…')}">${esc(answer)}</textarea>
+        <div class="mock-editor-meta">
+          <span id="writingWords">0 Wörter</span>
+          <span>150+ Wörter empfohlen</span>
+        </div>
+      </div>
+    </div>
+  `);
+}
+
+/* ─── 8. Generic Choice Fallback ─── */
 function renderChoice(model){
-  window.__mockAnswers={...itemAnswer(model.exercise.id)};
-  const items=model.items||[];const isMatching=model.exercise.task_type==='MATCHING';
-  let html=`<div class="mock-section-label"><span class="tag">Telc ${esc(model.exercise.level||state.session.level)}</span><span class="mock-task-count">${esc(model.exercise.teil)}</span></div><div class="mock-task-body">${escBody(model.exercise.body||'')}</div>`;
-  if(model.exercise.audio_url)html+=`<div class="mock-audio"><div class="mock-audio-header"><span>🎧 ${text('الملف الصوتي TELC Hören','Audiodatei TELC Hören')}</span><span>${esc(model.exercise.teil)}</span></div><audio controls preload="metadata" src="${esc(model.exercise.audio_url)}"></audio></div>`;
-  html+=items.map(it=>{const val=window.__mockAnswers[String(it.position_no)]||window.__mockAnswers[String(it.id)]||'';const opts=(it.options&&it.options.length?it.options:[{option_key:'Richtig',option_text:'Richtig'},{option_key:'Falsch',option_text:'Falsch'}]);if(isMatching){return `<article class="mock-item"><div class="mock-item-prompt">${esc(it.prompt)}</div><select class="mock-select" data-answer-q="${esc(it.position_no)}"><option value="">— ${text('اختر الإجابة','Antwort wählen')} —</option>${opts.map(o=>`<option value="${esc(o.option_key)}" ${String(val)===String(o.option_key)?'selected':''}>${esc(o.option_text)}</option>`).join('')}</select></article>`}return `<article class="mock-item"><div class="mock-item-prompt">${esc(it.prompt)}</div><div class="mock-options">${opts.map(o=>`<button type="button" class="mock-option ${String(val)===String(o.option_key)?'selected':''}" data-answer-q="${esc(it.position_no)}" data-answer="${esc(o.option_key)}"><span class="mock-option-key">${esc(o.option_key)}</span><span>${esc(o.option_text)}</span></button>`).join('')}</div></article>`}).join('');
+  window.__mockAnswers = {...itemAnswer(model.exercise.id)};
+  const items = model.items || [];
+  const isMatching = model.exercise.task_type === 'MATCHING';
+  let html = `
+    <div class="mock-section-label">
+      <span class="tag">Telc ${esc(model.exercise.level||state.session.level)}</span>
+      <span class="mock-task-count">${esc(model.exercise.teil)}</span>
+    </div>
+    <div class="mock-task-body">${escBody(model.exercise.body||'')}</div>`;
+
+  if(model.exercise.audio_url){
+    html += `
+      <div class="mock-audio">
+        <div class="mock-audio-header">
+          <span>🎧 ${text('الملف الصوتي TELC Hören','Audiodatei TELC Hören')}</span>
+          <span>${esc(model.exercise.teil)}</span>
+        </div>
+        <audio controls preload="metadata" src="${esc(model.exercise.audio_url)}"></audio>
+      </div>`;
+  }
+
+  html += items.map(it => {
+    const val = window.__mockAnswers[String(it.position_no)] || window.__mockAnswers[String(it.id)] || '';
+    const opts = (it.options && it.options.length ? it.options : [{option_key:'Richtig',option_text:'Richtig'},{option_key:'Falsch',option_text:'Falsch'}]);
+    if(isMatching){
+      return `
+      <article class="mock-item">
+        <div class="mock-item-prompt">${esc(it.prompt)}</div>
+        <select class="mock-select" data-answer-q="${esc(it.position_no)}">
+          <option value="">— ${text('اختر الإجابة','Antwort wählen')} —</option>
+          ${opts.map(o=>`<option value="${esc(o.option_key)}" ${String(val)===String(o.option_key)?'selected':''}>${esc(o.option_text)}</option>`).join('')}
+        </select>
+      </article>`;
+    }
+    return `
+    <article class="mock-item">
+      <div class="mock-item-prompt">${esc(it.prompt)}</div>
+      <div class="mock-options">
+        ${opts.map(o=>`
+          <button type="button" class="mock-option ${String(val)===String(o.option_key)?'selected':''}" data-answer-q="${esc(it.position_no)}" data-answer="${esc(o.option_key)}">
+            <span class="mock-option-key">${esc(o.option_key)}</span>
+            <span>${esc(o.option_text)}</span>
+          </button>
+        `).join('')}
+      </div>
+    </article>`;
+  }).join('');
+
   return baseShell(html);
 }
-function renderWriting(model){
-  const settings=model.exercise.settings_json&&typeof model.exercise.settings_json==='object'?model.exercise.settings_json:{};const answer=state.session.writingByExercise?.[String(model.exercise.id)]||'';
-  return baseShell(`<div class="mock-section-label"><span class="tag">Telc ${esc(model.exercise.level||state.session.level)}</span><span class="mock-task-count">Schreiben · ${esc(model.exercise.teil)}</span></div><div class="mock-writing-grid"><div><div class="mock-writing-box"><h3>Situation</h3><div class="mock-task-body">${escBody(settings.situation_text||model.exercise.body||'')}</div></div>${settings.task_text?`<div class="mock-writing-box" style="margin-top:14px"><h3>Aufgabe</h3><div class="mock-task-body">${escBody(settings.task_text)}</div></div>`:''}</div><div class="mock-writing-box mock-writing-editor"><h3>${text('إجابتك','Deine Antwort')}</h3><textarea id="writingAnswer" placeholder="${text('اكتب إجابتك بالألمانية هنا…','Schreibe deine Antwort auf Deutsch…')}">${esc(answer)}</textarea><div class="mock-editor-meta"><span id="writingWords">0 Wörter</span><span>150+ Wörter empfohlen</span></div></div></div>`);
+
+/* ─── Task Content Dispatcher ─── */
+function renderTaskContent(model){
+  const ex = model?.exercise || {};
+  const sec = ex.section || '';
+  const teil = ex.teil || '';
+  const ttype = ex.task_type || '';
+
+  if (sec === 'Schreiben' || ttype === 'WRITING') return renderWriting(model);
+  if (sec === 'Sprachbausteine') {
+    if (teil === 'Teil 1') return renderMockSpb1(model);
+    if (teil === 'Teil 2') return renderMockSpb2(model);
+  }
+  if (sec === 'Lesen') {
+    if (teil === 'Teil 1') return renderMockLesen1(model);
+    if (teil === 'Teil 2') return renderMockLesen2(model);
+    if (teil === 'Teil 3') return renderMockLesen3(model);
+  }
+  if (sec === 'Hören') return renderMockHoeren(model);
+  return renderChoice(model);
 }
+
 function bind(){
-  document.querySelectorAll('[data-answer-q]').forEach(el=>el.onchange=el.onclick=()=>{const q=el.dataset.answerQ;window.__mockAnswers=window.__mockAnswers||{};window.__mockAnswers[q]=el.dataset.answer||el.value||'';state.session.answersByExercise[String(currentTask().id)]={...window.__mockAnswers};saveSession();if(el.tagName==='BUTTON')document.querySelectorAll(`[data-answer-q="${CSS.escape(q)}"]`).forEach(x=>x.classList?.toggle('selected',x.dataset.answer===el.dataset.answer));});
-  const ta=document.getElementById('writingAnswer');if(ta){const update=()=>{document.getElementById('writingWords').textContent=(ta.value.trim()?ta.value.trim().split(/\s+/).length:0)+' Wörter';state.session.writingByExercise[String(currentTask().id)]=ta.value;saveSession()};ta.oninput=update;update();}
-  document.getElementById('prevBtn').onclick=prev;document.getElementById('nextBtn').onclick=next;
+  // Two-way sync for gap selects and option buttons
+  document.querySelectorAll('[data-answer-q]').forEach(el => {
+    const handleAnswer = () => {
+      const q = String(el.dataset.answerQ);
+      const val = el.dataset.answer !== undefined ? el.dataset.answer : el.value;
+      window.__mockAnswers = window.__mockAnswers || {};
+      window.__mockAnswers[q] = val || '';
+      state.session.answersByExercise[String(currentTask().id)] = {...window.__mockAnswers};
+      saveSession();
+
+      // Sync inline select if an option button was clicked
+      const gapSel = document.querySelector(`select[data-gap-q="${CSS.escape(q)}"]`);
+      if (gapSel && gapSel.value !== val) {
+        gapSel.value = val;
+        gapSel.classList.toggle('answered', Boolean(val));
+      }
+
+      // Sync option buttons if select was changed
+      document.querySelectorAll(`button[data-answer-q="${CSS.escape(q)}"]`).forEach(b => {
+        const isMatch = String(b.dataset.answer).toLowerCase() === String(val).toLowerCase();
+        b.classList.toggle('selected', isMatch);
+      });
+
+      // Update word bank used status if on Sprachbausteine 2
+      document.querySelectorAll('.mock-word-card').forEach(card => {
+        const key = card.dataset.wordKey;
+        const isUsed = Object.values(window.__mockAnswers).some(ans => String(ans).toLowerCase() === String(key).toLowerCase());
+        card.classList.toggle('used', isUsed);
+      });
+    };
+
+    if (el.tagName === 'SELECT') {
+      el.onchange = handleAnswer;
+    } else {
+      el.onclick = handleAnswer;
+    }
+  });
+
+    document.querySelectorAll('[data-mock-ad-select]').forEach(sel => sel.onchange = () => {
+    const letter = sel.dataset.mockAdSelect;
+    const sitNo = sel.value;
+    const task = currentTask();
+    const m = state.models[task.id];
+    const items = m?.items || [];
+    window.__mockAnswers = window.__mockAnswers || {};
+
+    items.forEach(it => {
+      const q = String(it.position_no);
+      if (String(window.__mockAnswers[q] || '').toUpperCase() === letter) {
+        delete window.__mockAnswers[q];
+      }
+    });
+
+    if (sitNo && sitNo !== 'X') {
+      window.__mockAnswers[sitNo] = letter;
+    }
+
+    state.session.answersByExercise[String(task.id)] = {...window.__mockAnswers};
+    saveSession();
+    render();
+  });
+  const ta = document.getElementById('writingAnswer');
+  if (ta) {
+    const update = () => {
+      const words = ta.value.trim() ? ta.value.trim().split(/\s+/).length : 0;
+      document.getElementById('writingWords').textContent = words + ' Wörter';
+      state.session.writingByExercise[String(currentTask().id)] = ta.value;
+      saveSession();
+    };
+    ta.oninput = update;
+    update();
+  }
+
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  if (prevBtn) prevBtn.onclick = prev;
+  if (nextBtn) nextBtn.onclick = next;
 }
+
 function persistCurrent(){
-  const task=currentTask();if(!task)return;
-  const m=state.models[task.id];if(!m)return;
-  state.session.answersByExercise=state.session.answersByExercise||{};state.session.writingByExercise=state.session.writingByExercise||{};
-  if(window.__mockAnswers)state.session.answersByExercise[String(m.exercise.id)]={...window.__mockAnswers};
-  const ta=document.getElementById('writingAnswer');if(ta)state.session.writingByExercise[String(m.exercise.id)]=ta.value;
+  const task = currentTask();
+  if(!task) return;
+  const m = state.models[task.id];
+  if(!m) return;
+  state.session.answersByExercise = state.session.answersByExercise || {};
+  state.session.writingByExercise = state.session.writingByExercise || {};
+  if (window.__mockAnswers) state.session.answersByExercise[String(m.exercise.id)] = {...window.__mockAnswers};
+  const ta = document.getElementById('writingAnswer');
+  if (ta) state.session.writingByExercise[String(m.exercise.id)] = ta.value;
   saveSession();
 }
+
 function next(){
   persistCurrent();
-  if(state.currentIndex<state.session.tasks.length-1){state.currentIndex++;render();return}
+  if (state.currentIndex < state.session.tasks.length - 1) {
+    state.currentIndex++;
+    render();
+    window.scrollTo({top: 0, behavior: 'smooth'});
+    return;
+  }
   finishExam();
 }
-function prev(){persistCurrent();if(state.currentIndex>0){state.currentIndex--;render()}}
-async function loadModel(id){if(state.models[id])return state.models[id];const m=await api('exercise-get?id='+encodeURIComponent(id));state.models[id]=m;return m}
+
+function prev(){
+  persistCurrent();
+  if (state.currentIndex > 0) {
+    state.currentIndex--;
+    render();
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+}
+
+async function loadModel(id){
+  if(state.models[id]) return state.models[id];
+  const m = await api('exercise-get?id=' + encodeURIComponent(id));
+  state.models[id] = m;
+  return m;
+}
+
 async function render(){
-  clearTimeout(state.timerHandle);renderTabs();const task=currentTask();if(!task)return finishExam();
-  tick();const model=await loadModel(task.id);let inner=model.exercise.section==='Schreiben'||model.exercise.task_type==='WRITING'?renderWriting(model):renderChoice(model);
-  app.innerHTML=inner+`<div class="mock-error" id="mockError"></div>`;
-  const last=state.currentIndex===state.session.tasks.length-1;
+  clearTimeout(state.timerHandle);
+  renderTabs();
+  const task = currentTask();
+  if(!task) return finishExam();
+  tick();
+
+  const model = await loadModel(task.id);
+  const inner = renderTaskContent(model);
+  app.innerHTML = inner + `<div class="mock-error" id="mockError"></div>`;
+
+  const isFirst = state.currentIndex === 0;
+  const isLast = state.currentIndex === state.session.tasks.length - 1;
+
   document.querySelector('.mock-actions')?.remove();
-  document.body.insertAdjacentHTML('beforeend',`<div class="mock-actions"><div class="mock-actions-inner"><button id="prevBtn" class="btn light" ${state.currentIndex===0?'disabled':''}>← ${text('السابق','Zurück')}</button><button id="nextBtn" class="btn dark">${last?text('حفظ الإجابة وإنهاء الامتحان','Antwort speichern und Prüfung beenden'):text('التالي','Weiter')} →</button></div></div>`);
+  const nextBtnLabel = isLast ? text('حفظ وإنهاء الامتحان وعرض النتيجة 🏁', 'Prüfung beenden und Ergebnis anzeigen 🏁') : text('التالي →', 'Weiter →');
+  const prevBtnLabel = text('← السابق', '← Zurück');
+
+  document.body.insertAdjacentHTML('beforeend', `
+    <div class="mock-actions">
+      <div class="mock-actions-inner">
+        <button id="prevBtn" class="mock-nav-btn light" ${isFirst ? 'disabled' : ''}>
+          ${prevBtnLabel}
+        </button>
+        <button id="nextBtn" class="mock-nav-btn ${isLast ? 'btn-finish-mock' : 'dark'}">
+          ${nextBtnLabel}
+        </button>
+      </div>
+    </div>
+  `);
   bind();
 }
+
 async function finishExam(){
-  if(state.finishing)return;state.finishing=true;persistCurrent();clearTimeout(state.timerHandle);document.querySelector('.mock-actions')?.remove();
-  app.innerHTML='<div class="mock-finish"><div class="spinner"></div><h2>جارٍ تصحيح الامتحان…</h2><p class="muted">يتم الآن مقارنة الإجابات وحساب النتائج وتقييم Schreiben فقط بعد إنهاء الامتحان.</p></div>';
-  try{
-    const tasks=state.session.tasks.map(t=>({id:t.id,section:t.section,teil:t.teil,answers:state.session.answersByExercise?.[String(t.id)]||{}}));
-    const objective=await api('mock-submit',{method:'POST',body:{level:state.session.level,tasks}});
-    const result={level:state.session.level,sections:{...(objective.sections||{})},finishedAt:Date.now(),writing:null,totalMax:225};
-    const w=state.session.tasks.find(t=>t.section==='Schreiben');
-    if(w){const answer=state.session.writingByExercise?.[String(w.id)]||'';if(answer.trim()){try{const r=await api('ai-writing-correct',{method:'POST',body:{exercise_id:w.id,answer}});result.writing={score:Number(r.overall_score||0),max:45,percent:Number(r.max_score?((r.overall_score||0)/r.max_score*100):0),criteria:r.criteria||[],summary_ar:r.summary_ar||'',summary_de:r.summary_de||''};}catch(e){result.writing={score:0,max:45,percent:0,error:e.message}}}else result.writing={score:0,max:45,percent:0,error:'empty'};result.sections.Schreiben={score:result.writing.score,max:45,percent:result.writing.percent};}
-    localStorage.setItem('telc_mock_result',JSON.stringify(result));localStorage.removeItem('telc_mock_exam');location.href='/self-test-result.html?mock=1';
-  }catch(e){state.finishing=false;app.innerHTML=`<div class="alert bad">${esc(e.message||'حدث خطأ أثناء التصحيح')}</div><div style="text-align:center;margin-top:15px"><button class="btn" onclick="location.reload()">إعادة المحاولة</button></div>`}
+  if(state.finishing) return;
+  state.finishing = true;
+  persistCurrent();
+  clearTimeout(state.timerHandle);
+  document.querySelector('.mock-actions')?.remove();
+  app.innerHTML = `
+    <div class="mock-finish">
+      <div class="spinner"></div>
+      <h2>${text('جارٍ تصحيح الامتحان وحساب النتائج…', 'Prüfung wird korrigiert…')}</h2>
+      <p class="muted">${text('يتم الآن فحص الإجابات ومطابقتها وفق معايير TELC الرسمية وتقييم Schriftlicher Ausdruck…', 'Antworten werden nach offiziellen TELC-Kriterien ausgewertet…')}</p>
+    </div>`;
+
+  try {
+    const tasks = state.session.tasks.map(t => ({
+      id: t.id,
+      section: t.section,
+      teil: t.teil,
+      answers: state.session.answersByExercise?.[String(t.id)] || {}
+    }));
+
+    const objective = await api('mock-submit', {
+      method: 'POST',
+      body: { level: state.session.level, tasks }
+    });
+
+    const result = {
+      level: state.session.level,
+      sections: { ...(objective.sections || {}) },
+      finishedAt: Date.now(),
+      writing: null,
+      totalMax: 225
+    };
+
+    const w = state.session.tasks.find(t => t.section === 'Schreiben');
+    if (w) {
+      const answer = state.session.writingByExercise?.[String(w.id)] || '';
+      if (answer.trim()) {
+        try {
+          const r = await api('ai-writing-correct', { method: 'POST', body: { exercise_id: w.id, answer } });
+          result.writing = {
+            score: Number(r.overall_score || 0),
+            max: 45,
+            percent: Number(r.max_score ? ((r.overall_score || 0) / r.max_score * 100) : 0),
+            criteria: r.criteria || [],
+            summary_ar: r.summary_ar || '',
+            summary_de: r.summary_de || ''
+          };
+        } catch(e) {
+          result.writing = { score: 0, max: 45, percent: 0, error: e.message };
+        }
+      } else {
+        result.writing = { score: 0, max: 45, percent: 0, error: 'empty' };
+      }
+      result.sections.Schreiben = { score: result.writing.score, max: 45, percent: result.writing.percent };
+    }
+
+    localStorage.setItem('telc_mock_result', JSON.stringify(result));
+    localStorage.removeItem('telc_mock_exam');
+    location.href = '/self-test-result.html?mock=1';
+  } catch(e) {
+    state.finishing = false;
+    app.innerHTML = `
+      <div class="alert bad" style="max-width:700px;margin:40px auto;padding:20px;border-radius:16px;">
+        <h3>${text('تعذر تصحيح الامتحان', 'Fehler bei der Korrektur')}</h3>
+        <p>${esc(e.message || text('حدث خطأ أثناء التصحيح', 'Ein Fehler ist aufgetreten'))}</p>
+        <div style="text-align:center;margin-top:20px">
+          <button class="btn" onclick="finishExam()">${text('إعادة المحاولة', 'Wiederholen')}</button>
+          <button class="btn light" style="margin-inline-start:10px" onclick="location.reload()">${text('العودة للأسئلة', 'Zurück zu den Aufgaben')}</button>
+        </div>
+      </div>`;
+  }
 }
-(async()=>{state.session=getSession();if(!state.session){location.href='/dashboard.html';return}state.session.tasks=(state.session.tasks||[]).filter(t=>SECTION_ORDER.includes(t.section));if(!state.session.tasks.length){location.href='/self-test.html';return}state.currentIndex=Math.min(Number(state.session.currentIndex)||0,state.session.tasks.length-1);if(Number(state.session.examDurationSeconds)!==8400||!Number(state.session.examEndsAt)){state.session.examDurationSeconds=8400;state.session.examEndsAt=Number(state.session.startedAt||Date.now())+8400*1000;saveSession()}await render()})();
+
+window.addEventListener('langchange', () => {
+  render();
+});
+
+(async () => {
+  state.session = getSession();
+  if (!state.session) { location.href = '/dashboard.html'; return; }
+  state.session.tasks = (state.session.tasks || []).filter(t => SECTION_ORDER.includes(t.section));
+  if (!state.session.tasks.length) { location.href = '/self-test.html'; return; }
+  state.currentIndex = Math.min(Number(state.session.currentIndex) || 0, state.session.tasks.length - 1);
+  if (Number(state.session.examDurationSeconds) !== 8400 || !Number(state.session.examEndsAt)) {
+    state.session.examDurationSeconds = 8400;
+    state.session.examEndsAt = Number(state.session.startedAt || Date.now()) + 8400 * 1000;
+    saveSession();
+  }
+  await render();
+})();
 </script>
-</body></html>
+</body>
+</html>

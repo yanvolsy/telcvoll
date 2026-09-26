@@ -16,6 +16,7 @@ exports.handler = async (event) => {
   const tasks=Array.isArray(body.tasks)?body.tasks:[];
   if(!tasks.length) return json(400,{error:'No exam tasks'});
   const pool=db();
+  const client=await pool.connect();
   try{
     const sectionRaw={}; const details=[];
     for(const task of tasks){
@@ -26,10 +27,12 @@ exports.handler = async (event) => {
       const given=task.answers&&typeof task.answers==='object'?task.answers:{};
       let rawScore=0, rawMax=0;
       for(const it of items){
-        const ans=String(given[it.id] ?? given[it.position_no] ?? '').trim();
+        const ans=String(given[it.id] ?? given[it.position_no] ?? given[String(it.position_no)] ?? '').trim();
+        const correct=String(it.correct_answer ?? '').trim();
         const pts=Number(it.points)||1; rawMax+=pts;
-        const ok=ans!=='' && ans===String(it.correct_answer??''); if(ok) rawScore+=pts;
-        details.push({exercise_id:id,section:ex.section,teil:ex.teil,prompt:it.prompt,given:ans,ok,points:ok?pts:0,max_points:pts});
+        const ok=ans!=='' && ans.toLowerCase()===correct.toLowerCase();
+        if(ok) rawScore+=pts;
+        details.push({exercise_id:id,section:ex.section,teil:ex.teil,prompt:it.prompt,given:ans,correct,ok,points:ok?pts:0,max_points:pts});
       }
       if(MAX_BY_SECTION[ex.section]){
         const a=sectionRaw[ex.section] ||= {raw:0,max:0,tasks:[]}; a.raw+=rawScore; a.max+=rawMax; a.tasks.push({id,teil:ex.teil,raw:rawScore,max:rawMax});
@@ -37,9 +40,12 @@ exports.handler = async (event) => {
     }
     const sections={};
     for(const [section,v] of Object.entries(sectionRaw)){
-      const max=MAX_BY_SECTION[section]; const score=v.max?Math.round((v.raw/v.max)*max*100)/100:0;
-      sections[section]={score,max,percent:max?Math.round(score/max*10000)/100:0,tasks:v.tasks};
+      const max=MAX_BY_SECTION[section];
+      const rawPct=v.max?(v.raw/v.max):0;
+      // Round to nearest 0.5 points as per standard TELC scoring
+      const score=Math.round(rawPct*max*2)/2;
+      sections[section]={score,max,percent:max?Math.round((score/max)*1000)/10:0,tasks:v.tasks};
     }
     return json(200,{level:body.level||'',sections,details});
-  }catch(e){console.error('mock-submit failed',e);return json(500,{error:'تعذر إنهاء المحاكاة.'});}finally{client.release();}
+  }catch(e){console.error('mock-submit failed',e);return json(500,{error:'تعذر تصحيح الامتحان التجريبي: '+(e.message||'خطأ في الخادم')});}finally{client.release();}
 };
