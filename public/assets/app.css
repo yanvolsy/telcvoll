@@ -8131,3 +8131,339 @@ button.side-option,
   color: var(--ink) !important;
 }
 
+
+
+/* ========================================================================
+   TELC VOLL — FINAL EXERCISE PRESENTATION / 2026-09-26
+   Visual-only refinement. Existing JS, APIs, scoring, auth and data remain untouched.
+   ======================================================================== */
+
+/* Keep the exercise experience deliberately LTR. Arabic text itself may remain RTL. */
+body.exercise-page,
+body.exercise-page #content,
+body.exercise-page .exercise-workspace,
+body.exercise-page .exam-workspace,
+body.exercise-page .exercise-actions {
+  direction: ltr !important;
+}
+
+/* Compact, premium sticky control rail */
+body.exercise-page .exercise-header-card.exercise-sticky-bar {
+  width: min(1180px, calc(100% - 28px)) !important;
+  max-width: 1180px !important;
+  margin: 0 auto 18px !important;
+  padding: 9px 0 !important;
+  top: 70px !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(255,122,47,.16) !important;
+  border-radius: 0 0 14px 14px !important;
+  background: color-mix(in srgb, var(--bg) 94%, transparent) !important;
+  box-shadow: 0 8px 26px rgba(0,0,0,.08) !important;
+}
+
+html[data-theme="dark"] body.exercise-page .exercise-header-card.exercise-sticky-bar {
+  background: color-mix(in srgb, #0f1b1a 94%, transparent) !important;
+  border-bottom-color: rgba(255,122,47,.18) !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,.24) !important;
+}
+
+body.exercise-page .exercise-single-top-bar {
+  width: 100% !important;
+  min-height: 48px !important;
+  padding: 0 12px !important;
+  gap: 10px !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+}
+
+/* Section / Teil */
+body.exercise-page .top-bar-left-cluster {
+  flex: 0 0 auto !important;
+  gap: 6px !important;
+}
+body.exercise-page .top-bar-left-cluster .tag {
+  height: 34px !important;
+  padding: 0 11px !important;
+  border-radius: 9px !important;
+  font-size: 12px !important;
+  letter-spacing: .01em !important;
+}
+body.exercise-page .tag-level-section {
+  background: rgba(255,122,47,.10) !important;
+  border-color: rgba(255,122,47,.28) !important;
+}
+body.exercise-page .tag-teil {
+  background: transparent !important;
+}
+
+/* Title gets a proper central lane instead of competing with the controls. */
+body.exercise-page .top-bar-title-cluster {
+  flex: 1 1 330px !important;
+  width: auto !important;
+  max-width: 390px !important;
+  min-width: 190px !important;
+  height: 36px !important;
+  margin-left: 4px !important;
+}
+body.exercise-page .top-bar-title-cluster .thema-title-row {
+  width: 100% !important;
+  height: 36px !important;
+  gap: 7px !important;
+}
+body.exercise-page .top-bar-title-cluster .thema-title-content,
+body.exercise-page .top-bar-title-cluster .thema-masked-wrapper {
+  min-width: 0 !important;
+  flex: 1 1 auto !important;
+}
+body.exercise-page .top-bar-title-cluster .thema-title-content h1 {
+  margin: 0 !important;
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+body.exercise-page .top-bar-title-cluster .thema-masked-wrapper {
+  height: 30px !important;
+  border: 1px dashed rgba(255,122,47,.28) !important;
+  border-radius: 8px !important;
+  padding: 0 10px !important;
+  cursor: pointer !important;
+}
+body.exercise-page .top-bar-title-cluster .frosted-ghost-bars {
+  opacity: .65 !important;
+}
+body.exercise-page .top-bar-title-cluster .ghost-bar {
+  height: 6px !important;
+  border-radius: 999px !important;
+  background: rgba(255,122,47,.26) !important;
+}
+body.exercise-page .top-bar-title-cluster .title-eye-btn {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  border: 1px solid rgba(255,122,47,.28) !important;
+}
+
+/* Result gets a real reserved lane, so the header never jumps after checking. */
+body.exercise-page .top-bar-result-cluster {
+  flex: 1 1 260px !important;
+  min-width: 190px !important;
+  max-width: 330px !important;
+  height: 36px !important;
+  justify-content: stretch !important;
+}
+body.exercise-page .top-bar-result-cluster .result-reserved-placeholder {
+  display: block !important;
+  width: 100% !important;
+  height: 34px !important;
+  border: 1px dashed rgba(255,255,255,.07) !important;
+  border-radius: 9px !important;
+  background: transparent !important;
+}
+html[data-theme="light"] body.exercise-page .top-bar-result-cluster .result-reserved-placeholder {
+  border-color: rgba(16,35,30,.07) !important;
+}
+body.exercise-page .top-bar-result-cluster .inline-result-panel {
+  width: 100% !important;
+  height: 34px !important;
+  margin: 0 !important;
+  padding: 0 12px !important;
+  border-radius: 9px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 7px !important;
+  font-size: 12.5px !important;
+  font-weight: 800 !important;
+  box-sizing: border-box !important;
+}
+
+/* Shuffle: one clear action, same height as the other controls. */
+body.exercise-page .top-bar-shuffle-cluster {
+  flex: 0 0 auto !important;
+}
+body.exercise-page .top-bar-shuffle-cluster .exercise-heading-shuffle {
+  height: 34px !important;
+  min-width: 112px !important;
+  padding: 0 12px !important;
+  border-radius: 9px !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  border: 1px solid rgba(255,122,47,.30) !important;
+  background: rgba(255,122,47,.08) !important;
+  color: var(--green) !important;
+}
+body.exercise-page .top-bar-shuffle-cluster .exercise-heading-shuffle:hover {
+  background: rgba(255,122,47,.14) !important;
+  border-color: rgba(255,122,47,.52) !important;
+}
+body.exercise-page .top-bar-shuffle-cluster .shuffle-icon {
+  font-size: 17px !important;
+  line-height: 1 !important;
+}
+
+/* Timer is intentionally the last, compact element. */
+body.exercise-page .top-bar-timer-cluster {
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+}
+body.exercise-page .top-bar-timer-cluster .modern-digital-clock,
+body.exercise-page .top-bar-timer-cluster .progress-pill {
+  height: 34px !important;
+  min-width: 86px !important;
+  padding: 0 11px !important;
+  border-radius: 9px !important;
+  gap: 6px !important;
+  justify-content: center !important;
+  background: transparent !important;
+  border: 1px solid var(--line) !important;
+  box-shadow: none !important;
+}
+body.exercise-page .top-bar-timer-cluster .timer-icon {
+  color: var(--green) !important;
+  font-size: 13px !important;
+}
+body.exercise-page .top-bar-timer-cluster .timer-digits {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  letter-spacing: .04em !important;
+}
+
+/* Main exercise workspace: one intentional frame, not a collection of floating cards. */
+body.exercise-page .exam-workspace {
+  width: min(1180px, calc(100% - 28px)) !important;
+  max-width: 1180px !important;
+  padding: 0 0 70px !important;
+  margin: 0 auto !important;
+}
+body.exercise-page .exercise-content-frame,
+body.exercise-page .main-exam-frame {
+  width: 100% !important;
+  padding: clamp(20px, 2.6vw, 32px) clamp(18px, 3vw, 40px) !important;
+  border: 1px solid rgba(255,122,47,.24) !important;
+  border-radius: 18px !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] body.exercise-page .exercise-content-frame,
+html[data-theme="dark"] body.exercise-page .main-exam-frame {
+  background: rgba(255,255,255,.008) !important;
+  border-color: rgba(255,122,47,.22) !important;
+}
+html[data-theme="light"] body.exercise-page .exercise-content-frame,
+html[data-theme="light"] body.exercise-page .main-exam-frame {
+  background: rgba(255,255,255,.28) !important;
+  border-color: rgba(255,122,47,.22) !important;
+}
+
+/* Remove visual noise from paragraph blocks; the frame is the hierarchy. */
+body.exercise-page .exam-text-card {
+  padding: 8px 0 22px !important;
+  margin: 0 0 22px !important;
+  border-bottom: 1px solid var(--line) !important;
+}
+body.exercise-page .exam-text-card:last-child {
+  border-bottom: 0 !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+body.exercise-page .exam-text {
+  max-width: 100% !important;
+  font-size: clamp(15.5px, 1.2vw, 17px) !important;
+  line-height: 1.85 !important;
+}
+
+/* Text tools stay on the right without changing the exercise direction. */
+body.exercise-page .paragraph-tools-row {
+  display: flex !important;
+  justify-content: flex-end !important;
+  direction: ltr !important;
+  margin: 8px 0 10px !important;
+}
+
+/* Answer controls: compact, consistent, clearly stateful. */
+body.exercise-page .side-option,
+body.exercise-page .mock-option {
+  min-height: 48px !important;
+  border-radius: 10px !important;
+  border-width: 1px !important;
+  box-shadow: none !important;
+}
+body.exercise-page .side-option.selected,
+body.exercise-page .mock-option.selected {
+  border-width: 1.5px !important;
+  box-shadow: 0 0 0 2px rgba(255,122,47,.08) !important;
+}
+
+/* Bottom actions become a quiet control strip rather than a second giant card. */
+body.exercise-page .exercise-actions {
+  width: min(1180px, calc(100% - 28px)) !important;
+  margin: -42px auto 42px !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+body.exercise-page .exercise-actions .exercise-nav {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 10px 0 !important;
+}
+body.exercise-page .exercise-actions .btn {
+  min-height: 42px !important;
+  padding: 0 18px !important;
+  border-radius: 9px !important;
+  font-size: 13px !important;
+}
+
+/* Mobile: never squeeze the control rail; it becomes a neat two-line grid. */
+@media (max-width: 900px) {
+  body.exercise-page .exercise-header-card.exercise-sticky-bar {
+    width: calc(100% - 18px) !important;
+    top: 64px !important;
+  }
+  body.exercise-page .exercise-single-top-bar {
+    min-height: 86px !important;
+    display: grid !important;
+    grid-template-columns: auto 1fr auto !important;
+    grid-template-areas:
+      "meta title timer"
+      "result result shuffle" !important;
+    gap: 6px 8px !important;
+    padding: 6px 8px !important;
+  }
+  body.exercise-page .top-bar-left-cluster { grid-area: meta !important; }
+  body.exercise-page .top-bar-title-cluster { grid-area: title !important; max-width: none !important; min-width: 0 !important; margin: 0 !important; }
+  body.exercise-page .top-bar-result-cluster { grid-area: result !important; max-width: none !important; min-width: 0 !important; height: 32px !important; }
+  body.exercise-page .top-bar-shuffle-cluster { grid-area: shuffle !important; }
+  body.exercise-page .top-bar-timer-cluster { grid-area: timer !important; }
+  body.exercise-page .top-bar-shuffle-cluster .exercise-heading-shuffle { min-width: 100px !important; }
+  body.exercise-page .exam-workspace,
+  body.exercise-page .exercise-actions { width: calc(100% - 18px) !important; }
+  body.exercise-page .exercise-content-frame,
+  body.exercise-page .main-exam-frame { padding: 18px 15px !important; border-radius: 14px !important; }
+}
+
+@media (max-width: 600px) {
+  body.exercise-page .exercise-header-card.exercise-sticky-bar { top: 58px !important; }
+  body.exercise-page .exercise-single-top-bar {
+    grid-template-columns: 1fr auto !important;
+    grid-template-areas:
+      "meta timer"
+      "title title"
+      "result shuffle" !important;
+    min-height: 124px !important;
+  }
+  body.exercise-page .top-bar-title-cluster { width: 100% !important; }
+  body.exercise-page .top-bar-title-cluster .thema-title-row { width: 100% !important; }
+  body.exercise-page .top-bar-result-cluster { width: 100% !important; }
+  body.exercise-page .top-bar-shuffle-cluster .exercise-heading-shuffle { width: 100% !important; }
+  body.exercise-page .top-bar-timer-cluster .modern-digital-clock,
+  body.exercise-page .top-bar-timer-cluster .progress-pill { min-width: 82px !important; }
+  body.exercise-page .exercise-actions .exercise-nav { flex-wrap: wrap !important; }
+}
