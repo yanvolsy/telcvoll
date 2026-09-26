@@ -153,7 +153,7 @@ exports.handler = async (event) => {
         description: `اشتراك TELC Voll كامل (${plan.duration_days} يوم) B1 + B2 + C1`
       },
       feeMode: 'NO_FEE',
-      successMessage: 'تم الدفع بنجاح! كود اشتراكك في TELC Voll جاهز.',
+      successMessage: 'تم الدفع بنجاح! تم تفعيل اشتراكك في TELC Voll.',
       redirectUrl: returnUrl
     };
 

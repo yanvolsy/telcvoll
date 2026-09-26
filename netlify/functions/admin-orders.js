@@ -1,7 +1,7 @@
 const { db } = require('./_lib/db');
 const { json } = require('./_lib/auth');
 const { requireAdmin } = require('./_lib/guard');
-const { sendAccessCodeEmail } = require('./_lib/email');
+const { sendSubscriptionActivatedEmail } = require('./_lib/email');
 const { requireSameOrigin, requestSize } = require('./_lib/request');
 
 exports.handler = async (event) => {
@@ -109,17 +109,16 @@ exports.handler = async (event) => {
       );
       const order = orderRes.rows[0];
       if (!order) return json(404, { error: 'الطلب غير موجود.' });
-      if (order.status !== 'CONFIRMED' || !order.access_code) {
+      if (order.status !== 'CONFIRMED') {
         return json(400, { error: 'لا يمكن إرسال بريد التأكيد لطلب غير مكتمل الدفع.' });
       }
 
-      const emailResult = await sendAccessCodeEmail({
+      const emailResult = await sendSubscriptionActivatedEmail({
         to: order.customer_email,
         name: order.customer_name,
         planName: order.plan_name,
         durationDays: order.duration_days,
         expiresAt: order.expires_at,
-        accessCode: order.access_code,
       });
 
       if (!emailResult.ok) {

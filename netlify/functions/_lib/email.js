@@ -4,6 +4,7 @@
 const RESEND_API_URL = 'https://api.resend.com/emails';
 const DEFAULT_SENDER = process.env.EMAIL_FROM || 'TELC Voll <noreply@telcvoll.de>';
 const SITE_URL = process.env.SITE_URL || 'https://telcvoll.de';
+const BRAND_LOGO_URL = `${SITE_URL.replace(/\/+$/, '')}/assets/TELC_Voll_AppIcon_Light.png`;
 
 /**
  * Send an email through Resend API
@@ -53,189 +54,65 @@ async function sendEmail({ to, subject, html, replyTo }) {
   }
 }
 
-/**
- * Send the official access code email after confirmed payment
- */
-async function sendAccessCodeEmail({ to, name, planName, durationDays, expiresAt, accessCode }) {
-  const formattedDate = expiresAt ? new Date(expiresAt).toLocaleDateString('ar-DZ', {
-    year: 'numeric', month: 'long', day: 'numeric'
-  }) : `${durationDays} يوماً`;
-
+/** Send a branded subscription activation notice after confirmed payment. */
+async function sendSubscriptionActivatedEmail({ to, name, planName, durationDays, expiresAt }) {
   const safeName = escapeHtml(name || 'عزيزي المشترك');
-  const safePlan = escapeHtml(planName || 'الخطة المختارة');
+  const safePlan = escapeHtml(planName || 'اشتراك TELC Voll');
   const safeDays = escapeHtml(durationDays || '—');
-  const safeCode = escapeHtml(accessCode || '');
-  const subject = `رمز الدخول إلى منصة TELC Voll — كود تفعيل B1 · B2 · C1 (${safeCode})`;
-  const codeLink = `${SITE_URL}/?code=${encodeURIComponent(accessCode || '')}`;
+  const siteUrl = escapeHtml(SITE_URL.replace(/\/+$/, ''));
+  const logoUrl = escapeHtml(BRAND_LOGO_URL);
+  let formattedDate = `${safeDays} يومًا`;
+  if (expiresAt) {
+    const date = new Date(expiresAt);
+    if (!Number.isNaN(date.getTime())) {
+      formattedDate = new Intl.DateTimeFormat('ar-DZ', {
+        year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Africa/Algiers'
+      }).format(date);
+    }
+  }
+  const safeExpiry = escapeHtml(formattedDate);
+  const subject = 'تم تفعيل اشتراكك في TELC Voll — أهلاً بك';
 
-  const html = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="ar" dir="rtl">
+  const html = `<!doctype html>
+<html lang="ar" dir="rtl" xmlns="http://www.w3.org/1999/xhtml">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="color-scheme" content="light dark" />
-  <meta name="supported-color-schemes" content="light dark" />
+  <meta name="color-scheme" content="light" />
   <title>${escapeHtml(subject)}</title>
-  <style type="text/css">
-    body, table, td, a { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
-    table, td { mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
-    img { -ms-interpolation-mode: bicubic; border: 0; outline: none; text-decoration: none; }
-    body { margin: 0; padding: 0; width: 100% !important; background-color: #0b0f0e; font-family: 'Segoe UI', Tahoma, Arial, sans-serif; direction: rtl; text-align: right; }
-    @media only screen and (max-width: 620px) {
-      .email-shell { width: 100% !important; }
-      .code-text { font-size: 24px !important; letter-spacing: 2px !important; }
-      .mobile-padding { padding-left: 18px !important; padding-right: 18px !important; }
-    }
-  </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #0b0f0e; color: #151d19;">
-  <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #0b0f0e; padding: 24px 0 36px 0;">
-    <tr>
-      <td align="center">
-        <!--[if (gte mso 9)|(IE)]>
-        <table align="center" border="0" cellspacing="0" cellpadding="0" width="600">
-        <tr>
-        <td align="center" valign="top" width="600">
-        <![endif]-->
-        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="email-shell" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,0.3); border: 1px solid #1f2a24;">
-          
-          <!-- Header -->
-          <tr>
-            <td align="center" style="background-color: #0b0f0e; padding: 34px 24px 30px; border-bottom: 2px solid #ff7a00;">
-              <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                <tr>
-                  <td align="center" valign="middle">
-                    <span style="display: inline-block; width: 12px; height: 12px; background-color: #ff7a00; border-radius: 50%; margin-inline-end: 8px; vertical-align: middle;"></span>
-                    <span style="color: #ffffff; font-size: 26px; font-weight: 900; letter-spacing: -0.5px; vertical-align: middle;">TELC Voll</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td align="center" style="padding-top: 6px;">
-                    <span style="color: #a0b2aa; font-size: 13px; font-weight: 600; letter-spacing: 0.5px;">منصة التحضير لامتحانات اللغة الألمانية · B1 · B2 · C1</span>
-                  </td>
-                </tr>
+<body style="margin:0;padding:0;background:#0d1310;font-family:'Segoe UI',Tahoma,Arial,sans-serif;color:#17221d;direction:rtl;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#0d1310;padding:30px 12px;">
+    <tr><td align="center">
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:620px;background:#ffffff;border:1px solid #26332d;border-radius:22px;overflow:hidden;">
+        <tr><td align="center" style="padding:28px 20px 24px;background:#101713;border-bottom:3px solid #f47b20;">
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0"><tr>
+            <td valign="middle" style="padding-left:12px;"><img src="${logoUrl}" width="48" height="48" alt="شعار TELC Voll" style="display:block;width:48px;height:48px;border:0;border-radius:13px;" /></td>
+            <td valign="middle" align="right"><div style="color:#ffffff;font-size:25px;font-weight:900;letter-spacing:-.4px;">TELC <span style="color:#f47b20;">Voll</span></div><div style="color:#a7b5ae;font-size:12px;margin-top:4px;">منصة التحضير لامتحانات اللغة الألمانية · B1 · B2 · C1</div></td>
+          </tr></table>
+        </td></tr>
+        <tr><td align="right" dir="rtl" style="padding:32px 32px 28px;">
+          <div style="display:inline-block;padding:7px 13px;border:1px solid #bfe8ce;border-radius:999px;background:#effaf3;color:#168348;font-size:12px;font-weight:800;margin-bottom:16px;">✓ تم تأكيد الدفع وتفعيل الحساب</div>
+          <h1 style="margin:0 0 12px;color:#111a15;font-size:25px;line-height:1.5;font-weight:900;">مرحبًا ${safeName}، أهلًا بك في المنصة</h1>
+          <p style="margin:0 0 22px;color:#53635b;font-size:15px;line-height:1.95;">شكرًا لانضمامك إلى TELC Voll. تم تفعيل حسابك واشتراكك بنجاح. نتمنى لك تدريبًا ممتعًا ونجاحًا وتوفيقًا في امتحانك القادم.</p>
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f6f9f7;border:1px solid #e1e9e4;border-radius:16px;margin:0 0 22px;">
+            <tr><td style="padding:10px 19px;">
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tr><td align="right" style="padding:12px 0;border-bottom:1px dashed #d8e2dc;color:#75847c;font-size:13px;">الخطة</td><td align="left" style="padding:12px 0;border-bottom:1px dashed #d8e2dc;color:#18221d;font-size:14px;font-weight:800;">${safePlan}</td></tr>
+                <tr><td align="right" style="padding:12px 0;border-bottom:1px dashed #d8e2dc;color:#75847c;font-size:13px;">المدة</td><td align="left" style="padding:12px 0;border-bottom:1px dashed #d8e2dc;color:#18221d;font-size:14px;font-weight:800;">${safeDays} يومًا</td></tr>
+                <tr><td align="right" style="padding:12px 0;border-bottom:1px dashed #d8e2dc;color:#75847c;font-size:13px;">نطاق الوصول</td><td align="left" style="padding:12px 0;border-bottom:1px dashed #d8e2dc;color:#168348;font-size:14px;font-weight:900;">B1 · B2 · C1</td></tr>
+                <tr><td align="right" style="padding:12px 0 5px;color:#75847c;font-size:13px;">تاريخ انتهاء الاشتراك</td><td align="left" style="padding:12px 0 5px;color:#f47b20;font-size:14px;font-weight:900;">${safeExpiry}</td></tr>
               </table>
-            </td>
-          </tr>
-
-          <!-- Main Content -->
-          <tr>
-            <td class="mobile-padding" style="padding: 34px 32px 28px; background-color: #ffffff;" dir="rtl" align="right">
-              
-              <!-- Success Badge -->
-              <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin-bottom: 18px;">
-                <tr>
-                  <td style="background-color: #fff4ec; border: 1px solid #fed7aa; border-radius: 999px; padding: 6px 16px;">
-                    <span style="color: #ff7a00; font-size: 13px; font-weight: 800;">تم تأكيد الدفع بنجاح ✓</span>
-                  </td>
-                </tr>
-              </table>
-
-              <h1 style="color: #0b0f0e; font-size: 23px; font-weight: 900; margin: 0 0 12px 0; line-height: 1.35;">مرحباً ${safeName}</h1>
-              <p style="color: #3b4d45; font-size: 15px; line-height: 1.75; margin: 0 0 24px 0;">
-                شكراً لاشتراكك في منصة <strong>TELC Voll</strong>. تم تفعيل حسابك بنجاح، ورمز الدخول الخاص بك جاهز للاستخدام الفوري لجميع مستويات المنصة <strong>(B1 + B2 + C1)</strong> دون أي قيود.
-              </p>
-
-              <!-- Order Summary Table -->
-              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f7faf9; border: 1px solid #e1e8e5; border-radius: 16px; margin: 0 0 28px 0;">
-                <tr>
-                  <td style="padding: 16px 20px;">
-                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%">
-                      <tr>
-                        <td align="right" style="padding: 9px 0; border-bottom: 1px dashed #e1e8e5; color: #6b7f76; font-size: 14px;">الخطة المفعلة:</td>
-                        <td align="left" dir="ltr" style="padding: 9px 0; border-bottom: 1px dashed #e1e8e5; color: #0b0f0e; font-size: 14px; font-weight: 800;">${safePlan}</td>
-                      </tr>
-                      <tr>
-                        <td align="right" style="padding: 9px 0; border-bottom: 1px dashed #e1e8e5; color: #6b7f76; font-size: 14px;">مدة الاشتراك:</td>
-                        <td align="left" style="padding: 9px 0; border-bottom: 1px dashed #e1e8e5; color: #0b0f0e; font-size: 14px; font-weight: 800;">${safeDays} يوماً</td>
-                      </tr>
-                      <tr>
-                        <td align="right" style="padding: 9px 0; border-bottom: 1px dashed #e1e8e5; color: #6b7f76; font-size: 14px;">نطاق الوصول:</td>
-                        <td align="left" style="padding: 9px 0; border-bottom: 1px dashed #e1e8e5; color: #ff7a00; font-size: 14px; font-weight: 800;">المنصة كاملة (B1 + B2 + C1)</td>
-                      </tr>
-                      <tr>
-                        <td align="right" style="padding: 9px 0; color: #6b7f76; font-size: 14px;">تاريخ انتهاء الصلاحية:</td>
-                        <td align="left" style="padding: 9px 0; color: #0b0f0e; font-size: 14px; font-weight: 800;">${escapeHtml(formattedDate)}</td>
-                      </tr>
-                    </table>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Access Code Card -->
-              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #fff9f4; border: 2px dashed #ff7a00; border-radius: 18px; margin: 0 0 28px 0;">
-                <tr>
-                  <td align="center" style="padding: 26px 20px;">
-                    <div style="color: #92400e; font-size: 12px; font-weight: 900; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px;">
-                      رمز الدخول الخاص بك · ACCESS CODE
-                    </div>
-                    <div class="code-text" style="font-family: Consolas, 'Courier New', monospace; font-size: 32px; font-weight: 900; color: #ff7a00; letter-spacing: 4px; padding: 6px 0; direction: ltr; display: inline-block;">
-                      ${safeCode}
-                    </div>
-                    <div style="color: #6b7f76; font-size: 13px; line-height: 1.6; margin-top: 10px; max-width: 440px;">
-                      احفظ هذا الكود. يمكنك نسخه واستخدامه للدخول في أي وقت، أو الضغط مباشرة على الزر أدناه للدخول الفوري.
-                    </div>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Primary CTA Button -->
-              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 0 0 28px 0;">
-                <tr>
-                  <td align="center">
-                    <a href="${escapeHtml(codeLink)}" target="_blank" style="display: inline-block; background-color: #ff7a00; color: #ffffff; text-decoration: none; font-size: 16px; font-weight: 900; padding: 16px 38px; border-radius: 14px; box-shadow: 0 6px 20px rgba(255,122,0,0.35); text-align: center;">
-                      الدخول إلى المنصة وتفعيل الكود تلقائياً ←
-                    </a>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Instructions / Steps -->
-              <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f7faf9; border-radius: 14px; margin: 0 0 20px 0;">
-                <tr>
-                  <td style="padding: 18px 22px;" align="right" dir="rtl">
-                    <strong style="color: #0b0f0e; font-size: 14px; display: block; margin-bottom: 8px;">خطوات تفعيل الدخول:</strong>
-                    <ol style="margin: 0; padding-right: 20px; color: #3b4d45; font-size: 13px; line-height: 1.8;">
-                      <li>اضغط على زر <strong>الدخول إلى المنصة</strong> أعلاه، أو توجه مباشرة إلى <a href="${SITE_URL}" target="_blank" style="color: #ff7a00; text-decoration: none; font-weight: 700;">telcvoll.de</a>.</li>
-                      <li>سيتم ملء رمز الدخول تلقائياً (أو الصق الكود <strong>${safeCode}</strong> في خانة كود الدخول).</li>
-                      <li>اضغط <strong>دخول إلى المنصة</strong> للبدء فوراً في جميع نماذج وامتحانات B1 و B2 و C1.</li>
-                    </ol>
-                  </td>
-                </tr>
-              </table>
-
-              <p style="color: #83978f; font-size: 12px; text-align: center; margin: 20px 0 0 0; line-height: 1.6;">
-                إذا واجهتك أي صعوبة في الدخول، يمكنك التواصل معنا مباشرة عبر صفحة <a href="${SITE_URL}/contact.html" target="_blank" style="color: #ff7a00; text-decoration: none; font-weight: 700;">تواصل معنا</a>.
-              </p>
-
-            </td>
-          </tr>
-
-          <!-- Footer -->
-          <tr>
-            <td align="center" style="background-color: #f7faf9; border-top: 1px solid #e1e8e5; padding: 22px 24px;">
-              <table role="presentation" border="0" cellpadding="0" cellspacing="0">
-                <tr>
-                  <td align="center">
-                    <strong style="color: #0b0f0e; font-size: 13px;">TELC Voll</strong><br />
-                    <span style="color: #83978f; font-size: 12px; line-height: 1.7;">
-                      German Exam Preparation Platform · B1 · B2 · C1<br />
-                      <a href="${SITE_URL}" target="_blank" style="color: #ff7a00; text-decoration: none; font-weight: 600;">${SITE_URL}</a>
-                    </span>
-                  </td>
-                </tr>
-              </table>
-            </td>
-          </tr>
-
-        </table>
-        <!--[if (gte mso 9)|(IE)]>
-        </td>
-        </tr>
-        </table>
-        <![endif]-->
-      </td>
-    </tr>
+            </td></tr>
+          </table>
+          <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" style="margin:0 auto 20px;"><tr><td align="center" style="background:#f47b20;border-radius:13px;box-shadow:0 7px 18px rgba(244,123,32,.22);">
+            <a href="${siteUrl}/login.html" target="_blank" style="display:inline-block;padding:14px 30px;color:#ffffff;text-decoration:none;font-size:15px;font-weight:900;">الدخول إلى المنصة ←</a>
+          </td></tr></table>
+          <p style="margin:0;color:#75847c;font-size:12px;line-height:1.8;text-align:center;">إذا احتجت إلى أي مساعدة، يسعدنا تواصلك معنا عبر <a href="${siteUrl}/contact.html" target="_blank" style="color:#e96e17;font-weight:800;text-decoration:none;">صفحة الدعم</a>.</p>
+        </td></tr>
+        <tr><td align="center" style="padding:18px 20px;background:#f6f9f7;border-top:1px solid #e3eae6;color:#7a8981;font-size:11px;line-height:1.8;">TELC Voll · نتمنى لك كل النجاح<br /><a href="${siteUrl}" target="_blank" style="color:#e96e17;text-decoration:none;font-weight:700;">${siteUrl}</a></td></tr>
+      </table>
+    </td></tr>
   </table>
 </body>
 </html>`;
@@ -272,6 +149,7 @@ async function sendPasswordResetEmail({ to, name, resetUrl, expiresMinutes = 60 
         <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="email-shell" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,0.3); border: 1px solid #1f2a24;">
           <tr>
             <td align="center" style="background-color: #0b0f0e; padding: 32px 24px; border-bottom: 2px solid #ff7a00;">
+              <img src="${escapeHtml(BRAND_LOGO_URL)}" width="42" height="42" alt="شعار TELC Voll" style="display:inline-block;width:42px;height:42px;border:0;border-radius:11px;vertical-align:middle;margin-left:10px;" />
               <span style="display: inline-block; width: 12px; height: 12px; background-color: #ff7a00; border-radius: 50%; margin-inline-end: 8px; vertical-align: middle;"></span>
               <span style="color: #ffffff; font-size: 26px; font-weight: 900; vertical-align: middle;">TELC Voll</span>
             </td>
@@ -338,6 +216,7 @@ async function sendVerificationEmail({ to, name, verificationUrl, expiresHours =
         <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" class="email-shell" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 16px 40px rgba(0,0,0,0.3); border: 1px solid #1f2a24;">
           <tr>
             <td align="center" style="background-color: #0b0f0e; padding: 32px 24px; border-bottom: 2px solid #ff7a00;">
+              <img src="${escapeHtml(BRAND_LOGO_URL)}" width="42" height="42" alt="شعار TELC Voll" style="display:inline-block;width:42px;height:42px;border:0;border-radius:11px;vertical-align:middle;margin-left:10px;" />
               <span style="display: inline-block; width: 12px; height: 12px; background-color: #ff7a00; border-radius: 50%; margin-inline-end: 8px; vertical-align: middle;"></span>
               <span style="color: #ffffff; font-size: 26px; font-weight: 900; vertical-align: middle;">TELC Voll</span>
             </td>
@@ -383,7 +262,7 @@ function escapeHtml(str) {
 
 module.exports = {
   sendEmail,
-  sendAccessCodeEmail,
+  sendSubscriptionActivatedEmail,
   sendPasswordResetEmail,
   sendVerificationEmail,
 };

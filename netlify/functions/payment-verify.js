@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 const { db } = require('./_lib/db');
 const { json } = require('./_lib/auth');
-const { sendAccessCodeEmail } = require('./_lib/email');
+const { sendSubscriptionActivatedEmail } = require('./_lib/email');
 const { requireSameOrigin, requestSize } = require('./_lib/request');
 const { safeLog } = require('./_lib/security');
 
@@ -175,15 +175,15 @@ exports.handler = async (event) => {
         durationDays: order.duration_days
       });
 
-      // Send confirmation email through Resend (asynchronously, does not block return)
+      // Send the branded subscription activation notice; never include the
+      // internal sign-in credential in customer-facing email.
       try {
-        const emailResult = await sendAccessCodeEmail({
+        const emailResult = await sendSubscriptionActivatedEmail({
           to: order.customer_email,
           name: order.customer_name,
           planName: order.plan_name,
           durationDays: order.duration_days,
           expiresAt: codeRow.expires_at,
-          accessCode: code,
         });
         if (emailResult.ok) {
           await pool.query('UPDATE orders SET email_sent=TRUE WHERE id=$1', [order.id]);
