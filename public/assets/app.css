@@ -7790,3 +7790,133 @@ option.opt-wrong {
   display: inline-flex !important;
   align-items: center !important;
 }
+
+
+/* =========================================================================
+   DEFINITIVE PARAGRAPH CONTENT UI CORRECTION
+   1. Complete removal of blue-gray filled background from paragraphs
+   2. Clean, comfortable, highly readable paragraph text colors in dark & light
+   3. Translation and Pronunciation buttons aligned strictly to the RIGHT
+   4. Pure page background around paragraphs with clean subtle dividers
+   5. Preserved LTR layout across all languages
+   ========================================================================= */
+
+/* 1. Remove blue-gray filled container/background completely */
+.exam-text-card,
+html[data-theme="dark"] .exam-text-card,
+.exercise-page:has(.exam-workspace) .exam-text-card,
+.exercise-page .exam-text-card,
+.mock-item,
+html[data-theme="dark"] .mock-item,
+.mock-root .mock-item {
+  background: transparent !important;
+  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 14px 0 28px 0 !important;
+  margin: 0 0 28px 0 !important;
+  border-bottom: 1px solid var(--line) !important;
+}
+
+.exam-text-card:hover,
+.exam-text-card.active-item,
+.exam-text-card.answered,
+.exam-text-card.answer-correct,
+.exam-text-card.answer-wrong,
+.mock-item:hover,
+.mock-item.answered {
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* 2. High-contrast, highly readable paragraph text */
+.exam-text,
+.exam-text-card .exam-text,
+.mock-task-body,
+.mock-item-prompt {
+  font-size: 16.5px !important;
+  line-height: 1.9 !important;
+  color: #1a202c !important;
+  letter-spacing: -0.01em !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+html[data-theme="dark"] .exam-text,
+html[data-theme="dark"] .exam-text-card .exam-text,
+html[data-theme="dark"] .mock-task-body,
+html[data-theme="dark"] .mock-item-prompt {
+  color: #f1f5f9 !important; /* Crisp, high-contrast, comfortable light text */
+}
+
+/* 3. Translation and Pronunciation buttons aligned strictly to the RIGHT */
+.paragraph-tools-row,
+.exercise-page .paragraph-tools-row,
+html[lang="ar"] .paragraph-tools-row,
+body[dir="rtl"] .paragraph-tools-row {
+  direction: ltr !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 8px 0 12px 0 !important;
+  padding: 0 !important;
+}
+
+.paragraph-tools-row .text-tools {
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-inline-start: auto !important;
+  margin-left: auto !important;
+}
+
+/* 4. Heading selection dropdown sits cleanly without extra container box */
+.paragraph-assignment {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 0 6px 0 !important;
+  width: 100% !important;
+}
+
+.paragraph-assignment-controls {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+.paragraph-assignment-controls .mock-select,
+.paragraph-assignment select,
+.mock-select {
+  width: 100% !important;
+  background: var(--bg) !important;
+  border: 1.5px solid var(--line) !important;
+  border-radius: 12px !important;
+  padding: 12px 16px !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: var(--ink) !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+  transition: all 0.2s ease !important;
+}
+
+html[data-theme="dark"] .paragraph-assignment-controls .mock-select,
+html[data-theme="dark"] .paragraph-assignment select,
+html[data-theme="dark"] .mock-select {
+  background: #0d1210 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #f1f5f9 !important;
+}
