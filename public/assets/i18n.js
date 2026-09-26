@@ -200,6 +200,11 @@ function applyTheme() {
   const theme = getTheme();
   document.documentElement.setAttribute('data-theme', theme);
   applyFavicon(theme);
+  const themeColorMeta = document.querySelector('meta[name="theme-color"]');
+  if (themeColorMeta) {
+    if (!themeColorMeta.dataset.lightThemeColor) themeColorMeta.dataset.lightThemeColor = themeColorMeta.content || '#f7faf9';
+    themeColorMeta.content = theme === 'dark' ? '#080808' : themeColorMeta.dataset.lightThemeColor;
+  }
   const btn = document.getElementById('themeToggleBtn');
   if (btn) {
     btn.innerHTML = theme === 'dark' ? ICON_SUN : ICON_MOON;

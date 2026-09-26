@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>الامتحان التجريبي — TELC Voll</title>
-<link rel="stylesheet" href="/assets/app.css?v=20260926-premium-redesign-v2">
+<link rel="stylesheet" href="/assets/app.css?v=20260926-black-orange-v1">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -26,7 +26,7 @@
 .mock-progress-bar{height:8px;background:var(--line);border-radius:999px;overflow:hidden;flex:1}
 .mock-progress-bar i{display:block;height:100%;background:linear-gradient(90deg,#f47b20,#ff9a4d);border-radius:inherit;transition:width .25s ease}
 .mock-card{direction:ltr;background:var(--white);border:1.5px solid var(--line);border-radius:24px;box-shadow:0 8px 30px rgba(0,0,0,0.04);padding:32px;box-sizing:border-box}
-html[data-theme="dark"] .mock-card{direction:ltr;background:rgba(18,24,21,0.85);backdrop-filter:blur(16px);border-color:rgba(255,255,255,0.08);box-shadow:0 12px 36px rgba(0,0,0,0.4)}
+html[data-theme="dark"] .mock-card{direction:ltr;background:rgba(20,20,20,0.96);backdrop-filter:blur(16px);border-color:#303030;box-shadow:0 12px 36px rgba(0,0,0,0.55)}
 .mock-section-label{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
 .mock-section-label .tag{font-weight:900;background:rgba(244,123,32,0.12);color:#f47b20;border:1px solid rgba(244,123,32,0.3);padding:5px 14px;border-radius:999px;font-size:13px}
 .mock-task-count{font-size:14px;font-weight:850;color:var(--muted);background:var(--bg);border:1px solid var(--line);padding:5px 12px;border-radius:999px}
@@ -36,8 +36,8 @@ html[data-theme="dark"] .mock-card{direction:ltr;background:rgba(18,24,21,0.85);
 .mock-inline-gap-select{display:inline-block;vertical-align:middle;padding:5px 12px;margin:3px 5px;border:1.5px solid var(--line);border-radius:10px;background:var(--white);color:var(--ink);font-weight:850;font-size:14px;cursor:pointer;transition:all .18s ease;box-shadow:0 2px 6px rgba(0,0,0,0.03);outline:none;max-width:230px}
 .mock-inline-gap-select:hover{border-color:#f47b20}
 .mock-inline-gap-select.answered{border-color:#f47b20;background:rgba(244,123,32,0.1);color:#f47b20;font-weight:900}
-html[data-theme="dark"] .mock-inline-gap-select{background:#1a231f;border-color:rgba(255,255,255,0.12);color:#fff}
-html[data-theme="dark"] .mock-inline-gap-select.answered{background:rgba(244,123,32,0.2);border-color:#f47b20;color:#ff9a4d}
+html[data-theme="dark"] .mock-inline-gap-select{background:#111;border-color:#383838;color:#fff}
+html[data-theme="dark"] .mock-inline-gap-select.answered{background:rgba(255,122,47,0.18);border-color:#ff7a2f;color:#ff9a4d}
 
 /* Questions container below text */
 .mock-spb-container{margin-top:28px;padding-top:22px;border-top:1.5px solid var(--line)}
@@ -53,8 +53,8 @@ html[data-theme="dark"] .mock-inline-gap-select.answered{background:rgba(244,123
 .mock-spb-option-btn:hover{border-color:#f47b20;background:rgba(244,123,32,0.04)}
 .mock-spb-option-btn.selected{border-color:#f47b20;background:rgba(244,123,32,0.12);color:#f47b20;box-shadow:0 0 0 1px #f47b20;font-weight:900}
 .mock-btn-key{font-weight:950;color:#f47b20;min-width:24px}
-html[data-theme="dark"] .mock-spb-card{background:#141c18;border-color:rgba(255,255,255,0.08)}
-html[data-theme="dark"] .mock-spb-option-btn{background:#1b2520;border-color:rgba(255,255,255,0.1);color:#fff}
+html[data-theme="dark"] .mock-spb-card{background:#141414;border-color:#303030}
+html[data-theme="dark"] .mock-spb-option-btn{background:#111;border-color:#333;color:#fff}
 
 /* Word Bank (Sprachbausteine 2) */
 .mock-wordbank-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
@@ -62,7 +62,7 @@ html[data-theme="dark"] .mock-spb-option-btn{background:#1b2520;border-color:rgb
 .mock-word-card small{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;background:rgba(244,123,32,0.12);color:#f47b20;font-size:12px;font-weight:950}
 .mock-word-card.used{opacity:.5;background:var(--bg);border-style:dashed}
 .mock-word-card .mock-word-check{margin-inline-start:auto;color:#2d9b68;font-weight:950}
-html[data-theme="dark"] .mock-word-card{background:#1a231f;border-color:rgba(255,255,255,0.1);color:#fff}
+html[data-theme="dark"] .mock-word-card{background:#141414;border-color:#333;color:#fff}
 
 /* Headings Bank (Lesen 1) */
 .mock-headings-bank{background:var(--bg);border:1.5px solid var(--line);border-radius:18px;padding:20px;margin-bottom:24px}
@@ -141,6 +141,36 @@ html[data-theme="dark"] .mock-word-card{background:#1a231f;border-color:rgba(255
   .mock-actions{padding:10px 14px}
   .mock-nav-btn{font-size:13px;padding:10px 14px}
 }
+/* Fixed, balanced mock-exam header: identity and timer on the first row, sections below. */
+.mock-top-inner {
+  grid-template-columns: auto minmax(0,1fr) auto !important;
+  grid-template-areas: "back brand status" "tabs tabs tabs" !important;
+  gap: 8px 14px !important;
+}
+.mock-top .back-link { grid-area: back; }
+.mock-brand { grid-area: brand; justify-self: start; min-width: 0; }
+.mock-status { grid-area: status; }
+.mock-tabs { grid-area: tabs; width: 100%; margin-top: 2px; }
+.mock-tab { min-height: 52px; }
+.mock-top { padding: 9px 0 11px; }
+.mock-top > .mock-root { padding-top: 0 !important; padding-bottom: 0 !important; }
+.mock-error { max-width: 680px; margin: 24px auto; color: var(--danger); text-align: center; }
+.mock-load-error { max-width: 640px; margin: 54px auto; padding: 28px; border: 1px solid var(--line); border-radius: 20px; background: var(--white); text-align: center; box-shadow: var(--shadow); }
+.mock-load-error p { color: var(--muted); }
+html[data-theme="dark"] .mock-top { background: rgba(8,8,8,.96); }
+html[data-theme="dark"] .mock-load-error { background: #141414; border-color: #333; color: #f5f5f5; }
+html[data-theme="dark"] .mock-nav-btn.dark { background: #ff7a2f !important; color: #fff !important; }
+html[data-theme="dark"] .mock-nav-btn.dark:hover { background: #e7651e !important; }
+@media(max-width:600px) {
+  .mock-top-inner { grid-template-columns: auto minmax(0,1fr) auto !important; grid-template-areas: "back brand status" "tabs tabs tabs" !important; gap: 7px !important; }
+  .mock-top > .mock-root { padding-left: 12px !important; padding-right: 12px !important; }
+  .mock-brand { font-size: 12px; overflow: hidden; text-overflow: ellipsis; }
+  .mock-status { gap: 6px; }
+  .mock-timer { min-width: 76px; padding: 6px 8px; font-size: 15px; }
+  .mock-status .header-actions { gap: 4px !important; }
+  .mock-status .header-actions .icon-btn { width: 30px !important; height: 30px !important; min-width: 30px !important; border-radius: 9px !important; }
+  .mock-tab { min-height: 46px; padding: 7px 6px; font-size: 12px; }
+}
 </style>
 <style><!-- TELC Voll: unified homepage typography -->
 html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
@@ -170,7 +200,7 @@ body.exercise-page {
   z-index: 90 !important;
   min-height: 70px !important;
   height: 70px !important;
-  background: rgba(13, 19, 16, 0.94) !important;
+  background: rgba(8, 8, 8, 0.94) !important;
   backdrop-filter: blur(16px) !important;
   -webkit-backdrop-filter: blur(16px) !important;
   border-bottom: 1px solid var(--line) !important;
@@ -201,7 +231,7 @@ html[data-theme="light"] .exercise-topbar {
 }
 
 html[data-theme="dark"] .exercise-header-card.exercise-sticky-bar {
-  background: #0d1210 !important;
+  background: #080808 !important;
   border-bottom-color: rgba(255, 255, 255, 0.08) !important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
 }
@@ -507,7 +537,7 @@ html[data-theme="dark"] .progress-pill {
   border: 1.5px solid rgba(244, 123, 32, 0.28) !important; /* SUBTLE ORANGE OUTLINE ONLY */
   border-radius: 16px !important;
   padding: 24px 28px !important;
-  background: rgba(18, 24, 21, 0.5) !important; /* Transparent/subtle interior in dark mode */
+  background: rgba(20, 20, 20, 0.5) !important; /* Transparent/subtle interior in dark mode */
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -750,7 +780,7 @@ html[data-theme="light"] .exam-text-card .exam-text {
   left: 0 !important;
   right: 0 !important;
   z-index: 80 !important;
-  background: rgba(13, 19, 16, 0.92) !important;
+  background: rgba(8, 8, 8, 0.92) !important;
   backdrop-filter: blur(14px) !important;
   -webkit-backdrop-filter: blur(14px) !important;
   border-top: 1px solid var(--line) !important;
@@ -816,7 +846,7 @@ html[data-theme="light"] .exercise-actions {
   </div>
 </header>
 <main id="app" class="mock-root"><div class="student-loading">جارٍ تحميل الامتحان…</div></main>
-<script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
+<script src="/assets/i18n.js?v=20260926-black-orange-v1"></script><script src="/assets/app.js"></script>
 <script>
 const sessionId = qs('session');
 const SECTION_ORDER = ['Lesen','Hören','Sprachbausteine','Schreiben'];
@@ -1608,8 +1638,41 @@ function renderTaskContent(model){
   return renderChoice(model);
 }
 
+function usesUniqueAnswers(section, teil){
+  return (section === 'Sprachbausteine' && teil === 'Teil 2') ||
+    (section === 'Lesen' && ['Teil 1', 'Teil 3'].includes(teil)) ||
+    (section === 'Hören' && teil === 'Teil 3');
+}
+function syncUniqueAnswerOptions(section, teil){
+  if(!usesUniqueAnswers(section, teil)) return;
+  const assignments = window.__mockAnswers || {};
+  document.querySelectorAll('select[data-answer-q]').forEach(select => {
+    const q = String(select.dataset.answerQ);
+    const own = String(assignments[q] || '').toLowerCase();
+    const used = new Set(Object.entries(assignments)
+      .filter(([key, value]) => key !== q && value && !(section === 'Lesen' && teil === 'Teil 3' && String(value).toUpperCase() === 'X'))
+      .map(([, value]) => String(value).toLowerCase()));
+    Array.from(select.options).forEach(option => {
+      if(!option.value) return;
+      option.disabled = String(option.value).toLowerCase() !== own && used.has(String(option.value).toLowerCase());
+    });
+  });
+  document.querySelectorAll('button[data-answer-q][data-answer]').forEach(button => {
+    const q = String(button.dataset.answerQ);
+    const value = String(button.dataset.answer || '');
+    const selected = String(assignments[q] || '').toLowerCase() === value.toLowerCase();
+    const used = Object.entries(assignments).some(([key, assigned]) => key !== q &&
+      String(assigned || '').toLowerCase() === value.toLowerCase() &&
+      !(section === 'Lesen' && teil === 'Teil 3' && String(assigned).toUpperCase() === 'X'));
+    button.disabled = used && !selected;
+    button.classList.toggle('is-used-answer', used && !selected);
+  });
+}
+
 function bind(){
   bindHoerenAudioPlayer();
+  const activeModel = state.models[currentTask()?.id];
+  if(activeModel?.exercise) syncUniqueAnswerOptions(activeModel.exercise.section || '', activeModel.exercise.teil || '');
   // Two-way sync for gap selects and option buttons
   document.querySelectorAll('[data-answer-q]').forEach(el => {
     const handleAnswer = () => {
@@ -1621,17 +1684,18 @@ function bind(){
       const mObj = state.models[taskObj.id];
       const sec = mObj?.exercise?.section || '';
       const teil = mObj?.exercise?.teil || '';
-      const isUniqueMockTask =
-        (sec === 'Sprachbausteine' && teil === 'Teil 2') ||
-        (sec === 'Lesen' && ['Teil 1', 'Teil 3'].includes(teil)) ||
-        (sec === 'Hören' && teil === 'Teil 3');
-      if (isUniqueMockTask && val) {
+      const isUniqueMockTask = usesUniqueAnswers(sec, teil);
+      const previousValue = window.__mockAnswers[q] || '';
+      if (isUniqueMockTask && val && !(sec === 'Lesen' && teil === 'Teil 3' && String(val).toUpperCase() === 'X')) {
         const duplicate = Object.entries(window.__mockAnswers || {}).some(([k, existing]) =>
           k !== q && String(existing).toLowerCase() === String(val).toLowerCase()
         );
         if (duplicate) {
           const msg = text('هذه الإجابة مستخدمة بالفعل في فراغ آخر. اختر إجابة مختلفة.', 'Diese Antwort wurde bereits in einer anderen Lücke verwendet. Bitte wählen Sie eine andere Antwort.');
-          document.getElementById('mockError').textContent = msg;
+          const errorEl = document.getElementById('mockError');
+          if(errorEl) errorEl.textContent = msg;
+          if(el.tagName === 'SELECT') el.value = previousValue;
+          syncUniqueAnswerOptions(sec, teil);
           return;
         }
       }
@@ -1646,6 +1710,9 @@ function bind(){
       }
       state.session.answersByExercise[String(currentTask().id)] = {...window.__mockAnswers};
       saveSession();
+      if(isUniqueMockTask) syncUniqueAnswerOptions(sec, teil);
+      const errorEl = document.getElementById('mockError');
+      if(errorEl) errorEl.textContent = '';
 
       // Sync inline select if an option button was clicked
       const gapSel = document.querySelector(`select[data-gap-q="${CSS.escape(q)}"]`);
@@ -1663,6 +1730,7 @@ function bind(){
       // Update word bank used status if on Sprachbausteine 2
       document.querySelectorAll('.mock-word-card').forEach(card => {
         const key = card.dataset.wordKey;
+        if(!key) return;
         const isUsed = Object.values(window.__mockAnswers).some(ans => String(ans).toLowerCase() === String(key).toLowerCase());
         card.classList.toggle('used', isUsed);
       });
@@ -1760,6 +1828,7 @@ function prev(){
 async function loadModel(id){
   if(state.models[id]) return state.models[id];
   const m = await api('exercise-get?id=' + encodeURIComponent(id));
+  if(!m || !m.exercise || !Array.isArray(m.items)) throw new Error(text('بيانات هذا التمرين غير مكتملة.','Die Aufgabendaten sind unvollständig.'));
   state.models[id] = m;
   return m;
 }
@@ -1770,10 +1839,23 @@ async function render(){
   const task = currentTask();
   if(!task) return finishExam();
   tick();
-
-  const model = await loadModel(task.id);
-  const inner = renderTaskContent(model);
-  app.innerHTML = inner + `<div class="mock-error" id="mockError"></div>`;
+  app.innerHTML = `<div class="student-loading" role="status">${text('جارٍ تحميل التمرين…','Aufgabe wird geladen…')}</div>`;
+  let model;
+  try {
+    model = await loadModel(task.id);
+  } catch(e) {
+    app.innerHTML = `<section class="mock-load-error" role="alert"><h2>${text('تعذر تحميل هذا التمرين','Diese Aufgabe konnte nicht geladen werden')}</h2><p>${esc(e?.message || text('تحقق من الاتصال ثم أعد المحاولة.','Bitte Verbindung prüfen und erneut versuchen.'))}</p><button class="btn" type="button" id="retryMockLoad">${text('إعادة المحاولة','Erneut versuchen')}</button></section>`;
+    document.getElementById('retryMockLoad')?.addEventListener('click', () => render());
+    return;
+  }
+  try {
+    const inner = renderTaskContent(model);
+    app.innerHTML = inner + `<div class="mock-error" id="mockError" role="status"></div>`;
+  } catch(e) {
+    app.innerHTML = `<section class="mock-load-error" role="alert"><h2>${text('تعذر عرض هذا التمرين','Diese Aufgabe konnte nicht angezeigt werden')}</h2><p>${esc(e?.message || '')}</p><button class="btn" type="button" id="retryMockLoad">${text('إعادة المحاولة','Erneut versuchen')}</button></section>`;
+    document.getElementById('retryMockLoad')?.addEventListener('click', () => render());
+    return;
+  }
 
   const isFirst = state.currentIndex === 0;
   const isLast = state.currentIndex === state.session.tasks.length - 1;
