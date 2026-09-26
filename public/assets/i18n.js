@@ -65,6 +65,7 @@ const I18N = {
     exam_page_title: 'محاكاة الامتحان', exam_no_task: 'لا توجد مهمة مرتبطة',
     exam_start_btn: 'بدء — {min} دقيقة',
     exam_desc: 'لكل Teil مؤقت خاص به. يتم اختيار التمارين من المهام التي حددها المشرف.',
+    time_left: 'الوقت المتبقي',
 
     ex_correct: 'صحيح', ex_wrong: 'خطأ', ex_your_answer: 'إجابتك', ex_solution: 'الحل',
     ex_my_errors_btn: 'أخطائي', ex_retry_btn: 'إعادة', ex_translation: 'الترجمة',
@@ -145,6 +146,7 @@ const I18N = {
     exam_page_title: 'Prüfungssimulation', exam_no_task: 'Keine verknüpfte Aufgabe',
     exam_start_btn: 'Start – {min} Min.',
     exam_desc: 'Jeder Teil hat einen eigenen Timer. Die Übungen werden aus den vom Administrator zugewiesenen Aufgaben ausgewählt.',
+    time_left: 'Verbleibende Zeit',
 
     ex_correct: 'Richtig', ex_wrong: 'Falsch', ex_your_answer: 'Deine Antwort', ex_solution: 'Lösung',
     ex_my_errors_btn: 'Meine Fehler', ex_retry_btn: 'Wiederholen', ex_translation: 'Übersetzung',
