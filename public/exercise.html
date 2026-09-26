@@ -20,7 +20,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <main id="content" class="exercise-page"><div class="student-loading">جارٍ التحميل…</div></main>
 <script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
 <script>
-const id=qs('id'); const duration=Number(qs('duration')||0); const sessionId=qs('session'); const mockMode=qs('mock')==='1' && !!sessionId; let model=null; let answers={}; let activeItem=null; let submitted=false; let resultData=null; let submitInFlight=false;
+const id=qs('id'); const duration=Number(qs('duration')||0); const sessionId=qs('session'); const mockMode=qs('mock')==='1' && !!sessionId; let model=null; let answers={}; let activeItem=null; let submitted=false; let resultData=null; let submitInFlight=false; let userCheckedAnswers=false;
 let matchingOrder=null; let headingOrder=null; let optionOrders={}; let showModelAnswers=false; let titleRevealed=false; let hoerenOrder=null; let hoerenAllTranslated=false; let wordOrder=null; const translationCache=new Map();
 const TELC_DUR = {
   B1: { Lesen: { 'Teil 1': 20, 'Teil 2': 20, 'Teil 3': 15, _default: 20 }, Sprachbausteine: { 'Teil 1': 10, 'Teil 2': 10, _default: 10 }, Hören: { 'Teil 1': 10, 'Teil 2': 10, 'Teil 3': 10, _default: 10 }, Schreiben: { 'Teil 1': 30, _default: 30 }, Sprechen: { 'Teil 1': 4, 'Teil 2': 5, 'Teil 3': 5, _default: 5 } },
@@ -277,7 +277,8 @@ function renderMatching(){
             return `<option value="${sNo}" ${isSelected ? 'selected' : ''} ${isUsed ? 'disabled' : ''}>Titre ${sNo}: ${esc(preview)}${isUsed ? ' — ' + text('تم اختياره', 'Bereits ausgewählt') : ''}</option>`;
           }).join('') + `<option value="X" ${activeSit === 'X' ? 'selected' : ''}>${text('X — إعلان بدون عنوان (لا يناسب أي عنوان)', 'X — Keine passende Anzeige')}</option>`;
 
-          const assignLabel = `Text ${letter} — ` + text('مكان اختيار العنوان المناسب لهذا الإعلان:', 'Passende Überschrift für diese Anzeige:');
+          const rawText = (typeof h === 'object') ? [h.title, h.body || h.text || h.content].filter(Boolean).join('\n\n') : String(h).trim();
+          const assignLabel = text('العنوان المناسب للإعلان (' + letter + '):', 'Passende Überschrift für Text ' + letter + ':');
           const assignPlaceholder = text('— اختر العنوان المناسب لهذا الإعلان (1 - 10 أو X) —', '— Passende Überschrift auswählen (1 - 10 oder X) —');
 
           return `
@@ -285,10 +286,7 @@ function renderMatching(){
             <div class="paragraph-assignment">
               <div class="paragraph-assignment-head">
                 <span class="assignment-label" style="font-weight:900;color:var(--ink);">${assignLabel}</span>
-                <div class="paragraph-assignment-tools">
-                  <span class="ad-tag" style="background:#0f172a;color:#fff;font-weight:900;font-size:13px;padding:4px 12px;border-radius:8px;">Text ${letter}</span>
-                  ${textTools(ad.body || ad.title, adCid)}
-                </div>
+                <div class="paragraph-assignment-tools">${textTools(rawText, adCid)}</div>
               </div>
               <div class="paragraph-assignment-controls">
                 <select data-ad-select="${letter}" aria-label="${assignLabel}" class="mock-select ${selectedSitNo ? 'answered' : ''}">
@@ -299,8 +297,7 @@ function renderMatching(){
                 ${(resultData && !showModelAnswers && expectedAnswer && selectedSitNo !== expectedAnswer) ? `<span class="model-answer-hint" style="color:#2d9b68;font-size:13.5px;font-weight:850;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:rgba(45,155,104,0.1);border-radius:8px;">${text('الحل:','Lösung:')} ${expectedAnswer === 'X' ? 'X' : 'Titre ' + expectedAnswer}</span>` : ''}
               </div>
             </div>
-            ${ad.title ? `<h4 class="ad-title" style="margin:4px 0 6px;font-size:18px;font-weight:850;color:var(--green);">${esc(ad.title)}</h4>` : ''}
-            <div class="exam-text ad-body" id="${adCid}" data-content-id="${adCid}" data-source="${esc(ad.body || ad.title)}" style="font-size:15.5px;line-height:1.85;color:var(--ink);">${escBody(ad.body || ad.title)}</div>
+            <div class="exam-text ad-body" id="${adCid}" data-content-id="${adCid}" data-source="${esc(rawText)}" style="font-size:15.5px;line-height:1.85;color:var(--ink);">${escBody(rawText)}</div>
             <div class="inline-translation" id="${adCid}-translation"></div>
           </article>`;
         }).join('')}
@@ -885,7 +882,7 @@ function selectAnswer(n,val){
  }
  activeItem=key;
  if(next) answers[key]=next; else delete answers[key];
- submitted=false; resultData=null; showModelAnswers=false;
+ submitted=false; resultData=null; showModelAnswers=false; userCheckedAnswers=false;
  rerenderExerciseStable(scrollState);
 }
 function sharedOptions(){const map=new Map();(model.items||[]).forEach(it=>(it.options||[]).forEach(o=>{if(o.option_text&&!map.has(o.option_key))map.set(o.option_key,o.option_text);}));return [...map.entries()];}
@@ -1811,17 +1808,14 @@ function renderExerciseHeaderCard(){
       <span>${text('خلط الأسئلة','Aufgaben mischen')}</span>
     </button>` : '';
 
-  const resultPanel = resultData ? `
-    <div class="inline-result-panel ${resultData.percent >= 60 ? 'pass' : 'fail'}">
-      <div class="result-panel-main">
-        <span class="result-panel-icon" aria-hidden="true">${resultData.percent >= 60 ? '✓' : '✕'}</span>
-        <span class="result-panel-label">${text('النتيجة:','Ergebnis:')}</span>
-        <strong>${resultData.score} / ${resultData.max}</strong>
-      </div>
-      <div class="result-panel-meta">
-        <span class="result-panel-percent">${resultData.percent}%</span>
-        <b class="result-panel-status">${esc(resultData.result || '')}</b>
-      </div>
+  const showResultScore = userCheckedAnswers && resultData;
+  const isPass = (resultData?.percent || 0) >= 60;
+  const resultPanel = showResultScore ? `
+    <div class="inline-result-panel ${isPass ? 'pass' : 'fail'}">
+      <span class="result-panel-icon" aria-hidden="true">${isPass ? '✓' : '✕'}</span>
+      <span class="result-panel-label">${text('النتيجة:','Ergebnis:')}</span>
+      <strong class="result-panel-score">${resultData.score} / ${resultData.max}</strong>
+      <span class="result-panel-percent">(${resultData.percent}%)</span>
     </div>` : '';
 
   let titleMarkup = '';
@@ -1834,8 +1828,8 @@ function renderExerciseHeaderCard(){
           </div>
           <div class="thema-tools">
             ${textTools(title, 'thema-title')}
-            <button type="button" class="btn small-btn title-reveal-btn title-eye-btn is-revealed" id="titleRevealBtn" title="${text('إخفاء العنوان','Thema verbergen')}" aria-label="${text('إخفاء العنوان','Thema verbergen')}">
-              <svg class="eye-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f47b20" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
+            <button type="button" class="title-reveal-btn title-eye-btn is-revealed" id="titleRevealBtn" title="${text('إخفاء العنوان','Thema verbergen')}" aria-label="${text('إخفاء العنوان','Thema verbergen')}">
+              <svg class="eye-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f47b20" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
             </button>
             <div class="inline-translation" id="thema-title-translation"></div>
           </div>
@@ -1854,8 +1848,8 @@ function renderExerciseHeaderCard(){
             </div>
           </div>
           <div class="thema-tools">
-            <button type="button" class="btn small-btn title-reveal-btn title-eye-btn" id="titleRevealBtn" title="${text('إظهار العنوان','Thema anzeigen')}" aria-label="${text('إظهار العنوان','Thema anzeigen')}">
-              <svg class="eye-svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f47b20" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <button type="button" class="title-reveal-btn title-eye-btn" id="titleRevealBtn" title="${text('إظهار العنوان','Thema anzeigen')}" aria-label="${text('إظهار العنوان','Thema anzeigen')}">
+              <svg class="eye-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f47b20" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
             </button>
           </div>
         </div>`;
@@ -1865,10 +1859,8 @@ function renderExerciseHeaderCard(){
   const hasBottomBar = Boolean(headingShuffle || resultPanel);
   const bottomBar = hasBottomBar ? `
     <div class="exercise-sub-bar exercise-card-bottom-bar" id="exerciseSubBar">
-      <div class="exercise-card-bottom-left exercise-sub-left">
+      <div class="exercise-sub-items">
         ${resultPanel}
-      </div>
-      <div class="exercise-card-bottom-right exercise-sub-right">
         ${headingShuffle}
       </div>
     </div>` : '';
@@ -1909,16 +1901,15 @@ function layout(main,side,workspaceClass=''){
 
 function bindActions(){
  const b=document.getElementById('checkBtn');
- if(b)b.onclick=submit;
+ if(b)b.onclick=()=>submit(true);
  const mb=document.getElementById('modelBtn');
  if(mb)mb.onclick=async()=>{
    const st=captureExerciseScroll();
    try{
      if(model?.exercise?.section==='Hören'){
-       // Hören stores the correct answer on each exercise item, so it can be shown directly.
        showModelAnswers=!showModelAnswers;
      }else{
-       if(!submitted && !resultData) await submit();
+       if(!resultData) await submit(false);
        showModelAnswers=!showModelAnswers;
      }
      rerenderExerciseStable(st);
@@ -1965,13 +1956,14 @@ function renderWorkspace(){
   return renderChoiceQuestions();
 }
 function renderResult(r){const st=captureExerciseScroll();submitted=true;resultData=r;rerenderExerciseStable(st);}
-async function submit(){
+async function submit(isExplicitCheck = true){
+  if(isExplicitCheck) userCheckedAnswers = true;
   if(!model.items.length){if(mockMode){goNextMock();}return;}
-  if(submitInFlight || submitted) return;
+  if(submitInFlight || (submitted && isExplicitCheck)) return;
   submitInFlight=true;
   const btn=document.getElementById('checkBtn');
-  if(btn){btn.disabled=true;btn.dataset.oldText=btn.textContent;btn.textContent=text('جارٍ التحقق…','Wird geprüft…');}
-  showModelAnswers=false;
+  if(isExplicitCheck && btn){btn.disabled=true;btn.dataset.oldText=btn.textContent;btn.textContent=text('جارٍ التحقق…','Wird geprüft…');}
+  if(isExplicitCheck) showModelAnswers=false;
   try{
     const r=await api('exercise-submit',{method:'POST',body:{exercise_id:id,answers}});
     localStorage.setItem('last_exercise_result_'+id,JSON.stringify(r));
