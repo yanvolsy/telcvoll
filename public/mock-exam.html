@@ -442,8 +442,8 @@ function renderMockLesen1(model){
   const usedKeys = new Set(Object.values(window.__mockAnswers).filter(Boolean).map(v => String(v).toUpperCase()));
 
   const headingsBankMarkup = `
-    <div class="mock-headings-bank">
-      <h3><span>📑</span> <span>${text('قائمة العناوين (Überschriften A bis J):', 'Überschriften (A bis J):')}</span></h3>
+    <div class="mock-headings-bank" style="margin-top:28px;">
+      <h3><span>📋</span> <span>${text('قائمة العناوين (Überschriften A bis J):', 'Überschriften (A bis J):')}</span></h3>
       <div class="mock-headings-list">
         ${heads.map((h, i) => {
           const letter = String.fromCharCode(65 + i);
@@ -463,7 +463,7 @@ function renderMockLesen1(model){
       const letter = String.fromCharCode(65 + i);
       const isSelected = val === letter;
       const isUsed = !isSelected && usedKeys.has(letter);
-      return `<option value="${letter}" ${isSelected ? 'selected' : ''} ${isUsed ? 'disabled' : ''}>${letter}: ${esc(h)}${isUsed ? ' — ' + text('تم اختياره', 'bereits gewählt') : ''}</option>`;
+      return `<option value="${letter}" ${isSelected ? 'selected' : ''} ${isUsed ? 'disabled' : ''}>${letter}: ${esc(h)}${isUsed ? ' - ' + text('تم اختياره', 'bereits gewählt') : ''}</option>`;
     }).join('');
 
     return `
@@ -486,16 +486,17 @@ function renderMockLesen1(model){
       <span class="tag">Telc ${esc(model.exercise.level||state.session.level)}</span>
       <span class="mock-task-count">${esc(model.exercise.section)} · ${esc(model.exercise.teil)}</span>
     </div>
-    ${headingsBankMarkup}
-    <div class="mock-spb-head">
+    <div class="mock-spb-head" style="margin-top:14px;margin-bottom:16px;">
       <h3><span>📖</span> <span>${text('النصوص (1 إلى 5):', 'Texte (1 bis 5):')}</span></h3>
       <span class="mock-task-count">${Object.keys(window.__mockAnswers).length} / ${items.length}</span>
     </div>
-    ${cardsMarkup}
+    <div style="display:flex;flex-direction:column;gap:18px;">
+      ${cardsMarkup}
+    </div>
+    ${headingsBankMarkup}
   `);
 }
 
-/* ─── 4. Lesen Teil 2 Renderer (Reading Text + Multiple Choice) ─── */
 function renderMockLesen2(model){
   window.__mockAnswers = {...itemAnswer(model.exercise.id)};
   const items = (model.items || []).slice(0, 5);
@@ -541,7 +542,7 @@ function renderMockLesen3(model){
   const heads = getExerciseHeadings(model);
 
   const headingsOverview = `
-    <div class="mock-headings-bank" style="margin-bottom:24px;">
+    <div class="mock-headings-bank" style="margin-top:32px;">
       <h3><span>📋</span> <span>${text('قائمة العناوين (10 عناوين — Überschriften 1 bis 10):', 'Überschriften (1 bis 10):')}</span></h3>
       <div class="mock-headings-list">
         ${items.map(it => {
@@ -595,18 +596,17 @@ function renderMockLesen3(model){
       <span class="tag">Telc ${esc(model.exercise.level||state.session.level)}</span>
       <span class="mock-task-count">${esc(model.exercise.section)} · ${esc(model.exercise.teil)}</span>
     </div>
-    ${headingsOverview}
-    <div class="mock-spb-head" style="margin-top:20px;">
+    <div class="mock-spb-head" style="margin-top:14px;margin-bottom:16px;">
       <h3><span>📰</span> <span>${text('الإعلانات (12 إعلاناً — Anzeigen A bis L):', 'Anzeigen (Text A bis L):')}</span></h3>
       <span class="mock-task-count">${Object.keys(window.__mockAnswers).length} / ${items.length}</span>
     </div>
     <div style="display:flex;flex-direction:column;gap:18px;">
       ${adsListMarkup}
     </div>
+    ${headingsOverview}
   `);
 }
 
-/* ─── 6. Hören Renderer (Audio + TF / Choice) ─── */
 function renderMockHoeren(model){
   window.__mockAnswers = {...itemAnswer(model.exercise.id)};
   const items = model.items || [];

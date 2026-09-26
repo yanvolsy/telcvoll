@@ -6317,3 +6317,82 @@ html[data-theme="dark"] .exercise-card-bottom-bar .inline-result-panel.fail {
 }
 
 
+
+/* Frosted Ghost bars for hidden title (zero leaked text) */
+.exercise-header-card .frosted-ghost-bars {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  filter: blur(2px) !important;
+  -webkit-filter: blur(2px) !important;
+  pointer-events: none !important;
+  user-select: none !important;
+  padding: 4px 2px !important;
+}
+
+.exercise-header-card .ghost-bar {
+  display: inline-block !important;
+  height: 18px !important;
+  border-radius: 999px !important;
+  background: linear-gradient(90deg, rgba(244, 123, 32, 0.22) 0%, rgba(244, 123, 32, 0.5) 50%, rgba(244, 123, 32, 0.22) 100%) !important;
+  background-size: 200% 100% !important;
+  animation: ghostShimmerBar 2.2s infinite ease-in-out !important;
+}
+
+.exercise-header-card .ghost-bar-long {
+  width: clamp(120px, 16vw, 170px) !important;
+}
+
+.exercise-header-card .ghost-bar-short {
+  width: clamp(70px, 9vw, 95px) !important;
+}
+
+@keyframes ghostShimmerBar {
+  0% { background-position: 150% 0; }
+  100% { background-position: -150% 0; }
+}
+
+html[data-theme="dark"] .exercise-header-card .ghost-bar {
+  background: linear-gradient(90deg, rgba(244, 123, 32, 0.28) 0%, rgba(255, 170, 90, 0.6) 50%, rgba(244, 123, 32, 0.28) 100%) !important;
+}
+
+/* Crystal liquid eye button with crisp orange stroke */
+.exercise-header-card .title-reveal-btn,
+.exercise-header-card .title-eye-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 42px !important;
+  height: 42px !important;
+  min-width: 42px !important;
+  padding: 0 !important;
+  border-radius: 12px !important;
+  cursor: pointer !important;
+  background: rgba(255, 255, 255, 0.75) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1.5px solid rgba(244, 123, 32, 0.4) !important;
+  color: #f47b20 !important;
+  box-shadow: 0 2px 10px rgba(244, 123, 32, 0.12) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+html[data-theme="dark"] .exercise-header-card .title-reveal-btn,
+html[data-theme="dark"] .exercise-header-card .title-eye-btn {
+  background: rgba(30, 41, 59, 0.75) !important;
+  border-color: rgba(244, 123, 32, 0.5) !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3) !important;
+}
+
+.exercise-header-card .title-reveal-btn:hover,
+.exercise-header-card .title-eye-btn:hover {
+  border-color: #f47b20 !important;
+  background: rgba(244, 123, 32, 0.18) !important;
+  transform: scale(1.06) !important;
+  box-shadow: 0 4px 16px rgba(244, 123, 32, 0.28) !important;
+}
+
+.exercise-header-card .title-eye-btn .eye-svg {
+  display: block !important;
+  stroke: #f47b20 !important;
+}

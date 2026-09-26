@@ -226,74 +226,26 @@ function renderMatching(){
  const items=model.items||[];
  const bodyText=getExerciseBody(model);
  const isLesen3=model.exercise.section==='Lesen'&&model.exercise.teil==='Teil 3';
- if(!matchingOrder)matchingOrder=items.map(it=>String(it.position_no));
- if(!headingOrder)headingOrder=heads.map((_,i)=>i);
- const usedAnswerIds=new Set(Object.values(answers).filter(Boolean).map(v=>matchingAnswerIdentity(v)));
+  if(!matchingOrder)matchingOrder=items.map(it=>String(it.position_no));
+  if(!headingOrder)headingOrder=heads.map((_,i)=>i);
+  const usedAnswerIds=new Set(Object.values(answers).filter(Boolean).map(v=>matchingAnswerIdentity(v)));
 
- const bodySection = (bodyText && !isLesen3) ? `
-   <div class="long-text matching-reading-panel" style="margin-bottom:24px;">
-     <div class="long-text-tools">${textTools(bodyText, 'matching-main-body')}</div>
-     <div class="long-text-content" id="matching-main-body" data-content-id="matching-main-body" data-source="${esc(bodyText)}">${escBody(bodyText)}</div>
-     ${translationBox('matching-main-body-translation')}
-   </div>
- ` : '';
-
- const lesen3ResultsCard = (isLesen3 && resultData) ? `
-   <div class="lesen3-results-card" style="background:var(--white);border:1.5px solid var(--line);border-radius:18px;padding:20px;margin-bottom:26px;box-shadow:var(--shadow);">
-     <div class="lesen3-results-head" style="display:flex;align-items:center;gap:8px;font-size:17px;font-weight:900;color:#2d9b68;margin-bottom:14px;">
-       <span>☑</span>
-       <span>${text('الإجابات الصحيحة', 'Richtige Lösungen')}</span>
-     </div>
-     <div class="lesen3-results-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(190px, 1fr));gap:10px;">
-       ${items.map(it => {
-         const n = String(it.position_no);
-         const detail = resultData?.details?.find(d => String(d.prompt) === String(it.prompt));
-         const correct = String(detail?.correct_answer || it.correct_answer || 'X').trim().toUpperCase();
-         const isX = correct === 'X';
-         const pillText = isX ? 'X' : `Text  ${correct}`;
-         return `
-         <div class="lesen3-res-row" style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg);border:1px solid var(--line);border-radius:12px;">
-           <strong style="font-size:14.5px;">Titre ${n}</strong>
-           <span style="display:inline-flex;align-items:center;justify-content:center;padding:5px 14px;border-radius:9px;font-weight:900;font-size:13.5px;color:#fff;background:${isX ? '#94a3b8' : '#2d9b68'};">
-             ${pillText}
-           </span>
-         </div>`;
-       }).join('')}
-     </div>
-   </div>
- ` : '';
-
- const lesen3AdsMarkup = isLesen3 ? `
-    <div class="matching-reading-panel lesen3-headings-overview" style="margin-bottom:26px;background:var(--bg);border:1.5px solid var(--line);border-radius:18px;padding:22px;">
-      <div class="matching-situations-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
-        <h3 style="margin:0;font-size:18px;font-weight:900;display:flex;align-items:center;gap:8px;">
-          <span>📋</span>
-          <span>${text('قائمة العناوين (10 عناوين — Überschriften 1 bis 10):', 'Überschriften (1 bis 10):')}</span>
-        </h3>
-        <small class="muted">${text('اقرأ الإعلانات بالأسفل واختر العنوان المناسب فوق كل إعلان. إعلانان لا يناسبان أي عنوان (X).', 'Lesen Sie die Anzeigen unten und wählen Sie die passende Überschrift über jeder Anzeige aus.')}</small>
-      </div>
-      <div class="lesen3-headings-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));gap:12px;">
-        ${items.map(it => {
-          const assignedLetter = heads.map((_, hi) => String.fromCharCode(65 + hi)).find(l => String(answerValue(it.position_no)).toUpperCase() === l);
-          return `
-          <div class="lesen3-heading-badge" style="background:var(--white);border:1.5px solid var(--line);border-radius:14px;padding:12px 16px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:4px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-              <strong style="font-weight:950;color:#f47b20;font-size:14.5px;">Titre ${it.position_no}</strong>
-              ${assignedLetter ? `<span style="background:#0f172a;color:#fff;font-weight:900;font-size:12px;padding:2px 8px;border-radius:6px;">Text ${assignedLetter}</span>` : `<small class="muted" style="font-size:11px;">${text('غير محدد','Offen')}</small>`}
-            </div>
-            <div style="font-size:14.5px;line-height:1.6;color:var(--ink);">${esc(it.prompt)}</div>
-          </div>`;
-        }).join('')}
-      </div>
+  const bodySection = (bodyText && !isLesen3) ? `
+    <div class="long-text matching-reading-panel" style="margin-bottom:24px;">
+      <div class="long-text-tools">${textTools(bodyText, 'matching-main-body')}</div>
+      <div class="long-text-content" id="matching-main-body" data-content-id="matching-main-body" data-source="${esc(bodyText)}">${escBody(bodyText)}</div>
+      ${translationBox('matching-main-body-translation')}
     </div>
+  ` : '';
 
+  const lesen3AdsMarkup = isLesen3 ? `
     <div class="lesen3-ads-section" style="margin-bottom:32px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
         <h3 style="margin:0;font-size:19px;font-weight:900;display:flex;align-items:center;gap:8px;">
           <span>📰</span>
           <span>${text('الإعلانات (12 إعلاناً — Anzeigen A bis L):','Anzeigen (Text A bis L):')}</span>
         </h3>
-        <small class="muted">${text('فوق كل إعلان قائمة لاختيار العنوان المناسب (Titre 1 - 10 أو X):','Wählen Sie über jeder Anzeige die passende Überschrift aus:')}</small>
+        <small class="muted">${text('فوق كل إعلان قائمة لاختيار العنوان المناسب من قائمة العناوين بالأسفل (Titre 1 - 10 أو X):','Wählen Sie über jeder Anzeige die passende Überschrift aus der Liste unten aus:')}</small>
       </div>
       <div class="lesen3-ads-list" style="display:flex;flex-direction:column;gap:22px;">
         ${heads.map((h, i) => {
@@ -312,23 +264,24 @@ function renderMatching(){
             resultClass = isMatch ? 'answer-correct' : 'answer-wrong';
           }
           
-          const shownAnswer = showModelAnswers && expectedAnswer ? expectedAnswer : selectedSitNo;
+          const activeSit = showModelAnswers && expectedAnswer ? expectedAnswer : selectedSitNo;
+          const shownAnswer = activeSit;
           const shownLabel = shownAnswer ? (shownAnswer === 'X' ? text('X — إعلان بدون عنوان', 'X — Keine passende Überschrift') : `Titre ${shownAnswer}`) : '';
 
           const selectOptions = items.map(sit => {
             const sNo = String(sit.position_no);
-            const isSelected = selectedSitNo === sNo;
+            const isSelected = activeSit === sNo;
             const currentHolder = heads.map((_, hi) => String.fromCharCode(65 + hi)).find(l => l !== letter && String(answerValue(sNo)).toUpperCase() === l);
             const isUsed = Boolean(currentHolder);
             const preview = sit.prompt ? (sit.prompt.length > 55 ? sit.prompt.slice(0, 52) + '…' : sit.prompt) : '';
             return `<option value="${sNo}" ${isSelected ? 'selected' : ''} ${isUsed ? 'disabled' : ''}>Titre ${sNo}: ${esc(preview)}${isUsed ? ' — ' + text('تم اختياره', 'Bereits ausgewählt') : ''}</option>`;
-          }).join('') + `<option value="X" ${selectedSitNo === 'X' ? 'selected' : ''}>${text('X — إعلان بدون عنوان (لا يناسب أي عنوان)', 'X — Keine passende Anzeige für diese Situation')}</option>`;
+          }).join('') + `<option value="X" ${activeSit === 'X' ? 'selected' : ''}>${text('X — إعلان بدون عنوان (لا يناسب أي عنوان)', 'X — Keine passende Anzeige')}</option>`;
 
           const assignLabel = `Text ${letter} — ` + text('مكان اختيار العنوان المناسب لهذا الإعلان:', 'Passende Überschrift für diese Anzeige:');
           const assignPlaceholder = text('— اختر العنوان المناسب لهذا الإعلان (1 - 10 أو X) —', '— Passende Überschrift auswählen (1 - 10 oder X) —');
 
           return `
-          <article class="exam-text-card lesen3-ad-card ${selectedSitNo ? 'answered' : ''} ${resultClass}" id="card-ad-${letter}" style="background:var(--white);border:1.5px solid var(--line);border-radius:20px;padding:24px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:14px;">
+          <article class="exam-text-card lesen3-ad-card ${selectedSitNo ? 'answered' : ''} ${resultClass} ${showModelAnswers ? 'model-shown' : ''}" id="card-ad-${letter}" style="background:var(--white);border:1.5px solid var(--line);border-radius:20px;padding:24px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:14px;">
             <div class="paragraph-assignment">
               <div class="paragraph-assignment-head">
                 <span class="assignment-label" style="font-weight:900;color:var(--ink);">${assignLabel}</span>
@@ -342,7 +295,8 @@ function renderMatching(){
                   <option value="">${assignPlaceholder}</option>
                   ${selectOptions}
                 </select>
-                ${shownLabel ? `<button type="button" class="assignment-selected" data-ad-clear="${letter}" aria-label="${text('إلغاء الاختيار','Auswahl löschen')}"><span>${esc(shownLabel)}</span><b>×</b></button>` : `<span class="assignment-empty">${text('لم يتم الاختيار بعد','Noch nicht ausgewählt')}</span>`}
+                ${shownLabel ? `<button type="button" class="assignment-selected ${showModelAnswers ? 'model-correct' : ''}" data-ad-clear="${letter}" aria-label="${text('إلغاء الاختيار','Auswahl löschen')}"><span>${esc(shownLabel)}</span>${showModelAnswers ? '' : '<b>×</b>'}</button>` : `<span class="assignment-empty">${text('لم يتم الاختيار بعد','Noch nicht ausgewählt')}</span>`}
+                ${(resultData && !showModelAnswers && expectedAnswer && selectedSitNo !== expectedAnswer) ? `<span class="model-answer-hint" style="color:#2d9b68;font-size:13.5px;font-weight:850;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:rgba(45,155,104,0.1);border-radius:8px;">${text('الحل:','Lösung:')} ${expectedAnswer === 'X' ? 'X' : 'Titre ' + expectedAnswer}</span>` : ''}
               </div>
             </div>
             ${ad.title ? `<h4 class="ad-title" style="margin:4px 0 6px;font-size:18px;font-weight:850;color:var(--green);">${esc(ad.title)}</h4>` : ''}
@@ -402,7 +356,6 @@ function renderMatching(){
   }).join('');
 
   const main = isLesen3 ? `
-    ${lesen3ResultsCard}
     ${lesen3AdsMarkup}
   ` : `${bodySection}${cards}`;
 
@@ -428,7 +381,44 @@ function renderMatching(){
 
  const answeredCount=Object.keys(answers).filter(k=>answers[k]).length;
  const meta=matchingMeta();
- const headingsBankUnder = !isLesen3 ? `
+ const headingsBankUnder = isLesen3 ? `
+   <div class="matching-headings-bank lesen3-headings-overview" style="margin-top:36px;padding:24px;background:var(--white);border:1.5px solid var(--line);border-radius:20px;box-shadow:var(--shadow-sm);">
+     <div class="matching-bank-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
+       <div>
+         <h3 style="margin:0 0 4px;font-size:19px;font-weight:900;display:flex;align-items:center;gap:8px;">
+           <span>📋</span>
+           <span>${text('قائمة العناوين (10 مواقف — Überschriften 1 bis 10):', 'Überschriften (1 bis 10):')}</span>
+         </h3>
+         <small style="color:var(--muted);font-size:13px;">${text('اختر العنوان المناسب من القائمة المنسدلة أعلى كل إعلان فوق. إعلانان لا يناسبان أي عنوان (X).', 'Wählen Sie oben über jeder Anzeige die passende Überschrift aus dieser Liste aus.')}</small>
+       </div>
+       <div style="display:flex;align-items:center;gap:10px;">
+         <span class="side-counter-pill">${answeredCount} / ${items.length}</span>
+       </div>
+     </div>
+     <div class="lesen3-headings-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));gap:12px;">
+       ${items.map(it => {
+         const assignedLetter = heads.map((_, hi) => String.fromCharCode(65 + hi)).find(l => String(answerValue(it.position_no)).toUpperCase() === l);
+         const cid = 'sit-head-' + it.position_no;
+         const detail = resultData ? (resultData.details || []).find(d => String(d.prompt) === String(it.prompt)) : null;
+         const correctVal = String(detail?.correct_answer || it.correct_answer || '').trim().toUpperCase();
+         const shownText = showModelAnswers && correctVal ? (correctVal === 'X' ? 'X' : `Text ${correctVal}`) : (assignedLetter ? `Text ${assignedLetter}` : '');
+         const badgeClass = detail ? (detail.ok ? 'model-correct' : 'model-wrong') : '';
+         return `
+         <div class="lesen3-heading-badge" style="background:var(--bg);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:6px;">
+           <div style="display:flex;justify-content:space-between;align-items:center;">
+             <strong style="font-weight:950;color:#f47b20;font-size:15px;">Titre ${it.position_no}</strong>
+             ${shownText ? `<span class="ad-status-pill ${badgeClass}" style="background:#0f172a;color:#fff;font-weight:900;font-size:12px;padding:3px 9px;border-radius:6px;">${shownText}</span>` : `<small class="muted" style="font-size:11.5px;">${text('غير محدد بعد','Noch offen')}</small>`}
+           </div>
+           <div id="${cid}" data-content-id="${cid}" data-source="${esc(it.prompt)}" style="font-size:14.5px;line-height:1.6;color:var(--ink);">${esc(it.prompt)}</div>
+           <div style="display:flex;justify-content:flex-end;margin-top:2px;">
+             ${textTools(it.prompt, cid)}
+           </div>
+           <div class="inline-translation" id="${cid}-translation"></div>
+         </div>`;
+       }).join('')}
+     </div>
+   </div>
+ ` : `
    <div class="matching-headings-bank" style="margin-top:32px;padding:0;background:transparent;border:0;border-radius:0;box-shadow:none;">
      <div class="matching-bank-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
        <div>
@@ -446,7 +436,7 @@ function renderMatching(){
        ${side}
      </div>
    </div>
- ` : '';
+ `;
 
  document.getElementById('content').innerHTML = layout(main + headingsBankUnder, '', isLesen3 ? 'lesen3-workspace' : '');
 
@@ -1853,8 +1843,11 @@ function renderExerciseHeaderCard(){
     } else {
       titleMarkup = `
         <div class="thema-title-row is-hidden-title">
-          <div class="thema-masked-wrapper thema-blurred-card" id="titleMaskedBox" title="${text('انقر لإظهار العنوان','Klicken zum Einblenden')}">
-            <span class="thema-blurred-text" aria-hidden="true">${esc(title)}</span>
+          <div class="thema-masked-wrapper thema-blurred-card" id="titleMaskedBox" role="button" tabindex="0" title="${text('انقر لإظهار العنوان','Klicken zum Einblenden')}" aria-label="${text('انقر لإظهار العنوان','Klicken zum Einblenden')}">
+            <span class="thema-blurred-text frosted-ghost-bars" aria-hidden="true">
+              <span class="ghost-bar ghost-bar-long"></span>
+              <span class="ghost-bar ghost-bar-short"></span>
+            </span>
             <div class="thema-blurred-badge">
               <span class="masked-lock-badge" aria-hidden="true">🔒</span>
               <span class="masked-hint">${text('العنوان مخفي أثناء التدريب (انقر للإظهار)','Thema ausgeblendet (Klicken zum Anzeigen)')}</span>
