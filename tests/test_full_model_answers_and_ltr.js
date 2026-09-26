@@ -21,7 +21,7 @@ assert(exHtml.includes('class="paragraph-assignment-head"'), 'renderMatching mus
 assert(exHtml.includes('spb-correct-hint'), 'renderSprachbausteine1 must include spb-correct-hint');
 assert(exHtml.includes('spb2-gap-correction'), 'renderBody must include spb2-gap-correction for Sprachbausteine 2');
 assert(exHtml.includes('spb2-gap-model'), 'renderBody must include spb2-gap-model for Sprachbausteine 2 model answers');
-assert(exHtml.includes('${esc(k)}) ${esc(v)}'), 'Sprachbausteine 2 select options must render both key and actual word value');
+assert(exHtml.includes('${esc(cleanOptionPrefix(v||k))}'), 'Sprachbausteine 2 select options must render clean word value without letter prefix');
 
 // Verify Lesen 2 & Hören
 assert(exHtml.includes('lesen2-correct-hint'), 'renderChoiceQuestions must include lesen2-correct-hint');
@@ -54,18 +54,19 @@ function extractHelperAndTest() {
       return m ? m[0].toUpperCase() : 'A';
     },
     parseAdText: (raw) => ({ title: 'Wohnung in Berlin', body: '3 Zimmer' }),
-    matchingDisplayLabel: (h, i) => `${String.fromCharCode(65 + i)} — ${h}`,
+    cleanOptionPrefix: (str) => String(str || '').replace(/^(?:Text\s*[A-Z0-9]+|W\d+|[A-Za-z]|\d+)\s*[:—–\-]\s*/i, '').replace(/^[a-zA-Z0-9]+[\)\.]\s*/, '').trim(),
+    matchingDisplayLabel: (h, i) => h,
     sharedOptions: () => [['a', 'deshalb'], ['b', 'obwohl'], ['c', 'jedoch']]
   };
 
-  const fn = new Function('model', 'text', 'getExerciseHeadings', 'resolveMatchingCorrectKey', 'parseAdText', 'matchingDisplayLabel', 'sharedOptions', `
+  const fn = new Function('model', 'text', 'getExerciseHeadings', 'resolveMatchingCorrectKey', 'parseAdText', 'matchingDisplayLabel', 'sharedOptions', 'cleanOptionPrefix', `
     ${funcCode}
     return getFullAnswerText;
-  `)(mockEnv.model, mockEnv.text, mockEnv.getExerciseHeadings, mockEnv.resolveMatchingCorrectKey, mockEnv.parseAdText, mockEnv.matchingDisplayLabel, mockEnv.sharedOptions);
+  `)(mockEnv.model, mockEnv.text, mockEnv.getExerciseHeadings, mockEnv.resolveMatchingCorrectKey, mockEnv.parseAdText, mockEnv.matchingDisplayLabel, mockEnv.sharedOptions, mockEnv.cleanOptionPrefix);
 
   // Test Lesen 1 matching
   const l1Result = fn(null, 'A', ['Wohnen im Alter: Neue Modelle', 'Sprachen lernen online']);
-  assert.strictEqual(l1Result, 'A — Wohnen im Alter: Neue Modelle', 'Lesen 1 must resolve to full heading text');
+  assert.strictEqual(l1Result, 'Wohnen im Alter: Neue Modelle', 'Lesen 1 must resolve to clean heading text without prefix');
 
   // Test Lesen 3 matching with X
   mockEnv.model.exercise.section = 'Lesen';
@@ -78,7 +79,7 @@ function extractHelperAndTest() {
   mockEnv.model.exercise.section = 'Sprachbausteine';
   mockEnv.model.exercise.teil = 'Teil 2';
   const spb2Result = fn({ position_no: 1 }, 'a');
-  assert.strictEqual(spb2Result, 'a) deshalb', 'Sprachbausteine 2 must resolve key to actual word');
+  assert.strictEqual(spb2Result, 'deshalb', 'Sprachbausteine 2 must resolve key to actual word without prefix');
 
   // Test Multiple Choice option resolution
   mockEnv.model.exercise.section = 'Lesen';
@@ -90,7 +91,7 @@ function extractHelperAndTest() {
     ]
   };
   const mcResult = fn(mcItem, 'b');
-  assert.strictEqual(mcResult, 'b) Zweite Wahl', 'Multiple choice must resolve to full option text');
+  assert.strictEqual(mcResult, 'Zweite Wahl', 'Multiple choice must resolve to full option text without prefix');
 
   // Test True/False
   mockEnv.model.exercise.section = 'Hören';
@@ -138,7 +139,7 @@ assert(exHtml.includes('result-pill-right'), 'exercise.html must include result-
 assert(exHtml.includes('result-pill-wrong'), 'exercise.html must include result-pill-wrong (✕ M falsch)');
 
 // Check mock-exam.html Spb2 dropdown has actual words
-assert(mockHtml.includes('const wordText = v ? `${esc(k)}) ${esc(v)}` : esc(k);'), 'mock-exam.html must show actual words in Spb2 dropdown');
+assert(mockHtml.includes('const wordText = v ? esc(v) : esc(k);'), 'mock-exam.html must show actual words in Spb2 dropdown without prefix');
 
 console.log('✓ Test 5 Passed: Result breakdown displays clean counts and mock-exam Spb2 dropdown is verified.\n');
 

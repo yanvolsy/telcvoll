@@ -513,7 +513,7 @@ function renderMockSpb2(model){
     const selectOpts = sharedOpts.map(([k, v]) => {
       const isSel = String(val).toLowerCase() === String(k).toLowerCase();
       const isUsed = !isSel && usedKeys.has(String(k).toLowerCase());
-      const wordText = v ? `${esc(k)}) ${esc(v)}` : esc(k);
+      const wordText = v ? esc(v) : esc(k);
       return `<option value="${esc(k)}" ${isSel ? 'selected' : ''} ${isUsed ? 'disabled' : ''}>${wordText}${isUsed ? ' — ' + text('تم استخدامه', 'bereits verwendet') : ''}</option>`;
     }).join('');
 
@@ -572,7 +572,6 @@ function renderMockLesen1(model){
           const letter = String.fromCharCode(65 + i);
           return `
           <div class="mock-heading-item">
-            <span class="mock-heading-letter">${letter}</span>
             <span>${esc(h)}</span>
           </div>`;
         }).join('')}
@@ -682,11 +681,12 @@ function renderMockLesen3(model){
       const letter = String.fromCharCode(65 + i);
       const ad = parseAdText(h);
       const fullTitle = ad.title ? ad.title : (ad.body ? ad.body.replace(/\s+/g, ' ').trim() : '');
-      const label = fullTitle ? `Text ${letter}: ${fullTitle}` : `Text ${letter}`;
+      const cleanTitle = (fullTitle || '').replace(/^(?:Text\s*[A-Z0-9]+|W\d+|[A-Za-z]|\d+)\s*[:—–\-]\s*/i, '').replace(/^[a-zA-Z0-9]+[\)\.]\s*/, '').trim() || fullTitle;
+      const label = cleanTitle;
       const isSelected = selected === letter;
       const isUsed = usedAnswerIds.has(letter) && !isSelected;
       return `<option value="${letter}" ${isSelected ? 'selected' : ''} ${isUsed ? 'disabled' : ''}>${esc(label)}${isUsed ? ' — ' + text('تم اختياره', 'Bereits ausgewählt') : ''}</option>`;
-    }).join('') + `<option value="X" ${selected === 'X' ? 'selected' : ''}>${text('X — لا يوجد عنوان مناسب لهذه الفقرة', 'X — Keine passende Anzeige')}</option>`;
+    }).join('') + `<option value="X" ${selected === 'X' ? 'selected' : ''}>${text('لا يوجد عنوان مناسب لهذه الفقرة', 'Keine passende Anzeige')}</option>`;
 
     return `
     <article class="mock-item ${selected ? 'answered' : ''}" id="mock-sit-${q}">

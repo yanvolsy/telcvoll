@@ -7339,3 +7339,109 @@ body.exercise-page,
   direction: rtl !important;
   text-align: right !important;
 }
+
+
+/* =========================================================================
+   USER EXPERIENCE & PRESENTATION REFINEMENTS
+   1. RTL Score Panel BiDi Fixes
+   2. Clean Modern Paragraph Card (no dark box, no redundant title)
+   3. Complete Removal of Hidden Title Lock Badge & Text
+   ========================================================================= */
+
+/* 1. RTL Score Panel & BiDi Isolation */
+.inline-result-panel[dir="rtl"],
+html[lang="ar"] .inline-result-panel,
+body[dir="rtl"] .inline-result-panel {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+.inline-result-panel[dir="rtl"] .result-panel-breakdown {
+  flex-direction: row !important;
+  direction: rtl !important;
+}
+
+.inline-result-panel[dir="rtl"] .result-pill-right,
+.inline-result-panel[dir="rtl"] .result-pill-wrong {
+  direction: rtl !important;
+  unicode-bidi: isolate !important;
+}
+
+/* 2. Modern Sleek Paragraph Card & Selection Box */
+.paragraph-assignment-head {
+  display: none !important;
+}
+
+.paragraph-assignment {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin-bottom: 14px !important;
+  width: 100% !important;
+}
+
+.paragraph-assignment-controls {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+}
+
+.paragraph-assignment-controls .mock-select,
+.paragraph-assignment select {
+  width: 100% !important;
+  min-height: 48px !important;
+  border-radius: 12px !important;
+  border: 1.5px solid var(--line) !important;
+  background: var(--bg) !important;
+  color: var(--ink) !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  padding: 10px 16px !important;
+  outline: none !important;
+  transition: all 0.2s ease !important;
+  box-sizing: border-box !important;
+}
+
+.paragraph-assignment-controls .mock-select:focus,
+.paragraph-assignment select:focus {
+  border-color: var(--green) !important;
+  box-shadow: 0 0 0 3px var(--green-soft) !important;
+}
+
+.exam-text-card {
+  padding: 24px 26px !important;
+  border-radius: 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  background: var(--white) !important;
+  border: 1.5px solid var(--line) !important;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.03) !important;
+  margin-bottom: 18px !important;
+}
+
+.exam-text-card .exam-text {
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 15.5px !important;
+  line-height: 1.85 !important;
+  color: var(--ink) !important;
+}
+
+/* 3. Site-Wide Removal of Hidden Title Lock Badge & Text */
+.exercise-header-card .thema-masked-wrapper,
+.exercise-header-card .thema-blurred-card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 4px 8px !important;
+}
+
+.exercise-header-card .thema-blurred-badge,
+.exercise-header-card .masked-lock-badge,
+.exercise-header-card .masked-hint,
+.masked-lock-badge,
+.masked-hint {
+  display: none !important;
+}
