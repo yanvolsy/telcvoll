@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1310"><title>تمرين TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260926-clean-v4">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1310"><title>تمرين TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260926-user-spec-v5">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
@@ -10,42 +10,300 @@ html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !impo
 html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}</style>
 
 <style id="definitive-clean-paragraph-ui">
-/* TELC Voll - Definitive Paragraph & Frame UI Overrides */
-.exercise-content-frame {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-}
+/* ==========================================================================
+   TELC VOLL - EXACT COMPACT EXAM UI (NO UNNECESSARY CONTAINERS)
+   ========================================================================== */
 
-.exam-text-card,
-html[data-theme="dark"] .exam-text-card,
-.exercise-page .exam-text-card {
+/* 1. Main Workspace & Frame: REMOVE THE CONTAINER ENTIRELY */
+.exam-workspace,
+.exam-main,
+.exercise-content-frame,
+.exercise-page:has(.exam-workspace) .exam-main,
+.exercise-page:has(.exam-workspace) .exam-workspace {
   background: transparent !important;
   background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  padding: 14px 0 28px 0 !important;
-  margin: 0 0 28px 0 !important;
-  border-bottom: 1px solid var(--line) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  max-width: 100% !important;
 }
 
-.exam-text-card:hover,
+/* 2. Fixed Sticky Exercise Bar: Attached to Header, Stable Width, LTR Order */
+.exercise-header-card.exercise-sticky-bar {
+  position: sticky !important;
+  top: 70px !important;
+  z-index: 85 !important;
+  background: var(--bg) !important;
+  border-bottom: 1.5px solid var(--line) !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-radius: 0 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04) !important;
+  padding: 10px 0 !important;
+  margin: 0 auto 20px auto !important;
+  width: 100% !important;
+  max-width: 1100px !important;
+  box-sizing: border-box !important;
+}
+
+html[data-theme="dark"] .exercise-header-card.exercise-sticky-bar {
+  background: #0d1210 !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+.exercise-single-top-bar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  width: 100% !important;
+  padding: 0 16px !important;
+  box-sizing: border-box !important;
+  direction: ltr !important;
+}
+
+/* Cluster 1: Level & Section Tags */
+.top-bar-left-cluster {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex: 0 0 auto !important;
+}
+
+/* Cluster 2: Controlled Title Area */
+.top-bar-title-cluster {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex: 0 1 240px !important;
+  max-width: 240px !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.top-bar-title-cluster .thema-title-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Cluster 3: FIXED RESERVED RESULT AREA */
+.top-bar-result-cluster {
+  width: 170px !important;
+  min-width: 170px !important;
+  max-width: 170px !important;
+  flex: 0 0 170px !important;
+  height: 36px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+}
+
+.top-bar-result-cluster .inline-result-panel {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 4px 12px !important;
+  border-radius: 8px !important;
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+  border: 1px solid var(--line) !important;
+}
+
+.top-bar-result-cluster .inline-result-panel.pass {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border-color: rgba(16, 185, 129, 0.3) !important;
+  color: #10b981 !important;
+}
+
+.top-bar-result-cluster .inline-result-panel.fail {
+  background: rgba(239, 68, 68, 0.12) !important;
+  border-color: rgba(239, 68, 68, 0.3) !important;
+  color: #ef4444 !important;
+}
+
+/* Cluster 4: Shuffle Button */
+.top-bar-shuffle-cluster {
+  flex: 0 0 auto !important;
+}
+
+/* Cluster 5: Timer */
+.top-bar-timer-cluster {
+  flex: 0 0 auto !important;
+}
+
+/* 3. PARAGRAPH CARD: REMOVED COMPLETELY (Sitting directly on page background) */
+.exam-text-card,
+.exam-text-card.answer-wrong,
+.exam-text-card.answer-correct,
 .exam-text-card.active-item,
 .exam-text-card.answered,
-.exam-text-card.answer-correct,
-.exam-text-card.answer-wrong {
+html[data-theme="dark"] .exam-text-card,
+.exercise-page:has(.exam-workspace) .exam-text-card,
+.exercise-page:has(.exam-workspace) .exam-text-card.answer-wrong,
+.exercise-page:has(.exam-workspace) .exam-text-card.answer-correct {
   background: transparent !important;
   background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-radius: 0 !important;
+  padding: 0 0 28px 0 !important;
+  margin: 0 0 28px 0 !important;
+  border-bottom: 1px solid var(--line) !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+html[data-theme="dark"] .exam-text-card {
+  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 4. HEADING SELECTION: COMPACT HEIGHT (NO GIANT CONTAINER) */
+.paragraph-assignment {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 0 6px 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
   box-shadow: none !important;
 }
 
+.paragraph-assignment-controls {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.paragraph-assignment select,
+.paragraph-assignment-controls .mock-select,
+select.mock-select,
+select[data-paragraph-select] {
+  display: block !important;
+  width: 100% !important;
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  line-height: 44px !important;
+  flex: none !important;
+  margin: 0 !important;
+  padding: 0 14px !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  border-radius: 10px !important;
+  border: 1.5px solid var(--line) !important;
+  background: var(--bg) !important;
+  color: var(--ink) !important;
+  outline: none !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+}
+
+html[data-theme="dark"] .paragraph-assignment select,
+html[data-theme="dark"] .paragraph-assignment-controls .mock-select,
+html[data-theme="dark"] select.mock-select {
+  background: #121815 !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #f1f5f9 !important;
+}
+
+select.mock-select.assignment-model-correct {
+  border: 2px solid #10b981 !important;
+  background: rgba(16, 185, 129, 0.08) !important;
+  color: #10b981 !important;
+}
+
+select.mock-select.assignment-model-wrong {
+  border: 2px solid #ef4444 !important;
+  background: rgba(239, 68, 68, 0.08) !important;
+  color: #ef4444 !important;
+}
+
+/* 5. TRANSLATION & PRONUNCIATION: ATTACHED TO PARAGRAPH ON THE RIGHT */
+.paragraph-tools-row,
+.exercise-page .paragraph-tools-row,
+html[lang="ar"] .paragraph-tools-row,
+body[dir="rtl"] .paragraph-tools-row {
+  direction: ltr !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 4px 0 6px 0 !important;
+  padding: 0 !important;
+}
+
+.paragraph-tools-row .text-tools {
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-left: auto !important;
+  margin-inline-start: auto !important;
+}
+
+/* 6. COMPACT CORRECT ANSWER FEEDBACK (NO GIANT GREEN CARD) */
+.assignment-correct-answer,
+html[data-theme="dark"] .assignment-correct-answer {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  margin: 6px 0 !important;
+  padding: 2px 0 !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  color: #10b981 !important;
+  font-size: 14.5px !important;
+  font-weight: 750 !important;
+  width: auto !important;
+}
+
+.assignment-correct-answer.model-answer-bar {
+  color: #f97316 !important;
+}
+
+.assignment-correct-answer .correct-badge {
+  font-weight: 900 !important;
+  font-size: 14.5px !important;
+  color: inherit !important;
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.assignment-correct-answer .correct-full-text {
+  font-weight: 750 !important;
+  font-size: 14.5px !important;
+  color: inherit !important;
+}
+
+/* 7. PARAGRAPH TYPOGRAPHY */
 .exam-text,
 .exam-text-card .exam-text {
   font-size: 16.5px !important;
-  line-height: 1.9 !important;
+  line-height: 1.85 !important;
   letter-spacing: -0.01em !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -59,75 +317,6 @@ html[data-theme="dark"] .exam-text-card .exam-text {
 
 html[data-theme="light"] .exam-text,
 html[data-theme="light"] .exam-text-card .exam-text {
-  color: #1a202c !important;
-}
-
-.paragraph-tools-row,
-.exercise-page .paragraph-tools-row,
-html[lang="ar"] .paragraph-tools-row,
-body[dir="rtl"] .paragraph-tools-row {
-  direction: ltr !important;
-  display: flex !important;
-  justify-content: flex-end !important;
-  align-items: center !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-  margin: 8px 0 12px 0 !important;
-  padding: 0 !important;
-}
-
-.paragraph-tools-row .text-tools {
-  display: flex !important;
-  justify-content: flex-end !important;
-  align-items: center !important;
-  gap: 8px !important;
-  margin-left: auto !important;
-  margin-inline-start: auto !important;
-}
-
-.paragraph-assignment {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  margin: 0 0 10px 0 !important;
-  width: 100% !important;
-}
-
-.paragraph-assignment-controls {
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 0 !important;
-  width: 100% !important;
-}
-
-.paragraph-assignment-controls .mock-select,
-.paragraph-assignment select,
-select.mock-select {
-  width: 100% !important;
-  border-radius: 12px !important;
-  padding: 12px 16px !important;
-  font-size: 15px !important;
-  font-weight: 700 !important;
-  outline: none !important;
-  box-sizing: border-box !important;
-  transition: all 0.2s ease !important;
-}
-
-html[data-theme="dark"] .paragraph-assignment-controls .mock-select,
-html[data-theme="dark"] .paragraph-assignment select,
-html[data-theme="dark"] select.mock-select {
-  background: #121815 !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.14) !important;
-  color: #f1f5f9 !important;
-}
-
-html[data-theme="light"] .paragraph-assignment-controls .mock-select,
-html[data-theme="light"] .paragraph-assignment select,
-html[data-theme="light"] select.mock-select {
-  background: #ffffff !important;
-  border: 1.5px solid var(--line) !important;
   color: #1a202c !important;
 }
 </style>
@@ -514,32 +703,32 @@ function renderMatching(){
     const selectResultClass = userCheckedAnswers ? (detail?.ok ? 'assignment-model-correct' : 'assignment-model-wrong') : (showModelAnswers && correctVal ? 'assignment-model-correct' : '');
     const fullCorrectAnswerText = getFullAnswerText(it, correctVal, heads);
     const correctHint = (resultData && !detail?.ok && correctVal && selected !== correctVal) ? `
-      <div class="assignment-correct-answer">
-        <span class="correct-badge">✓ ${text('الإجابة الصحيحة:','Richtige Antwort:')}</span>
-        <strong class="correct-full-text">${esc(fullCorrectAnswerText)}</strong>
+      <div class="assignment-correct-answer" style="display:flex;align-items:center;gap:6px;margin:4px 0 8px 0;padding:2px 0;background:transparent !important;border:none !important;box-shadow:none !important;color:#10b981 !important;font-size:14.5px;font-weight:750;">
+        <span class="correct-badge" style="color:#10b981 !important;font-weight:900;">✓ ${text('الإجابة الصحيحة:','Richtige Antwort:')}</span>
+        <strong class="correct-full-text" style="color:inherit !important;font-weight:750;">${esc(fullCorrectAnswerText)}</strong>
       </div>` : (showModelAnswers && correctVal ? `
-      <div class="assignment-correct-answer model-answer-bar">
-        <span class="correct-badge">★ ${text('الإجابة النموذجية:','Musterlösung:')}</span>
-        <strong class="correct-full-text">${esc(fullCorrectAnswerText)}</strong>
+      <div class="assignment-correct-answer model-answer-bar" style="display:flex;align-items:center;gap:6px;margin:4px 0 8px 0;padding:2px 0;background:transparent !important;border:none !important;box-shadow:none !important;color:#f97316 !important;font-size:14.5px;font-weight:750;">
+        <span class="correct-badge" style="color:#f97316 !important;font-weight:900;">★ ${text('الإجابة النموذجية:','Musterlösung:')}</span>
+        <strong class="correct-full-text" style="color:inherit !important;font-weight:750;">${esc(fullCorrectAnswerText)}</strong>
       </div>` : '');
-    return `<article class="exam-text-card ${selected?'answered':''} ${resultClass} ${showModelAnswers?'model-shown':''} ${String(activeItem)===String(it.position_no)?'active-item':''}" data-item="${it.position_no}" style="background:transparent !important;background-color:transparent !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;border:none !important;border-radius:0 !important;box-shadow:none !important;padding:14px 0 28px 0 !important;margin:0 0 28px 0 !important;border-bottom:1px solid var(--line) !important;">
-      <div class="paragraph-assignment" style="background:transparent !important;border:none !important;box-shadow:none !important;padding:0 !important;margin:0 0 10px 0 !important;width:100% !important;">
+    return `<article class="exam-text-card ${selected?'answered':''} ${resultClass} ${showModelAnswers?'model-shown':''} ${String(activeItem)===String(it.position_no)?'active-item':''}" data-item="${it.position_no}" style="background:transparent !important;background-color:transparent !important;border:none !important;box-shadow:none !important;border-radius:0 !important;padding:0 0 28px 0 !important;margin:0 0 28px 0 !important;border-bottom:1px solid var(--line) !important;display:block !important;">
+      <div class="paragraph-assignment" style="display:block !important;width:100% !important;margin:0 0 6px 0 !important;padding:0 !important;background:transparent !important;border:none !important;box-shadow:none !important;">
         <div class="paragraph-assignment-head" style="display:none !important;" aria-hidden="true"></div>
-        <div class="paragraph-assignment-controls" style="background:transparent !important;border:none !important;box-shadow:none !important;padding:0 !important;width:100% !important;">
-          <select data-paragraph-select="${it.position_no}" data-ad-select="${it.position_no}" aria-label="${assignLabel}" class="mock-select ${selected?'answered':''} ${selectResultClass}" style="width:100% !important;border-radius:12px !important;padding:12px 16px !important;font-size:15px !important;font-weight:700 !important;outline:none !important;box-sizing:border-box !important;">
+        <div class="paragraph-assignment-controls" style="display:block !important;width:100% !important;margin:0 !important;padding:0 !important;background:transparent !important;border:none !important;box-shadow:none !important;">
+          <select data-paragraph-select="${it.position_no}" data-ad-select="${it.position_no}" aria-label="${assignLabel}" class="mock-select ${selected?'answered':''} ${selectResultClass}" style="display:block !important;width:100% !important;height:44px !important;min-height:44px !important;max-height:44px !important;line-height:44px !important;flex:none !important;margin:0 !important;padding:0 14px !important;font-size:15px !important;font-weight:700 !important;border-radius:10px !important;border:1.5px solid var(--line) !important;outline:none !important;box-sizing:border-box !important;">
             <option value="">${assignPlaceholder}</option>
             ${selectOptions}
           </select>
         </div>
       </div>
-      <div class="paragraph-tools-row" style="direction:ltr !important;display:flex !important;justify-content:flex-end !important;align-items:center !important;width:100% !important;margin:8px 0 12px 0 !important;padding:0 !important;">
+      <div class="paragraph-tools-row" style="direction:ltr !important;display:flex !important;justify-content:flex-end !important;align-items:center !important;width:100% !important;margin:4px 0 6px 0 !important;padding:0 !important;">
         <div class="text-tools" style="display:flex !important;justify-content:flex-end !important;align-items:center !important;gap:8px !important;margin-left:auto !important;margin-inline-start:auto !important;">
-          <button type="button" class="mini-tool" data-translate="${cid}-translation" data-source-id="${cid}" aria-label="${text('ترجمة','Übersetzen')}" aria-pressed="false">文</button>
-          <button type="button" class="mini-tool" data-speak="${cid}" aria-label="${text('نطق بالألمانية','Deutsch vorlesen')}" aria-pressed="false">◉</button>
+          <button type="button" class="mini-tool" data-translate="${cid}-translation" data-source-id="${cid}" aria-label="${text('ترجمة','Übersetzen')}" aria-pressed="false" style="cursor:pointer;">文</button>
+          <button type="button" class="mini-tool" data-speak="${cid}" aria-label="${text('نطق بالألمانية','Deutsch vorlesen')}" aria-pressed="false" style="cursor:pointer;">◉</button>
         </div>
       </div>
       ${correctHint}
-       <div class="exam-text" id="${cid}" data-content-id="${cid}" data-source="${esc(it.prompt)}" style="font-size:16.5px;line-height:1.9;color:var(--ink);background:transparent !important;">${escBody(it.prompt)}</div>
+       <div class="exam-text" id="${cid}" data-content-id="${cid}" data-source="${esc(it.prompt)}" style="font-size:16.5px;line-height:1.85;color:var(--ink);background:transparent !important;margin:0 0 12px 0 !important;padding:0 !important;">${escBody(it.prompt)}</div>
       <div class="inline-translation" id="${cid}-translation"></div>
     </article>`;
   }).join('');
@@ -2037,17 +2226,20 @@ function renderExerciseHeaderCard(){
   const isPass = (resultData?.percent || 0) >= 60;
   const rightCount = resultData?.details ? resultData.details.filter(d => d.ok).length : (resultData?.score || 0);
   const wrongCount = resultData?.details ? resultData.details.filter(d => !d.ok).length : Math.max(0, (resultData?.max || 0) - (resultData?.score || 0));
-  const resultPanel = showResultScore ? `
-    <div class="inline-result-panel ${isPass ? 'pass' : 'fail'}" dir="${getLang()==='ar'?'rtl':'ltr'}" role="status">
-      <span class="result-panel-icon" aria-hidden="true">${isPass ? '✓' : '✕'}</span>
-      <span class="result-panel-label">${text('النتيجة:','Ergebnis:')}</span>
-      <strong class="result-panel-score"><bdi>${resultData.score} / ${resultData.max}</bdi></strong>
-      <span class="result-panel-percent"><bdi>(${resultData.percent}%)</bdi></span>
-      <span class="result-panel-breakdown">
-        <span class="result-pill-right"><bdi>✓ ${rightCount} ${text('صحيح','richtig')}</bdi></span>
-        <span class="result-pill-wrong"><bdi>✕ ${wrongCount} ${text('خطأ','falsch')}</bdi></span>
-      </span>
-    </div>` : '';
+
+  const resultPanel = `
+    <div class="top-bar-result-cluster exercise-control-panel-slot" style="width:170px;min-width:170px;max-width:170px;flex:0 0 170px;display:flex;align-items:center;justify-content:center;height:36px;box-sizing:border-box;">
+      ${showResultScore ? `
+        <div class="inline-result-panel ${isPass ? 'pass' : 'fail'}" style="margin:0;padding:4px 10px;font-size:13.5px;font-weight:800;border-radius:8px;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;">
+          <span class="result-panel-score"><bdi>${resultData.score} / ${resultData.max}</bdi></span>
+          <span>·</span>
+          <span class="result-panel-percent"><bdi>${resultData.percent}%</bdi></span>
+          <span class="result-panel-breakdown" style="display:none;" aria-hidden="true">
+            <span class="result-pill-right">✓ ${rightCount} ${text('صحيح','richtig')}</span>
+            <span class="result-pill-wrong">✕ ${wrongCount} ${text('خطأ','falsch')}</span>
+          </span>
+        </div>` : ''}
+    </div>`;
 
   let titleMarkup = '';
   if (!mockMode && title) {
@@ -2099,9 +2291,7 @@ function renderExerciseHeaderCard(){
             ${titleMarkup}
           </div>` : ''}
 
-        <div class="top-bar-result-cluster exercise-control-panel-slot">
-          ${resultPanel}
-        </div>
+        ${resultPanel}
 
         <div class="top-bar-shuffle-cluster exercise-control-shuffle-slot">
           ${headingShuffle}
@@ -2126,8 +2316,8 @@ function layout(main, side, extraWorkspaceClass = ''){
   ${renderExerciseHeaderCard()}
   ${renderExerciseControlBar()}
   ${renderAudio()}
-  <div class="exam-workspace ${combinedWorkspaceClass}">
-    <section class="exam-main"><div class="exercise-content-frame">${main}</div></section>
+  <div class="exam-workspace ${combinedWorkspaceClass}" style="max-width:1100px;margin:0 auto;padding:0 16px;background:transparent !important;border:none !important;box-shadow:none !important;">
+    <section class="exam-main" style="padding:16px 0 60px 0;background:transparent !important;border:none !important;box-shadow:none !important;"><div class="exercise-content-frame" style="padding:0 !important;background:transparent !important;border:none !important;box-shadow:none !important;">${main}</div></section>
   </div>
   <div class="exercise-actions">
     <div class="exercise-nav">

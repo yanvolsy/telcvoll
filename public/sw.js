@@ -1,4 +1,4 @@
-const CACHE='telc-voll-20260926-clean-v4';
+const CACHE='telc-voll-20260926-user-spec-v5';
 const CORE=['/','/dashboard.html','/contact.html','/assets/app.css','/assets/app.js','/assets/i18n.js','/manifest.webmanifest','/assets/favicon-light.svg','/assets/favicon-dark.svg'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));
