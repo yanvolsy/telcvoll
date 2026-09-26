@@ -513,9 +513,8 @@ function renderMockSpb2(model){
     const selectOpts = sharedOpts.map(([k, v]) => {
       const isSel = String(val).toLowerCase() === String(k).toLowerCase();
       const isUsed = !isSel && usedKeys.has(String(k).toLowerCase());
-      // In the mock exam, the dropdown uses the internal W1/W2/... identifiers.
-      // The actual words remain visible in the word bank below, as in the exam workflow.
-      return `<option value="${esc(k)}" ${isSel ? 'selected' : ''} ${isUsed ? 'disabled' : ''}>${esc(k)}${isUsed ? ' — ' + text('تم استخدامه', 'bereits verwendet') : ''}</option>`;
+      const wordText = v ? `${esc(k)}) ${esc(v)}` : esc(k);
+      return `<option value="${esc(k)}" ${isSel ? 'selected' : ''} ${isUsed ? 'disabled' : ''}>${wordText}${isUsed ? ' — ' + text('تم استخدامه', 'bereits verwendet') : ''}</option>`;
     }).join('');
 
     const gapHtml = `<select class="mock-inline-gap-select ${val ? 'answered' : ''}" data-answer-q="${esc(n)}" data-gap-q="${esc(n)}" aria-label="${text('الفراغ', 'Lücke')} ${examNo}"><option value="">(${examNo}) — ${text('اختر كلمة', 'Wort')}</option>${selectOpts}</select>`;

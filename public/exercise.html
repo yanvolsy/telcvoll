@@ -221,6 +221,104 @@ function parseAdText(raw){
   return { title: str, body: '' };
 }
 
+function resolveMatchingCorrectKey(raw, heads){
+  const value=String(raw??'').trim();
+  if(!value) return '';
+  if(/^x$/i.test(value) || /^x\s*[—-]/i.test(value)) return 'X';
+  const textMatch=value.match(/^text\s*([a-z])$/i);
+  if(textMatch) return textMatch[1].toUpperCase();
+  const letterMatch=value.match(/^([a-z])$/i);
+  if(letterMatch) return letterMatch[1].toUpperCase();
+  const wMatch=value.match(/^w\s*(\d+)$/i);
+  if(wMatch){
+    const idx=Number(wMatch[1])-1;
+    return idx>=0 && idx<heads.length ? String.fromCharCode(65+idx) : value;
+  }
+  const numMatch=value.match(/^(?:text\s*)?(\d+)$/i);
+  if(numMatch){
+    const idx=Number(numMatch[1])-1;
+    return idx>=0 && idx<heads.length ? String.fromCharCode(65+idx) : value;
+  }
+  const norm=normalizeAnswerText(formatMatchingHeading(value));
+  const idx=heads.findIndex(h=>normalizeAnswerText(formatMatchingHeading(h))===norm);
+  return idx>=0 ? String.fromCharCode(65+idx) : value;
+}
+function canonicalSubmissionAnswer(it, given){
+  const raw=String(given??'').trim();
+  if(!raw) return '';
+  const expected=String(it?.correct_answer??'').trim();
+  const isMatching = String(model?.exercise?.task_type||'')==='MATCHING' || (model?.exercise?.section==='Lesen' && ['Teil 1','Teil 3'].includes(model.exercise.teil)) || (model?.exercise?.section==='Hören' && model.exercise.teil==='Teil 3');
+  if(!isMatching) return raw;
+  if(/^text\s*[a-z]$/i.test(expected)){
+    const key=resolveMatchingCorrectKey(raw,getExerciseHeadings(model)||[]);
+    return key==='X' ? 'X' : (/^[A-Z]$/.test(key)?`Text ${key}`:raw);
+  }
+  if(/^w\s*\d+$/i.test(expected)){
+    const key=resolveMatchingCorrectKey(raw,getExerciseHeadings(model)||[]);
+    if(/^[A-Z]$/.test(key)) return `W${key.charCodeAt(0)-64}`;
+  }
+  return raw;
+}
+
+function getFullAnswerText(it, val, heads){
+  if (!val && val !== 0) return '';
+  const strVal = String(val).trim();
+  if (!strVal) return '';
+  const sec = String(model?.exercise?.section || '');
+  const teil = String(model?.exercise?.teil || '');
+  const isMatching = model?.exercise?.task_type === 'MATCHING' || (sec === 'Lesen' && ['Teil 1', 'Teil 3'].includes(teil)) || (sec === 'Hören' && teil === 'Teil 3');
+  const isLesen3 = sec === 'Lesen' && teil === 'Teil 3';
+  const isSpb2 = sec === 'Sprachbausteine' && teil === 'Teil 2';
+
+  if (isMatching) {
+    if (strVal.toUpperCase() === 'X') {
+      return text('X — لا يوجد عنوان/إعلان مناسب للفقرة', 'X — Keine passende Anzeige / Überschrift');
+    }
+    const hList = heads || getExerciseHeadings(model) || [];
+    const key = resolveMatchingCorrectKey(strVal, hList);
+    if (key === 'X') {
+      return text('X — لا يوجد عنوان/إعلان مناسب للفقرة', 'X — Keine passende Anzeige / Überschrift');
+    }
+    if (/^[A-Z]$/.test(key)) {
+      const idx = key.charCodeAt(0) - 65;
+      if (idx >= 0 && idx < hList.length) {
+        if (isLesen3) {
+          const ad = parseAdText(hList[idx]);
+          const full = ad.title ? (ad.title + (ad.body ? ' — ' + ad.body : '')) : (ad.body || '');
+          const clean = full.replace(/\s+/g, ' ').trim();
+          return `Text ${key}: ${clean.length > 90 ? clean.slice(0, 90) + '…' : clean}`;
+        } else {
+          return matchingDisplayLabel(hList[idx], idx);
+        }
+      }
+    }
+    return key || strVal;
+  }
+
+  if (isSpb2) {
+    const opts = (typeof sharedOptions === 'function') ? sharedOptions() : [];
+    const clean = strVal.toLowerCase();
+    const found = opts.find(([k]) => String(k).trim().toLowerCase() === clean);
+    if (found) return `${found[0]}) ${found[1]}`;
+    if (/^w\d+$/i.test(clean)) {
+      const idx = Number(clean.replace(/\D/g, '')) - 1;
+      if (idx >= 0 && idx < opts.length) return `${opts[idx][0]}) ${opts[idx][1]}`;
+    }
+    return strVal;
+  }
+
+  if (strVal === 'Richtig') return text('صحيح (Richtig)', 'Richtig');
+  if (strVal === 'Falsch') return text('خطأ (Falsch)', 'Falsch');
+
+  const options = it?.options || [];
+  if (options.length) {
+    const opt = options.find(o => String(o.option_key).trim().toLowerCase() === strVal.toLowerCase());
+    if (opt) return `${opt.option_key}) ${opt.option_text || opt.option_key}`;
+  }
+
+  return strVal;
+}
+
 function renderMatching(){
  const heads=getExerciseHeadings(model);
  const items=model.items||[];
@@ -242,7 +340,8 @@ function renderMatching(){
     const selected=answerValue(it.position_no);
     const cid='para-'+it.position_no;
     const detail=resultData?(resultData.details||[]).find(d=>String(d.prompt)===String(it.prompt)):null;
-    const correctVal=String(detail?.correct_answer||it.correct_answer||'').trim().toUpperCase();
+    const rawCorrectVal=String(detail?.correct_answer||it.correct_answer||'').trim();
+    const correctVal=resolveMatchingCorrectKey(rawCorrectVal,heads);
     const shownAnswer=showModelAnswers&&correctVal?correctVal:selected;
     const shownLabel=shownAnswer?(isLesen3?(shownAnswer==='X'?text('X — لا يوجد عنوان مناسب','X — Keine passende Anzeige'):`Text ${shownAnswer}`):labelFor(it.position_no,shownAnswer)):'';
     const resultClass=detail?(detail.ok?'answer-correct':'answer-wrong'):'';
@@ -273,18 +372,28 @@ function renderMatching(){
     const assignLabel = text('اختر العنوان المناسب','Passende Überschrift auswählen');
     const assignPlaceholder = isLesen3 ? text('— اختر العنوان —','— Überschrift auswählen —') : text('— اختر العنوان —','— Überschrift auswählen —');
     const selectResultClass = showModelAnswers && correctVal ? 'assignment-model-correct' : (detail ? (detail.ok ? 'assignment-model-correct' : 'assignment-model-wrong') : '');
-    const correctHint = (resultData && !detail?.ok && correctVal && selected !== correctVal) ? `<div class="assignment-correct-answer">${text('الإجابة الصحيحة:','Richtige Antwort:')} ${correctVal === 'X' ? text('X — لا يوجد عنوان مناسب','X — Keine passende Anzeige') : (isLesen3 ? 'Text ' + correctVal : esc(labelFor(it.position_no, correctVal)))}</div>` : '';
+    const fullCorrectAnswerText = getFullAnswerText(it, correctVal, heads);
+    const correctHint = (resultData && !detail?.ok && correctVal && selected !== correctVal) ? `
+      <div class="assignment-correct-answer">
+        <span class="correct-badge">✓ ${text('الإجابة الصحيحة:','Richtige Antwort:')}</span>
+        <strong class="correct-full-text">${esc(fullCorrectAnswerText)}</strong>
+      </div>` : (showModelAnswers && correctVal ? `
+      <div class="assignment-correct-answer model-answer-bar">
+        <span class="correct-badge">★ ${text('الإجابة النموذجية:','Musterlösung:')}</span>
+        <strong class="correct-full-text">${esc(fullCorrectAnswerText)}</strong>
+      </div>` : '');
     return `<article class="exam-text-card ${selected?'answered':''} ${resultClass} ${showModelAnswers?'model-shown':''} ${String(activeItem)===String(it.position_no)?'active-item':''}" data-item="${it.position_no}">
       <div class="paragraph-assignment">
-         <div class="paragraph-assignment-controls">
-           <select data-paragraph-select="${it.position_no}" data-ad-select="${it.position_no}" aria-label="${assignLabel}" class="mock-select ${selected?'answered':''} ${selectResultClass}">
-             <option value="">${assignPlaceholder}</option>
-             ${selectOptions}
-           </select>
-           ${textTools(it.prompt,cid)}
-           ${correctHint}
-         </div>
-       </div>
+        <div class="paragraph-assignment-head">${assignLabel}</div>
+        <div class="paragraph-assignment-controls">
+          <select data-paragraph-select="${it.position_no}" data-ad-select="${it.position_no}" aria-label="${assignLabel}" class="mock-select ${selected?'answered':''} ${selectResultClass}">
+            <option value="">${assignPlaceholder}</option>
+            ${selectOptions}
+          </select>
+        </div>
+      </div>
+      <div class="paragraph-tools-row">${textTools(it.prompt,cid)}</div>
+      ${correctHint}
        <div class="exam-text" id="${cid}" data-content-id="${cid}" data-source="${esc(it.prompt)}" style="font-size:15.5px;line-height:1.85;color:var(--ink);">${escBody(it.prompt)}</div>
       <div class="inline-translation" id="${cid}-translation"></div>
     </article>`;
@@ -437,15 +546,26 @@ function renderSprachbausteine1(){
        ${items.map(it=>{
          const n=String(it.position_no), examNo=Number(n)+20, chosen=answerValue(n);
          const detail=resultData?.details?.find(d=>String(d.prompt)===String(it.prompt));
-         const correct=detail?.correct_answer||'';
+         const correct=String(detail?.correct_answer || it.correct_answer || it.correct || '').trim();
          const showCorrect=showModelAnswers&&correct;
          const base=(it.options||[]).slice(0,3);
          if(!optionOrders[n]) optionOrders[n]=base.map(o=>o.option_key);
          const byKey=new Map(base.map(o=>[String(o.option_key),o]));
          const ordered=optionOrders[n].map(k=>byKey.get(String(k))).filter(Boolean);
+         const fullCorrectText = getFullAnswerText(it, correct);
+         const correctHint = (resultData && !detail?.ok && correct && chosen !== correct) ? `
+           <div class="assignment-correct-answer spb-correct-hint">
+             <span class="correct-badge">✓ ${text('الإجابة الصحيحة:','Richtige Antwort:')}</span>
+             <strong class="correct-full-text">${esc(fullCorrectText)}</strong>
+           </div>` : (showModelAnswers && correct ? `
+           <div class="assignment-correct-answer model-answer-bar spb-correct-hint">
+             <span class="correct-badge">★ ${text('الإجابة النموذجية:','Musterlösung:')}</span>
+             <strong class="correct-full-text">${esc(fullCorrectText)}</strong>
+           </div>` : '');
          return `<div class="side-question spb1-question ${detail?(detail.ok?'result-correct':'result-wrong'):''}">
            <div class="question-prompt question-text-tools"><strong>${examNo}</strong><span>${text('الفراغ','Lücke')} ${examNo}</span></div>
-           <div class="side-options">
+           ${correctHint}
+           <div class="side-options">`;
              ${ordered.map((o,oi)=>{
                const ocid=`spb1-o-${n}-${oi}`;
                return `<div class="spb1-option-wrap">
@@ -508,15 +628,26 @@ function renderHoerenChoiceQuestions(){
  const rows=items.map((it,index)=>{
    const n=String(it.position_no), chosen=answerValue(n);
    const detail=resultData?.details?.find(d=>String(d.prompt)===String(it.prompt));
-   const correct=detail?.correct_answer||'';
+   const correct=String(detail?.correct_answer || it.correct_answer || it.correct || '').trim();
    const qid=`hoeren-choice-q-${n}`;
    const options=(it.options||[]).slice(0,4);
    if(!optionOrders[n])optionOrders[n]=options.map(o=>o.option_key);
    const byKey=new Map(options.map(o=>[String(o.option_key),o]));
    const ordered=optionOrders[n].map(k=>byKey.get(String(k))).filter(Boolean);
+   const fullCorrectText = getFullAnswerText(it, correct);
+   const correctHint = (resultData && !detail?.ok && correct && chosen !== correct) ? `
+     <div class="assignment-correct-answer hoeren-choice-correct-hint">
+       <span class="correct-badge">✓ ${text('الإجابة الصحيحة:','Richtige Antwort:')}</span>
+       <strong class="correct-full-text">${esc(fullCorrectText)}</strong>
+     </div>` : (showModelAnswers && correct ? `
+     <div class="assignment-correct-answer model-answer-bar hoeren-choice-correct-hint">
+       <span class="correct-badge">★ ${text('الإجابة النموذجية:','Musterlösung:')}</span>
+       <strong class="correct-full-text">${esc(fullCorrectText)}</strong>
+     </div>` : '');
    return `<article class="hoeren-choice-card ${detail?(detail.ok?'result-correct':'result-wrong'):''}" data-item="${esc(n)}">
      <div class="hoeren-choice-question-row"><span class="hoeren-choice-number">${index+1}.</span><div class="hoeren-choice-question" id="${qid}" data-content-id="${qid}" data-source="${esc(it.prompt||'')}">${esc(it.prompt||'')}</div><div class="hoeren-choice-question-tools">${textTools(it.prompt||'',qid)}</div></div>
-     <div class="hoeren-choice-options">${ordered.map((o,oi)=>{const oid=`hoeren-choice-o-${n}-${oi}`;const selected=String(chosen)===String(o.option_key);const isCorrect=showModelAnswers&&String(correct)===String(o.option_key);const resultClass=detail&&selected?(detail.ok?'result-correct':'result-wrong'):'';return `<div class="hoeren-choice-option-wrap"><button type="button" class="hoeren-choice-option ${selected?'selected':''} ${resultClass} ${isCorrect?'model-correct':''}" data-q="${esc(n)}" data-o="${esc(o.option_key)}"><span class="hoeren-choice-radio"></span><span class="hoeren-choice-option-text" id="${oid}" data-content-id="${oid}" data-source="${esc(o.option_text||'')}">${esc(o.option_text||'')}</span></button>${textTools(o.option_text||'',oid)}${translationBox(oid+'-translation')}</div>`;}).join('')}</div>
+     ${correctHint}
+     <div class="hoeren-choice-options">`;${ordered.map((o,oi)=>{const oid=`hoeren-choice-o-${n}-${oi}`;const selected=String(chosen)===String(o.option_key);const isCorrect=showModelAnswers&&String(correct)===String(o.option_key);const resultClass=detail&&selected?(detail.ok?'result-correct':'result-wrong'):'';return `<div class="hoeren-choice-option-wrap"><button type="button" class="hoeren-choice-option ${selected?'selected':''} ${resultClass} ${isCorrect?'model-correct':''}" data-q="${esc(n)}" data-o="${esc(o.option_key)}"><span class="hoeren-choice-radio"></span><span class="hoeren-choice-option-text" id="${oid}" data-content-id="${oid}" data-source="${esc(o.option_text||'')}">${esc(o.option_text||'')}</span></button>${textTools(o.option_text||'',oid)}${translationBox(oid+'-translation')}</div>`;}).join('')}</div>
      <div class="inline-translation hoeren-choice-question-translation" id="${qid}-translation"></div>
    </article>`;
  }).join('');
@@ -540,13 +671,23 @@ function renderChoiceQuestions(){
       const n=String(it.position_no);
       const chosen=answerValue(n);
       const detail=resultData?.details?.find(d=>String(d.prompt)===String(it.prompt));
-      const correct=detail?.correct_answer||'';
+      const correct=String(detail?.correct_answer || it.correct_answer || it.correct || '').trim();
       const showCorrect=showModelAnswers&&correct;
       const baseOptions=(it.options||[]).slice(0,3);
       if(!optionOrders[n]) optionOrders[n]=baseOptions.map(o=>o.option_key);
       const byKey=new Map(baseOptions.map(o=>[String(o.option_key),o]));
       const ordered=optionOrders[n].map(k=>byKey.get(String(k))).filter(Boolean);
       const qcid='choice-q-'+n;
+      const fullCorrectText = getFullAnswerText(it, correct);
+      const correctHint = (resultData && !detail?.ok && correct && chosen !== correct) ? `
+        <div class="assignment-correct-answer lesen2-correct-hint">
+          <span class="correct-badge">✓ ${text('الإجابة الصحيحة:','Richtige Antwort:')}</span>
+          <strong class="correct-full-text">${esc(fullCorrectText)}</strong>
+        </div>` : (showModelAnswers && correct ? `
+        <div class="assignment-correct-answer model-answer-bar lesen2-correct-hint">
+          <span class="correct-badge">★ ${text('الإجابة النموذجية:','Musterlösung:')}</span>
+          <strong class="correct-full-text">${esc(fullCorrectText)}</strong>
+        </div>` : '');
       return `<div class="lesen2-question ${detail?(detail.ok?'result-correct':'result-wrong'):''}" data-item="${esc(n)}" style="background:var(--white);border:1px solid var(--line);border-radius:18px;padding:20px 22px;box-shadow:var(--shadow-sm);">
         <div class="question-prompt-row" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px;">
           <div class="question-prompt-text" style="font-size:16px;font-weight:850;line-height:1.6;color:var(--ink);">
@@ -556,7 +697,8 @@ function renderChoiceQuestions(){
           <div class="question-tools">${textTools(it.prompt||'',qcid)}</div>
         </div>
         ${translationBox(`${qcid}-translation`)}
-        <div class="options-list" style="display:flex;flex-direction:column;gap:10px;">
+        ${correctHint}
+        <div class="options-list" style="display:flex;flex-direction:column;gap:10px;">`;
           ${ordered.map((o,oi)=>{
             const ocid='choice-o-'+n+'-'+oi;
             const isSelected=String(chosen)===String(o.option_key);
@@ -736,9 +878,13 @@ function renderBody(body){
      const opts=sharedOptions();
      const selectOpts=opts.map(([k,v])=>{
        const isSel=String(displayVal).toLowerCase()===String(k).toLowerCase();
-       return `<option value="${esc(k)}" ${isSel?'selected':''}>${esc(k)}</option>`;
+       return `<option value="${esc(k)}" ${isSel?'selected':''}>${esc(k)}) ${esc(v)}</option>`;
      }).join('');
-     gapHtml=`<select class="inline-gap-select ${val?'answered':''} ${resultClass} ${modelClass}" data-gap-select="${n}" aria-label="${text('الفراغ','Lücke')} ${examNo}"><option value="">(${examNo}) — ${text('اختر كلمة','Wort')}</option>${selectOpts}</select>`;
+     const fullCorrectWord = getFullAnswerText(i, correct);
+     const correctBadge = (resultData && !detail?.ok && correct) ? `
+       <span class="spb2-gap-correction" title="${text('الإجابة الصحيحة:','Richtige Antwort:')} ${esc(fullCorrectWord)}">✓ ${esc(fullCorrectWord)}</span>` : (showModelAnswers && correct ? `
+       <span class="spb2-gap-model" title="${text('الإجابة النموذجية:','Musterlösung:')} ${esc(fullCorrectWord)}">★ ${esc(fullCorrectWord)}</span>` : '');
+     gapHtml=`<span class="spb2-gap-wrapper"><select class="inline-gap-select ${val?'answered':''} ${resultClass} ${modelClass}" data-gap-select="${n}" aria-label="${text('الفراغ','Lücke')} ${examNo}"><option value="">(${examNo}) — ${text('اختر كلمة','Wort')}</option>${selectOpts}</select>${correctBadge}</span>`;
    }else{
      const shown=displayVal?esc(labelFor(n,displayVal)):'('+examNo+')';
      gapHtml='<span class="inline-answer '+(displayVal?'filled ':'')+resultClass+' '+modelClass+'">'+shown+'</span>';
@@ -857,6 +1003,16 @@ function renderTF(){
 
     const rowStatusClass = detail ? (detail.ok ? 'row-correct' : 'row-wrong') : '';
 
+    const fullCorrectText = getFullAnswerText(it, correct);
+    const correctHint = (resultData && !detail?.ok && correct) ? `
+      <div class="assignment-correct-answer hoeren-tf-correct-hint">
+        <span class="correct-badge">✓ ${text('الإجابة الصحيحة:','Richtige Antwort:')}</span>
+        <strong>${esc(fullCorrectText)}</strong>
+      </div>` : (showModelAnswers && correct ? `
+      <div class="assignment-correct-answer model-answer-bar hoeren-tf-correct-hint">
+        <span class="correct-badge">★ ${text('الإجابة النموذجية:','Musterlösung:')}</span>
+        <strong>${esc(fullCorrectText)}</strong>
+      </div>` : '');
     return `
       <div class="hoeren-table-row ${rowStatusClass}" data-item="${it.position_no}">
         <div class="hoeren-cell hoeren-cell-r">
@@ -875,6 +1031,7 @@ function renderTF(){
             <span class="hoeren-stmt-text" id="${qid}" data-content-id="${qid}" data-source="${esc(it.prompt||'')}">${esc(it.prompt)}</span>
             <div class="hoeren-stmt-tools">${textTools(it.prompt||'', qid)}</div>
           </div>
+          ${correctHint}
           <div class="inline-translation ${hoerenAllTranslated ? 'visible' : ''}" id="${qid}-translation"></div>
         </div>
       </div>`;
@@ -1064,7 +1221,7 @@ function getMockSession(){try{const s=JSON.parse(localStorage.getItem('telc_self
 function mockRemaining(){const s=getMockSession();return s?Math.max(0,Math.ceil((Number(s.endAt)-Date.now())/1000)):0;}
 function goNextMock(){const session=getMockSession();if(!session)return false;session.index=(session.ids||[]).findIndex(x=>String(x)===String(id));localStorage.setItem('telc_self_test',JSON.stringify(session));const nextId=session.ids[session.index+1];if(nextId){location.href='/exercise.html?id='+encodeURIComponent(nextId)+'&session='+encodeURIComponent(sessionId)+'&mock=1';return true;}location.href='/self-test-result.html';return true;}
 async function advanceSession(){if(mockMode)return goNextMock();return false;}
-async function finishMockSession(){const session=getMockSession();if(!session)return; if(!submitted){try{const r=await api('exercise-submit',{method:'POST',body:{exercise_id:id,answers}});session.results=session.results||[];session.results.push({id,title:model.exercise.title,section:model.exercise.section,teil:model.exercise.teil,score:r.score,max:r.max,percent:r.percent,result:r.result});localStorage.setItem('telc_self_test',JSON.stringify(session));}catch(e){}} location.href='/self-test-result.html?expired=1';}
+async function finishMockSession(){const session=getMockSession();if(!session)return; if(!submitted){try{const r=await api('exercise-submit',{method:'POST',body:{exercise_id:id,answers:buildSubmissionAnswers()}});session.results=session.results||[];session.results.push({id,title:model.exercise.title,section:model.exercise.section,teil:model.exercise.teil,score:r.score,max:r.max,percent:r.percent,result:r.result});localStorage.setItem('telc_self_test',JSON.stringify(session));}catch(e){}} location.href='/self-test-result.html?expired=1';}
 let exerciseTimerEnd = null;
 let exerciseTimerInterval = null;
 function startExerciseTimer(){
@@ -1804,17 +1961,23 @@ function renderExerciseControlBar(){
       <span class="shuffle-icon" aria-hidden="true">⤨</span>
       <span>${text('خلط الأسئلة','Aufgaben mischen')}</span>
     </button>` : '';
-  const showResultScore=userCheckedAnswers && resultData;
+  const showResultScore = userCheckedAnswers && resultData;
   const isPass=(resultData?.percent||0)>=60;
+  const rightCount = resultData?.details ? resultData.details.filter(d => d.ok).length : (resultData?.score || 0);
+  const wrongCount = resultData?.details ? resultData.details.filter(d => !d.ok).length : Math.max(0, (resultData?.max || 0) - (resultData?.score || 0));
   const resultPanel=showResultScore ? `
     <div class="inline-result-panel ${isPass?'pass':'fail'}" role="status">
       <span class="result-panel-icon" aria-hidden="true">${isPass?'✓':'✕'}</span>
       <span class="result-panel-label">${text('النتيجة:','Ergebnis:')}</span>
       <strong class="result-panel-score">${resultData.score} / ${resultData.max}</strong>
       <span class="result-panel-percent">(${resultData.percent}%)</span>
+      <span class="result-panel-breakdown">
+        <span class="result-pill-right">✓ ${rightCount} ${text('صحيح','richtig')}</span>
+        <span class="result-pill-wrong">✕ ${wrongCount} ${text('خطأ','falsch')}</span>
+      </span>
     </div>` : '';
   if(!shuffleBtn && !resultPanel) return '';
-  return `<div class="exercise-control-bar" id="exerciseControlBar">
+  return `<div class="exercise-control-bar exercise-sub-bar" id="exerciseControlBar">
     <div class="exercise-control-result">${resultPanel}</div>
     <div class="exercise-control-shuffle">${shuffleBtn}</div>
   </div>`;
@@ -1846,12 +2009,10 @@ function bindActions(){
  if(mb)mb.onclick=async()=>{
    const st=captureExerciseScroll();
    try{
-     if(model?.exercise?.section==='Hören'){
-       showModelAnswers=!showModelAnswers;
-     }else{
-       if(!resultData) await submit(false);
-       showModelAnswers=!showModelAnswers;
+     if(!resultData){
+       await submit(false);
      }
+     showModelAnswers=!showModelAnswers;
      rerenderExerciseStable(st);
    }catch(e){document.getElementById('content').insertAdjacentHTML('beforeend',`<div class="alert bad">${esc(e.message)}</div>`);restoreExerciseScroll(st);}
  };
@@ -1896,6 +2057,14 @@ function renderWorkspace(){
   return renderChoiceQuestions();
 }
 function renderResult(r){const st=captureExerciseScroll();submitted=true;resultData=r;rerenderExerciseStable(st);}
+function buildSubmissionAnswers(){
+  const out={};
+  (model?.items||[]).forEach(it=>{
+    const key=String(it.position_no);
+    out[key]=canonicalSubmissionAnswer(it, answers[key]);
+  });
+  return out;
+}
 async function submit(isExplicitCheck = true){
   if(isExplicitCheck) userCheckedAnswers = true;
   if(!model.items.length){if(mockMode){goNextMock();}return;}
@@ -1905,7 +2074,7 @@ async function submit(isExplicitCheck = true){
   if(isExplicitCheck && btn){btn.disabled=true;btn.dataset.oldText=btn.textContent;btn.textContent=text('جارٍ التحقق…','Wird geprüft…');}
   if(isExplicitCheck) showModelAnswers=false;
   try{
-    const r=await api('exercise-submit',{method:'POST',body:{exercise_id:id,answers}});
+    const r=await api('exercise-submit',{method:'POST',body:{exercise_id:id,answers:buildSubmissionAnswers()}});
     localStorage.setItem('last_exercise_result_'+id,JSON.stringify(r));
     markExerciseCompleted(id);
     if(mockMode){
