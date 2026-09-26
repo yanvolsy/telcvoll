@@ -264,6 +264,124 @@ function getExerciseBody(model){
   return '';
 }
 
+
+function formatAudioTime(seconds){
+  const n=Number(seconds);
+  if(!Number.isFinite(n)||n<0)return '0:00';
+  return Math.floor(n/60)+':'+Math.floor(n%60).toString().padStart(2,'0');
+}
+function renderUnifiedAudioPlayer(audioUrl) {
+  const hasAudio = Boolean(String(audioUrl || '').trim());
+  if (!hasAudio) {
+    return `
+      <div class="hoeren-audio-player-card is-unavailable" data-hoeren-player>
+        <div class="hoeren-audio-unavailable" role="status">
+          <span class="hoeren-audio-unavailable-icon" aria-hidden="true">♪</span>
+          <div>
+            <strong>${text('الصوت غير متوفر', 'Audio nicht verfügbar')}</strong>
+            <small>${text('لا يوجد ملف صوتي لهذا الامتحان حالياً.', 'Für diese Prüfung ist derzeit keine Audiodatei verfügbar.')}</small>
+          </div>
+        </div>
+      </div>`;
+  }
+  return `
+    <div class="hoeren-audio-player-card" data-hoeren-player>
+      <audio class="hoeren-native-audio" preload="metadata" src="${esc(audioUrl)}"></audio>
+      <div class="hoeren-audio-controls-group">
+        <button type="button" class="hoeren-audio-play" data-audio-play aria-label="${text('تشغيل الصوت','Audio abspielen')}" title="${text('تشغيل / إيقاف مؤقت','Abspielen / Pause')}">
+          <span class="hoeren-audio-play-icon" aria-hidden="true">▶</span>
+        </button>
+        <button type="button" class="hoeren-audio-icon-btn hoeren-audio-skip-btn" data-audio-skip="-5" title="${text('تراجع 5 ثوانٍ','5s zurück')}" aria-label="${text('تراجع 5 ثوانٍ','5s zurück')}">
+          <span>↺ 5s</span>
+        </button>
+        <button type="button" class="hoeren-audio-icon-btn hoeren-audio-skip-btn" data-audio-skip="5" title="${text('تقدم 5 ثوانٍ','5s vor')}" aria-label="${text('تقدم 5 ثوانٍ','5s vor')}">
+          <span>5s ↻</span>
+        </button>
+      </div>
+      <div class="hoeren-audio-main">
+        <div class="hoeren-audio-topline">
+          <span class="hoeren-audio-label">${text('الملف الصوتي TELC Hören','Audiodatei TELC Hören')}</span>
+          <span class="hoeren-audio-time"><span data-audio-current>0:00</span><span> / </span><span data-audio-duration>0:00</span></span>
+        </div>
+        <input class="hoeren-audio-progress" data-audio-progress type="range" min="0" max="100" value="0" step="0.1" aria-label="${text('تقدم الصوت','Audiofortschritt')}">
+      </div>
+      <div class="hoeren-audio-actions">
+        <button type="button" class="hoeren-audio-icon-btn hoeren-audio-speed-btn" data-audio-speed title="${text('سرعة التشغيل: 1x / 0.8x / 1.2x','Wiedergabegeschwindigkeit')}">
+          <span data-audio-speed-label>1x</span>
+        </button>
+        <button type="button" class="hoeren-audio-icon-btn" data-audio-mute aria-label="${text('كتم الصوت','Stummschalten')}" title="${text('كتم الصوت','Stummschalten')}">
+          <span data-audio-volume-icon aria-hidden="true">🔊</span>
+        </button>
+        <input class="hoeren-audio-volume" data-audio-volume type="range" min="0" max="1" value="1" step="0.05" aria-label="${text('مستوى الصوت','Lautstärke')}">
+      </div>
+    </div>`;
+}
+function bindHoerenAudioPlayer(){
+  const cards=document.querySelectorAll('[data-hoeren-player]');
+  cards.forEach(card => {
+    const audio=card.querySelector('.hoeren-native-audio');
+    const play=card.querySelector('[data-audio-play]');
+    const icon=card.querySelector('.hoeren-audio-play-icon');
+    const progress=card.querySelector('[data-audio-progress]');
+    const current=card.querySelector('[data-audio-current]');
+    const durationEl=card.querySelector('[data-audio-duration]');
+    const mute=card.querySelector('[data-audio-mute]');
+    const volume=card.querySelector('[data-audio-volume]');
+    const volumeIcon=card.querySelector('[data-audio-volume-icon]');
+    const speedBtn=card.querySelector('[data-audio-speed]');
+    const speedLabel=card.querySelector('[data-audio-speed-label]');
+    const skipBtns=card.querySelectorAll('[data-audio-skip]');
+    if(!audio||!play)return;
+    const markUnavailable=()=>{
+      card.classList.add('is-unavailable');
+      card.innerHTML = `<div class="hoeren-audio-unavailable" role="status"><span class="hoeren-audio-unavailable-icon" aria-hidden="true">♪</span><div><strong>${text('الصوت غير متوفر','Audio nicht verfügbar')}</strong><small>${text('تعذر تحميل الملف الصوتي لهذا الامتحان.','Die Audiodatei für diese Prüfung konnte nicht geladen werden.')}</small></div></div>`;
+    };
+    audio.addEventListener('error', markUnavailable, {once:true});
+    const sync=()=>{ if(card.classList.contains('is-unavailable')) return;
+      const dur=Number.isFinite(audio.duration)?audio.duration:0;
+      current.textContent=formatAudioTime(audio.currentTime);
+      durationEl.textContent=formatAudioTime(dur);
+      const pct = dur ? (audio.currentTime / dur * 100) : 0;
+      progress.value = pct;
+      progress.style.background = `linear-gradient(to right, var(--green) 0%, var(--green) ${pct}%, var(--line) ${pct}%, var(--line) 100%)`;
+      icon.textContent=audio.paused?'▶':'❚❚';
+      card.classList.toggle('is-playing',!audio.paused);
+      play.setAttribute('aria-label',audio.paused?text('تشغيل الصوت','Audio abspielen'):text('إيقاف مؤقت','Pause'));
+    };
+    const syncVolume=()=>{
+      const v=audio.muted?0:audio.volume;
+      if (volume) {
+        volume.value=v;
+        const vPct = v * 100;
+        volume.style.background = `linear-gradient(to right, var(--green) 0%, var(--green) ${vPct}%, var(--line) ${vPct}%, var(--line) 100%)`;
+      }
+      if (volumeIcon) volumeIcon.textContent=v===0?'🔇':v<.5?'🔉':'🔊';
+    };
+    play.onclick=()=>audio.paused?audio.play().catch(()=>{}):audio.pause();
+    audio.addEventListener('loadedmetadata',sync); audio.addEventListener('timeupdate',sync); audio.addEventListener('play',sync); audio.addEventListener('pause',sync); audio.addEventListener('ended',sync);
+    progress.oninput=()=>{if(Number.isFinite(audio.duration))audio.currentTime=Number(progress.value)/100*audio.duration;};
+    if (volume) volume.oninput=()=>{audio.muted=false;audio.volume=Number(volume.value);syncVolume();};
+    if (mute) mute.onclick=()=>{audio.muted=!audio.muted;syncVolume();};
+    if (speedBtn) {
+      const speeds = [1, 1.2, 0.8];
+      let sIdx = 0;
+      speedBtn.onclick=()=>{
+        sIdx = (sIdx + 1) % speeds.length;
+        audio.playbackRate = speeds[sIdx];
+        if (speedLabel) speedLabel.textContent = speeds[sIdx] + 'x';
+      };
+    }
+    skipBtns.forEach(sb => {
+      sb.onclick=()=>{
+        const delta = Number(sb.dataset.audioSkip || 0);
+        if (Number.isFinite(audio.currentTime)) audio.currentTime = Math.max(0, Math.min(audio.duration || 0, audio.currentTime + delta));
+      };
+    });
+    sync();
+    syncVolume();
+  });
+}
+
 function getExerciseHeadings(model){
   const ex = model?.exercise || {};
   const st = parseSettings(ex);
@@ -502,23 +620,31 @@ function renderMockLesen2(model){
   const items = (model.items || []).slice(0, 5);
   const bodyText = getExerciseBody(model);
 
-  const questionsMarkup = items.map(it => {
+  const questionsMarkup = items.map((it, idx) => {
     const n = String(it.position_no);
     const val = window.__mockAnswers[n] || window.__mockAnswers[String(it.id)] || '';
     const opts = (it.options || []).slice(0, 3);
 
     return `
-    <article class="mock-item ${val ? 'answered' : ''}" data-item="${esc(n)}">
-      <div class="mock-item-prompt">${esc(it.position_no)}. ${esc(it.prompt)}</div>
-      <div class="mock-options">
-        ${opts.map(o => `
-          <button type="button" class="mock-option ${String(val) === String(o.option_key) ? 'selected' : ''}" data-answer-q="${esc(n)}" data-answer="${esc(o.option_key)}">
-            <span class="mock-option-key">${esc(o.option_key)}</span>
-            <span>${esc(o.option_text || o.option_key)}</span>
-          </button>
-        `).join('')}
+    <div class="lesen2-question ${val ? 'answered' : ''}" data-item="${esc(n)}" style="background:var(--white);border:1.5px solid var(--line);border-radius:20px;padding:22px 24px;box-shadow:var(--shadow-sm);margin-bottom:18px;">
+      <div class="question-prompt-row" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px;">
+        <div class="question-prompt-text" style="font-size:16px;font-weight:850;line-height:1.6;color:var(--ink);">
+          <span class="question-num" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:var(--green-soft);color:var(--green-dark);border-radius:8px;margin-inline-end:10px;font-size:13.5px;font-weight:900;">${it.position_no}</span>
+          <span>${esc(it.prompt || '')}</span>
+        </div>
       </div>
-    </article>`;
+      <div class="options-list" style="display:flex;flex-direction:column;gap:10px;">
+        ${opts.map(o => {
+          const isSelected = String(val).toLowerCase() === String(o.option_key).toLowerCase();
+          return `
+          <div class="option-row">
+            <button type="button" class="side-option mock-option ${isSelected ? 'selected' : ''}" data-answer-q="${esc(n)}" data-answer="${esc(o.option_key)}" style="width:100%;text-align:start;justify-content:flex-start;padding:12px 18px;border-radius:12px;font-size:14.5px;font-weight:750;background:var(--bg);color:var(--ink);border:${isSelected ? '2.5px solid var(--green)' : '1.5px solid var(--line)'};box-shadow:${isSelected ? '0 0 0 1px var(--green)' : 'none'};cursor:pointer;">
+              <span class="option-text"><span class="mock-option-key" style="font-weight:900;color:var(--green-dark);margin-inline-end:6px;">${esc(o.option_key)})</span> ${esc(o.option_text || o.option_key)}</span>
+            </button>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
   }).join('');
 
   return baseShell(`
@@ -526,16 +652,19 @@ function renderMockLesen2(model){
       <span class="tag">Telc ${esc(model.exercise.level||state.session.level)}</span>
       <span class="mock-task-count">${esc(model.exercise.section)} · ${esc(model.exercise.teil)}</span>
     </div>
-    <div class="mock-reading-panel">${escBody(bodyText)}</div>
-    <div class="mock-spb-head" style="margin-top:24px;">
+    <div class="long-text lesen2-long-text mock-reading-panel" style="margin-bottom:24px;background:var(--white);border:1.5px solid var(--line);border-radius:20px;padding:26px;box-shadow:var(--shadow-sm);backdrop-filter:blur(16px);font-size:16px;line-height:1.9;color:var(--ink);">
+      <div class="long-text-content">${escBody(bodyText)}</div>
+    </div>
+    <div class="mock-spb-head" style="margin-top:24px;margin-bottom:16px;">
       <h3><span>📝</span> <span>${text('أسئلة الاختيار من متعدد (6 إلى 10):', 'Aufgaben zum Text (6 bis 10):')}</span></h3>
       <span class="mock-task-count">${Object.keys(window.__mockAnswers).length} / ${items.length}</span>
     </div>
-    ${questionsMarkup}
+    <div class="lesen2-questions-list" style="display:flex;flex-direction:column;gap:6px;">
+      ${questionsMarkup}
+    </div>
   `);
 }
 
-/* ─── 5. Lesen Teil 3 Renderer (12 Ads + 10 Situations) ─── */
 function renderMockLesen3(model){
   window.__mockAnswers = {...itemAnswer(model.exercise.id)};
   const items = model.items || [];
@@ -634,65 +763,87 @@ function renderMockHoeren(model){
     return keys.length === 0 || keys.includes('richtig') || keys.includes('falsch');
   });
 
-  let audioHtml = '';
-  if (model.exercise.audio_url) {
-    audioHtml = `
-      <div class="mock-audio">
-        <div class="mock-audio-header">
-          <span>🎧 ${text('الملف الصوتي TELC Hören', 'Audiodatei TELC Hören')}</span>
-          <span>${esc(model.exercise.teil)}</span>
+  const audioBox = renderUnifiedAudioPlayer(model.exercise.audio_url);
+
+  let questionsMarkup = '';
+  if (isTF) {
+    questionsMarkup = `
+      <div class="hoeren-table-card" style="margin-top:24px;background:var(--white);border:1.5px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:var(--shadow-sm);backdrop-filter:blur(16px);">
+        <div class="hoeren-table-head" style="display:flex;align-items:center;padding:14px 20px;background:var(--bg);border-bottom:1.5px solid var(--line);font-weight:900;font-size:13.5px;color:var(--muted);">
+          <div class="hoeren-th hoeren-th-r" style="width:80px;text-align:center;">${text('صحيح','RICHTIG')}</div>
+          <div class="hoeren-th hoeren-th-f" style="width:80px;text-align:center;">${text('خطأ','FALSCH')}</div>
+          <div class="hoeren-th hoeren-th-statement" style="flex:1;padding-inline-start:16px;">${text('العبارة','AUSSAGE')}</div>
         </div>
-        <audio controls preload="metadata" src="${esc(model.exercise.audio_url)}"></audio>
+        <div class="hoeren-table-body">
+          ${items.map((it, idx) => {
+            const n = String(it.position_no);
+            const val = String(window.__mockAnswers[n] || window.__mockAnswers[String(it.id)] || '').toLowerCase();
+            const isR = val === 'richtig';
+            const isF = val === 'falsch';
+            return `
+            <div class="hoeren-table-row ${val ? 'answered' : ''}" data-item="${esc(n)}" style="display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line);gap:8px;">
+              <div class="hoeren-cell hoeren-cell-r" style="width:80px;display:flex;justify-content:center;">
+                <button type="button" class="hoeren-circle-radio-btn ${isR ? 'selected' : ''}" data-answer-q="${esc(n)}" data-answer="richtig" aria-label="${idx + 1} Richtig" title="Richtig">
+                  <span class="hoeren-circle-radio"></span>
+                </button>
+              </div>
+              <div class="hoeren-cell hoeren-cell-f" style="width:80px;display:flex;justify-content:center;">
+                <button type="button" class="hoeren-circle-radio-btn ${isF ? 'selected' : ''}" data-answer-q="${esc(n)}" data-answer="falsch" aria-label="${idx + 1} Falsch" title="Falsch">
+                  <span class="hoeren-circle-radio"></span>
+                </button>
+              </div>
+              <div class="hoeren-cell hoeren-cell-statement" style="flex:1;padding-inline-start:16px;">
+                <div class="hoeren-stmt-content" style="display:flex;align-items:baseline;gap:8px;">
+                  <span class="hoeren-stmt-num" style="font-weight:900;color:var(--green-dark);">${idx + 1}.</span>
+                  <span class="hoeren-stmt-text" style="font-size:15.5px;line-height:1.75;color:var(--ink);">${esc(it.prompt)}</span>
+                </div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+  } else {
+    questionsMarkup = `
+      <div class="lesen2-questions-list" style="margin-top:24px;display:flex;flex-direction:column;gap:18px;">
+        ${items.map((it, idx) => {
+          const n = String(it.position_no);
+          const val = String(window.__mockAnswers[n] || window.__mockAnswers[String(it.id)] || '').toLowerCase();
+          const opts = it.options && it.options.length ? it.options : [{option_key:'a',option_text:'a'},{option_key:'b',option_text:'b'},{option_key:'c',option_text:'c'}];
+          return `
+          <div class="lesen2-question ${val ? 'answered' : ''}" data-item="${esc(n)}" style="background:var(--white);border:1.5px solid var(--line);border-radius:20px;padding:22px 24px;box-shadow:var(--shadow-sm);">
+            <div class="question-prompt-row" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px;">
+              <div class="question-prompt-text" style="font-size:16px;font-weight:850;line-height:1.6;color:var(--ink);">
+                <span class="question-num" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:var(--green-soft);color:var(--green-dark);border-radius:8px;margin-inline-end:10px;font-size:13.5px;font-weight:900;">${idx + 1}</span>
+                <span>${esc(it.prompt || '')}</span>
+              </div>
+            </div>
+            <div class="options-list" style="display:flex;flex-direction:column;gap:10px;">
+              ${opts.map(o => {
+                const isSelected = val === String(o.option_key).toLowerCase();
+                return `
+                <div class="option-row">
+                  <button type="button" class="side-option mock-option ${isSelected ? 'selected' : ''}" data-answer-q="${esc(n)}" data-answer="${esc(o.option_key)}" style="width:100%;text-align:start;justify-content:flex-start;padding:12px 18px;border-radius:12px;font-size:14.5px;font-weight:750;background:var(--bg);color:var(--ink);border:${isSelected ? '2.5px solid var(--green)' : '1.5px solid var(--line)'};box-shadow:${isSelected ? '0 0 0 1px var(--green)' : 'none'};cursor:pointer;">
+                    <span class="option-text"><span class="mock-option-key" style="font-weight:900;color:var(--green-dark);margin-inline-end:6px;">${esc(o.option_key)})</span> ${esc(o.option_text || o.option_key)}</span>
+                  </button>
+                </div>`;
+              }).join('')}
+            </div>
+          </div>`;
+        }).join('')}
       </div>`;
   }
-
-  const itemsHtml = items.map((it, idx) => {
-    const n = String(it.position_no);
-    const val = String(window.__mockAnswers[n] || window.__mockAnswers[String(it.id)] || '').toLowerCase();
-
-    if (isTF) {
-      return `
-      <article class="mock-item ${val ? 'answered' : ''}">
-        <div class="mock-item-prompt">${idx + 1}. ${esc(it.prompt)}</div>
-        <div class="mock-tf-row">
-          <button type="button" class="mock-tf-btn tf-richtig ${val === 'richtig' ? 'selected' : ''}" data-answer-q="${esc(n)}" data-answer="richtig">
-            <span>✓</span>
-            <span>Richtig</span>
-          </button>
-          <button type="button" class="mock-tf-btn tf-falsch ${val === 'falsch' ? 'selected' : ''}" data-answer-q="${esc(n)}" data-answer="falsch">
-            <span>✕</span>
-            <span>Falsch</span>
-          </button>
-        </div>
-      </article>`;
-    }
-
-    const opts = it.options && it.options.length ? it.options : [{option_key:'a',option_text:'a'},{option_key:'b',option_text:'b'},{option_key:'c',option_text:'c'}];
-    return `
-    <article class="mock-item ${val ? 'answered' : ''}">
-      <div class="mock-item-prompt">${idx + 1}. ${esc(it.prompt)}</div>
-      <div class="mock-options">
-        ${opts.map(o => `
-          <button type="button" class="mock-option ${val === String(o.option_key).toLowerCase() ? 'selected' : ''}" data-answer-q="${esc(n)}" data-answer="${esc(o.option_key)}">
-            <span class="mock-option-key">${esc(o.option_key)}</span>
-            <span>${esc(o.option_text || o.option_key)}</span>
-          </button>
-        `).join('')}
-      </div>
-    </article>`;
-  }).join('');
 
   return baseShell(`
     <div class="mock-section-label">
       <span class="tag">Telc ${esc(model.exercise.level||state.session.level)}</span>
       <span class="mock-task-count">${esc(model.exercise.section)} · ${esc(model.exercise.teil)}</span>
     </div>
-    ${audioHtml}
-    <div class="mock-spb-head">
-      <h3><span>👂</span> <span>${text('الأسئلة:', 'Aufgaben:')}</span></h3>
+    ${audioBox}
+    <div class="mock-spb-head" style="margin-top:24px;margin-bottom:16px;">
+      <h3><span>🎧</span> <span>${text('أسئلة الاستماع:', 'Hörverstehensaufgaben:')}</span></h3>
       <span class="mock-task-count">${Object.keys(window.__mockAnswers).length} / ${items.length}</span>
     </div>
-    ${itemsHtml}
+    ${questionsMarkup}
   `);
 }
 
@@ -804,6 +955,7 @@ function renderTaskContent(model){
 }
 
 function bind(){
+  bindHoerenAudioPlayer();
   // Two-way sync for gap selects and option buttons
   document.querySelectorAll('[data-answer-q]').forEach(el => {
     const handleAnswer = () => {

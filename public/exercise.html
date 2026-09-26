@@ -1703,9 +1703,10 @@ function topShuffleCurrentExercise(){
 }
 
 function isShuffleAllowed(sec, teil){
-  if (sec === 'Lesen' && (teil === 'Teil 1' || teil === 'Teil 3')) return true;
-  if (sec === 'Sprachbausteine' && teil === 'Teil 2') return true;
-  if (sec === 'Hören' && (teil === 'Teil 1' || teil === 'Teil 3')) return true;
+  if (sec === 'Lesen' && ['Teil 1', 'Teil 2', 'Teil 3'].includes(teil)) return true;
+  if (sec === 'Hören' && ['Teil 1', 'Teil 2', 'Teil 3'].includes(teil)) return true;
+  if (sec === 'Sprachbausteine' && ['Teil 1', 'Teil 2', 'Teil 3'].includes(teil)) return true;
+  if (sec !== 'Schreiben' && sec !== 'Sprechen' && model?.items?.length > 1) return true;
   return false;
 }
 
