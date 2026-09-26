@@ -21,7 +21,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <script src="/assets/i18n.js"></script><script src="/assets/app.js"></script>
 <script>
 const id=qs('id'); const duration=Number(qs('duration')||0); const sessionId=qs('session'); const mockMode=qs('mock')==='1' && !!sessionId; let model=null; let answers={}; let activeItem=null; let submitted=false; let resultData=null; let submitInFlight=false;
-let matchingOrder=null; let headingOrder=null; let optionOrders={}; let showModelAnswers=false; let titleRevealed=true; let hoerenOrder=null; let hoerenAllTranslated=false; let wordOrder=null; const translationCache=new Map();
+let matchingOrder=null; let headingOrder=null; let optionOrders={}; let showModelAnswers=false; let titleRevealed=false; let hoerenOrder=null; let hoerenAllTranslated=false; let wordOrder=null; const translationCache=new Map();
 const TELC_DUR = {
   B1: { Lesen: { 'Teil 1': 20, 'Teil 2': 20, 'Teil 3': 15, _default: 20 }, Sprachbausteine: { 'Teil 1': 10, 'Teil 2': 10, _default: 10 }, Hören: { 'Teil 1': 10, 'Teil 2': 10, 'Teil 3': 10, _default: 10 }, Schreiben: { 'Teil 1': 30, _default: 30 }, Sprechen: { 'Teil 1': 4, 'Teil 2': 5, 'Teil 3': 5, _default: 5 } },
   B2: { Lesen: { 'Teil 1': 20, 'Teil 2': 25, 'Teil 3': 20, _default: 20 }, Sprachbausteine: { 'Teil 1': 15, 'Teil 2': 10, _default: 15 }, Hören: { 'Teil 1': 6, 'Teil 2': 8, 'Teil 3': 6, _default: 7 }, Schreiben: { 'Teil 1': 30, _default: 30 }, Sprechen: { 'Teil 1': 5, 'Teil 2': 5, 'Teil 3': 5, _default: 5 } },
@@ -832,33 +832,8 @@ function renderTF(){
     hoerenOrder = items.map((_, i) => i);
   }
   const orderedItems = hoerenOrder.map(idx => items[idx]).filter(Boolean);
-  const activeDuration = duration || (model?.exercise ? getTelcDurationSeconds(model.exercise) : 600);
-  const initialMin = String(Math.floor(activeDuration / 60)).padStart(2, '0');
-  const timer = (mockMode || activeDuration) ? `<div class="progress-pill ${mockMode ? 'mock-global-timer' : ''}" id="timerEl"><span class="timer-icon" aria-hidden="true">⏱️</span> <span class="timer-digits">${initialMin}:00</span></div>` : '';
-  const resultPanel = resultData ? `<div class="inline-result-panel ${resultData.percent >= 60 ? 'pass' : 'fail'}"><div class="result-panel-main"><span class="result-panel-label">${text('النتيجة','Ergebnis')}</span><strong>${resultData.score} / ${resultData.max}</strong></div><div class="result-panel-meta"><span>${resultData.percent}%</span><b>${esc(resultData.result || '')}</b></div></div>` : '';
+  const headingBlock = renderExerciseHeaderCard();
 
-  // 1. Standard Top Heading identical to other sections
-  const mockTitle = mockMode ? '' : `
-    <div class="thema-title-row">
-      <h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}">${esc(model.exercise.title)}</h1>
-      <div class="thema-tools">
-        ${textTools(model.exercise.title||'', 'thema-title')}
-        <div class="inline-translation" id="thema-title-translation"></div>
-      </div>
-    </div>`;
-
-  const headingBlock = `
-    <div class="exercise-heading">
-      <div class="exercise-heading-meta">
-        <div class="exercise-heading-tags">
-          <span class="tag tag-level-section">Telc ${esc(model.exercise.level||'B2')} · ${esc(model.exercise.section)}</span>
-          <span class="tag tag-teil">${esc(model.exercise.teil)}</span>
-        </div>
-        ${timer ? `<div class="exercise-heading-timer">${timer}</div>` : ''}
-      </div>
-      <div class="exercise-heading-title">${mockTitle}</div>
-    </div>
-    ${resultPanel}`;
 
   // 2. Upgraded universal audio player
   const audioBox = renderUnifiedAudioPlayer(model.exercise.audio_url);
@@ -952,6 +927,7 @@ function renderTF(){
 
   bindTextTools();
   bindHoerenAudioPlayer();
+  bindActions();
 }
 function formatAudioTime(seconds){
   const n=Number(seconds);
@@ -1040,25 +1016,7 @@ function renderWriting(){
  const initialMin = String(durMin).padStart(2, '0');
 
    document.getElementById('content').innerHTML=`<div class="writing-page-shell">
-   <div class="exercise-heading writing-heading">
-     <div class="exercise-heading-meta">
-       <div class="exercise-heading-tags">
-         <span class="tag tag-level-section">Telc ${esc(model.exercise.level||'B2')} · Schreiben</span>
-       </div>
-       <div class="exercise-heading-timer">
-         <div class="progress-pill" id="timerEl"><span class="timer-icon" aria-hidden="true">⏱️</span> <span class="timer-digits">${initialMin}:00</span></div>
-       </div>
-     </div>
-     <div class="exercise-heading-title">
-       <div class="thema-title-row">
-         <h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}">${esc(model.exercise.title)}</h1>
-         <div class="thema-tools">
-           ${textTools(model.exercise.title||'','thema-title')}
-           <div class="inline-translation" id="thema-title-translation"></div>
-         </div>
-       </div>
-     </div>
-   </div>
+   ${renderExerciseHeaderCard()}
    <div class="writing-workspace">
     <section class="writing-left">
       <div class="writing-time-rule">${text(`الوقت: ${durMin} دقيقة | الحد الأدنى ${wordLimit} كلمة`,`Zeit: ${durMin} Minuten | Mindestens ${wordLimit} Wörter`)}</div>
@@ -1690,55 +1648,22 @@ function renderSpeaking(){
      else if(t.includes('reise')||t.includes('urlaub')||t.includes('stadt')||t.includes('land')) currentPresCategory='Reise';
    }
    document.getElementById('content').innerHTML=`<div class="speaking-exercise-shell">
-   <div class="exercise-heading speaking-heading">
-     <div class="exercise-heading-meta">
-       <div class="exercise-heading-tags">
-         <span class="tag tag-level-section">Telc ${esc(model.exercise.level||'B2')} · Sprechen</span>
-         <span class="tag tag-teil">${esc(teil)}</span>
-       </div>
-     </div>
-     <div class="exercise-heading-title">
-       <div class="thema-title-row">
-         <h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}" class="${titleRevealed?'':'thema-title-hidden'}">${esc(model.exercise.title)}</h1>
-         <div class="thema-tools">
-           ${textTools(model.exercise.title,'thema-title')}
-           <div class="inline-translation" id="thema-title-translation"></div>
-           <button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text('إظهار العنوان','Titel anzeigen')}"><span class="eye-icon eye-off"></span></button>
-         </div>
-       </div>
-     </div>
-   </div>
+   ${renderExerciseHeaderCard()}
    ${renderTeil1Studio()}
    </div>`;
    bindTeil1StudioEvents();
    bindTextTools();
+   bindActions();
    return;
  }
 
  document.getElementById('content').innerHTML=`<div class="speaking-exercise-shell">
- <div class="exercise-heading speaking-heading">
-   <div class="exercise-heading-meta">
-     <div class="exercise-heading-tags">
-       <span class="tag tag-level-section">Telc ${esc(model.exercise.level||'B2')} · Sprechen</span>
-       <span class="tag tag-teil">${esc(teil)}</span>
-     </div>
-   </div>
-   <div class="exercise-heading-title">
-     <div class="thema-title-row">
-       <h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}" class="${titleRevealed?'':'thema-title-hidden'}">${esc(model.exercise.title)}</h1>
-       <div class="thema-tools">
-         ${textTools(model.exercise.title,'thema-title')}
-         <div class="inline-translation" id="thema-title-translation"></div>
-         <button type="button" class="mini-tool title-reveal" id="titleReveal" aria-label="${text('إظهار العنوان','Titel anzeigen')}"><span class="eye-icon eye-off"></span></button>
-       </div>
-     </div>
-   </div>
- </div>
- <div class="speaking-layout"><section class="speaking-task-panel"><div class="speaking-task-head"><span class="tag">${esc(model.exercise.level||'B2')} · ${esc(teil)}</span><strong>${text('الموضوع','Thema')}</strong></div><div class="speaking-task-text question-text-tools">${textTools(body,qid)}<div id="${qid}" data-content-id="${qid}" data-source="${esc(body)}">${escBody(body)}</div>${translationBox(qid+'-translation')}</div>${teil==='Teil 3'?renderSpeakingTaskList(body):''}<div class="speaking-hint">${esc(hint)}</div></section>
+   ${renderExerciseHeaderCard()}
+   <div class="speaking-layout"><section class="speaking-task-panel"><div class="speaking-task-head"><span class="tag">${esc(model.exercise.level||'B2')} · ${esc(teil)}</span><strong>${text('الموضوع','Thema')}</strong></div><div class="speaking-task-text question-text-tools">${textTools(body,qid)}<div id="${qid}" data-content-id="${qid}" data-source="${esc(body)}">${escBody(body)}</div>${translationBox(qid+'-translation')}</div>${teil==='Teil 3'?renderSpeakingTaskList(body):''}<div class="speaking-hint">${esc(hint)}</div></section>
  <section class="speaking-simulator"><div class="speaking-sim-head"><div><span class="tag">${esc(teil)}</span><h2>${text('محادثة مع الشريك والممتحن','Gespräch mit Partner & Prüfer')}</h2><small>${text('اكتب إجابتك بالألمانية واستمع إلى رد الشريك صوتيًا.','Schreibe deine Antwort auf Deutsch und höre die Antwort deines Partners an.')}</small></div><span class="speaking-live-dot">●</span></div><div class="speaking-roles"><div class="speaking-role"><span class="speaking-avatar jerry-avatar">J</span><div><b>Jerry</b><small>${text('الممتحن والمدرب','Prüfer & Trainer')}</small></div></div><div class="speaking-role"><span class="speaking-avatar partner-avatar">P</span><div><b>${text('الشريك','Partner')}</b><small>${text('يتفاعل معك في المحادثة','Gesprächspartner')}</small></div></div></div><div class="speaking-chat" id="speakingChat"></div>
  <div class="speaking-writing-box"><div class="speaking-writing-label"><span>${text('إجابتك','Deine Antwort')}</span><small>${text('اكتب بالألمانية ثم اضغط إرسال','Auf Deutsch schreiben und Senden drücken')}</small></div><div class="speaking-input-row"><textarea id="speakingInput" placeholder="${text('اكتب ردك هنا بالألمانية…','Schreibe deine Antwort auf Deutsch…')}"></textarea><button type="button" class="btn dark" id="speakingSend">${text('إرسال','Senden')}</button></div></div>
  <div class="speaking-controls"><span class="speaking-time" id="speakingTime">00:00</span><button type="button" class="btn model-btn speaking-model-btn" id="speakingModel">${text('إجابة نموذجية بالذكاء الاصطناعي','KI-Musterantwort')}</button><button type="button" class="btn dark" id="speakingFinish">${text('إنهاء وتقييم','Beenden & bewerten')}</button></div><div id="speakingModelBox" class="speaking-model-box" hidden></div><div id="speakingEval" class="speaking-eval" hidden></div></section></div></div>`;
- initInlineSpeaking(teil);bindTextTools();
+ initInlineSpeaking(teil);bindTextTools();bindActions();
  document.querySelector('[data-toggle-speaking-tasks]')?.addEventListener('click',e=>{const list=document.querySelector('[data-speaking-task-list]');if(!list)return;const hidden=list.hidden;list.hidden=!hidden;e.currentTarget.textContent=hidden?'▾':'▸';e.currentTarget.setAttribute('aria-expanded',String(hidden));});
 }
 function initInlineSpeaking(currentTeil){
@@ -1792,60 +1717,119 @@ function isShuffleAllowed(sec, teil){
   return false;
 }
 
+function renderExerciseHeaderCard(){
+  const ex = model?.exercise || {};
+  const sec = String(ex.section || '');
+  const teil = String(ex.teil || '');
+  const level = String(ex.level || 'B2');
+  const title = String(ex.title || '');
+
+  const activeDuration = duration || (model?.exercise ? getTelcDurationSeconds(model.exercise) : 1200);
+  const initialMin = String(Math.floor(activeDuration / 60)).padStart(2, '0');
+  const timer = (mockMode || activeDuration) ? `
+    <div class="progress-pill ${mockMode ? 'mock-global-timer' : ''}" id="timerEl">
+      <span class="timer-icon" aria-hidden="true">⏱️</span>
+      <span class="timer-digits">${initialMin}:00</span>
+    </div>` : '';
+
+  const canShuffle = !mockMode && isShuffleAllowed(sec, teil);
+  const headingShuffle = canShuffle ? `
+    <button type="button" class="exercise-heading-shuffle" id="headingShuffleBtn" title="${text('خلط الأسئلة','Aufgaben mischen')}" aria-label="${text('خلط الأسئلة','Aufgaben mischen')}">
+      <span class="shuffle-icon" aria-hidden="true">⤨</span>
+      <span>${text('خلط الأسئلة','Aufgaben mischen')}</span>
+    </button>` : '';
+
+  const resultPanel = resultData ? `
+    <div class="inline-result-panel ${resultData.percent >= 60 ? 'pass' : 'fail'}">
+      <div class="result-panel-main">
+        <span class="result-panel-icon" aria-hidden="true">${resultData.percent >= 60 ? '✓' : '✕'}</span>
+        <span class="result-panel-label">${text('النتيجة:','Ergebnis:')}</span>
+        <strong>${resultData.score} / ${resultData.max}</strong>
+      </div>
+      <div class="result-panel-meta">
+        <span class="result-panel-percent">${resultData.percent}%</span>
+        <b class="result-panel-status">${esc(resultData.result || '')}</b>
+      </div>
+    </div>` : '';
+
+  let titleMarkup = '';
+  if (!mockMode && title) {
+    if (titleRevealed) {
+      titleMarkup = `
+        <div class="thema-title-row is-revealed-title">
+          <div class="thema-title-content">
+            <h1 id="thema-title" data-content-id="thema-title" data-source="${esc(title)}">${esc(title)}</h1>
+          </div>
+          <div class="thema-tools">
+            ${textTools(title, 'thema-title')}
+            <button type="button" class="btn small-btn light title-reveal-btn" id="titleRevealBtn" title="${text('إخفاء العنوان','Thema verbergen')}" aria-label="${text('إخفاء العنوان','Thema verbergen')}">
+              <span class="eye-icon" aria-hidden="true">👁️‍🗨️</span>
+              <span>${text('إخفاء العنوان','Thema verbergen')}</span>
+            </button>
+            <div class="inline-translation" id="thema-title-translation"></div>
+          </div>
+        </div>`;
+    } else {
+      titleMarkup = `
+        <div class="thema-title-row is-hidden-title">
+          <div class="thema-masked-wrapper" id="titleMaskedBox" title="${text('انقر لإظهار العنوان','Klicken zum Einblenden')}">
+            <span class="masked-lock-badge" aria-hidden="true">🔒</span>
+            <span class="masked-dots" aria-hidden="true">••••••••••••••</span>
+            <span class="masked-hint">${text('العنوان مخفي أثناء التدريب','Thema ausgeblendet')}</span>
+          </div>
+          <div class="thema-tools">
+            <button type="button" class="btn small-btn title-reveal-btn" id="titleRevealBtn" title="${text('إظهار العنوان','Thema anzeigen')}" aria-label="${text('إظهار العنوان','Thema anzeigen')}">
+              <span class="eye-icon" aria-hidden="true">👁️</span>
+              <span>${text('إظهار العنوان','Thema anzeigen')}</span>
+            </button>
+          </div>
+        </div>`;
+    }
+  }
+
+  const hasBottomBar = Boolean(headingShuffle || resultPanel);
+  const bottomBar = hasBottomBar ? `
+    <div class="exercise-sub-bar exercise-card-bottom-bar" id="exerciseSubBar">
+      <div class="exercise-card-bottom-left exercise-sub-left">
+        ${resultPanel}
+      </div>
+      <div class="exercise-card-bottom-right exercise-sub-right">
+        ${headingShuffle}
+      </div>
+    </div>` : '';
+
+  return `
+    <div class="exercise-header-card exercise-heading">
+      <div class="exercise-card-top-bar exercise-heading-meta">
+        <div class="exercise-card-tags exercise-heading-tags">
+          <span class="tag tag-level-section">
+            <span class="brand-dot" aria-hidden="true"></span>Telc ${esc(level)} · ${esc(sec)}
+          </span>
+          ${teil ? `<span class="tag tag-teil">${esc(teil)}</span>` : ''}
+        </div>
+        ${timer ? `<div class="exercise-card-timer exercise-heading-timer">${timer}</div>` : ''}
+      </div>
+      ${titleMarkup ? `<div class="exercise-card-title-bar exercise-heading-title">${titleMarkup}</div>` : ''}
+      ${bottomBar}
+    </div>`;
+}
+
 function layout(main,side,workspaceClass=''){
  const isHoeren = String(model?.exercise?.section||'').toLowerCase().includes('hör') || String(model?.exercise?.section||'').toLowerCase().includes('hoer');
  const combinedWorkspaceClass = [workspaceClass, isHoeren ? 'hoeren-workspace' : ''].filter(Boolean).join(' ');
- const mockTitle=mockMode?'':`<div class="thema-title-row"><h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}">${esc(model.exercise.title)}</h1><div class="thema-tools">${textTools(model.exercise.title,'thema-title')}<div class="inline-translation" id="thema-title-translation"></div></div></div>`;
- const headingTools=mockMode?'':mockTitle;
- const activeDuration = duration || (model?.exercise ? getTelcDurationSeconds(model.exercise) : 1200);
- const initialMin = String(Math.floor(activeDuration / 60)).padStart(2, '0');
- const timer=(mockMode||activeDuration)?`<div class="progress-pill ${mockMode?'mock-global-timer':''}" id="timerEl"><span class="timer-icon" aria-hidden="true">⏱️</span> <span class="timer-digits">${initialMin}:00</span></div>`:'';
- const resultPanel=resultData?`<div class="inline-result-panel ${resultData.percent>=60?'pass':'fail'}"><div class="result-panel-main"><span class="result-panel-label">${text('النتيجة','Ergebnis')}</span> <strong>${resultData.score} / ${resultData.max}</strong></div><div class="result-panel-meta"><span>${resultData.percent}%</span> <b>${esc(resultData.result||'')}</b></div></div>`:'';
- 
- const sec = String(model?.exercise?.section || '');
- const teil = String(model?.exercise?.teil || '');
- const canShuffle = !mockMode && isShuffleAllowed(sec, teil);
- const headingShuffle = canShuffle ? `
-    <button type="button" class="exercise-heading-shuffle" id="headingShuffleBtn" title="${text('خلط الأسئلة','Aufgaben mischen')}" aria-label="${text('خلط الأسئلة','Aufgaben mischen')}">
-      <span aria-hidden="true">⤨</span><span>${text('خلط الأسئلة','Aufgaben mischen')}</span>
-    </button>` : '';
 
- const headingMeta = `
-  <div class="exercise-heading-meta">
-    <div class="exercise-heading-tags">
-      <span class="tag tag-level-section">Telc ${esc(model.exercise.level||'B2')} · ${esc(sec)}</span>
-      <span class="tag tag-teil">${esc(teil)}</span>
-    </div>
-    <div class="exercise-heading-controls">
-      ${timer ? `<div class="exercise-heading-timer">${timer}</div>` : ''}
+ return `
+  ${renderExerciseHeaderCard()}
+  ${renderAudio()}
+  <div class="exam-workspace ${combinedWorkspaceClass}">
+    <section class="exam-main">${main}</section>
+  </div>
+  <div class="exercise-actions">
+    <div class="exercise-nav">
+      <button class="btn" id="checkBtn">${text(mockMode?'إنهاء الجزء':'تحقق من الإجابات',mockMode?'Teil beenden':'Antworten prüfen')}</button>
+      ${mockMode?'':`<button class="btn model-btn" id="modelBtn">${text(showModelAnswers ? 'إخفاء الإجابة' : 'الإجابة النموذجية', showModelAnswers ? 'Musterlösung ausblenden' : 'Musterlösung')}</button>`}
     </div>
   </div>`;
-
- const subBar = (headingShuffle || resultPanel) ? `
-  <div class="exercise-sub-bar" id="exerciseSubBar">
-    <div class="exercise-sub-left">
-      ${resultPanel}
-    </div>
-    <div class="exercise-sub-right">
-      ${headingShuffle}
-    </div>
-  </div>` : '';
-
- return `<div class="exercise-heading">
-  ${headingMeta}
-  <div class="exercise-heading-title">${headingTools}</div>
-  ${renderAudio()}
-  ${subBar}
- </div>
- <div class="exam-workspace ${combinedWorkspaceClass}">
-   <section class="exam-main">${main}</section>
- </div>
- <div class="exercise-actions">
-   <div class="exercise-nav">
-     <button class="btn" id="checkBtn">${text(mockMode?'إنهاء الجزء':'تحقق من الإجابات',mockMode?'Teil beenden':'Antworten prüfen')}</button>
-     ${mockMode?'':`<button class="btn model-btn" id="modelBtn">${text(showModelAnswers ? 'إخفاء الإجابة' : 'الإجابة النموذجية', showModelAnswers ? 'Musterlösung ausblenden' : 'Musterlösung')}</button>`}
-   </div>
- </div>`;
 }
 
 function bindActions(){
@@ -1867,8 +1851,23 @@ function bindActions(){
  };
   const topShuffle=document.getElementById('headingShuffleBtn');
   if(topShuffle) topShuffle.onclick=e=>{e.preventDefault();e.stopPropagation();topShuffleCurrentExercise();};
+
+  // Wire Title Reveal/Hide toggle
+  const trBtn=document.getElementById('titleRevealBtn');
+  const maskBox=document.getElementById('titleMaskedBox');
+  const toggleTitle=(e)=>{
+    e.preventDefault();
+    e.stopPropagation();
+    titleRevealed=!titleRevealed;
+    const st=captureExerciseScroll();
+    rerenderExerciseStable(st);
+  };
+  if(trBtn) trBtn.onclick=toggleTitle;
+  if(maskBox) maskBox.onclick=toggleTitle;
+
   if(mockMode){startMockTimer();}else{startExerciseTimer();}
   bindHoerenAudioPlayer();
+  bindTextTools();
 }
 
 function renderWorkspace(){

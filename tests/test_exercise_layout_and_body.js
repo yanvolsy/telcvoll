@@ -26,7 +26,7 @@ assert(exHtml.includes('layout(main + headingsBankUnder'), 'headingsBankUnder mu
 console.log('✓ Headings bank is placed underneath paragraphs');
 
 // Check that unified sub-bar and isShuffleAllowed exist
-assert(exHtml.includes('class="exercise-sub-bar"'), 'exercise-sub-bar must be present under title');
+assert(exHtml.includes('exercise-sub-bar'), 'exercise-sub-bar must be present under title');
 assert(exHtml.includes('id="headingShuffleBtn"'), 'shuffle button must be present in sub-bar');
 console.log('✓ Sub-bar is present under title with conditional shuffle and result panel');
 

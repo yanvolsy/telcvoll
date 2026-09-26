@@ -185,6 +185,13 @@ exports.handler = async (event) => {
   if (!body) return json(400, { error: 'طلب غير صالح.' });
 
   if (event.httpMethod === 'DELETE') {
+    const bulkIds = Array.isArray(body.bulk_ids) ? body.bulk_ids : (Array.isArray(body.ids) ? body.ids : null);
+    if (bulkIds && bulkIds.length) {
+      const ids = bulkIds.map(Number).filter(Boolean);
+      if (!ids.length) return json(422, { error: 'قائمة المعرفات فارغة.' });
+      await pool.query('DELETE FROM exercises WHERE id = ANY($1)', [ids]);
+      return json(200, { ok: true, deleted_count: ids.length });
+    }
     const id = Number(body.id);
     if (!id) return json(422, { error: 'معرّف التمرين مطلوب.' });
     await pool.query('DELETE FROM exercises WHERE id=$1', [id]);

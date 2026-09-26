@@ -40,11 +40,15 @@ async function ensureSchema(p) {
     `CREATE INDEX IF NOT EXISTS idx_exercises_access_mode ON exercises(access_mode);`
   ];
 
-  for (const sql of statements) {
-    try {
-      await runner.query(sql);
-    } catch (err) {
-      // Individual non-fatal catch allows remaining statements to proceed
+  try {
+    await runner.query(statements.join('\n'));
+  } catch (err) {
+    for (const sql of statements) {
+      try {
+        await runner.query(sql);
+      } catch (innerErr) {
+        // Individual non-fatal catch allows remaining statements to proceed
+      }
     }
   }
   schemaReady = true;
