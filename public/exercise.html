@@ -262,29 +262,27 @@ function renderMatching(){
     }
 
     const selectedIdentity=selected?matchingAnswerIdentity(selected):'';
+    const displaySelected = showModelAnswers && correctVal ? correctVal : selected;
     const selectOptions=options.map(o=>{
       const identity=matchingAnswerIdentity(o.key);
       const isX = isLesen3 && o.key.toUpperCase() === 'X';
       const used = !isX && usedAnswerIds.has(identity) && selectedIdentity !== identity;
-      return `<option value="${esc(o.key)}" ${selected===o.key?'selected':''} ${used?'disabled':''}>${esc(o.text)}${used?' — '+text('تم اختياره','Bereits ausgewählt'):''}</option>`;
+      return `<option value="${esc(o.key)}" ${displaySelected===o.key?'selected':''} ${used?'disabled':''}>${esc(o.text)}${used?' — '+text('تم اختياره','Bereits ausgewählt'):''}</option>`;
     }).join('');
     
-    const assignLabel = isLesen3 ? text(`الموقف / الفقرة ${it.position_no} — اختر العنوان المناسب:`, `Absatz ${it.position_no} — Passende Überschrift / Anzeige:`) : text('العنوان المناسب لهذه الفقرة:','Passende Überschrift für diesen Text:');
-    const assignPlaceholder = isLesen3 ? text('— اختر العنوان المناسب لهذه الفقرة (Text A - L أو X) —','— Passende Anzeige auswählen (Text A - L oder X) —') : text('— اختر العنوان —','— Überschrift auswählen —');
-    
+    const assignLabel = text('اختر العنوان المناسب','Passende Überschrift auswählen');
+    const assignPlaceholder = isLesen3 ? text('— اختر العنوان —','— Überschrift auswählen —') : text('— اختر العنوان —','— Überschrift auswählen —');
+    const selectResultClass = showModelAnswers && correctVal ? 'assignment-model-correct' : (detail ? (detail.ok ? 'assignment-model-correct' : 'assignment-model-wrong') : '');
+    const correctHint = (resultData && !detail?.ok && correctVal && selected !== correctVal) ? `<div class="assignment-correct-answer">${text('الإجابة الصحيحة:','Richtige Antwort:')} ${correctVal === 'X' ? text('X — لا يوجد عنوان مناسب','X — Keine passende Anzeige') : (isLesen3 ? 'Text ' + correctVal : esc(labelFor(it.position_no, correctVal)))}</div>` : '';
     return `<article class="exam-text-card ${selected?'answered':''} ${resultClass} ${showModelAnswers?'model-shown':''} ${String(activeItem)===String(it.position_no)?'active-item':''}" data-item="${it.position_no}">
       <div class="paragraph-assignment">
-         <div class="paragraph-assignment-head">
-           <span class="assignment-label" style="font-weight:900;color:var(--ink);">${assignLabel}</span>
-           <div class="paragraph-assignment-tools">${textTools(it.prompt,cid)}</div>
-         </div>
          <div class="paragraph-assignment-controls">
-           <select data-paragraph-select="${it.position_no}" data-ad-select="${it.position_no}" aria-label="${assignLabel}" class="mock-select ${selected?'answered':''}">
+           <select data-paragraph-select="${it.position_no}" data-ad-select="${it.position_no}" aria-label="${assignLabel}" class="mock-select ${selected?'answered':''} ${selectResultClass}">
              <option value="">${assignPlaceholder}</option>
              ${selectOptions}
            </select>
-           ${shownLabel?`<button type="button" class="assignment-selected ${showModelAnswers?'model-correct':''}" data-clear="${it.position_no}" aria-label="${text('إلغاء الاختيار','Auswahl löschen')}"><span>${esc(shownLabel)}</span>${showModelAnswers?'':'<b>×</b>'}</button>`:`<span class="assignment-empty">${text('لم يتم الاختيار بعد','Noch nicht ausgewählt')}</span>`}
-           ${(resultData && !showModelAnswers && correctVal && selected !== correctVal) ? `<span class="model-answer-hint" style="color:#2d9b68;font-size:13.5px;font-weight:850;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:rgba(45,155,104,0.1);border-radius:8px;">${text('الحل:','Lösung:')} ${correctVal === 'X' ? text('X — لا يوجد عنوان مناسب','X — Keine passende Anzeige') : 'Text ' + correctVal}</span>` : ''}
+           ${textTools(it.prompt,cid)}
+           ${correctHint}
          </div>
        </div>
        <div class="exam-text" id="${cid}" data-content-id="${cid}" data-source="${esc(it.prompt)}" style="font-size:15.5px;line-height:1.85;color:var(--ink);">${escBody(it.prompt)}</div>
@@ -309,8 +307,7 @@ function renderMatching(){
    const cid='head-'+key;
    return `<div class="heading-option-wrap ${selectedForActive?'is-active-match':''} ${isUsed?'heading-used':''} ${selectedForActive?'heading-current':''}">
       <button type="button" class="choice-card ${selectedForActive?'selected':''} ${resultClass} ${modelClass}" data-choice="${key}" ${isUsed&&!selectedForActive?'disabled':''}><b id="${cid}" data-content-id="${cid}" data-source="${esc(displayHeading)}">${esc(displayHeading)}</b>${isUsed?`<small class="heading-used-badge">✓ ${text('تم اختياره','Ausgewählt')}</small>`:''}</button>
-      ${textTools(displayHeading,cid)}
-      <div class="inline-translation" id="${cid}-translation"></div>
+
    </div>`;
  }).join('');
 
@@ -739,7 +736,7 @@ function renderBody(body){
      const opts=sharedOptions();
      const selectOpts=opts.map(([k,v])=>{
        const isSel=String(displayVal).toLowerCase()===String(k).toLowerCase();
-       return `<option value="${esc(k)}" ${isSel?'selected':''}>${esc(matchingDisplayLabel(k+': '+v))}</option>`;
+       return `<option value="${esc(k)}" ${isSel?'selected':''}>${esc(k)}</option>`;
      }).join('');
      gapHtml=`<select class="inline-gap-select ${val?'answered':''} ${resultClass} ${modelClass}" data-gap-select="${n}" aria-label="${text('الفراغ','Lücke')} ${examNo}"><option value="">(${examNo}) — ${text('اختر كلمة','Wort')}</option>${selectOpts}</select>`;
    }else{

@@ -100,12 +100,12 @@ html[data-theme="dark"] .mock-word-card{background:#1a231f;border-color:rgba(255
 .mock-tf-btn.selected.tf-falsch{background:rgba(201,74,67,0.15);border-color:#c94a43;color:#c94a43;box-shadow:0 0 0 1px #c94a43}
 
 /* Writing Box */
-.mock-writing-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.mock-writing-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:stretch}
 .mock-writing-box{border:1.5px solid var(--line);border-radius:20px;padding:22px;background:var(--bg)}
 .mock-writing-box h3{margin-top:0;font-size:18px;font-weight:900;color:var(--ink)}
-.mock-writing-editor textarea{width:100%;min-height:420px;resize:vertical;border:1.5px solid var(--line);border-radius:16px;padding:18px;background:var(--white);font:inherit;font-size:15.5px;line-height:1.85;box-sizing:border-box;color:var(--ink);outline:none;transition:border-color .18s ease}
+.mock-writing-editor textarea{width:100%;min-height:620px;resize:vertical;border:1.5px solid var(--line);border-radius:16px;padding:18px;background:var(--white);font:inherit;font-size:15.5px;line-height:1.85;box-sizing:border-box;color:var(--ink);outline:none;transition:border-color .18s ease}
 .mock-writing-editor textarea:focus{border-color:#f47b20;box-shadow:0 0 0 2px rgba(244,123,32,0.15)}
-.mock-editor-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;font-weight:800;margin-top:8px}
+.mock-editor-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;font-weight:800;margin-top:8px;gap:10px;flex-wrap:wrap}.mock-writing-char-toolbar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:0 0 10px}.mock-writing-char-btn{min-width:40px;height:38px;padding:0 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-weight:950;cursor:pointer}.mock-writing-char-btn:hover{border-color:#f47b20;color:#f47b20;background:rgba(244,123,32,.08)}
 
 /* Bottom Actions Toolbar */
 .mock-actions{direction:ltr;position:fixed;bottom:0;left:0;right:0;z-index:60;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-top:1.5px solid var(--line);padding:14px 20px;box-shadow:0 -4px 24px rgba(0,0,0,0.06)}
@@ -507,9 +507,15 @@ function renderMockSpb2(model){
     const n = String(it.position_no);
     const examNo = Number(n) > 30 ? Number(n) : Number(n) + 30;
     const val = window.__mockAnswers[n] || window.__mockAnswers[String(it.id)] || '';
+    const usedKeys = new Set(Object.values(window.__mockAnswers || {})
+      .filter(Boolean)
+      .map(x => String(x).toLowerCase()));
     const selectOpts = sharedOpts.map(([k, v]) => {
       const isSel = String(val).toLowerCase() === String(k).toLowerCase();
-      return `<option value="${esc(k)}" ${isSel ? 'selected' : ''}>${esc(k)}: ${esc(v)}</option>`;
+      const isUsed = !isSel && usedKeys.has(String(k).toLowerCase());
+      // In the mock exam, the dropdown uses the internal W1/W2/... identifiers.
+      // The actual words remain visible in the word bank below, as in the exam workflow.
+      return `<option value="${esc(k)}" ${isSel ? 'selected' : ''} ${isUsed ? 'disabled' : ''}>${esc(k)}${isUsed ? ' — ' + text('تم استخدامه', 'bereits verwendet') : ''}</option>`;
     }).join('');
 
     const gapHtml = `<select class="mock-inline-gap-select ${val ? 'answered' : ''}" data-answer-q="${esc(n)}" data-gap-q="${esc(n)}" aria-label="${text('الفراغ', 'Lücke')} ${examNo}"><option value="">(${examNo}) — ${text('اختر كلمة', 'Wort')}</option>${selectOpts}</select>`;
@@ -586,15 +592,13 @@ function renderMockLesen1(model){
 
     return `
     <article class="mock-item ${val ? 'answered' : ''}">
-      <div class="mock-item-prompt" style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;">
-        <strong>Text ${idx + 1}</strong>
-      </div>
-      <div style="margin-bottom:16px;">
+      <div style="margin-bottom:10px;">
         <select class="mock-select ${val ? 'answered' : ''}" data-answer-q="${esc(n)}" aria-label="Text ${idx + 1}">
-          <option value="">— ${text('اختر العنوان المناسب لهذا النص', 'Passende Überschrift auswählen')} —</option>
+          <option value="">— ${text('اختر العنوان', 'Passende Überschrift auswählen')} —</option>
           ${selectOptions}
         </select>
       </div>
+      <div class="mock-paragraph-tools">${textTools ? '' : ''}</div>
       <div class="mock-task-body" style="font-size:16px;line-height:1.8;">${escBody(it.prompt || it.body || '')}</div>
     </article>`;
   }).join('');
@@ -688,12 +692,9 @@ function renderMockLesen3(model){
     return `
     <article class="mock-item ${selected ? 'answered' : ''}" id="mock-sit-${q}">
       <div class="paragraph-assignment" style="margin-bottom:14px;">
-        <div class="paragraph-assignment-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-          <span class="assignment-label" style="font-weight:900;color:var(--ink);">${text('الموقف / الفقرة ' + (idx + 1) + ' — اختر العنوان المناسب:', 'Absatz ' + (idx + 1) + ' — Passende Überschrift / Anzeige:')}</span>
-        </div>
-        <div class="paragraph-assignment-controls" style="display:flex;align-items:center;gap:10px;">
+        <div class="paragraph-assignment-controls" style="display:flex;flex-direction:column;align-items:stretch;gap:8px;">
           <select class="mock-select ${selected ? 'answered' : ''}" data-answer-q="${esc(q)}" data-mock-ad-select="${esc(q)}" aria-label="${esc(it.prompt)}">
-            <option value="">— ${text('اختر العنوان المناسب لهذه الفقرة (Text A - L أو X)', 'Passende Überschrift auswählen (Text A - L oder X)')} —</option>
+            <option value="">— ${text('اختر العنوان', 'Passende Überschrift auswählen')} —</option>
             ${options}
           </select>
           ${selected ? `<button type="button" class="assignment-selected" data-mock-clear="${esc(q)}" aria-label="${text('إلغاء الاختيار','Auswahl löschen')}"><span>${selected === 'X' ? 'X' : 'Text ' + selected}</span><b>×</b></button>` : ''}
@@ -870,6 +871,9 @@ function renderWriting(model){
       </div>
       <div class="mock-writing-box mock-writing-editor">
         <h3>${text('إجابتك','Deine Antwort')}</h3>
+        <div class="mock-writing-char-toolbar" aria-label="${text('حروف ألمانية مساعدة','Deutsche Sonderzeichen')}">
+          ${['ä','ö','ü','ß','Ä','Ö','Ü'].map(ch=>`<button type="button" class="mock-writing-char-btn" data-insert-char="${ch}">${ch}</button>`).join('')}
+        </div>
         <textarea id="writingAnswer" placeholder="${text('اكتب إجابتك بالألمانية هنا…','Schreibe deine Antwort auf Deutsch…')}">${esc(answer)}</textarea>
         <div class="mock-editor-meta">
           <span id="writingWords">0 Wörter</span>
@@ -962,10 +966,27 @@ function bind(){
       const q = String(el.dataset.answerQ);
       const val = el.dataset.answer !== undefined ? el.dataset.answer : el.value;
       window.__mockAnswers = window.__mockAnswers || {};
-      window.__mockAnswers[q] = val || '';
+      // Shared-answer tasks must use each answer only once within that task.
       const taskObj = currentTask();
       const mObj = state.models[taskObj.id];
-      const isL3 = mObj?.exercise?.section === 'Lesen' && mObj?.exercise?.teil === 'Teil 3';
+      const sec = mObj?.exercise?.section || '';
+      const teil = mObj?.exercise?.teil || '';
+      const isUniqueMockTask =
+        (sec === 'Sprachbausteine' && teil === 'Teil 2') ||
+        (sec === 'Lesen' && ['Teil 1', 'Teil 3'].includes(teil)) ||
+        (sec === 'Hören' && teil === 'Teil 3');
+      if (isUniqueMockTask && val) {
+        const duplicate = Object.entries(window.__mockAnswers || {}).some(([k, existing]) =>
+          k !== q && String(existing).toLowerCase() === String(val).toLowerCase()
+        );
+        if (duplicate) {
+          const msg = text('هذه الإجابة مستخدمة بالفعل في فراغ آخر. اختر إجابة مختلفة.', 'Diese Antwort wurde bereits in einer anderen Lücke verwendet. Bitte wählen Sie eine andere Antwort.');
+          document.getElementById('mockError').textContent = msg;
+          return;
+        }
+      }
+      window.__mockAnswers[q] = val || '';
+      const isL3 = sec === 'Lesen' && teil === 'Teil 3';
       if (isL3 && val && String(val).toUpperCase() !== 'X') {
         Object.keys(window.__mockAnswers).forEach(k => {
           if (k !== q && String(window.__mockAnswers[k]).toUpperCase() === String(val).toUpperCase()) {
@@ -1037,6 +1058,14 @@ function bind(){
     };
     ta.oninput = update;
     update();
+    document.querySelectorAll('[data-insert-char]').forEach(btn=>btn.onclick=()=>{
+      const ch=btn.dataset.insertChar||'';
+      const start=ta.selectionStart, end=ta.selectionEnd;
+      ta.value=ta.value.slice(0,start)+ch+ta.value.slice(end);
+      ta.focus();
+      ta.selectionStart=ta.selectionEnd=start+ch.length;
+      update();
+    });
   }
 
   const prevBtn = document.getElementById('prevBtn');
