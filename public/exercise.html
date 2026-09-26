@@ -238,80 +238,13 @@ function renderMatching(){
     </div>
   ` : '';
 
-  const lesen3AdsMarkup = isLesen3 ? `
-    <div class="lesen3-ads-section" style="margin-bottom:32px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
-        <h3 style="margin:0;font-size:19px;font-weight:900;display:flex;align-items:center;gap:8px;">
-          <span>📰</span>
-          <span>${text('الإعلانات (12 إعلاناً — Anzeigen A bis L):','Anzeigen (Text A bis L):')}</span>
-        </h3>
-        <small class="muted">${text('فوق كل إعلان قائمة لاختيار العنوان المناسب من قائمة العناوين بالأسفل (Titre 1 - 10 أو X):','Wählen Sie über jeder Anzeige die passende Überschrift aus der Liste unten aus:')}</small>
-      </div>
-      <div class="lesen3-ads-list" style="display:flex;flex-direction:column;gap:22px;">
-        ${heads.map((h, i) => {
-          const letter = String.fromCharCode(65 + i);
-          const ad = parseAdText(h);
-          const adCid = 'ad-text-' + letter;
-          
-          const assignedItem = items.find(it => String(answerValue(it.position_no)).toUpperCase() === letter);
-          const selectedSitNo = assignedItem ? String(assignedItem.position_no) : '';
-          
-          let resultClass = '';
-          const correctItem = items.find(it => String(it.correct_answer || '').toUpperCase() === letter);
-          const expectedAnswer = correctItem ? String(correctItem.position_no) : 'X';
-          if (resultData) {
-            const isMatch = selectedSitNo && selectedSitNo.toUpperCase() === expectedAnswer.toUpperCase();
-            resultClass = isMatch ? 'answer-correct' : 'answer-wrong';
-          }
-          
-          const activeSit = showModelAnswers && expectedAnswer ? expectedAnswer : selectedSitNo;
-          const shownAnswer = activeSit;
-          const shownLabel = shownAnswer ? (shownAnswer === 'X' ? text('X — إعلان بدون عنوان', 'X — Keine passende Überschrift') : `Titre ${shownAnswer}`) : '';
-
-          const selectOptions = items.map(sit => {
-            const sNo = String(sit.position_no);
-            const isSelected = activeSit === sNo;
-            const currentHolder = heads.map((_, hi) => String.fromCharCode(65 + hi)).find(l => l !== letter && String(answerValue(sNo)).toUpperCase() === l);
-            const isUsed = Boolean(currentHolder);
-            const preview = sit.prompt ? (sit.prompt.length > 55 ? sit.prompt.slice(0, 52) + '…' : sit.prompt) : '';
-            return `<option value="${sNo}" ${isSelected ? 'selected' : ''} ${isUsed ? 'disabled' : ''}>Titre ${sNo}: ${esc(preview)}${isUsed ? ' — ' + text('تم اختياره', 'Bereits ausgewählt') : ''}</option>`;
-          }).join('') + `<option value="X" ${activeSit === 'X' ? 'selected' : ''}>${text('X — إعلان بدون عنوان (لا يناسب أي عنوان)', 'X — Keine passende Anzeige')}</option>`;
-
-          const rawText = (typeof h === 'object') ? [h.title, h.body || h.text || h.content].filter(Boolean).join('\n\n') : String(h).trim();
-          const assignLabel = text('العنوان المناسب للإعلان (' + letter + '):', 'Passende Überschrift für Text ' + letter + ':');
-          const assignPlaceholder = text('— اختر العنوان المناسب لهذا الإعلان (1 - 10 أو X) —', '— Passende Überschrift auswählen (1 - 10 oder X) —');
-
-          return `
-          <article class="exam-text-card lesen3-ad-card ${selectedSitNo ? 'answered' : ''} ${resultClass} ${showModelAnswers ? 'model-shown' : ''}" id="card-ad-${letter}" style="background:var(--white);border:1.5px solid var(--line);border-radius:20px;padding:24px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:14px;">
-            <div class="paragraph-assignment">
-              <div class="paragraph-assignment-head">
-                <span class="assignment-label" style="font-weight:900;color:var(--ink);">${assignLabel}</span>
-                <div class="paragraph-assignment-tools">${textTools(rawText, adCid)}</div>
-              </div>
-              <div class="paragraph-assignment-controls">
-                <select data-ad-select="${letter}" aria-label="${assignLabel}" class="mock-select ${selectedSitNo ? 'answered' : ''}">
-                  <option value="">${assignPlaceholder}</option>
-                  ${selectOptions}
-                </select>
-                ${shownLabel ? `<button type="button" class="assignment-selected ${showModelAnswers ? 'model-correct' : ''}" data-ad-clear="${letter}" aria-label="${text('إلغاء الاختيار','Auswahl löschen')}"><span>${esc(shownLabel)}</span>${showModelAnswers ? '' : '<b>×</b>'}</button>` : `<span class="assignment-empty">${text('لم يتم الاختيار بعد','Noch nicht ausgewählt')}</span>`}
-                ${(resultData && !showModelAnswers && expectedAnswer && selectedSitNo !== expectedAnswer) ? `<span class="model-answer-hint" style="color:#2d9b68;font-size:13.5px;font-weight:850;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:rgba(45,155,104,0.1);border-radius:8px;">${text('الحل:','Lösung:')} ${expectedAnswer === 'X' ? 'X' : 'Titre ' + expectedAnswer}</span>` : ''}
-              </div>
-            </div>
-            <div class="exam-text ad-body" id="${adCid}" data-content-id="${adCid}" data-source="${esc(rawText)}" style="font-size:15.5px;line-height:1.85;color:var(--ink);">${escBody(rawText)}</div>
-            <div class="inline-translation" id="${adCid}-translation"></div>
-          </article>`;
-        }).join('')}
-      </div>
-    </div>
-  ` : '';
-
   const cards = matchingOrder.map(n=>items.find(it=>String(it.position_no)===n)).filter(Boolean).map(it=>{
     const selected=answerValue(it.position_no);
     const cid='para-'+it.position_no;
     const detail=resultData?(resultData.details||[]).find(d=>String(d.prompt)===String(it.prompt)):null;
-    const correctVal=detail?.correct_answer||'';
+    const correctVal=String(detail?.correct_answer||it.correct_answer||'').trim().toUpperCase();
     const shownAnswer=showModelAnswers&&correctVal?correctVal:selected;
-    const shownLabel=shownAnswer?labelFor(it.position_no,shownAnswer):'';
+    const shownLabel=shownAnswer?(isLesen3?(shownAnswer==='X'?text('X — لا يوجد عنوان مناسب','X — Keine passende Anzeige'):`Text ${shownAnswer}`):labelFor(it.position_no,shownAnswer)):'';
     const resultClass=detail?(detail.ok?'answer-correct':'answer-wrong'):'';
     
     let options = [];
@@ -319,10 +252,11 @@ function renderMatching(){
       options = heads.map((h, i) => {
         const letter = String.fromCharCode(65 + i);
         const ad = parseAdText(h);
-        const label = `Text ${letter}${ad.title ? ': ' + ad.title : ''}`;
+        const fullTitle = ad.title ? ad.title : (ad.body ? ad.body.replace(/\s+/g, ' ').trim() : '');
+        const label = fullTitle ? `Text ${letter}: ${fullTitle}` : `Text ${letter}`;
         return { key: letter, text: label };
       });
-      options.push({ key: 'X', text: text('X — لا يوجد إعلان مناسب لهذا الموقف', 'X — Keine passende Anzeige') });
+      options.push({ key: 'X', text: text('X — لا يوجد عنوان مناسب لهذه الفقرة', 'X — Keine passende Anzeige') });
     } else {
       options = heads.map((h,i)=>({key:String.fromCharCode(65+i),text:matchingDisplayLabel(h,i)}));
     }
@@ -330,31 +264,35 @@ function renderMatching(){
     const selectedIdentity=selected?matchingAnswerIdentity(selected):'';
     const selectOptions=options.map(o=>{
       const identity=matchingAnswerIdentity(o.key);
-      const isX = isLesen3 && o.key === 'X';
+      const isX = isLesen3 && o.key.toUpperCase() === 'X';
       const used = !isX && usedAnswerIds.has(identity) && selectedIdentity !== identity;
       return `<option value="${esc(o.key)}" ${selected===o.key?'selected':''} ${used?'disabled':''}>${esc(o.text)}${used?' — '+text('تم اختياره','Bereits ausgewählt'):''}</option>`;
     }).join('');
-    const assignLabel = isLesen3 ? `Titre ${it.position_no} — ` + text('الإعلان المناسب لهذا الموقف:','Passende Anzeige für diese Situation:') : text('العنوان المناسب لهذه الفقرة:','Passende Überschrift für diesen Text:');
-    const assignPlaceholder = isLesen3 ? text('— اختر الإعلان المناسب (Text A - L أو X) —','— Passende Anzeige auswählen (Text A - L oder X) —') : text('— اختر العنوان —','— Überschrift auswählen —');
-    return `<article class="exam-text-card ${selected?'answered':''} ${resultClass} ${String(activeItem)===String(it.position_no)?'active-item':''}" data-item="${it.position_no}">
+    
+    const assignLabel = isLesen3 ? text(`الموقف / الفقرة ${it.position_no} — اختر العنوان المناسب:`, `Absatz ${it.position_no} — Passende Überschrift / Anzeige:`) : text('العنوان المناسب لهذه الفقرة:','Passende Überschrift für diesen Text:');
+    const assignPlaceholder = isLesen3 ? text('— اختر العنوان المناسب لهذه الفقرة (Text A - L أو X) —','— Passende Anzeige auswählen (Text A - L oder X) —') : text('— اختر العنوان —','— Überschrift auswählen —');
+    
+    return `<article class="exam-text-card ${selected?'answered':''} ${resultClass} ${showModelAnswers?'model-shown':''} ${String(activeItem)===String(it.position_no)?'active-item':''}" data-item="${it.position_no}">
       <div class="paragraph-assignment">
          <div class="paragraph-assignment-head">
-           <span class="assignment-label">${assignLabel}</span>
+           <span class="assignment-label" style="font-weight:900;color:var(--ink);">${assignLabel}</span>
            <div class="paragraph-assignment-tools">${textTools(it.prompt,cid)}</div>
          </div>
          <div class="paragraph-assignment-controls">
-           <select data-paragraph-select="${it.position_no}" aria-label="${assignLabel}"><option value="">${assignPlaceholder}</option>${selectOptions}</select>
-           ${shownLabel?`<button type="button" class="assignment-selected" data-clear="${it.position_no}" aria-label="${text('إلغاء الاختيار','Auswahl löschen')}"><span>${esc(shownLabel)}</span><b>×</b></button>`:`<span class="assignment-empty">${text('لم يتم الاختيار بعد','Noch nicht ausgewählt')}</span>`}
+           <select data-paragraph-select="${it.position_no}" data-ad-select="${it.position_no}" aria-label="${assignLabel}" class="mock-select ${selected?'answered':''}">
+             <option value="">${assignPlaceholder}</option>
+             ${selectOptions}
+           </select>
+           ${shownLabel?`<button type="button" class="assignment-selected ${showModelAnswers?'model-correct':''}" data-clear="${it.position_no}" aria-label="${text('إلغاء الاختيار','Auswahl löschen')}"><span>${esc(shownLabel)}</span>${showModelAnswers?'':'<b>×</b>'}</button>`:`<span class="assignment-empty">${text('لم يتم الاختيار بعد','Noch nicht ausgewählt')}</span>`}
+           ${(resultData && !showModelAnswers && correctVal && selected !== correctVal) ? `<span class="model-answer-hint" style="color:#2d9b68;font-size:13.5px;font-weight:850;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:rgba(45,155,104,0.1);border-radius:8px;">${text('الحل:','Lösung:')} ${correctVal === 'X' ? text('X — لا يوجد عنوان مناسب','X — Keine passende Anzeige') : 'Text ' + correctVal}</span>` : ''}
          </div>
        </div>
-       <div class="exam-text" id="${cid}" data-content-id="${cid}" data-source="${esc(it.prompt)}">${escBody(it.prompt)}</div>
+       <div class="exam-text" id="${cid}" data-content-id="${cid}" data-source="${esc(it.prompt)}" style="font-size:15.5px;line-height:1.85;color:var(--ink);">${escBody(it.prompt)}</div>
       <div class="inline-translation" id="${cid}-translation"></div>
     </article>`;
   }).join('');
 
-  const main = isLesen3 ? `
-    ${lesen3AdsMarkup}
-  ` : `${bodySection}${cards}`;
+  const main = `${bodySection}${cards}`;
 
  const side=headingOrder.map(i=>({h:heads[i],i})).map(({h,i})=>{
    const key=String.fromCharCode(65+i);
@@ -379,38 +317,41 @@ function renderMatching(){
  const answeredCount=Object.keys(answers).filter(k=>answers[k]).length;
  const meta=matchingMeta();
  const headingsBankUnder = isLesen3 ? `
-   <div class="matching-headings-bank lesen3-headings-overview" style="margin-top:36px;padding:24px;background:var(--white);border:1.5px solid var(--line);border-radius:20px;box-shadow:var(--shadow-sm);">
+   <div class="matching-headings-bank lesen3-headings-overview" style="margin-top:36px;padding:26px;background:var(--white);border:1.5px solid var(--line);border-radius:20px;box-shadow:var(--shadow-sm);">
      <div class="matching-bank-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:12px;">
        <div>
-         <h3 style="margin:0 0 4px;font-size:19px;font-weight:900;display:flex;align-items:center;gap:8px;">
-           <span>📋</span>
-           <span>${text('قائمة العناوين (10 مواقف — Überschriften 1 bis 10):', 'Überschriften (1 bis 10):')}</span>
+         <h3 style="margin:0 0 6px;font-size:19px;font-weight:900;display:flex;align-items:center;gap:8px;">
+           <span>📰</span>
+           <span>${text('قائمة العناوين والإعلانات المتاحة (12 إعلاناً — Anzeigen A bis L):', 'Verfügbare Anzeigen (Text A bis L):')}</span>
          </h3>
-         <small style="color:var(--muted);font-size:13px;">${text('اختر العنوان المناسب من القائمة المنسدلة أعلى كل إعلان فوق. إعلانان لا يناسبان أي عنوان (X).', 'Wählen Sie oben über jeder Anzeige die passende Überschrift aus dieser Liste aus.')}</small>
+         <small style="color:var(--muted);font-size:13.5px;line-height:1.6;">${text('اقرأ الفقرات الـ 10 بالأعلى واختر لكل فقرة العنوان/الإعلان المناسب لها، أو اختر (X) إذا لم يكن لها عنوان مناسب. لا يمكن استخدام العنوان لأكثر من فقرة واحدة.', 'Wählen Sie oben für jeden Absatz die passende Anzeige aus, oder X wenn keine Anzeige passt. Jede Anzeige kann nur einmal zugeordnet werden.')}</small>
        </div>
        <div style="display:flex;align-items:center;gap:10px;">
          <span class="side-counter-pill">${answeredCount} / ${items.length}</span>
        </div>
      </div>
-     <div class="lesen3-headings-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));gap:12px;">
-       ${items.map(it => {
-         const assignedLetter = heads.map((_, hi) => String.fromCharCode(65 + hi)).find(l => String(answerValue(it.position_no)).toUpperCase() === l);
-         const cid = 'sit-head-' + it.position_no;
-         const detail = resultData ? (resultData.details || []).find(d => String(d.prompt) === String(it.prompt)) : null;
-         const correctVal = String(detail?.correct_answer || it.correct_answer || '').trim().toUpperCase();
-         const shownText = showModelAnswers && correctVal ? (correctVal === 'X' ? 'X' : `Text ${correctVal}`) : (assignedLetter ? `Text ${assignedLetter}` : '');
-         const badgeClass = detail ? (detail.ok ? 'model-correct' : 'model-wrong') : '';
+     <div class="lesen3-ads-list" style="display:flex;flex-direction:column;gap:18px;">
+       ${heads.map((h, i) => {
+         const letter = String.fromCharCode(65 + i);
+         const ad = parseAdText(h);
+         const adCid = 'ad-text-' + letter;
+         const assignedItem = items.find(it => String(answerValue(it.position_no)).toUpperCase() === letter);
+         const assignedSitNo = assignedItem ? String(assignedItem.position_no) : '';
+         const rawText = (typeof h === 'object') ? [h.title, h.body || h.text || h.content].filter(Boolean).join('\n\n') : String(h).trim();
          return `
-         <div class="lesen3-heading-badge" style="background:var(--bg);border:1.5px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:6px;">
-           <div style="display:flex;justify-content:space-between;align-items:center;">
-             <strong style="font-weight:950;color:#f47b20;font-size:15px;">Titre ${it.position_no}</strong>
-             ${shownText ? `<span class="ad-status-pill ${badgeClass}" style="background:#0f172a;color:#fff;font-weight:900;font-size:12px;padding:3px 9px;border-radius:6px;">${shownText}</span>` : `<small class="muted" style="font-size:11.5px;">${text('غير محدد بعد','Noch offen')}</small>`}
+         <div class="heading-entry lesen3-ad-card ${assignedSitNo ? 'is-used' : ''}" id="card-ad-${letter}" style="background:var(--bg);border:1.5px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:12px;">
+           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+             <strong style="font-size:16px;font-weight:950;color:#f47b20;display:inline-flex;align-items:center;gap:8px;">
+               <span>Text ${letter}</span>
+               ${ad.title ? `<span style="color:var(--ink);font-weight:800;">— ${esc(ad.title)}</span>` : ''}
+             </strong>
+             <div style="display:flex;align-items:center;gap:10px;">
+               ${assignedSitNo ? `<span class="badge" style="background:#0f172a;color:#fff;font-weight:800;font-size:12px;padding:4px 10px;border-radius:8px;">✓ ${text('مخصص للفقرة ' + assignedSitNo, 'Zugeordnet zu Absatz ' + assignedSitNo)}</span>` : ''}
+               ${textTools(rawText, adCid)}
+             </div>
            </div>
-           <div id="${cid}" data-content-id="${cid}" data-source="${esc(it.prompt)}" style="font-size:14.5px;line-height:1.6;color:var(--ink);">${esc(it.prompt)}</div>
-           <div style="display:flex;justify-content:flex-end;margin-top:2px;">
-             ${textTools(it.prompt, cid)}
-           </div>
-           <div class="inline-translation" id="${cid}-translation"></div>
+           <div class="exam-text ad-body" id="${adCid}" data-content-id="${adCid}" data-source="${esc(rawText)}" style="font-size:15px;line-height:1.85;color:var(--ink);white-space:normal;word-break:break-word;">${escBody(ad.body || (ad.title ? '' : rawText))}</div>
+           <div class="inline-translation" id="${adCid}-translation"></div>
          </div>`;
        }).join('')}
      </div>
@@ -442,36 +383,6 @@ function renderMatching(){
    c.onclick=e=>{if(e.target.closest('select,.text-tools,.mini-tool,.clear-selection'))return;activeItem=String(c.dataset.item);document.querySelectorAll('[data-item]').forEach(x=>x.classList.toggle('active-item',String(x.dataset.item)===activeItem));};
  });
 
-   document.querySelectorAll('[data-ad-select]').forEach(sel => sel.onchange = e => {
-    e.stopPropagation();
-    const st = captureExerciseScroll();
-    const letter = String(sel.dataset.adSelect || '').toUpperCase();
-    const sitNo = String(sel.value || '');
-    items.forEach(it => {
-      if (String(answers[String(it.position_no)] || '').toUpperCase() === letter) {
-        delete answers[String(it.position_no)];
-      }
-    });
-    if (sitNo && sitNo !== 'X') {
-      answers[sitNo] = letter;
-    }
-    renderMatching();
-    restoreExerciseScroll(st);
-    bindActions();
-  });
-  document.querySelectorAll('[data-ad-clear]').forEach(b => b.onclick = e => {
-    e.stopPropagation();
-    const st = captureExerciseScroll();
-    const letter = String(b.dataset.adClear || '').toUpperCase();
-    items.forEach(it => {
-      if (String(answers[String(it.position_no)] || '').toUpperCase() === letter) {
-        delete answers[String(it.position_no)];
-      }
-    });
-    renderMatching();
-    restoreExerciseScroll(st);
-    bindActions();
-  });
   document.querySelectorAll('[data-paragraph-select]').forEach(sel=>{
    const refreshUniqueOptions=()=>{
      const selectedKeys=new Set([...document.querySelectorAll('[data-paragraph-select]')].filter(x=>x!==sel).map(x=>String(x.value||'')).filter(Boolean).map(matchingAnswerIdentity));
@@ -489,7 +400,19 @@ function renderMatching(){
    e.stopPropagation(); const st=captureExerciseScroll();
    const n=String(sel.dataset.paragraphSelect), chosen=String(sel.value||'');
    activeItem=n;
-   if(!chosen){delete answers[n];}else{const chosenId=matchingAnswerIdentity(chosen);const duplicate=Object.entries(answers).some(([k,v])=>k!==n&&matchingAnswerIdentity(v)===chosenId);if(duplicate){const msg=text('هذا الخيار مستخدم بالفعل في حقل آخر. اختر خياراً مختلفاً.','Diese Antwort wurde bereits einem anderen Feld zugeordnet. Bitte wählen Sie eine andere Antwort.');const existing=document.querySelector('.unique-answer-warning');if(existing)existing.remove();document.getElementById('content')?.insertAdjacentHTML('afterbegin',`<div class="alert bad unique-answer-warning">${esc(msg)}</div>`);restoreExerciseScroll(st);return;}answers[n]=chosen;}
+   if(!chosen){
+     delete answers[n];
+   }else{
+     if (chosen.toUpperCase() !== 'X') {
+       const chosenId = matchingAnswerIdentity(chosen);
+       Object.keys(answers).forEach(k => {
+         if (k !== n && matchingAnswerIdentity(answers[k]) === chosenId) {
+           delete answers[k];
+         }
+       });
+     }
+     answers[n]=chosen;
+   }
    renderMatching();restoreExerciseScroll(st);bindActions();
  });
  document.querySelectorAll('[data-clear]').forEach(b=>b.onclick=e=>{e.stopPropagation();const st=captureExerciseScroll();delete answers[String(b.dataset.clear)];activeItem=String(b.dataset.clear);renderMatching();restoreExerciseScroll(st);bindActions();});

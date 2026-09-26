@@ -6548,3 +6548,144 @@ html[data-theme="dark"] .exercise-header-card .title-eye-btn {
   gap: 14px !important;
   flex-wrap: wrap !important;
 }
+
+
+/* ==========================================================================
+   UNIVERSAL LIQUID GLASS & UNTRUNCATED TEXT LAYOUT FOR ALL SECTIONS
+   ========================================================================== */
+
+/* Liquid Glass Cards across all sections */
+.exam-text-card,
+.mock-item,
+.reading-bank-card,
+.long-text,
+.spb-questions-container,
+.speaking-task-panel,
+.writing-block,
+.mock-headings-bank,
+.matching-headings-bank {
+  background: var(--white) !important;
+  border: 1.5px solid var(--line) !important;
+  border-radius: 20px !important;
+  box-shadow: var(--shadow-sm) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+html[data-theme="dark"] .exam-text-card,
+html[data-theme="dark"] .mock-item,
+html[data-theme="dark"] .reading-bank-card,
+html[data-theme="dark"] .long-text,
+html[data-theme="dark"] .spb-questions-container,
+html[data-theme="dark"] .speaking-task-panel,
+html[data-theme="dark"] .writing-block,
+html[data-theme="dark"] .mock-headings-bank,
+html[data-theme="dark"] .matching-headings-bank {
+  background: rgba(30, 41, 59, 0.7) !important;
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Zero Text Truncation across all headings, options and bodies */
+.mock-select,
+.paragraph-assignment select,
+.heading-entry,
+.exam-text,
+.mock-task-body,
+.mock-ad-content {
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  text-overflow: unset !important;
+}
+
+.mock-select option,
+.paragraph-assignment select option {
+  white-space: normal !important;
+  word-break: break-word !important;
+  padding: 8px 12px !important;
+}
+
+/* Translation placement: ALWAYS directly underneath the text block */
+.inline-translation {
+  display: none;
+  margin-top: 14px !important;
+  padding: 14px 18px !important;
+  border: 1.5px solid rgba(244, 123, 32, 0.25) !important;
+  border-radius: 14px !important;
+  background: rgba(244, 123, 32, 0.05) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  color: var(--ink) !important;
+  font-size: 14.5px !important;
+  line-height: 1.85 !important;
+  direction: rtl !important;
+  text-align: right !important;
+  font-weight: 550 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03) !important;
+}
+
+.inline-translation.visible {
+  display: block !important;
+  animation: fadeInTranslation 0.25s ease-out !important;
+}
+
+.inline-translation.loading {
+  display: block !important;
+  opacity: 0.65 !important;
+}
+
+@keyframes fadeInTranslation {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+html[data-theme="dark"] .inline-translation {
+  background: rgba(244, 123, 32, 0.08) !important;
+  border-color: rgba(244, 123, 32, 0.35) !important;
+  color: #f1f5f9 !important;
+}
+
+/* Assignment selected button with clear 'x' */
+.assignment-selected {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 6px 14px !important;
+  border-radius: 10px !important;
+  background: #0f172a !important;
+  color: #fff !important;
+  font-weight: 850 !important;
+  font-size: 13px !important;
+  border: none !important;
+  cursor: pointer !important;
+  transition: transform 0.15s ease, background-color 0.15s ease !important;
+}
+
+.assignment-selected:hover {
+  background: #1e293b !important;
+  transform: scale(1.02) !important;
+}
+
+.assignment-selected b {
+  font-size: 15px !important;
+  opacity: 0.8 !important;
+  margin-inline-start: 4px !important;
+}
+
+.assignment-selected.model-correct {
+  background: #2d9b68 !important;
+  color: #fff !important;
+}
+
+/* Clean Ad Cards in Headings Bank */
+.lesen3-ad-card,
+.mock-heading-item {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.lesen3-ad-card.is-used,
+.mock-heading-item.is-used {
+  border-color: rgba(244, 123, 32, 0.4) !important;
+  background: rgba(244, 123, 32, 0.03) !important;
+}

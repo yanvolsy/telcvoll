@@ -540,55 +540,75 @@ function renderMockLesen3(model){
   window.__mockAnswers = {...itemAnswer(model.exercise.id)};
   const items = model.items || [];
   const heads = getExerciseHeadings(model);
+  const usedAnswerIds = new Set(Object.values(window.__mockAnswers).filter(Boolean).map(v => String(v).toUpperCase()));
+
+  const paragraphsListMarkup = items.map((it, idx) => {
+    const q = String(it.position_no);
+    const selected = String(window.__mockAnswers[q] || '').toUpperCase();
+
+    const options = heads.map((h, i) => {
+      const letter = String.fromCharCode(65 + i);
+      const ad = parseAdText(h);
+      const fullTitle = ad.title ? ad.title : (ad.body ? ad.body.replace(/\s+/g, ' ').trim() : '');
+      const label = fullTitle ? `Text ${letter}: ${fullTitle}` : `Text ${letter}`;
+      const isSelected = selected === letter;
+      const isUsed = usedAnswerIds.has(letter) && !isSelected;
+      return `<option value="${letter}" ${isSelected ? 'selected' : ''} ${isUsed ? 'disabled' : ''}>${esc(label)}${isUsed ? ' — ' + text('تم اختياره', 'Bereits ausgewählt') : ''}</option>`;
+    }).join('') + `<option value="X" ${selected === 'X' ? 'selected' : ''}>${text('X — لا يوجد عنوان مناسب لهذه الفقرة', 'X — Keine passende Anzeige')}</option>`;
+
+    return `
+    <article class="mock-item ${selected ? 'answered' : ''}" id="mock-sit-${q}">
+      <div class="paragraph-assignment" style="margin-bottom:14px;">
+        <div class="paragraph-assignment-head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <span class="assignment-label" style="font-weight:900;color:var(--ink);">${text('الموقف / الفقرة ' + (idx + 1) + ' — اختر العنوان المناسب:', 'Absatz ' + (idx + 1) + ' — Passende Überschrift / Anzeige:')}</span>
+        </div>
+        <div class="paragraph-assignment-controls" style="display:flex;align-items:center;gap:10px;">
+          <select class="mock-select ${selected ? 'answered' : ''}" data-answer-q="${esc(q)}" data-mock-ad-select="${esc(q)}" aria-label="${esc(it.prompt)}">
+            <option value="">— ${text('اختر العنوان المناسب لهذه الفقرة (Text A - L أو X)', 'Passende Überschrift auswählen (Text A - L oder X)')} —</option>
+            ${options}
+          </select>
+          ${selected ? `<button type="button" class="assignment-selected" data-mock-clear="${esc(q)}" aria-label="${text('إلغاء الاختيار','Auswahl löschen')}"><span>${selected === 'X' ? 'X' : 'Text ' + selected}</span><b>×</b></button>` : ''}
+        </div>
+      </div>
+      <div class="mock-task-body" style="font-size:15.5px;line-height:1.85;color:var(--ink);">${escBody(it.prompt)}</div>
+    </article>`;
+  }).join('');
 
   const headingsOverview = `
-    <div class="mock-headings-bank" style="margin-top:32px;">
-      <h3><span>📋</span> <span>${text('قائمة العناوين (10 عناوين — Überschriften 1 bis 10):', 'Überschriften (1 bis 10):')}</span></h3>
-      <div class="mock-headings-list">
-        ${items.map(it => {
-          const assignedLetter = heads.map((_, hi) => String.fromCharCode(65 + hi)).find(l => String(window.__mockAnswers[String(it.position_no)] || window.__mockAnswers[String(it.id)] || '').toUpperCase() === l);
+    <div class="mock-headings-bank lesen3-headings-overview" style="margin-top:34px;padding:26px;background:var(--white);border:1.5px solid var(--line);border-radius:20px;box-shadow:var(--shadow-sm);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+        <div>
+          <h3 style="margin:0 0 6px;font-size:18.5px;font-weight:900;display:flex;align-items:center;gap:8px;">
+            <span>📰</span>
+            <span>${text('قائمة العناوين والإعلانات المتاحة (12 إعلاناً — Anzeigen A bis L):', 'Verfügbare Anzeigen (Text A bis L):')}</span>
+          </h3>
+          <small class="muted" style="font-size:13.5px;line-height:1.6;">${text('اقرأ الفقرات الـ 10 بالأعلى واختر لكل فقرة العنوان المناسب، أو اختر (X) إذا لم يكن لها عنوان مناسب. لا يمكن استخدام العنوان لأكثر من فقرة واحدة.', 'Wählen Sie oben für jeden Absatz die passende Anzeige aus, oder X wenn keine Anzeige passt.')}</small>
+        </div>
+        <span class="mock-task-count">${Object.keys(window.__mockAnswers).length} / ${items.length}</span>
+      </div>
+      <div class="mock-headings-list lesen3-ads-list" style="display:flex;flex-direction:column;gap:16px;">
+        ${heads.map((h, i) => {
+          const letter = String.fromCharCode(65 + i);
+          const ad = parseAdText(h);
+          const assignedItem = items.find(it => String(window.__mockAnswers[String(it.position_no)] || '').toUpperCase() === letter);
+          const assignedNo = assignedItem ? String(assignedItem.position_no) : '';
+          const rawText = (typeof h === 'object') ? [h.title, h.body || h.text || h.content].filter(Boolean).join('\n\n') : String(h).trim();
           return `
-          <div class="mock-heading-item">
-            <span class="mock-heading-letter">Titre ${it.position_no}</span>
-            <div style="flex:1;">
-              <span>${esc(it.prompt)}</span>
-              ${assignedLetter ? ` <span style="background:#0f172a;color:#fff;font-weight:900;font-size:11px;padding:2px 7px;border-radius:6px;margin-inline-start:6px;">Text ${assignedLetter}</span>` : ''}
+          <div class="mock-heading-item ${assignedNo ? 'is-used' : ''}" style="background:var(--bg);border:1.5px solid var(--line);border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <strong style="font-size:15.5px;font-weight:950;color:#f47b20;display:inline-flex;align-items:center;gap:8px;">
+                <span>Text ${letter}</span>
+                ${ad.title ? `<span style="color:var(--ink);font-weight:800;">— ${esc(ad.title)}</span>` : ''}
+              </strong>
+              ${assignedNo ? `<span style="background:#0f172a;color:#fff;font-weight:900;font-size:11.5px;padding:3px 9px;border-radius:6px;">✓ ${text('مخصص للفقرة ' + assignedNo, 'Zugeordnet zu Absatz ' + assignedNo)}</span>` : ''}
+            </div>
+            <div class="mock-ad-content" style="font-size:14.5px;line-height:1.75;color:var(--ink);white-space:normal;word-break:break-word;">
+              ${escBody(ad.body || (ad.title ? '' : rawText))}
             </div>
           </div>`;
         }).join('')}
       </div>
     </div>`;
-
-  const adsListMarkup = heads.map((h, i) => {
-    const letter = String.fromCharCode(65 + i);
-    const ad = parseAdText(h);
-    const assignedItem = items.find(it => String(window.__mockAnswers[String(it.position_no)] || window.__mockAnswers[String(it.id)] || '').toUpperCase() === letter);
-    const selectedSitNo = assignedItem ? String(assignedItem.position_no) : '';
-
-    const selectOptions = items.map(sit => {
-      const sNo = String(sit.position_no);
-      const isSelected = selectedSitNo === sNo;
-      const currentHolder = heads.map((_, hi) => String.fromCharCode(65 + hi)).find(l => l !== letter && String(window.__mockAnswers[sNo] || window.__mockAnswers[String(sit.id)] || '').toUpperCase() === l);
-      const isUsed = Boolean(currentHolder);
-      const preview = sit.prompt ? (sit.prompt.length > 55 ? sit.prompt.slice(0, 52) + '…' : sit.prompt) : '';
-      return `<option value="${sNo}" ${isSelected ? 'selected' : ''} ${isUsed ? 'disabled' : ''}>Titre ${sNo}: ${esc(preview)}${isUsed ? ' — ' + text('تم اختياره', 'Bereits ausgewählt') : ''}</option>`;
-    }).join('') + `<option value="X" ${selectedSitNo === 'X' ? 'selected' : ''}>${text('X — إعلان بدون عنوان (لا يناسب أي عنوان)', 'X — Keine passende Anzeige')}</option>`;
-
-    const rawText = (typeof h === 'object') ? [h.title, h.body || h.text || h.content].filter(Boolean).join('\n\n') : String(h).trim();
-    return `
-    <article class="mock-item ${selectedSitNo ? 'answered' : ''}">
-      <div class="mock-item-prompt" style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;">
-        <strong>Text ${letter}</strong>
-      </div>
-      <div style="margin-bottom:16px;">
-        <select class="mock-select ${selectedSitNo ? 'answered' : ''}" data-mock-ad-select="${letter}" aria-label="Text ${letter}">
-          <option value="">— ${text('اختر العنوان المناسب لهذا الإعلان (1 - 10 أو X)', 'Passende Überschrift auswählen (1 - 10 oder X)')} —</option>
-          ${selectOptions}
-        </select>
-      </div>
-      <div class="mock-task-body" style="font-size:15.5px;line-height:1.8;">${escBody(rawText)}</div>
-    </article>`;
-  }).join('');
 
   return baseShell(`
     <div class="mock-section-label">
@@ -596,11 +616,11 @@ function renderMockLesen3(model){
       <span class="mock-task-count">${esc(model.exercise.section)} · ${esc(model.exercise.teil)}</span>
     </div>
     <div class="mock-spb-head" style="margin-top:14px;margin-bottom:16px;">
-      <h3><span>📰</span> <span>${text('الإعلانات (12 إعلاناً — Anzeigen A bis L):', 'Anzeigen (Text A bis L):')}</span></h3>
+      <h3><span>📋</span> <span>${text('الفقرات العشر (المواقف 1 إلى 10):', 'Die 10 Situationen (Absätze 1 bis 10):')}</span></h3>
       <span class="mock-task-count">${Object.keys(window.__mockAnswers).length} / ${items.length}</span>
     </div>
-    <div style="display:flex;flex-direction:column;gap:18px;">
-      ${adsListMarkup}
+    <div style="display:flex;flex-direction:column;gap:20px;">
+      ${paragraphsListMarkup}
     </div>
     ${headingsOverview}
   `);
@@ -791,6 +811,16 @@ function bind(){
       const val = el.dataset.answer !== undefined ? el.dataset.answer : el.value;
       window.__mockAnswers = window.__mockAnswers || {};
       window.__mockAnswers[q] = val || '';
+      const taskObj = currentTask();
+      const mObj = state.models[taskObj.id];
+      const isL3 = mObj?.exercise?.section === 'Lesen' && mObj?.exercise?.teil === 'Teil 3';
+      if (isL3 && val && String(val).toUpperCase() !== 'X') {
+        Object.keys(window.__mockAnswers).forEach(k => {
+          if (k !== q && String(window.__mockAnswers[k]).toUpperCase() === String(val).toUpperCase()) {
+            delete window.__mockAnswers[k];
+          }
+        });
+      }
       state.session.answersByExercise[String(currentTask().id)] = {...window.__mockAnswers};
       saveSession();
 
