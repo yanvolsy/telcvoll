@@ -109,6 +109,10 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
         <span><strong>تخطي التمارين المكررة</strong> (الموصى به — لن يتم تكرار نفس المواضيع)</span>
       </label>
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+        <input type="radio" name="dupAction" value="replace">
+        <span><strong>تحديث التمرين الموجود</strong> — استبدال بياناته بالملف المستورد مع الإبقاء على صلاحية الوصول الحالية.</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
         <input type="radio" name="dupAction" value="clone">
         <span><strong>استيراد كنسخ إضافية</strong> (إضافة «— نسخة» لعنوان الموضوع)</span>
       </label>
@@ -772,15 +776,31 @@ function normalizeImportBatch(pack) {
     const varInfo = parseVariationInfo(ex.title, ex.settings);
     const exKey = `${ex.level}|${ex.section.toLowerCase()}|${ex.teil.toLowerCase().replace(/\s+/g, '')}|${norm(ex.title)}`;
 
-    const exactInDb = state.exercises.some(existing =>
+    const existingMatch = state.exercises.find(existing =>
       String(existing.level || '').toUpperCase() === ex.level &&
       String(existing.section || '').toLowerCase() === ex.section.toLowerCase() &&
       String(existing.teil || '').toLowerCase().replace(/\s+/g, '') === ex.teil.toLowerCase().replace(/\s+/g, '') &&
       norm(existing.title) === norm(ex.title)
     );
+    const exactInDb = Boolean(existingMatch);
     const exactInBatch = seenInBatch.has(exKey);
     seenInBatch.add(exKey);
     const isExactDup = exactInDb || exactInBatch;
+
+    if (existingMatch) {
+      let existingSettings = existingMatch.settings_json || {};
+      if (typeof existingSettings === 'string') {
+        try { existingSettings = JSON.parse(existingSettings); } catch { existingSettings = {}; }
+      }
+      const incomingMode = String(ex.settings?.mapping_mode || '').trim().toUpperCase();
+      const existingMode = String(existingSettings?.mapping_mode || '').trim().toUpperCase();
+      const itemCountChanged = Number(existingMatch.item_count || 0) !== Number(ex.items?.length || 0);
+      const headingCountChanged = Array.isArray(existingSettings?.headings) &&
+        existingSettings.headings.length !== (Array.isArray(ex.headings) ? ex.headings.length : 0);
+      ex._existingDuplicateId = Number(existingMatch.id);
+      ex._existingDuplicateAccessMode = existingMatch.access_mode === 'free' ? 'free' : 'paid';
+      ex._suggestReplace = itemCountChanged || headingCountChanged || Boolean(incomingMode && existingMode && incomingMode !== existingMode);
+    }
 
     if (varInfo.isVariation) {
       ex._isVariation = true;
@@ -889,6 +909,10 @@ function openImportPreview(list, filename = '') {
   if (dupWrap) {
     dupWrap.style.display = dupCount > 0 ? 'block' : 'none';
   }
+  const suggestedDupAction = list.some(x => x._isDuplicate && x._suggestReplace) ? 'replace' : 'skip';
+  document.querySelectorAll('input[name="dupAction"]').forEach(input => {
+    input.checked = input.value === suggestedDupAction;
+  });
 
   const progressWrap = $('importProgressWrap');
   if (progressWrap) progressWrap.style.display = 'none';
@@ -911,16 +935,36 @@ $('confirmImportBtn')?.addEventListener('click', async () => {
   const dupAction = document.querySelector('input[name="dupAction"]:checked')?.value || 'skip';
   let toImport = [];
   let skipped = 0;
+  let replaced = 0;
 
   if (dupAction === 'skip') {
     toImport = pendingImportList.filter(x => !x._isDuplicate);
     skipped = pendingImportList.length - toImport.length;
-  } else {
+  } else if (dupAction === 'clone') {
     toImport = pendingImportList.map(x => x._isDuplicate ? { ...x, title: `${x.title} — نسخة` } : x);
+  } else {
+    const replacedIds = new Set();
+    toImport = pendingImportList.reduce((list, exercise) => {
+      if (!exercise._isDuplicate) {
+        list.push(exercise);
+      } else if (exercise._existingDuplicateId && !replacedIds.has(exercise._existingDuplicateId)) {
+        replacedIds.add(exercise._existingDuplicateId);
+        list.push({
+          ...exercise,
+          id: exercise._existingDuplicateId,
+          access_mode: exercise._existingDuplicateAccessMode || 'paid',
+          _replaceExisting: true
+        });
+        replaced++;
+      } else {
+        skipped++;
+      }
+      return list;
+    }, []);
   }
 
   if (!toImport.length) {
-    alert('جميع التمارين في هذا الملف مكررة وتم تخطيها. لم يتم استيراد أي تمرين جديد.');
+    alert(dupAction === 'replace' ? 'لم يتم تحديث أي تمرين موجود في هذا الملف.' : 'جميع التمارين في هذا الملف مكررة وتم تخطيها. لم يتم استيراد أي تمرين جديد.');
     closeImportModal();
     return;
   }
@@ -943,13 +987,15 @@ $('confirmImportBtn')?.addEventListener('click', async () => {
       const pct = Math.round(((i + 1) / toImport.length) * 100);
       if (progressBar) progressBar.style.width = `${pct}%`;
       if (progressPercent) progressPercent.textContent = `${pct}%`;
-      if (progressLabel) progressLabel.textContent = `جارٍ استيراد (${i + 1}/${toImport.length}): ${ex.title}…`;
+      const isUpdate = Number(ex.id) > 0;
+      if (progressLabel) progressLabel.textContent = `${isUpdate ? 'جارٍ تحديث' : 'جارٍ استيراد'} (${i + 1}/${toImport.length}): ${ex.title}…`;
 
-      await api('admin-questions', { method: 'POST', body: ex });
+      await api('admin-questions', { method: isUpdate ? 'PUT' : 'POST', body: ex });
       done++;
     }
 
-    showToast(`تم استيراد ${done} تمارين بنجاح ${skipped > 0 ? `(تم تخطي ${skipped} مكرر)` : ''}`);
+    const imported = done - replaced;
+    showToast(`تم استيراد ${imported} وتحديث ${replaced} بنجاح ${skipped > 0 ? `(تم تخطي ${skipped} مكرر)` : ''}`);
     closeImportModal();
 
     // Switch filters to first imported exercise context if helpful
