@@ -1123,8 +1123,11 @@ function getFullAnswerText(it, val, heads){
         if (isLesen3) {
           const isReversed=String(parseSettings(model?.exercise).mapping_mode||'').toUpperCase()==='REVERSED';
           if(isReversed){
-            const situation=matchingDisplayLabel(hList[idx],idx);
-            return situation||String(hList[idx]||'');
+            const rawSituation=hList[idx];
+            const situation=typeof rawSituation==='object'
+              ? String(rawSituation.text||rawSituation.situation||rawSituation.prompt||rawSituation.title||'').trim()
+              : String(rawSituation||'').trim();
+            return situation||matchingDisplayLabel(rawSituation,idx);
           }
           const ad=parseLesen3Ad(hList[idx],idx);
           return ad.title ? text(`النص ${key} — ${ad.title}`,`Text ${key} — ${ad.title}`) : text(`النص ${key}`,`Text ${key}`);
@@ -1184,14 +1187,18 @@ function renderMatching(){
     const rawCorrectVal=correctAnswerFor(it);
     const correctVal=resolveMatchingCorrectKey(rawCorrectVal,heads);
     const resultClass=detail?(detail.ok?'answer-correct':'answer-wrong'):'';
+    const reverseAd=isReversedLesen3?parseAdText(it.prompt):null;
+    const reverseAdLetter=`Text ${String.fromCharCode(64+(Number(it.position_no)||1))}`;
     
     let options = [];
     if (isLesen3) {
       options = heads.map((h, i) => {
         const letter = String.fromCharCode(65 + i);
         if(isReversedLesen3){
-          const situation=matchingDisplayLabel(h,i);
-          return {key:letter,text:situation?`${letter} — ${situation}`:letter};
+          const situation=typeof h==='object'
+            ? String(h.text||h.situation||h.prompt||h.title||'').trim()
+            : String(h||'').trim();
+          return {key:letter,text:situation||letter};
         }
         const ad=parseLesen3Ad(h,i);
         const title=cleanOptionPrefix(ad.title)||ad.title;
@@ -1232,6 +1239,7 @@ function renderMatching(){
     const fullCorrectAnswerText = getFullAnswerText(it, correctVal, heads);
     const correctHint=answerFeedbackMarkup(detail,correctVal,fullCorrectAnswerText);
     return `<article class="exam-text-card ${selected?'answered':''} ${resultClass} ${showModelAnswers?'model-shown':''} ${String(activeItem)===String(it.position_no)?'active-item':''}" data-item="${it.position_no}">
+      ${isReversedLesen3?`<div style="margin:0 0 10px;color:#f47b20;font-size:17px;font-weight:950;">${reverseAdLetter}</div>`:''}
       <div class="paragraph-assignment">
         <div class="paragraph-assignment-head" style="display:none !important;" aria-hidden="true"></div>
         <div class="paragraph-assignment-controls">
@@ -1248,7 +1256,7 @@ function renderMatching(){
         </div>
       </div>
       ${correctHint}
-       <div class="exam-text" id="${cid}" data-content-id="${cid}" data-source="${esc(it.prompt)}">${escBody(it.prompt)}</div>
+       <div class="exam-text" id="${cid}" data-content-id="${cid}" data-source="${esc(it.prompt)}">${isReversedLesen3?`<div style="margin-bottom:8px;color:var(--accent);font-weight:850;">${esc(reverseAd?.title||'')}</div>${escBody(reverseAd?.body||'')}`:escBody(it.prompt)}</div>
       <div class="inline-translation" id="${cid}-translation"></div>
     </article>`;
   }).join('');
@@ -1299,8 +1307,8 @@ function renderMatching(){
          const rawText = isReversedLesen3
            ? ((typeof h === 'object') ? [h.title, h.body || h.text || h.content].filter(Boolean).join('\n\n') : String(h).trim())
            : (ad.fullText || String(h).trim());
-         const cardTitle = isReversedLesen3 ? `Situation ${i + 1}` : `Text ${letter}`;
-         const cardBody = isReversedLesen3 ? rawText : (ad.body || (ad.title ? '' : rawText));
+         const cardTitle = isReversedLesen3 ? text(`الموقف ${i + 1}`,`Situation ${i + 1}`) : `Text ${letter}`;
+         const cardBody = isReversedLesen3 ? matchingDisplayLabel(h,i) : (ad.body || (ad.title ? '' : rawText));
          return `
          <div class="heading-entry lesen3-ad-card ${assignedSitNo ? 'is-used' : ''}" id="card-ad-${letter}" style="background:var(--bg);border:1.5px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:12px;">
            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
