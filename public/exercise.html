@@ -1033,6 +1033,25 @@ function parseAdText(raw){
   return { title: str, body: '' };
 }
 
+function parseLesen3Ad(raw,index=0){
+  const ad=parseAdText(raw);
+  let title=ad.title;
+  let body=ad.body;
+  // Imported files may store the answer key as the first line ("A\\nTitle\\nText").
+  // Treat that letter as the identifier and split the actual headline from its body.
+  if(/^[A-L]$/i.test(title)&&body){
+    const lineBreak=body.indexOf('\n');
+    if(lineBreak>=0){title=body.slice(0,lineBreak).trim();body=body.slice(lineBreak+1).trim();}
+    else{title=body.trim();body='';}
+  }
+  return {
+    letter:String.fromCharCode(65+index),
+    title,
+    body,
+    fullText:[title,body].filter(Boolean).join('\n\n')
+  };
+}
+
 function resolveMatchingCorrectKey(raw, heads){
   const value=String(raw??'').trim();
   if(!value) return '';
@@ -1089,22 +1108,26 @@ function getFullAnswerText(it, val, heads){
 
   if (isMatching) {
     if (strVal.toUpperCase() === 'X') {
+      if(isLesen3) return text('X — لا يوجد إعلان مناسب','X — Keine passende Anzeige');
       return text('لا يوجد عنوان مناسب لهذه الفقرة', 'Keine passende Anzeige');
     }
     const hList = heads || getExerciseHeadings(model) || [];
     const key = resolveMatchingCorrectKey(strVal, hList);
     if (key === 'X') {
+      if(isLesen3) return text('X — لا يوجد إعلان مناسب','X — Keine passende Anzeige');
       return text('لا يوجد عنوان مناسب لهذه الفقرة', 'Keine passende Anzeige');
     }
     if (/^[A-Z]$/.test(key)) {
       const idx = key.charCodeAt(0) - 65;
       if (idx >= 0 && idx < hList.length) {
         if (isLesen3) {
-          const ad = parseAdText(hList[idx]);
-          const full = ad.title ? (ad.title + (ad.body ? ' — ' + ad.body : '')) : (ad.body || '');
-          const clean = full.replace(/\s+/g, ' ').trim();
-          const cleanVal = cleanOptionPrefix(clean.length > 90 ? clean.slice(0, 90) + '…' : clean);
-          return cleanVal || clean;
+          const isReversed=String(parseSettings(model?.exercise).mapping_mode||'').toUpperCase()==='REVERSED';
+          if(isReversed){
+            const situation=matchingDisplayLabel(hList[idx],idx);
+            return situation||String(hList[idx]||'');
+          }
+          const ad=parseLesen3Ad(hList[idx],idx);
+          return ad.title ? text(`النص ${key} — ${ad.title}`,`Text ${key} — ${ad.title}`) : text(`النص ${key}`,`Text ${key}`);
         } else {
           return matchingDisplayLabel(hList[idx], idx);
         }
@@ -1166,10 +1189,13 @@ function renderMatching(){
     if (isLesen3) {
       options = heads.map((h, i) => {
         const letter = String.fromCharCode(65 + i);
-        const ad = parseAdText(h);
-        const fullTitle = ad.title ? ad.title : (ad.body ? ad.body.replace(/\s+/g, ' ').trim() : '');
-        const cleanTitle = cleanOptionPrefix(fullTitle) || fullTitle;
-        return { key: letter, text: cleanTitle };
+        if(isReversedLesen3){
+          const situation=matchingDisplayLabel(h,i);
+          return {key:letter,text:situation?`${letter} — ${situation}`:letter};
+        }
+        const ad=parseLesen3Ad(h,i);
+        const title=cleanOptionPrefix(ad.title)||ad.title;
+        return {key:letter,text:title?`${letter} — ${title}`:letter};
       });
       options.push({ key: 'X', text: text('X — لا يوجد عنوان مناسب لهذه الفقرة', 'X — Keine passende Anzeige') });
     } else {
@@ -1266,11 +1292,13 @@ function renderMatching(){
      <div class="lesen3-ads-list" style="display:flex;flex-direction:column;gap:18px;">
        ${heads.map((h, i) => {
          const letter = String.fromCharCode(65 + i);
-         const ad = parseAdText(h);
+         const ad = isReversedLesen3 ? parseAdText(h) : parseLesen3Ad(h,i);
          const adCid = 'ad-text-' + letter;
          const assignedItem = items.find(it => String(answerValue(it.position_no)).toUpperCase() === letter);
          const assignedSitNo = assignedItem ? String(assignedItem.position_no) : '';
-         const rawText = (typeof h === 'object') ? [h.title, h.body || h.text || h.content].filter(Boolean).join('\n\n') : String(h).trim();
+         const rawText = isReversedLesen3
+           ? ((typeof h === 'object') ? [h.title, h.body || h.text || h.content].filter(Boolean).join('\n\n') : String(h).trim())
+           : (ad.fullText || String(h).trim());
          const cardTitle = isReversedLesen3 ? `Situation ${i + 1}` : `Text ${letter}`;
          const cardBody = isReversedLesen3 ? rawText : (ad.body || (ad.title ? '' : rawText));
          return `
