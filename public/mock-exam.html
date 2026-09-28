@@ -27,7 +27,7 @@
 .mock-progress-bar{height:8px;background:var(--line);border-radius:999px;overflow:hidden;flex:1}
 .mock-progress-bar i{display:block;height:100%;background:linear-gradient(90deg,#f47b20,#ff9a4d);border-radius:inherit;transition:width .25s ease}
 .mock-card{direction:ltr;background:var(--white);border:1.5px solid var(--line);border-radius:24px;box-shadow:0 8px 30px rgba(0,0,0,0.04);padding:32px;box-sizing:border-box}
-html[data-theme="dark"] .mock-card{direction:ltr;background:rgba(20,20,20,0.96);backdrop-filter:blur(16px);border-color:#303030;box-shadow:0 12px 36px rgba(0,0,0,0.55)}
+
 .mock-section-label{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
 .mock-section-label .tag{font-weight:900;background:rgba(244,123,32,0.12);color:#f47b20;border:1px solid rgba(244,123,32,0.3);padding:5px 14px;border-radius:999px;font-size:13px}
 .mock-task-count{font-size:14px;font-weight:850;color:var(--muted);background:var(--bg);border:1px solid var(--line);padding:5px 12px;border-radius:999px}
@@ -37,8 +37,8 @@ html[data-theme="dark"] .mock-card{direction:ltr;background:rgba(20,20,20,0.96);
 .mock-inline-gap-select{display:inline-block;vertical-align:middle;padding:5px 12px;margin:3px 5px;border:1.5px solid var(--line);border-radius:10px;background:var(--white);color:var(--ink);font-weight:850;font-size:14px;cursor:pointer;transition:all .18s ease;box-shadow:0 2px 6px rgba(0,0,0,0.03);outline:none;max-width:230px}
 .mock-inline-gap-select:hover{border-color:#f47b20}
 .mock-inline-gap-select.answered{border-color:#f47b20;background:rgba(244,123,32,0.1);color:#f47b20;font-weight:900}
-html[data-theme="dark"] .mock-inline-gap-select{background:#111;border-color:#383838;color:#fff}
-html[data-theme="dark"] .mock-inline-gap-select.answered{background:rgba(255,122,47,0.18);border-color:#ff7a2f;color:#ff9a4d}
+
+
 
 /* Questions container below text */
 .mock-spb-container{margin-top:28px;padding-top:22px;border-top:1.5px solid var(--line)}
@@ -54,8 +54,8 @@ html[data-theme="dark"] .mock-inline-gap-select.answered{background:rgba(255,122
 .mock-spb-option-btn:hover{border-color:#f47b20;background:rgba(244,123,32,0.04)}
 .mock-spb-option-btn.selected{border-color:#f47b20;background:rgba(244,123,32,0.12);color:#f47b20;box-shadow:0 0 0 1px #f47b20;font-weight:900}
 .mock-btn-key{font-weight:950;color:#f47b20;min-width:24px}
-html[data-theme="dark"] .mock-spb-card{background:#141414;border-color:#303030}
-html[data-theme="dark"] .mock-spb-option-btn{background:#111;border-color:#333;color:#fff}
+
+
 
 /* Word Bank (Sprachbausteine 2) */
 .mock-wordbank-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
@@ -63,7 +63,7 @@ html[data-theme="dark"] .mock-spb-option-btn{background:#111;border-color:#333;c
 .mock-word-card small{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;background:rgba(244,123,32,0.12);color:#f47b20;font-size:12px;font-weight:950}
 .mock-word-card.used{opacity:.5;background:var(--bg);border-style:dashed}
 .mock-word-card .mock-word-check{margin-inline-start:auto;color:#2d9b68;font-weight:950}
-html[data-theme="dark"] .mock-word-card{background:#141414;border-color:#333;color:#fff}
+
 
 /* Headings Bank (Lesen 1) */
 .mock-headings-bank{background:var(--bg);border:1.5px solid var(--line);border-radius:18px;padding:20px;margin-bottom:24px}
@@ -175,10 +175,10 @@ html[data-theme="dark"] .mock-word-card{background:#141414;border-color:#333;col
 .mock-error { max-width: 680px; margin: 24px auto; color: var(--danger); text-align: center; }
 .mock-load-error { max-width: 640px; margin: 54px auto; padding: 28px; border: 1px solid var(--line); border-radius: 20px; background: var(--white); text-align: center; box-shadow: var(--shadow); }
 .mock-load-error p { color: var(--muted); }
-html[data-theme="dark"] .mock-top { background: rgba(8,8,8,.96); }
-html[data-theme="dark"] .mock-load-error { background: #141414; border-color: #333; color: #f5f5f5; }
-html[data-theme="dark"] .mock-nav-btn.dark { background: #ff7a2f !important; color: #fff !important; }
-html[data-theme="dark"] .mock-nav-btn.dark:hover { background: #e7651e !important; }
+
+
+
+
 @media(max-width:600px) {
   .mock-top-inner { grid-template-columns: auto minmax(0,1fr) auto !important; grid-template-areas: "back brand status" "tabs tabs tabs" !important; gap: 7px !important; }
   .mock-top > .mock-root { padding-left: 12px !important; padding-right: 12px !important; }
@@ -190,7 +190,7 @@ html[data-theme="dark"] .mock-nav-btn.dark:hover { background: #e7651e !importan
   .mock-tab { min-height: 46px; padding: 7px 6px; font-size: 12px; }
 }
 </style>
-<style><!-- TELC Voll: unified homepage typography -->
+<style>/* TELC Voll: unified homepage typography */
 html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
 html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}</style>
 
@@ -248,11 +248,7 @@ html[data-theme="light"] .exercise-topbar {
   direction: ltr !important;
 }
 
-html[data-theme="dark"] .exercise-header-card.exercise-sticky-bar {
-  background: #080808 !important;
-  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
-}
+
 
 .exercise-single-top-bar {
   display: flex !important;
@@ -297,11 +293,7 @@ html[data-theme="dark"] .exercise-header-card.exercise-sticky-bar {
   border: 1.5px solid var(--line) !important;
 }
 
-html[data-theme="dark"] .tag-teil {
-  background: #121815 !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
-  color: #f1f5f9 !important;
-}
+
 
 /* Cluster 2: Controlled Title Area */
 .top-bar-title-cluster {
@@ -381,10 +373,7 @@ html[data-theme="dark"] .tag-teil {
   border-color: #f47b20 !important;
 }
 
-html[data-theme="dark"] .title-reveal-btn.title-eye-btn {
-  background: #121815 !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
-}
+
 
 .thema-title-content {
   flex: 1 !important;
@@ -473,11 +462,7 @@ html[data-theme="dark"] .title-reveal-btn.title-eye-btn {
   color: #f47b20 !important;
 }
 
-html[data-theme="dark"] .exercise-heading-shuffle {
-  background: #121815 !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
-  color: #f1f5f9 !important;
-}
+
 
 /* Cluster 5: Modern Digital Clock */
 .top-bar-timer-cluster {
@@ -504,12 +489,7 @@ html[data-theme="dark"] .exercise-heading-shuffle {
   white-space: nowrap !important;
 }
 
-html[data-theme="dark"] .modern-digital-clock,
-html[data-theme="dark"] .progress-pill {
-  background: #121815 !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
-  color: #f1f5f9 !important;
-}
+
 
 .modern-digital-clock .timer-icon,
 .progress-pill .timer-icon {
@@ -574,7 +554,6 @@ html[data-theme="light"] .main-exam-frame {
 .exam-text-card.answer-correct,
 .exam-text-card.active-item,
 .exam-text-card.answered,
-html[data-theme="dark"] .exam-text-card,
 .exercise-page:has(.exam-workspace) .exam-text-card,
 .exercise-page:has(.exam-workspace) .exam-text-card.answer-wrong,
 .exercise-page:has(.exam-workspace) .exam-text-card.answer-correct {
@@ -599,9 +578,7 @@ html[data-theme="dark"] .exam-text-card,
   margin-bottom: 0 !important;
 }
 
-html[data-theme="dark"] .exam-text-card {
-  border-bottom-color: rgba(255, 255, 255, 0.1) !important;
-}
+
 
 /* 5. HEADING SELECTION: COMPACT 42PX HEIGHT */
 .paragraph-assignment {
@@ -649,13 +626,7 @@ select[data-paragraph-select] {
   transition: border-color 0.15s ease !important;
 }
 
-html[data-theme="dark"] .paragraph-assignment select,
-html[data-theme="dark"] .paragraph-assignment-controls .mock-select,
-html[data-theme="dark"] select.mock-select {
-  background: #121815 !important;
-  border-color: rgba(255, 255, 255, 0.14) !important;
-  color: #f1f5f9 !important;
-}
+
 
 select.mock-select:focus {
   border-color: #f47b20 !important;
@@ -726,15 +697,10 @@ body[dir="rtl"] .paragraph-tools-row {
   border-color: #f47b20 !important;
 }
 
-html[data-theme="dark"] .mini-tool {
-  background: #141414 !important;
-  border-color: #222222 !important;
-  color: #cbd5e1 !important;
-}
+
 
 /* 7. COMPACT CORRECT & WRONG FEEDBACK (NO GIANT CARDS) */
-.assignment-correct-answer,
-html[data-theme="dark"] .assignment-correct-answer {
+.assignment-correct-answer{
   display: flex !important;
   align-items: center !important;
   gap: 6px !important;
@@ -781,10 +747,7 @@ html[data-theme="dark"] .assignment-correct-answer {
   background: transparent !important;
 }
 
-html[data-theme="dark"] .exam-text,
-html[data-theme="dark"] .exam-text-card .exam-text {
-  color: #f1f5f9 !important;
-}
+
 
 html[data-theme="light"] .exam-text,
 html[data-theme="light"] .exam-text-card .exam-text {
@@ -853,7 +816,7 @@ html[data-theme="light"] .exercise-actions {
 .mock-top .mock-exam-controls>.mock-status{grid-area:status!important;display:flex;align-items:center;justify-content:flex-end;gap:10px;min-width:max-content;white-space:nowrap}
 .mock-top .mock-exam-controls>.mock-tabs{grid-area:tabs!important;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%;min-width:0;margin:0}
 .mock-root#app{padding-top:calc(var(--mock-header-height, 0px) + 18px)!important}
-html[data-theme="dark"] .mock-top{background:#080808!important;border-color:#222222!important}
+
 @media(max-width:700px){
   .mock-top .mock-brand-bar{min-height:58px;padding-left:12px!important;padding-right:12px!important}
   .mock-brand{font-size:16px}
