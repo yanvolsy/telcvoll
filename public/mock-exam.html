@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>الامتحان التجريبي — TELC Voll</title>
-<link rel="stylesheet" href="/assets/app.css?v=20260928-polished-v4">
+<link rel="stylesheet" href="/assets/app.css?v=20260928-polished-v1">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -114,8 +114,8 @@ html[data-theme="dark"] .mock-word-card{background:#141414;border-color:#333;col
 .mock-nav-btn.light{background:var(--white);border:1.5px solid var(--line);color:var(--ink)}
 .mock-nav-btn.light:hover:not(:disabled){border-color:#f47b20;color:#f47b20}
 .mock-nav-btn.light:disabled{opacity:.4;cursor:not-allowed}
-.mock-nav-btn.dark{background:#111827;color:#fff}
-.mock-nav-btn.dark:hover{background:#1f2937;transform:translateY(-1px)}
+.mock-nav-btn.dark{background:#0D1511;color:#fff}
+.mock-nav-btn.dark:hover{background:#14231B;transform:translateY(-1px)}
 .mock-nav-btn.btn-finish-mock{background:#f47b20 !important;color:#fff !important;box-shadow:0 4px 18px rgba(244,123,32,0.4) !important}
 .mock-nav-btn.btn-finish-mock:hover{background:#e06912 !important;transform:scale(1.02)}
 
@@ -187,22 +187,6 @@ html[data-theme="dark"] .mock-nav-btn.dark:hover { background: #e7651e !importan
   .mock-status .header-actions { gap: 4px !important; }
   .mock-status .header-actions .icon-btn { width: 30px !important; height: 30px !important; min-width: 30px !important; border-radius: 9px !important; }
   .mock-tab { min-height: 46px; padding: 7px 6px; font-size: 12px; }
-}
-
-/* ===== Mock exam final navigation and unified TELC palette ===== */
-.mock-teil-tabs{display:flex;align-items:center;justify-content:flex-start;gap:6px;width:100%;margin-top:6px;padding:0;direction:ltr;}
-.mock-teil-tab{min-width:84px;height:38px;padding:0 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface,var(--white));color:var(--ink);font:inherit;font-weight:850;cursor:pointer;transition:all .18s ease;}
-.mock-teil-tab:hover{border-color:var(--green);color:var(--green)}
-.mock-teil-tab.active{background:linear-gradient(135deg,#ff7a2f,#e45f18);color:#fff;border-color:#ff7a2f;box-shadow:0 5px 16px rgba(255,122,47,.18)}
-html[data-theme="dark"] .mock-top{background:#050b08 !important;border-color:#1d342a !important}
-html[data-theme="dark"] .mock-card{background:#0d1712 !important;border-color:#1d342a !important}
-html[data-theme="dark"] .mock-tab,html[data-theme="dark"] .mock-teil-tab{background:#07110c !important;color:#edf6f1 !important;border-color:#1d342a !important}
-html[data-theme="dark"] .mock-tab.active,html[data-theme="dark"] .mock-teil-tab.active{background:linear-gradient(135deg,#ff7a2f,#e45f18) !important;color:#fff !important;border-color:#ff7a2f !important}
-html[data-theme="dark"] .mock-reading-panel,html[data-theme="dark"] .mock-spb-card,html[data-theme="dark"] .mock-spb-option-btn{background:#07110c !important;border-color:#1d342a !important;color:#edf6f1 !important}
-@media(max-width:700px){
-  .mock-teil-tabs{overflow-x:auto;scrollbar-width:none;justify-content:stretch}
-  .mock-teil-tabs::-webkit-scrollbar{display:none}
-  .mock-teil-tab{flex:1 0 0;min-width:72px;height:36px;padding:0 8px;font-size:11px}
 }
 </style>
 <style><!-- TELC Voll: unified homepage typography -->
@@ -868,7 +852,7 @@ html[data-theme="light"] .exercise-actions {
 .mock-top .mock-exam-controls>.mock-status{grid-area:status!important;display:flex;align-items:center;justify-content:flex-start;gap:10px;min-width:max-content;white-space:nowrap}
 .mock-top .mock-exam-controls>.mock-tabs{grid-area:tabs!important;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%;min-width:0;margin:0}
 .mock-root#app{padding-top:calc(var(--mock-header-height, 0px) + 18px)!important}
-html[data-theme="dark"] .mock-top{background:#080808!important;border-color:#303030!important}
+html[data-theme="dark"] .mock-top{background:#080D0A!important;border-color:#1D3A2F!important}
 @media(max-width:700px){
   .mock-top .mock-brand-bar{min-height:58px;padding-left:12px!important;padding-right:12px!important}
   .mock-brand{font-size:16px}
@@ -897,14 +881,14 @@ html[data-theme="dark"] .mock-top{background:#080808!important;border-color:#303
   </div>
   <div class="mock-root mock-exam-controls">
     <div class="mock-status">
-      <span class="muted" data-i18n="time_left">الوقت المتبقي للامتحان</span>
-      <strong id="examTimer" class="mock-timer">--:--</strong>
+      <strong id="examTimer" class="mock-timer">--:--:--</strong>
     </div>
-    <nav id="mockTabs" class="mock-tabs" aria-label="أقسام الامتحان"></nav><nav id="mockTeilTabs" class="mock-teil-tabs" aria-label="Teile des aktuellen Abschnitts"></nav>
+    <nav id="mockTabs" class="mock-tabs" aria-label="أقسام الامتحان"></nav>
+    <div id="mockTeilTabs" class="mock-teil-tabs" aria-label="أجزاء القسم"></div>
   </div>
 </header>
 <main id="app" class="mock-root"><div class="student-loading">جارٍ تحميل الامتحان…</div></main>
-<script src="/assets/i18n.js?v=20260928-polished-v4"></script><script src="/assets/app.js"></script>
+<script src="/assets/i18n.js?v=20260927-subscription-activation-mail-v10"></script><script src="/assets/app.js"></script>
 <script>
 const sessionId = qs('session');
 const SECTION_ORDER = ['Lesen','Hören','Sprachbausteine','Schreiben'];
@@ -952,41 +936,29 @@ function jumpToSection(section){
 }
 function renderTabs(){
   const tabs = document.getElementById('mockTabs');
+  const teilTabs = document.getElementById('mockTeilTabs');
   if(!tabs) return;
   tabs.innerHTML = SECTION_ORDER.map(s=>{
     const inds = sectionIndexes(s);
     const exists = inds.length > 0;
     return `<button class="mock-tab ${currentSection()===s?'active':''}" data-section="${s}" ${exists?'':'disabled'}>${SECTION_LABEL[s]}<small>${exists?inds.length+' Aufgabe':'nicht verfügbar'}</small></button>`;
   }).join('');
+  if(teilTabs){
+    const sec=currentSection();
+    const parts=[...new Set((state.session?.tasks||[]).filter(x=>x.section===sec).map(x=>String(x.teil||'').trim()).filter(Boolean))]
+      .sort((a,b)=>a.localeCompare(b,'de',{numeric:true}));
+    teilTabs.innerHTML=parts.map(part=>{
+      const idx=(state.session?.tasks||[]).findIndex(x=>x.section===sec&&String(x.teil||'').trim()===part);
+      return `<button type="button" class="mock-teil-tab ${currentTask()?.teil===part?'active':''}" data-teil="${esc(part)}">${esc(part)}</button>`;
+    }).join('');
+    teilTabs.hidden=parts.length===0;
+    teilTabs.querySelectorAll('[data-teil]').forEach(b=>b.onclick=()=>{
+      const secNow=currentSection();
+      const i=(state.session?.tasks||[]).findIndex(x=>x.section===secNow&&String(x.teil||'').trim()===String(b.dataset.teil||''));
+      if(i>=0){persistCurrent();state.currentIndex=i;render();}
+    });
+  }
   tabs.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>jumpToSection(b.dataset.section));
-  renderTeilTabs();
-}
-function availableTeileForSection(section){
-  const order=['Teil 1','Teil 2','Teil 3'];
-  const seen=new Set();
-  (state.session?.tasks||[]).forEach(task=>{
-    if(task.section===section && task.teil) seen.add(String(task.teil));
-  });
-  return order.filter(t=>seen.has(t));
-}
-function renderTeilTabs(){
-  const wrap=document.getElementById('mockTeilTabs');
-  if(!wrap) return;
-  const section=currentSection();
-  const parts=availableTeileForSection(section);
-  if(!parts.length){wrap.innerHTML='';wrap.hidden=true;return;}
-  const current=String(currentTask()?.teil||'');
-  wrap.hidden=false;
-  wrap.innerHTML=parts.map(part=>`<button type="button" class="mock-teil-tab ${current===part?'active':''}" data-mock-teil="${esc(part)}">${esc(part)}</button>`).join('');
-  wrap.querySelectorAll('[data-mock-teil]').forEach(btn=>btn.onclick=()=>jumpToTeil(section,btn.dataset.mockTeil));
-}
-function jumpToTeil(section,teil){
-  const index=(state.session?.tasks||[]).findIndex(task=>task.section===section && String(task.teil||'')===String(teil));
-  if(index<0)return;
-  persistCurrent();
-  state.currentIndex=index;
-  saveSession();
-  render();
 }
 function baseShell(inner){
   const sec = currentSection();

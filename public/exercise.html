@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1310"><title>تمرين TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260928-polished-v4">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1310"><title>تمرين TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260928-polished-v1">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
@@ -2730,26 +2730,11 @@ function renderExerciseHeaderCard(){
   const title = String(ex.title || '');
   const activeDuration = duration || (model?.exercise ? getTelcDurationSeconds(model.exercise) : 1200);
   const initialMin = String(Math.floor(activeDuration / 60)).padStart(2, '0');
-  const timer = (mockMode||activeDuration)
-    ? `<div class="modern-digital-clock progress-pill ${mockMode?'mock-global-timer':''}" id="timerEl" role="timer" aria-label="Timer"><span class="timer-icon" aria-hidden="true">⏱</span><span class="timer-digits">${initialMin}:00</span></div>`
-    : '';
+  const timer = (mockMode||activeDuration) ? `<div class="modern-digital-clock progress-pill ${mockMode?'mock-global-timer':''}" id="timerEl" role="timer" aria-label="Timer"><span class="timer-icon" aria-hidden="true">⏱</span><span class="timer-digits">${initialMin}:00</span></div>` : '';
   const canShuffle = !mockMode && isShuffleAllowed(sec, teil);
-  const headingShuffle = canShuffle
-    ? `<button type="button" class="exercise-heading-shuffle" id="headingShuffleBtn" title="${text('خلط الأسئلة','Aufgaben mischen')}" aria-label="${text('خلط الأسئلة','Aufgaben mischen')}"><span class="shuffle-icon" aria-hidden="true">⤨</span></button>`
-    : '';
-  const titleMarkup = title
-    ? `<div class="thema-title-row is-revealed-title">
-         <div class="thema-title-content"><h1 id="thema-title" data-content-id="thema-title" data-source="${esc(title)}">${esc(title)}</h1></div>
-         <div class="thema-tools">${textTools(title,'thema-title')}</div>
-       </div>`
-    : '';
-  return `<header class="exercise-header-card exercise-heading exercise-sticky-bar" id="exerciseStickyBar">
-    <div class="exercise-single-top-bar exercise-heading-meta exercise-control-bar exercise-sub-bar" id="exerciseControlBar">
-      ${titleMarkup ? `<div class="top-bar-title-cluster exercise-card-title-bar exercise-heading-title">${titleMarkup}</div>` : ''}
-      ${headingShuffle ? `<div class="top-bar-shuffle-cluster exercise-control-shuffle-slot">${headingShuffle}</div>` : ''}
-      ${timer ? `<div class="top-bar-timer-cluster exercise-card-timer exercise-heading-timer">${timer}</div>` : ''}
-    </div>
-  </header>`;
+  const headingShuffle = canShuffle ? `<button type="button" class="exercise-heading-shuffle" id="headingShuffleBtn" title="${text('خلط الأسئلة','Aufgaben mischen')}" aria-label="${text('خلط الأسئلة','Aufgaben mischen')}"><span class="shuffle-icon" aria-hidden="true">⤨</span><span>${text('خلط الأسئلة','Aufgaben mischen')}</span></button>` : '';
+  const titleMarkup = title ? `<div class="thema-title-row is-revealed-title"><div class="thema-title-content"><h1 id="thema-title" data-content-id="thema-title" data-source="${esc(title)}">${esc(title)}</h1></div><div class="thema-tools">${textTools(title,'thema-title')}</div></div>` : '';
+  return `<header class="exercise-header-card exercise-heading exercise-sticky-bar" id="exerciseStickyBar"><div class="exercise-single-top-bar exercise-heading-meta exercise-control-bar exercise-sub-bar" id="exerciseControlBar">${titleMarkup?`<div class="top-bar-title-cluster exercise-card-title-bar exercise-heading-title">${titleMarkup}</div>`:''}<div class="top-bar-shuffle-cluster exercise-control-shuffle-slot">${headingShuffle}</div>${timer?`<div class="top-bar-timer-cluster exercise-card-timer exercise-heading-timer">${timer}</div>`:''}</div></header>`;
 }
 function renderExerciseControlBar(){
   // Fully integrated into the unified sticky exercise header card
