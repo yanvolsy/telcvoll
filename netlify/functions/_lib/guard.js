@@ -109,7 +109,7 @@ async function requireStudent(event, options = {}) {
   try {
     const sRes = await pool.query(
       `SELECT id, name, email, first_name, last_name, phone, country,
-              profile_completed, is_blocked, is_paid
+              profile_completed, is_blocked, is_paid, subscription_expires_at
        FROM students WHERE id = $1`,
       [studentId]
     );
@@ -119,13 +119,19 @@ async function requireStudent(event, options = {}) {
     }
 
     const subscription = await getStudentSubscription(pool, s.id);
-    const isPaid = !!(subscription.active === true || subscription.is_paid === true || s.is_paid === true);
-    if (isPaid && !subscription.active) {
+    // The source of truth is an active/unexpired subscription. A legacy paid flag is
+    // accepted only when its stored expiry is still in the future.
+    const legacyExpiry = s.subscription_expires_at ? new Date(s.subscription_expires_at) : null;
+    const legacyActive = !!(s.is_paid === true && legacyExpiry && !Number.isNaN(legacyExpiry.getTime()) && legacyExpiry > new Date());
+    if (!subscription.active && legacyActive) {
       subscription.active = true;
       subscription.is_paid = true;
       subscription.plan = subscription.plan || 'اشتراك كامل B1 · B2 · C1';
       subscription.plan_name = subscription.plan_name || 'اشتراك كامل B1 · B2 · C1';
+      subscription.expires_at = subscription.expires_at || legacyExpiry.toISOString();
+      subscription.ai_enabled = subscription.ai_enabled === true;
     }
+    const isPaid = subscription.active === true;
 
     return {
       student_id: s.id,
@@ -139,7 +145,7 @@ async function requireStudent(event, options = {}) {
       profile_completed: s.profile_completed !== false,
       subscription,
       is_paid: isPaid,
-      ai_enabled: isPaid ? (subscription.ai_enabled || true) : false,
+      ai_enabled: isPaid && subscription.ai_enabled === true,
     };
   } catch (err) {
     console.error('Error in requireStudent guard:', err);
