@@ -5,7 +5,7 @@ Allow: /self-test.html
 Allow: /login.html
 Allow: /register.html
 Allow: /contact.html
-Allow: /install.html
+Disallow: /install.html
 Disallow: /admin/
 Disallow: /api/
 Disallow: /dashboard.html

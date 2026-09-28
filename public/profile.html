@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f47b20"><title>ملفي | TELC Voll</title>
-<link rel="stylesheet" href="/assets/app.css?v=20260927-premium-ui-v1">
+<link rel="stylesheet" href="/assets/app.css?v=20260928-polished-v1">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
@@ -52,7 +52,7 @@ function render(){
             <small>${text('ينتهي في: ','Gültig bis: ')}${sub.expires_at ? new Date(sub.expires_at).toLocaleDateString(lang()==='ar'?'ar-u-nu-latn':'de-DE', { year:'numeric', month:'short', day:'numeric' }) : ''}</small>
           ` : `
             <strong style="color:var(--green);">🟢 ${text('نوع الحساب: حساب مجاني','Kontotyp: Kostenlos')}</strong>
-            <small>${text('وصول للتمارين المجانية. يمكنك ترقية حسابك لفتح جميع المحتويات.','Zugang zu kostenlosen Inhalten.')} <a href="/#plans" style="color:var(--green);font-weight:900;text-decoration:underline;margin-inline-start:6px;">${text('ترقية الاشتراك ⚡','Jetzt abonnieren')}</a></small>
+            <small>${text('وصول للتمارين المجانية. يمكنك ترقية حسابك لفتح جميع المحتويات.','Zugang zu kostenlosen Inhalten.')} <a href="/plans.html" style="color:var(--green);font-weight:900;text-decoration:underline;margin-inline-start:6px;">${text('ترقية الاشتراك ⚡','Jetzt abonnieren')}</a></small>
           `}
         </div>
         <div class="profile-levels"><span>B1</span><span>B2</span><span>C1</span></div>
