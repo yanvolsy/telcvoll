@@ -11596,3 +11596,151 @@ html body > #content.exercise-page .exam-workspace {
     font-size:13px !important;
   }
 }
+
+/* ==========================================================================
+   FINAL TARGETED MOBILE / EXERCISE POLISH — 2026-09-28
+   Only: model-answer button, mobile section navigation, exercise shuffle.
+   ========================================================================== */
+
+/* Model Answer: clear orange action in both themes, especially dark mode. */
+.exercise-actions .model-btn,
+html[data-theme="dark"] .exercise-actions .model-btn {
+  background: var(--exercise-accent) !important;
+  background-color: var(--exercise-accent) !important;
+  color: #fff !important;
+  border: 1px solid var(--exercise-accent) !important;
+  box-shadow: 0 4px 14px rgba(255,122,47,.16) !important;
+}
+.exercise-actions .model-btn:hover,
+html[data-theme="dark"] .exercise-actions .model-btn:hover {
+  background: var(--green-dark) !important;
+  background-color: var(--green-dark) !important;
+  color: #fff !important;
+  border-color: var(--green-dark) !important;
+  transform: translateY(-1px) !important;
+}
+.exercise-actions .model-btn:focus-visible {
+  outline: 2px solid var(--exercise-accent) !important;
+  outline-offset: 2px !important;
+}
+
+/* Exercise Shuffle: one clean icon button; no old circular treatment. */
+html body > #content.exercise-page .exercise-heading-shuffle,
+html body > #content.exercise-page .top-bar-shuffle-cluster .exercise-heading-shuffle {
+  width: 42px !important;
+  min-width: 42px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 11px !important;
+  border: 1px solid var(--line) !important;
+  background: var(--surface) !important;
+  color: var(--ink) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+html body > #content.exercise-page .exercise-heading-shuffle:hover,
+html body > #content.exercise-page .top-bar-shuffle-cluster .exercise-heading-shuffle:hover {
+  background: var(--exercise-accent-soft) !important;
+  color: var(--exercise-accent) !important;
+  border-color: var(--exercise-accent) !important;
+  box-shadow: 0 4px 12px rgba(255,122,47,.14) !important;
+  transform: translateY(-1px) !important;
+}
+html body > #content.exercise-page .exercise-heading-shuffle .shuffle-icon {
+  width: 22px !important;
+  height: 22px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+html body > #content.exercise-page .exercise-heading-shuffle .shuffle-icon svg {
+  width: 20px !important;
+  height: 20px !important;
+  display: block !important;
+}
+html body > #content.exercise-page .exercise-heading-shuffle > span:not(.shuffle-icon) {
+  display: none !important;
+}
+
+/* Mobile: section navigation remains readable and app-like.
+   3 items on the first row, 2 centered on the second row. */
+@media (max-width: 700px) {
+  .student-hub .section-switch {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+    padding: 5px !important;
+    border-radius: 16px !important;
+  }
+  .student-hub .section-switch .section-btn,
+  .student-hub .section-switch .section-btn:nth-child(4),
+  .student-hub .section-switch .section-btn:nth-child(5) {
+    min-width: 0 !important;
+    width: auto !important;
+    min-height: 62px !important;
+    height: 62px !important;
+    padding: 7px 4px !important;
+    border-radius: 11px !important;
+    gap: 4px !important;
+  }
+  .student-hub .section-switch .section-btn:nth-child(1),
+  .student-hub .section-switch .section-btn:nth-child(2),
+  .student-hub .section-switch .section-btn:nth-child(3) {
+    grid-column: span 2 !important;
+  }
+  .student-hub .section-switch .section-btn:nth-child(4),
+  .student-hub .section-switch .section-btn:nth-child(5) {
+    grid-column: span 3 !important;
+  }
+  .student-hub .section-switch .section-btn > span:first-child {
+    margin: 0 !important;
+    font-size: 17px !important;
+    line-height: 1 !important;
+  }
+  .student-hub .section-switch .section-btn-copy {
+    width: 100% !important;
+    min-width: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 2px !important;
+  }
+  .student-hub .section-switch .section-btn-copy b {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    font-size: 10.5px !important;
+    line-height: 1.15 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-align: center !important;
+  }
+  .student-hub .section-switch .section-btn-copy small {
+    font-size: 8.5px !important;
+    line-height: 1.1 !important;
+  }
+
+  .exercise-actions .model-btn {
+    min-width: 0 !important;
+  }
+
+  html body > #content.exercise-page .exercise-heading-shuffle,
+  html body > #content.exercise-page .top-bar-shuffle-cluster .exercise-heading-shuffle {
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    border-radius: 11px !important;
+  }
+  html body > #content.exercise-page .exercise-heading-shuffle .shuffle-icon svg {
+    width: 19px !important;
+    height: 19px !important;
+  }
+}
