@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080808">
 <title>الامتحان التجريبي — TELC Voll</title>
 <link rel="stylesheet" href="/assets/app.css?v=20260928-polished-v1">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
@@ -114,8 +115,8 @@ html[data-theme="dark"] .mock-word-card{background:#141414;border-color:#333;col
 .mock-nav-btn.light{background:var(--white);border:1.5px solid var(--line);color:var(--ink)}
 .mock-nav-btn.light:hover:not(:disabled){border-color:#f47b20;color:#f47b20}
 .mock-nav-btn.light:disabled{opacity:.4;cursor:not-allowed}
-.mock-nav-btn.dark{background:#0D1511;color:#fff}
-.mock-nav-btn.dark:hover{background:#14231B;transform:translateY(-1px)}
+.mock-nav-btn.dark{background:#141414;color:#fff}
+.mock-nav-btn.dark:hover{background:#222222;transform:translateY(-1px)}
 .mock-nav-btn.btn-finish-mock{background:#f47b20 !important;color:#fff !important;box-shadow:0 4px 18px rgba(244,123,32,0.4) !important}
 .mock-nav-btn.btn-finish-mock:hover{background:#e06912 !important;transform:scale(1.02)}
 
@@ -726,8 +727,8 @@ body[dir="rtl"] .paragraph-tools-row {
 }
 
 html[data-theme="dark"] .mini-tool {
-  background: #121815 !important;
-  border-color: rgba(255, 255, 255, 0.12) !important;
+  background: #141414 !important;
+  border-color: #222222 !important;
   color: #cbd5e1 !important;
 }
 
@@ -848,18 +849,18 @@ html[data-theme="light"] .exercise-actions {
 .mock-brand-group{display:flex;align-items:center;gap:12px;min-width:0}
 .mock-brand{color:var(--green)!important;font-size:18px;font-weight:950}
 .mock-top .header-actions{display:flex;align-items:center;gap:10px}
-.mock-top .mock-exam-controls{display:grid!important;grid-template-columns:max-content minmax(0,1fr)!important;grid-template-areas:"status tabs"!important;align-items:center;gap:16px;padding-top:10px!important;padding-bottom:10px!important}
-.mock-top .mock-exam-controls>.mock-status{grid-area:status!important;display:flex;align-items:center;justify-content:flex-start;gap:10px;min-width:max-content;white-space:nowrap}
+.mock-top .mock-exam-controls{display:grid!important;grid-template-columns:minmax(0,1fr) max-content!important;grid-template-areas:"tabs status"!important;align-items:center;gap:16px;padding-top:10px!important;padding-bottom:10px!important}
+.mock-top .mock-exam-controls>.mock-status{grid-area:status!important;display:flex;align-items:center;justify-content:flex-end;gap:10px;min-width:max-content;white-space:nowrap}
 .mock-top .mock-exam-controls>.mock-tabs{grid-area:tabs!important;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%;min-width:0;margin:0}
 .mock-root#app{padding-top:calc(var(--mock-header-height, 0px) + 18px)!important}
-html[data-theme="dark"] .mock-top{background:#080D0A!important;border-color:#1D3A2F!important}
+html[data-theme="dark"] .mock-top{background:#080808!important;border-color:#222222!important}
 @media(max-width:700px){
   .mock-top .mock-brand-bar{min-height:58px;padding-left:12px!important;padding-right:12px!important}
   .mock-brand{font-size:16px}
   .mock-top .header-actions{gap:6px}
   .mock-top .header-actions .icon-btn{width:36px!important;height:36px!important;min-width:36px!important}
   .mock-top .mock-exam-controls{grid-template-columns:minmax(0,1fr)!important;grid-template-areas:"status" "tabs"!important;gap:8px;padding:8px 12px!important}
-  .mock-top .mock-exam-controls>.mock-status{justify-content:space-between;min-width:0}
+  .mock-top .mock-exam-controls>.mock-status{justify-content:flex-end;min-width:0}
   .mock-top .mock-exam-controls>.mock-tabs{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
   .mock-top .mock-tab{min-height:44px;padding:6px 4px;font-size:11px}
   .mock-top .mock-tab small{font-size:10px}
