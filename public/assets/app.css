@@ -11802,3 +11802,16 @@ html[data-theme="light"] body::after {
     rgba(255,255,255,.08) !important;
   display: block !important;
 }
+
+/* TELC Voll — subtle translucent cards over ambient background */
+html[data-theme="dark"] :where(.card,.panel,.topic-card,.student-card,.admin-card,.admin-stat,.admin-tool,.stat,.plan-item,.exam-card,.table-card,.toolbar-panel,.code-table-wrap,.table-wrap,.modal-box,.modal,.editor-wrapper,.preview-frame) {
+  background: rgba(20,20,20,.82) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border-color: rgba(255,255,255,.08) !important;
+}
+html[data-theme="light"] :where(.card,.panel,.topic-card,.student-card,.admin-card,.admin-stat,.admin-tool,.stat,.plan-item,.exam-card,.table-card,.toolbar-panel,.code-table-wrap,.table-wrap,.modal-box,.modal,.editor-wrapper,.preview-frame) {
+  background: rgba(255,255,255,.86) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
