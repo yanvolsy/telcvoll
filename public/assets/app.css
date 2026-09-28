@@ -8,7 +8,7 @@
 :root{
   --green:#FF7A2F;--green-dark:#e05f15;--green-soft:rgba(255,122,47,.12);
   --exercise-accent:#FF7A2F;
-  --ink:#eef5f2;--muted:#9db0aa;--line:#1D3A2F;--bg:#080808;
+  --ink:#eef5f2;--muted:#9db0aa;--line:#222222;--bg:#080808;
   --white:#141414;--gold:#e3ac4c;--danger:#e06c62;
   --shadow:0 10px 28px rgba(0,0,0,.38)
 }
@@ -66,7 +66,7 @@ body::after {
 html[data-theme="dark"]{
   --green:#FF7A2F;--green-dark:#e05f15;--green-soft:rgba(255,122,47,.12);
   --exercise-accent:#FF7A2F;
-  --ink:#eef5f2;--muted:#9db0aa;--line:#1D3A2F;--bg:#080808;
+  --ink:#eef5f2;--muted:#9db0aa;--line:#222222;--bg:#080808;
   --white:#141414;--gold:#e3ac4c;--danger:#e06c62;
   --shadow:0 10px 28px rgba(0,0,0,.38)
 }
@@ -1126,22 +1126,22 @@ html[data-theme="dark"] .admin-shell .customer-info small,html[data-theme="dark"
 }
 
 html[data-theme="dark"] {
-  --green: #fb923c;
-  --green-dark: #f97316;
-  --green-soft: rgba(251, 146, 60, 0.12);
-  --green-rgb: 251, 146, 60;
-  --ink: #f8fafc;
-  --ink-rgb: 248, 250, 252;
-  --muted: #8fa099;
-  --line: #121815;
-  --bg: #090d0b;
-  --white: #121815;
-  --gold: #fbbf24;
-  --danger: #f87171;
+  --green: #FF7A2F;
+  --green-dark: #e05f15;
+  --green-soft: rgba(255, 122, 47, 0.12);
+  --green-rgb: 255, 122, 47;
+  --ink: #eef5f2;
+  --ink-rgb: 238, 245, 242;
+  --muted: #9db0aa;
+  --line: #222222;
+  --bg: #080808;
+  --white: #141414;
+  --gold: #e3ac4c;
+  --danger: #e06c62;
   --shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
   --shadow-md: 0 18px 48px rgba(0, 0, 0, 0.62);
   --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.75);
-  --shadow-glow: 0 0 40px rgba(251, 146, 60, 0.28);
+  --shadow-glow: 0 0 40px rgba(255, 122, 47, 0.28);
 }
 
 /* Base Polish */
@@ -11310,722 +11310,804 @@ html[data-theme="dark"] .hub-status-card-action:hover { background:var(--green) 
 }
 
 /* ========================================================================
-   TELC VOLL — DASHBOARD REFINEMENT PASS 2
-   Requested visual direction:
-   - Dark mode = orange + deep green-black only (no blue/slate cast)
-   - Desktop: greeting above title; KPI cards beside the title block
-   - Mobile: five section buttons on one compact horizontal row
-   - Mobile: shuffle + Teil controls share one row; search remains below
-   - Exercise cards are shorter and denser
-   - Preserve all existing RTL/LTR decisions and functionality
+   TELC VOLL — FINAL POLISHED STYLESHEET
+   100% Preserved Light Mode, Admin Dark Mode Visual Synchronization,
+   Unified B1/B2/C1, Compact Mobile Navigation, Clean Title Bar,
+   Refined Mock Exam, and Universal German Text Containment.
    ======================================================================== */
 
-/* --- Dark palette: deep green-black + TELC orange --- */
+/* --- 1. Dark Theme Synchronization with Admin Panel --- */
 html[data-theme="dark"] {
-  --bg:#050907 !important;
-  --surface:#0a120f !important;
-  --surface-elevated:#0e1a15 !important;
-  --surface-hover:#13251d !important;
-  --surface-glass:rgba(10,18,15,.90) !important;
-  --surface-glass-border:rgba(255,122,47,.14) !important;
-  --line:#1d3a2f !important;
-  --line-subtle:#14281f !important;
-  --ink:#f3f7f5 !important;
-  --text-secondary:#d3e0da !important;
-  --muted:#9ab0a6 !important;
-  --white:#0a120f !important;
-  --green:#ff7a2f !important;
-  --green-dark:#e05f15 !important;
-  --green-soft:rgba(255,122,47,.11) !important;
-  --brand:#ff7a2f !important;
-  --brand-hover:#ff9148 !important;
-  --brand-active:#e05f15 !important;
-  --brand-soft:rgba(255,122,47,.11) !important;
-  --brand-border:rgba(255,122,47,.36) !important;
-  --shadow-sm:0 2px 10px rgba(0,0,0,.34) !important;
-  --shadow:0 9px 28px rgba(0,0,0,.42) !important;
-  --shadow-lg:0 18px 48px rgba(0,0,0,.55) !important;
-  --shadow-brand:0 8px 24px rgba(255,122,47,.20) !important;
+  --bg: #080808 !important;
+  --surface: #141414 !important;
+  --surface-elevated: #1a1a1a !important;
+  --surface-hover: #222222 !important;
+  --surface-glass: rgba(20, 20, 20, 0.92) !important;
+  --surface-glass-border: rgba(255, 122, 47, 0.14) !important;
+  --line: #222222 !important;
+  --line-subtle: #1a1a1a !important;
+  --ink: #eef5f2 !important;
+  --text-secondary: #c8d4ce !important;
+  --muted: #9db0aa !important;
+  --white: #141414 !important;
+  --green: #FF7A2F !important;
+  --green-dark: #e05f15 !important;
+  --green-soft: rgba(255, 122, 47, 0.12) !important;
+  --brand: #FF7A2F !important;
+  --brand-hover: #ff9148 !important;
+  --brand-active: #e05f15 !important;
+  --brand-soft: rgba(255, 122, 47, 0.12) !important;
+  --brand-border: rgba(255, 122, 47, 0.36) !important;
+  --shadow: 0 10px 28px rgba(0, 0, 0, 0.45) !important;
+  --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.35) !important;
+  --shadow-md: 0 18px 48px rgba(0, 0, 0, 0.60) !important;
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.70) !important;
 }
 
-/* Keep common dashboard surfaces in the same green-black family. */
-html[data-theme="dark"] body,
-html[data-theme="dark"] .student-hub,
-html[data-theme="dark"] .student-hub .hub-status-card,
-html[data-theme="dark"] .student-hub .hub-progress-card,
-html[data-theme="dark"] .student-hub .level-switch,
-html[data-theme="dark"] .student-hub .section-switch,
-html[data-theme="dark"] .student-hub .topic-toolbar,
-html[data-theme="dark"] .student-hub .topic-search-wrap input,
-html[data-theme="dark"] .student-hub .teil-tabs,
-html[data-theme="dark"] .student-hub .shuffle-toggle,
-html[data-theme="dark"] .student-hub .topic-card {
-  background-color:var(--surface) !important;
-  color:var(--ink) !important;
-  border-color:var(--line) !important;
-}
-html[data-theme="dark"] .student-hub .level-switch .level-btn:not(.active),
-html[data-theme="dark"] .student-hub .section-switch .section-btn:not(.active),
-html[data-theme="dark"] .student-hub .teil-tab:not(.active),
-html[data-theme="dark"] .student-hub .shuffle-toggle:not(.is-active) {
-  background:#07100c !important;
-  color:var(--ink) !important;
-  border-color:var(--line) !important;
-}
-html[data-theme="dark"] .student-hub .level-switch .level-btn.active,
-html[data-theme="dark"] .student-hub .section-switch .section-btn.active,
-html[data-theme="dark"] .student-hub .teil-tab.active,
-html[data-theme="dark"] .student-hub .shuffle-toggle.is-active {
-  background:linear-gradient(135deg,#ff7a2f 0%,#e05f15 100%) !important;
-  color:#fff !important;
-  border-color:#ff7a2f !important;
-  box-shadow:0 7px 20px rgba(255,122,47,.20) !important;
-}
-html[data-theme="dark"] .student-hub .hub-progress-track {
-  background:#07100c !important;
-  border-color:#1d3a2f !important;
-}
-html[data-theme="dark"] .student-hub .hub-progress-fill {
-  background:linear-gradient(90deg,#ff7a2f 0%,#ff9148 100%) !important;
-}
-html[data-theme="dark"] .student-hub .hub-status-card-action {
-  background:#07100c !important;
-  color:var(--ink) !important;
-  border-color:var(--line) !important;
-}
-html[data-theme="dark"] .student-hub .hub-status-card-action:hover {
-  background:#ff7a2f !important;
-  color:#fff !important;
-  border-color:#ff7a2f !important;
-}
-html[data-theme="dark"] .student-hub .topic-search-wrap input::placeholder {
-  color:#8ea79c !important;
-}
-
-/* --- Desktop dashboard hierarchy: greeting -> title on the left/right block,
-      account + progress cards beside it, eliminating dead space. --- */
-@media (min-width:701px) {
-  .student-hub .hub-head {
-    display:grid !important;
-    grid-template-columns:minmax(0,1fr) minmax(500px,1.15fr) !important;
-    align-items:center !important;
-    gap:28px !important;
-    margin-bottom:24px !important;
-  }
-  .student-hub .hub-title-block {
-    display:flex !important;
-    flex-direction:column !important;
-    align-items:flex-start !important;
-    justify-content:center !important;
-    gap:8px !important;
-    min-width:0 !important;
-  }
-  .student-hub .hub-title-block .hub-greeting {
-    order:1 !important;
-    margin:0 !important;
-    align-self:flex-start !important;
-  }
-  .student-hub .hub-title-block h1 {
-    order:2 !important;
-    margin:0 !important;
-    font-size:clamp(34px,3.5vw,48px) !important;
-    line-height:1.12 !important;
-  }
-  .student-hub .hub-title-block > .muted {
-    order:3 !important;
-    flex-basis:auto !important;
-    margin:0 !important;
-    font-size:14px !important;
-  }
-  .student-hub .hub-kpis {
-    width:100% !important;
-    display:grid !important;
-    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-    gap:12px !important;
-    min-width:0 !important;
-  }
-  .student-hub .hub-status-card,
-  .student-hub .hub-progress-card {
-    min-width:0 !important;
-    min-height:154px !important;
-    padding:16px !important;
-  }
-}
-
-/* --- Mobile heading and progress card --- */
-@media (max-width:700px) {
-  .student-hub .hub-head {
-    display:block !important;
-    margin-bottom:12px !important;
-  }
-  .student-hub .hub-title-block {
-    display:grid !important;
-    grid-template-columns:minmax(0,1fr) minmax(0,1.15fr) !important;
-    align-items:center !important;
-    gap:7px !important;
-  }
-  .student-hub .hub-title-block .hub-greeting {
-    grid-column:2 !important;
-    grid-row:1 !important;
-    width:100% !important;
-    box-sizing:border-box !important;
-    padding:7px 8px !important;
-    font-size:10px !important;
-    white-space:nowrap !important;
-    overflow:hidden !important;
-    text-overflow:ellipsis !important;
-  }
-  .student-hub .hub-title-block h1 {
-    grid-column:1 !important;
-    grid-row:1 !important;
-    font-size:clamp(25px,7.5vw,33px) !important;
-    white-space:nowrap !important;
-    margin:0 !important;
-  }
-  .student-hub .hub-title-block > .muted {
-    grid-column:1 / -1 !important;
-    grid-row:2 !important;
-    font-size:12.5px !important;
-    margin:0 !important;
-  }
-  .student-hub .hub-kpis {
-    display:grid !important;
-    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-    gap:8px !important;
-    width:100% !important;
-    margin-top:10px !important;
-  }
-  .student-hub .hub-status-card,
-  .student-hub .hub-progress-card {
-    min-width:0 !important;
-    min-height:132px !important;
-    padding:12px !important;
-    border-radius:16px !important;
-    gap:7px !important;
-  }
-  .student-hub .hub-status-card-title,
-  .student-hub .hub-progress-title { font-size:10px !important; }
-  .student-hub .hub-badge-pill { font-size:9px !important; padding:3px 7px !important; }
-  .student-hub .hub-progress-val { font-size:18px !important; }
-  .student-hub .hub-progress-bottom { font-size:9.5px !important; }
-  .student-hub .hub-status-card-action { padding:6px 9px !important; font-size:10.5px !important; }
-}
-
-/* --- Five TELC sections: one compact row on phones, icon directly above label. --- */
-@media (max-width:700px) {
-  .student-hub .section-switch {
-    display:grid !important;
-    grid-template-columns:repeat(5,minmax(0,1fr)) !important;
-    gap:3px !important;
-    padding:4px !important;
-    border-radius:16px !important;
-    margin-bottom:11px !important;
-  }
-  .student-hub .section-switch .section-btn,
-  .student-hub .section-switch .section-btn:nth-child(4),
-  .student-hub .section-switch .section-btn:nth-child(5) {
-    grid-column:auto !important;
-    min-width:0 !important;
-    min-height:67px !important;
-    height:67px !important;
-    padding:5px 2px !important;
-    border-radius:11px !important;
-    gap:4px !important;
-  }
-  .student-hub .section-switch .section-btn > span:first-child {
-    display:block !important;
-    font-size:17px !important;
-    line-height:1 !important;
-    height:20px !important;
-  }
-  .student-hub .section-switch .section-btn-copy {
-    width:100% !important;
-    min-width:0 !important;
-    gap:1px !important;
-  }
-  .student-hub .section-switch .section-btn-copy b {
-    display:block !important;
-    width:100% !important;
-    font-size:8px !important;
-    line-height:1.15 !important;
-    white-space:normal !important;
-    overflow-wrap:anywhere !important;
-  }
-  .student-hub .section-switch .section-btn-copy small {
-    font-size:7.5px !important;
-    line-height:1.1 !important;
-  }
-}
-
-/* --- Toolbar: desktop = three independent controls on one line. --- */
-@media (min-width:701px) {
-  .student-hub .topic-toolbar {
-    display:grid !important;
-    grid-template-columns:minmax(240px,1fr) auto auto !important;
-    align-items:center !important;
-    gap:10px !important;
-    margin-bottom:16px !important;
-  }
-  .student-hub .topic-search-wrap { order:1 !important; min-width:0 !important; }
-  .student-hub .teil-tabs { order:2 !important; justify-self:center !important; }
-  .student-hub .shuffle-toggle { order:3 !important; justify-self:end !important; }
-  .student-hub .topic-search-wrap input { width:100% !important; min-width:0 !important; }
-}
-
-/* --- Toolbar: mobile = shuffle + Teil in one compact row; search below. --- */
-@media (max-width:700px) {
-  .student-hub .topic-toolbar {
-    display:grid !important;
-    grid-template-columns:auto minmax(0,1fr) !important;
-    grid-template-rows:auto auto !important;
-    align-items:center !important;
-    gap:7px !important;
-    margin-bottom:10px !important;
-  }
-  .student-hub .shuffle-toggle {
-    grid-column:1 !important;
-    grid-row:1 !important;
-    width:44px !important;
-    height:42px !important;
-    padding:0 !important;
-    border-radius:12px !important;
-    display:inline-flex !important;
-    justify-content:center !important;
-    align-items:center !important;
-    background:var(--surface) !important;
-    border:1px solid var(--brand-border) !important;
-    color:var(--brand) !important;
-  }
-  .student-hub .shuffle-toggle .shuffle-icon { width:19px !important; height:19px !important; }
-  .student-hub .shuffle-toggle .shuffle-label { display:none !important; }
-  .student-hub .teil-tabs {
-    grid-column:2 !important;
-    grid-row:1 !important;
-    width:100% !important;
-    min-width:0 !important;
-    display:grid !important;
-    grid-template-columns:repeat(3,minmax(0,1fr)) !important;
-    gap:4px !important;
-    padding:4px !important;
-    border-radius:12px !important;
-    overflow:visible !important;
-  }
-  .student-hub .teil-tab {
-    min-width:0 !important;
-    padding:8px 4px !important;
-    font-size:11px !important;
-    line-height:1 !important;
-    white-space:nowrap !important;
-  }
-  .student-hub .topic-search-wrap {
-    grid-column:1 / -1 !important;
-    grid-row:2 !important;
-    width:100% !important;
-  }
-  .student-hub .topic-search-wrap input {
-    width:100% !important;
-    min-width:0 !important;
-    height:38px !important;
-    box-sizing:border-box !important;
-  }
-}
-
-/* --- Exercise cards: remove unnecessary vertical air. --- */
-.student-hub .topic-card {
-  min-height:0 !important;
-  padding:17px !important;
-  border-radius:17px !important;
-}
-.student-hub .topic-card h3 {
-  margin:9px 0 8px !important;
-  line-height:1.3 !important;
-}
-.student-hub .topic-meta {
-  margin-bottom:10px !important;
-  gap:5px !important;
-}
-.student-hub .topic-card .btn {
-  min-height:38px !important;
-  padding:8px 12px !important;
-}
-@media (max-width:700px) {
-  .student-hub .topic-card {
-    padding:13px !important;
-    border-radius:15px !important;
-  }
-  .student-hub .topic-card h3 {
-    font-size:15px !important;
-    margin:7px 0 6px !important;
-  }
-  .student-hub .topic-meta { margin-bottom:7px !important; }
-}
-
-/* Remove the accidental blue/slate cast from common dashboard controls in dark mode. */
-html[data-theme="dark"] .student-hub :where(button,input,.topic-card,.hub-status-card,.hub-progress-card) {
-  -webkit-tap-highlight-color:rgba(255,122,47,.12);
-}
-html[data-theme="dark"] .student-hub :where(.topic-card,.hub-status-card,.hub-progress-card) {
-  box-shadow:0 5px 18px rgba(0,0,0,.28) !important;
-}
-
-/* Final dark-mode color cleanup: replace remaining blue/slate accents with
-   TELC orange / green-black tones while preserving semantic states. */
-html[data-theme="dark"] .speaking-qa-badge.q-badge {
-  background:rgba(255,122,47,.12) !important;
-  color:#ffad66 !important;
-  border-color:rgba(255,122,47,.30) !important;
-}
-html[data-theme="dark"] .tag-audio {
-  background:rgba(255,122,47,.10) !important;
-  color:#ffad66 !important;
-  border-color:rgba(255,122,47,.28) !important;
-}
-html[data-theme="dark"] .hoeren-circle-radio,
-html[data-theme="dark"] .hoeren-choice-radio {
-  border-color:#5f7d70 !important;
-}
-
-/* The dashboard itself should never introduce a cool/blue accent in dark mode. */
-html[data-theme="dark"] .student-hub :where(.tag-audio,.speaking-qa-badge.q-badge) {
-  color:#ffad66 !important;
-  background:rgba(255,122,47,.10) !important;
-  border-color:rgba(255,122,47,.28) !important;
-}
-
-/* ========================================================================
-   TELC VOLL — EXACT FINAL POLISH PASS
-   Requested UI changes only. Existing RTL/LTR behavior and application logic
-   remain untouched.
-   ======================================================================== */
-
-/* Unified TELC color system: warm orange + green-black, never blue/slate. */
-:root {
-  --green:#FF7A2F !important;
-  --green-dark:#E05F15 !important;
-  --green-soft:rgba(255,122,47,.10) !important;
-  --green-rgb:255,122,47 !important;
-  --exercise-accent:#FF7A2F !important;
-  --bg:#F7FAF9 !important;
-  --surface:#FFFFFF !important;
-  --surface-elevated:#EEF5F1 !important;
-  --surface-hover:#E7F0EB !important;
-  --surface-glass:rgba(255,255,255,.90) !important;
-  --surface-glass-border:rgba(16,35,30,.10) !important;
-  --line:#D6E2DC !important;
-  --line-subtle:#E8F0EC !important;
-  --ink:#10231E !important;
-  --text-secondary:#3F5750 !important;
-  --muted:#65736F !important;
-  --white:#FFFFFF !important;
-  --gold:#D99B27 !important;
-  --danger:#B33A32 !important;
-}
-html[data-theme="dark"] {
-  --green:#FF7A2F !important;
-  --green-dark:#E05F15 !important;
-  --green-soft:rgba(255,122,47,.12) !important;
-  --green-rgb:255,122,47 !important;
-  --exercise-accent:#FF7A2F !important;
-  --bg:#080D0A !important;
-  --surface:#0D1511 !important;
-  --surface-elevated:#111C16 !important;
-  --surface-hover:#14231B !important;
-  --surface-glass:rgba(13,21,17,.88) !important;
-  --surface-glass-border:rgba(143,180,160,.14) !important;
-  --line:#1D3A2F !important;
-  --line-subtle:#152A22 !important;
-  --ink:#EEF5F2 !important;
-  --text-secondary:#C2D0C9 !important;
-  --muted:#8FA099 !important;
-  --white:#0D1511 !important;
-  --gold:#E3AC4C !important;
-  --danger:#E06C62 !important;
-}
-
+/* Base dark mode surfaces */
 html[data-theme="dark"] body,
 html[data-theme="dark"] .student-hub,
 html[data-theme="dark"] .mock-root,
 html[data-theme="dark"] .exercise-page {
-  background-color:#080D0A !important;
-}
-html[data-theme="dark"] .student-hub :where(.topic-card,.hub-status-card,.hub-progress-card,.section-switch,.level-switch,.topic-toolbar,.teil-tabs,.topic-search-wrap input),
-html[data-theme="dark"] .mock-card,
-html[data-theme="dark"] .mock-item,
-html[data-theme="dark"] .mock-writing-box,
-html[data-theme="dark"] .mock-select,
-html[data-theme="dark"] .mock-tf-btn {
-  background:#0D1511 !important;
-  border-color:#1D3A2F !important;
-}
-html[data-theme="dark"] .student-hub :where(.level-btn:not(.active),.section-btn:not(.active),.teil-tab:not(.active),.shuffle-toggle),
-html[data-theme="dark"] .mock-tab:not(.active),
-html[data-theme="dark"] .mock-teil-tab:not(.active) {
-  background:#0B120F !important;
-  color:#EEF5F2 !important;
-  border-color:#1D3A2F !important;
-}
-html[data-theme="dark"] .student-hub :where(.level-btn.active,.section-btn.active,.teil-tab.active,.shuffle-toggle.is-active),
-html[data-theme="dark"] .mock-tab.active,
-html[data-theme="dark"] .mock-teil-tab.active {
-  background:#FF7A2F !important;
-  border-color:#FF7A2F !important;
-  color:#fff !important;
-}
-html[data-theme="dark"] .student-hub :where(.topic-card,.hub-status-card,.hub-progress-card) * {
-  border-color:inherit;
+  background-color: var(--bg) !important;
+  color: var(--ink) !important;
 }
 
-/* Remove the extra dashboard background layer. */
+html[data-theme="dark"] :where(.topic-card, .hub-status-card, .hub-progress-card, .level-switch, .section-switch, .teil-tabs, .mock-card, .mock-item, .mock-writing-box, .mock-select, .mock-tf-btn, .panel, .card, .admin-card, .table-card, .modal-box, .variation-modal-dialog) {
+  background: var(--surface) !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+}
+
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select {
+  background: var(--bg) !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+}
+
+html[data-theme="dark"] input:focus,
+html[data-theme="dark"] textarea:focus,
+html[data-theme="dark"] select:focus {
+  outline-color: var(--green-soft) !important;
+  border-color: var(--green) !important;
+}
+
+/* Inactive buttons and tabs in dark mode */
+html[data-theme="dark"] :where(.level-btn:not(.active), .section-btn:not(.active), .teil-tab:not(.active), .shuffle-toggle:not(.is-active), .mock-tab:not(.active), .mock-teil-tab:not(.active)) {
+  background: #181818 !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+}
+
+/* Active buttons and tabs in dark mode */
+html[data-theme="dark"] :where(.level-btn.active, .section-btn.active, .teil-tab.active, .shuffle-toggle.is-active, .mock-tab.active, .mock-teil-tab.active) {
+  background: var(--green) !important;
+  border-color: var(--green) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(255, 122, 47, 0.28) !important;
+}
+
+html[data-theme="dark"] .student-hub .hub-progress-track {
+  background: #181818 !important;
+  border-color: var(--line) !important;
+}
+
+html[data-theme="dark"] .student-hub .hub-progress-fill {
+  background: linear-gradient(90deg, #ff7a2f 0%, #ff9148 100%) !important;
+}
+
+html[data-theme="dark"] .student-hub .hub-status-card-action {
+  background: #181818 !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+}
+
+html[data-theme="dark"] .student-hub .hub-status-card-action:hover {
+  background: var(--green) !important;
+  color: #fff !important;
+  border-color: var(--green) !important;
+}
+
+/* Clear Dark Mode Feedback: Correct, Wrong, Unanswered, and Model */
+html[data-theme="dark"] .assignment-correct-answer[data-feedback-tone="correct"] {
+  color: #4ade80 !important;
+  background: rgba(34, 197, 94, 0.12) !important;
+  border-color: rgba(34, 197, 94, 0.30) !important;
+}
+
+html[data-theme="dark"] .assignment-correct-answer[data-feedback-tone="wrong"] {
+  color: #f87171 !important;
+  background: rgba(239, 68, 68, 0.12) !important;
+  border-color: rgba(239, 68, 68, 0.30) !important;
+  font-weight: 850 !important;
+}
+
+html[data-theme="dark"] .assignment-correct-answer[data-feedback-tone="model"],
+html[data-theme="dark"] .assignment-correct-answer.model-answer-bar {
+  color: #fb923c !important;
+  background: rgba(255, 122, 47, 0.12) !important;
+  border-color: rgba(255, 122, 47, 0.30) !important;
+}
+
+html[data-theme="dark"] .speaking-qa-badge.q-badge {
+  background: rgba(255, 122, 47, 0.12) !important;
+  color: #ffad66 !important;
+  border-color: rgba(255, 122, 47, 0.30) !important;
+}
+
+html[data-theme="dark"] .speaking-qa-badge.a-badge {
+  background: rgba(255, 122, 47, 0.16) !important;
+  color: #ffb87a !important;
+  border-color: rgba(255, 122, 47, 0.35) !important;
+}
+
+/* --- 2. Remove Extra Dashboard Background Layer --- */
 .student-hub,
 .student-hub::before,
-.student-hub::after {
-  background-color:transparent !important;
-  background-image:none !important;
-  box-shadow:none !important;
+.student-hub::after,
+.hub-head {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  border: none !important;
 }
 
-/* Desktop only: the mobile login/menu controls must never appear. */
-@media (min-width:701px) {
-  .top .mobile-menu-toggle,
-  .top .mobile-login {
-    display:none !important;
+/* --- 3. Student Dashboard Header Hierarchy & Spacing --- */
+@media (min-width: 701px) {
+  .student-hub .hub-head {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(460px, 1.15fr) !important;
+    align-items: center !important;
+    gap: 24px !important;
+    margin-bottom: 22px !important;
+  }
+  .student-hub .hub-title-block {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    min-width: 0 !important;
+  }
+  .student-hub .hub-title-block .hub-greeting {
+    order: 1 !important;
+    margin: 0 !important;
+  }
+  .student-hub .hub-title-block h1 {
+    order: 2 !important;
+    margin: 0 !important;
+    font-size: clamp(30px, 3.2vw, 44px) !important;
+    line-height: 1.15 !important;
+    white-space: nowrap !important;
+  }
+  .student-hub .hub-title-block > .muted {
+    order: 3 !important;
+    margin: 0 !important;
+    font-size: 14px !important;
+  }
+  .student-hub .hub-kpis {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    min-width: 0 !important;
+  }
+  .student-hub .hub-status-card,
+  .student-hub .hub-progress-card {
+    min-width: 0 !important;
+    min-height: 140px !important;
+    padding: 16px !important;
   }
 }
 
-/* Dashboard section buttons: icon centered directly above the label. */
-.student-hub .section-switch .section-btn {
-  display:flex !important;
-  flex-direction:column !important;
-  align-items:center !important;
-  justify-content:center !important;
-  text-align:center !important;
-}
-.student-hub .section-switch .section-btn > span:first-child {
-  display:block !important;
-  margin:0 auto 2px !important;
-  width:100% !important;
-  text-align:center !important;
-}
-.student-hub .section-switch .section-btn-copy {
-  display:flex !important;
-  flex-direction:column !important;
-  align-items:center !important;
-  justify-content:center !important;
-  text-align:center !important;
-  width:100% !important;
+@media (max-width: 700px) {
+  .top .brand {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+  .top .brand-mark {
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+  }
+  .student-hub {
+    padding-top: 14px !important;
+    padding-inline: 12px !important;
+  }
+  .student-hub .hub-head {
+    display: block !important;
+    margin-bottom: 12px !important;
+  }
+  .student-hub .hub-title-block {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) !important;
+    align-items: center !important;
+    gap: 7px !important;
+  }
+  .student-hub .hub-title-block .hub-greeting {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 6px 8px !important;
+    font-size: 10px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .student-hub .hub-title-block h1 {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    font-size: clamp(23px, 6.8vw, 30px) !important;
+    white-space: nowrap !important;
+    margin: 0 !important;
+  }
+  .student-hub .hub-title-block > .muted {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    font-size: 12px !important;
+    margin: 0 !important;
+  }
+  .student-hub .hub-kpis {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+    width: 100% !important;
+    margin-top: 10px !important;
+  }
+  .student-hub .hub-status-card,
+  .student-hub .hub-progress-card {
+    min-width: 0 !important;
+    min-height: 126px !important;
+    padding: 12px !important;
+    border-radius: 16px !important;
+  }
+  .student-hub .hub-status-card-title,
+  .student-hub .hub-progress-title { font-size: 10px !important; }
+  .student-hub .hub-badge-pill { font-size: 9px !important; padding: 3px 7px !important; }
+  .student-hub .hub-progress-val { font-size: 18px !important; }
+  .student-hub .hub-progress-bottom { font-size: 9.5px !important; }
+  .student-hub .hub-status-card-action { padding: 6px 9px !important; font-size: 10.5px !important; }
 }
 
-/* Exercise header: title only, no Telc/Teil tags, no title frame. */
+/* --- 4. Unified TELC Level Buttons (B1 / B2 / C1) --- */
+.student-hub .level-switch {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  width: min(480px, 100%) !important;
+  max-width: 480px !important;
+  margin: 0 auto 18px !important;
+  padding: 5px !important;
+  border-radius: 16px !important;
+  border: 1px solid var(--line) !important;
+  background: var(--white) !important;
+  box-shadow: var(--shadow-sm) !important;
+  box-sizing: border-box !important;
+}
+
+.student-hub .level-switch .level-btn {
+  height: 44px !important;
+  min-height: 44px !important;
+  border-radius: 12px !important;
+  font-size: 14px !important;
+  font-weight: 850 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  border: 1px solid transparent !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  cursor: pointer !important;
+  padding: 0 10px !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+  background: transparent !important;
+  color: var(--ink) !important;
+}
+
+.student-hub .level-switch .level-btn:hover {
+  background: var(--green-soft) !important;
+  color: var(--green-dark) !important;
+}
+
+.student-hub .level-switch .level-btn.active {
+  background: var(--green) !important;
+  color: #ffffff !important;
+  border-color: var(--green) !important;
+  font-weight: 900 !important;
+  box-shadow: 0 4px 14px rgba(255, 122, 47, 0.30) !important;
+}
+
+/* --- 5. Mobile Section Navigation (Single Compact Balanced Row) --- */
+@media (max-width: 700px) {
+  .student-hub .section-switch {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 4px !important;
+    padding: 4px !important;
+    border-radius: 16px !important;
+    border: 1px solid var(--line) !important;
+    background: var(--white) !important;
+    margin-bottom: 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    box-shadow: var(--shadow-sm) !important;
+  }
+  .student-hub .section-switch .section-btn,
+  .student-hub .section-switch .section-btn:nth-child(4),
+  .student-hub .section-switch .section-btn:nth-child(5) {
+    grid-column: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    min-height: 60px !important;
+    height: auto !important;
+    padding: 5px 2px !important;
+    border-radius: 11px !important;
+    gap: 3px !important;
+    box-sizing: border-box !important;
+    border: 1px solid transparent !important;
+  }
+  .student-hub .section-switch .section-btn > span:first-child {
+    display: block !important;
+    font-size: 18px !important;
+    line-height: 1 !important;
+    height: 19px !important;
+    margin: 0 auto !important;
+    text-align: center !important;
+  }
+  .student-hub .section-switch .section-btn-copy {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    text-align: center !important;
+    gap: 1px !important;
+  }
+  .student-hub .section-switch .section-btn-copy b {
+    display: block !important;
+    width: 100% !important;
+    font-size: 9.5px !important;
+    font-weight: 850 !important;
+    line-height: 1.15 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    text-align: center !important;
+    letter-spacing: -0.02em !important;
+  }
+  .student-hub .section-switch .section-btn-copy small {
+    display: block !important;
+    font-size: 8px !important;
+    line-height: 1.1 !important;
+    opacity: 0.85 !important;
+    text-align: center !important;
+  }
+}
+
+/* --- 6. Responsive Header Visibility (Mobile vs Desktop) --- */
+@media (min-width: 701px) {
+  .mobile-nav-toggle,
+  .mobile-menu-toggle,
+  .dashboard-mobile-nav,
+  .admin-mobile-toggle,
+  .admin-mobile-menu,
+  .top .mobile-login {
+    display: none !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .top .student-nav-links,
+  .admin-nav nav.admin-top-links {
+    display: none !important;
+  }
+  .mobile-nav-toggle {
+    display: inline-flex !important;
+  }
+}
+
+/* --- 7. Minimal Clean Exercise Title Bar --- */
 body.exercise-page .exercise-header-card.exercise-sticky-bar,
 html body > #content.exercise-page .exercise-header-card.exercise-sticky-bar {
-  width:100% !important;
-  max-width:none !important;
-  margin:0 0 18px !important;
-  padding:10px max(16px, calc((100% - 1180px) / 2)) 12px !important;
-  border:0 !important;
-  border-bottom:1px solid rgba(255,122,47,.20) !important;
-  border-radius:0 0 20px 20px !important;
-  background:var(--bg) !important;
-  box-shadow:0 7px 22px rgba(0,0,0,.08) !important;
+  max-width: 1180px !important;
+  width: 100% !important;
+  margin: 0 auto 16px !important;
+  padding: 8px 18px !important;
+  min-height: 50px !important;
+  border: 1px solid var(--line) !important;
+  border-top: none !important;
+  border-radius: 0 0 16px 16px !important;
+  background: var(--white) !important;
+  box-shadow: var(--shadow-sm) !important;
+  box-sizing: border-box !important;
 }
+
 html[data-theme="dark"] body.exercise-page .exercise-header-card.exercise-sticky-bar {
-  background:#080D0A !important;
-  border-bottom-color:#1D3A2F !important;
+  background: var(--surface) !important;
+  border-color: var(--line) !important;
 }
+
 body.exercise-page .exercise-single-top-bar,
 html body > #content.exercise-page .exercise-single-top-bar {
-  display:flex !important;
-  align-items:center !important;
-  justify-content:flex-start !important;
-  gap:14px !important;
-  width:100% !important;
-  min-height:46px !important;
-  padding:0 !important;
-  direction:ltr !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 12px !important;
+  width: 100% !important;
+  min-height: 44px !important;
+  padding: 0 !important;
+  direction: ltr !important;
 }
-body.exercise-page .top-bar-left-cluster { display:none !important; }
-body.exercise-page .top-bar-result-cluster { display:none !important; }
-body.exercise-page .top-bar-title-cluster,
-html body > #content.exercise-page .top-bar-title-cluster {
-  order:1 !important;
-  flex:1 1 auto !important;
-  width:auto !important;
-  max-width:none !important;
-  min-width:0 !important;
-  height:auto !important;
-  margin:0 !important;
+
+body.exercise-page .top-bar-left-cluster,
+body.exercise-page .top-bar-result-cluster,
+body.exercise-page .tag-level-section,
+body.exercise-page .tag-teil {
+  display: none !important;
 }
+
+body.exercise-page .top-bar-title-cluster {
+  order: 1 !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
 body.exercise-page .top-bar-title-cluster .thema-title-row {
-  display:flex !important;
-  align-items:center !important;
-  justify-content:flex-start !important;
-  gap:8px !important;
-  width:auto !important;
-  height:auto !important;
-  min-width:0 !important;
-  padding:0 !important;
-  background:transparent !important;
-  border:0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+  background: transparent !important;
+  border: none !important;
 }
+
 body.exercise-page .top-bar-title-cluster .thema-title-content {
-  min-width:0 !important;
-  flex:0 1 auto !important;
+  min-width: 0 !important;
+  flex: 0 1 auto !important;
 }
+
 body.exercise-page .top-bar-title-cluster .thema-title-content h1 {
-  margin:0 !important;
-  padding:0 !important;
-  font-size:clamp(16px,1.45vw,20px) !important;
-  line-height:1.25 !important;
-  font-weight:900 !important;
-  white-space:nowrap !important;
-  overflow:hidden !important;
-  text-overflow:ellipsis !important;
-  color:var(--ink) !important;
-  text-align:left !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: clamp(16px, 1.4vw, 20px) !important;
+  line-height: 1.25 !important;
+  font-weight: 900 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  color: var(--ink) !important;
+  text-align: left !important;
 }
+
 body.exercise-page .top-bar-title-cluster .thema-tools {
-  flex:0 0 auto !important;
-  display:inline-flex !important;
-  align-items:center !important;
-  gap:6px !important;
+  flex: 0 0 auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
 }
-body.exercise-page .top-bar-title-cluster .thema-tools > * {
-  margin:0 !important;
-}
+
 body.exercise-page .top-bar-shuffle-cluster {
-  order:2 !important;
-  flex:0 0 auto !important;
+  order: 2 !important;
+  flex: 0 0 auto !important;
 }
+
 body.exercise-page .top-bar-shuffle-cluster .exercise-heading-shuffle {
-  width:38px !important;
-  min-width:38px !important;
-  height:38px !important;
-  min-height:38px !important;
-  padding:0 !important;
-  border-radius:10px !important;
-  display:inline-flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  gap:0 !important;
-  background:var(--surface) !important;
-  border:1px solid var(--line) !important;
-  color:var(--green) !important;
+  width: 38px !important;
+  min-width: 38px !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  padding: 0 !important;
+  border-radius: 10px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: var(--surface) !important;
+  border: 1px solid var(--line) !important;
+  color: var(--green) !important;
+  cursor: pointer !important;
 }
-body.exercise-page .top-bar-shuffle-cluster .exercise-heading-shuffle > span:not(.shuffle-icon) { display:none !important; }
-body.exercise-page .top-bar-shuffle-cluster .shuffle-icon { font-size:19px !important; }
+
+body.exercise-page .top-bar-shuffle-cluster .exercise-heading-shuffle > span:not(.shuffle-icon) {
+  display: none !important;
+}
+
+body.exercise-page .top-bar-shuffle-cluster .shuffle-icon {
+  font-size: 19px !important;
+}
+
 body.exercise-page .top-bar-timer-cluster {
-  order:3 !important;
-  flex:0 0 auto !important;
-  margin:0 !important;
+  order: 3 !important;
+  flex: 0 0 auto !important;
+  margin: 0 !important;
 }
+
 body.exercise-page .top-bar-timer-cluster .modern-digital-clock,
 body.exercise-page .top-bar-timer-cluster .progress-pill {
-  min-width:82px !important;
-  height:38px !important;
-  padding:0 10px !important;
-  gap:0 !important;
-  border-radius:10px !important;
-  background:var(--surface) !important;
-  border:1px solid var(--line) !important;
-  box-shadow:none !important;
+  min-width: 82px !important;
+  height: 38px !important;
+  padding: 0 10px !important;
+  border-radius: 10px !important;
+  background: var(--surface) !important;
+  border: 1px solid var(--line) !important;
+  box-shadow: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-variant-numeric: tabular-nums !important;
+  letter-spacing: 0.04em !important;
+  color: var(--ink) !important;
+  font-weight: 900 !important;
 }
-body.exercise-page .top-bar-timer-cluster .timer-icon { display:none !important; }
-body.exercise-page .top-bar-timer-cluster .timer-digits { font-size:13px !important; }
 
-/* Mock exam header: timer on the right, HH:MM:SS, section + Teil navigation. */
+body.exercise-page .top-bar-timer-cluster .timer-icon {
+  display: none !important;
+}
+
+body.exercise-page .top-bar-timer-cluster .timer-digits {
+  font-size: 13.5px !important;
+  font-weight: 900 !important;
+}
+
+/* --- 8. Mock Exam Header & Navigation --- */
 .mock-top .mock-exam-controls {
-  grid-template-columns:minmax(0,1fr) max-content !important;
-  grid-template-areas:"tabs status" !important;
-  align-items:center !important;
+  grid-template-columns: minmax(0, 1fr) max-content !important;
+  grid-template-areas: "tabs status" !important;
+  align-items: center !important;
 }
+
 .mock-top .mock-exam-controls > .mock-status {
-  grid-area:status !important;
-  justify-content:flex-end !important;
-  min-width:max-content !important;
+  grid-area: status !important;
+  justify-content: flex-end !important;
+  min-width: max-content !important;
 }
-.mock-top .mock-exam-controls > .mock-tabs { grid-area:tabs !important; }
+
+.mock-top .mock-exam-controls > .mock-tabs {
+  grid-area: tabs !important;
+}
+
 .mock-timer {
-  min-width:112px !important;
-  padding:8px 12px !important;
-  font-variant-numeric:tabular-nums !important;
-  direction:ltr !important;
-  letter-spacing:.04em !important;
+  min-width: 110px !important;
+  padding: 8px 12px !important;
+  font-variant-numeric: tabular-nums !important;
+  direction: ltr !important;
+  letter-spacing: 0.04em !important;
 }
+
 .mock-teil-tabs {
-  grid-column:1 / -1 !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  gap:6px !important;
-  width:100% !important;
-  padding-top:2px !important;
+  grid-column: 1 / -1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  width: 100% !important;
+  padding-top: 4px !important;
 }
+
 .mock-teil-tab {
-  min-width:82px !important;
-  min-height:36px !important;
-  padding:7px 14px !important;
-  border:1px solid var(--line) !important;
-  border-radius:10px !important;
-  background:var(--surface) !important;
-  color:var(--ink) !important;
-  font:inherit !important;
-  font-size:12px !important;
-  font-weight:900 !important;
-  cursor:pointer !important;
+  min-width: 80px !important;
+  min-height: 36px !important;
+  padding: 7px 14px !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 10px !important;
+  background: var(--surface) !important;
+  color: var(--ink) !important;
+  font: inherit !important;
+  font-size: 12px !important;
+  font-weight: 850 !important;
+  cursor: pointer !important;
+  transition: all 0.18s ease !important;
 }
-.mock-teil-tab:hover { border-color:var(--green) !important; color:var(--green) !important; }
+
+.mock-teil-tab:hover {
+  border-color: var(--green) !important;
+  color: var(--green) !important;
+}
+
 .mock-teil-tab.active {
-  background:#FF7A2F !important;
-  border-color:#FF7A2F !important;
-  color:#fff !important;
-  box-shadow:0 5px 16px rgba(255,122,47,.22) !important;
+  background: var(--green) !important;
+  border-color: var(--green) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 14px rgba(255, 122, 47, 0.25) !important;
+  font-weight: 900 !important;
 }
-html[data-theme="dark"] .mock-teil-tab:not(.active) { background:#0B120F !important; color:#EEF5F2 !important; border-color:#1D3A2F !important; }
 
-/* Desktop dashboard toolbar: search, Teil and shuffle remain separate on one line. */
-@media (min-width:701px) {
+/* --- 9. Search + Teil + Shuffle Toolbar --- */
+@media (min-width: 701px) {
   .student-hub .topic-toolbar {
-    display:grid !important;
-    grid-template-columns:minmax(260px,1fr) auto 46px !important;
-    align-items:center !important;
-    gap:12px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 14px !important;
+    margin: 0 0 20px !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
   }
-  html[dir="rtl"] .student-hub .topic-toolbar { direction:ltr !important; }
-  .student-hub .topic-search-wrap { grid-column:1 !important; grid-row:1 !important; }
-  .student-hub .teil-tabs { grid-column:2 !important; grid-row:1 !important; justify-self:center !important; }
-  .student-hub .shuffle-toggle { grid-column:3 !important; grid-row:1 !important; justify-self:end !important; }
+  .student-hub .topic-search-wrap {
+    flex: 1 1 280px !important;
+    max-width: 360px !important;
+    min-width: 200px !important;
+    margin: 0 !important;
+  }
+  .student-hub .teil-tabs {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    padding: 4px !important;
+    border-radius: 14px !important;
+    border: 1px solid var(--line) !important;
+    background: var(--white) !important;
+    box-shadow: var(--shadow-sm) !important;
+  }
+  .student-hub .teil-tab {
+    padding: 7px 14px !important;
+    font-size: 12.5px !important;
+    font-weight: 850 !important;
+    border-radius: 10px !important;
+  }
+  .student-hub .shuffle-toggle {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 0 16px !important;
+    height: 42px !important;
+    border-radius: 12px !important;
+    border: 1px solid var(--line) !important;
+    background: var(--white) !important;
+    box-shadow: var(--shadow-sm) !important;
+    cursor: pointer !important;
+    color: var(--ink) !important;
+  }
 }
 
-@media (max-width:700px) {
-  body.exercise-page .exercise-header-card.exercise-sticky-bar,
-  html body > #content.exercise-page .exercise-header-card.exercise-sticky-bar {
-    padding:9px 12px 11px !important;
-    margin-bottom:14px !important;
+@media (max-width: 700px) {
+  .student-hub .topic-toolbar {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-rows: auto auto !important;
+    gap: 8px !important;
+    margin-bottom: 12px !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
   }
-  body.exercise-page .exercise-single-top-bar,
-  html body > #content.exercise-page .exercise-single-top-bar {
-    min-height:48px !important;
-    display:flex !important;
-    flex-wrap:nowrap !important;
-    gap:7px !important;
+  .student-hub .teil-tabs {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 4px !important;
+    padding: 3px !important;
+    border-radius: 12px !important;
+    border: 1px solid var(--line) !important;
+    background: var(--white) !important;
+    box-sizing: border-box !important;
   }
-  body.exercise-page .top-bar-title-cluster { flex:1 1 auto !important; min-width:0 !important; }
-  body.exercise-page .top-bar-title-cluster .thema-title-row { min-width:0 !important; }
-  body.exercise-page .top-bar-title-cluster .thema-title-content { min-width:0 !important; flex:1 1 auto !important; }
-  body.exercise-page .top-bar-title-cluster .thema-title-content h1 { font-size:14px !important; }
-  body.exercise-page .top-bar-shuffle-cluster .exercise-heading-shuffle { width:36px !important; min-width:36px !important; height:36px !important; }
-  body.exercise-page .top-bar-timer-cluster .modern-digital-clock,
-  body.exercise-page .top-bar-timer-cluster .progress-pill { min-width:76px !important; height:36px !important; }
-  .mock-top .mock-exam-controls {
-    grid-template-columns:minmax(0,1fr) !important;
-    grid-template-areas:"status" "tabs" "teile" !important;
-    gap:7px !important;
-    padding:8px 12px !important;
+  .student-hub .teil-tab {
+    min-width: 0 !important;
+    padding: 7px 3px !important;
+    font-size: 11px !important;
+    white-space: nowrap !important;
   }
-  .mock-top .mock-exam-controls > .mock-status { grid-area:status !important; justify-content:flex-end !important; }
-  .mock-top .mock-exam-controls > .mock-tabs { grid-area:tabs !important; }
-  .mock-top .mock-exam-controls > .mock-teil-tabs { grid-area:teile !important; }
-  .mock-timer { min-width:104px !important; font-size:15px !important; }
-  .mock-teil-tabs { justify-content:flex-start !important; overflow-x:auto !important; padding-bottom:2px !important; }
-  .mock-teil-tab { min-width:72px !important; flex:0 0 auto !important; }
+  .student-hub .shuffle-toggle {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    width: 42px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    border-radius: 12px !important;
+    display: inline-flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    background: var(--white) !important;
+    border: 1px solid var(--line) !important;
+    color: var(--green) !important;
+  }
+  .student-hub .shuffle-toggle .shuffle-label { display: none !important; }
+  .student-hub .topic-search-wrap {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+  }
+  .student-hub .topic-search-wrap input {
+    width: 100% !important;
+    height: 40px !important;
+    box-sizing: border-box !important;
+  }
 }
+
+/* --- 10 & 11. Exercise Cards Compactness & German Text Containment --- */
+.student-hub .topic-card {
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 16px !important;
+  border-radius: 16px !important;
+}
+
+.student-hub .topic-card h3 {
+  margin: 8px 0 6px !important;
+  line-height: 1.3 !important;
+}
+
+.student-hub .topic-meta {
+  margin-bottom: 8px !important;
+  gap: 5px !important;
+}
+
+.student-hub .topic-card .btn {
+  min-height: 38px !important;
+  padding: 8px 12px !important;
+}
+
+.exam-text-card {
+  padding: 16px 20px !important;
+  margin-bottom: 14px !important;
+  border-radius: 16px !important;
+  min-height: 0 !important;
+  height: auto !important;
+}
+
+@media (max-width: 700px) {
+  .exam-text-card {
+    padding: 13px 14px !important;
+    margin-bottom: 10px !important;
+    border-radius: 14px !important;
+  }
+}
+
+/* Universal safe word-wrapping for long German terms without text clipping */
+.exam-text,
+.exam-text p,
+.paragraph-assignment,
+.choice-card,
+.side-option,
+.option,
+.topic-card h3,
+.topic-meta,
+.section-btn,
+.level-btn,
+.speaking-model-line p,
+.speaking-qa-text,
+.result-section h3,
+h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  min-width: 0 !important;
+}
+
+/* --- 12. Centered Mobile Toast Notifications --- */
+@media (max-width: 700px) {
+  .toast,
+  .notification,
+  .notif-toast,
+  .admin-toast,
+  .alert-floating {
+    position: fixed !important;
+    left: 50% !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 20px) !important;
+    transform: translateX(-50%) !important;
+    width: min(400px, calc(100vw - 28px)) !important;
+    max-width: calc(100vw - 28px) !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
+    overflow-wrap: anywhere !important;
+    z-index: 9999 !important;
+  }
+}
+
