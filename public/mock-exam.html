@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>الامتحان التجريبي — TELC Voll</title>
-<link rel="stylesheet" href="/assets/app.css?v=20260928-polished-v1">
+<link rel="stylesheet" href="/assets/app.css?v=20260928-polished-v3">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -866,6 +866,20 @@ html[data-theme="dark"] .mock-top{background:#080808!important;border-color:#303
 }
 </style>
 
+
+<style id="telc-unified-mock-polish">
+html[data-theme="dark"] .mock-top{background:#07100C!important;border-color:#20382E!important}
+html[data-theme="dark"] .mock-top .mock-brand-bar,html[data-theme="dark"] .mock-top .mock-exam-controls{background:#07100C!important;border-color:#20382E!important}
+html[data-theme="dark"] .mock-top .mock-tab,html[data-theme="dark"] .mock-top .mock-teil-tab{background:#0C1712!important;color:#F1F7F4!important;border-color:#20382E!important}
+html[data-theme="dark"] .mock-top .mock-tab.active,html[data-theme="dark"] .mock-top .mock-teil-tab.active{background:linear-gradient(135deg,#FF7A2F,#E5631A)!important;border-color:#FF7A2F!important;color:#fff!important}
+html[data-theme="dark"] .mock-top .mock-timer{background:rgba(255,122,47,.12)!important;color:#FF7A2F!important;border-color:rgba(255,122,47,.35)!important}
+.mock-top .mock-status{justify-content:flex-end!important}
+.mock-top .mock-teil-tabs{display:flex;gap:6px;width:100%;margin-top:6px}
+.mock-top .mock-teil-tab{flex:1;min-height:40px;padding:7px 10px;border-radius:11px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-weight:850;cursor:pointer}
+.mock-top .mock-teil-tab.active{background:linear-gradient(135deg,#FF7A2F,#E5631A);color:#fff;border-color:#FF7A2F}
+.mock-top .mock-timer{font-variant-numeric:tabular-nums;letter-spacing:.04em}
+@media(max-width:700px){.mock-top .mock-teil-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.mock-top .mock-teil-tab{min-width:0;font-size:11px;padding:7px 4px}}
+</style>
 </head>
 <body>
 <header class="mock-top">
@@ -918,7 +932,7 @@ function currentTask(){return state.session?.tasks?.[state.currentIndex]}
 function currentSection(){return currentTask()?.section||'Lesen'}
 function sectionIndexes(section){return (state.session?.tasks||[]).map((x,i)=>x.section===section?i:-1).filter(i=>i>=0)}
 function remaining(){return Math.max(0,Math.ceil((Number(state.session?.examEndsAt||0)-Date.now())/1000))}
-function formatTime(n){return String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0')}
+function formatTime(n){const h=Math.floor(n/3600);const m=Math.floor((n%3600)/60);const sec=n%60;return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0')}
 function tick(){
   const n = remaining();
   const el = document.getElementById('examTimer');
@@ -927,6 +941,13 @@ function tick(){
   state.timerHandle = setTimeout(tick, 500);
 }
 function sectionFirstIndex(section){const i = (state.session?.tasks||[]).findIndex(x=>x.section===section);return i<0?0:i}
+function teilFirstIndex(section, teil){const i = (state.session?.tasks||[]).findIndex(x=>x.section===section && String(x.teil||'')===String(teil||''));return i<0?0:i}
+function jumpToTeil(section, teil){
+  const i = teilFirstIndex(section, teil);
+  persistCurrent();
+  state.currentIndex = i;
+  render();
+}
 function jumpToSection(section){
   const i = sectionFirstIndex(section);
   if(i<0) return;
@@ -937,12 +958,17 @@ function jumpToSection(section){
 function renderTabs(){
   const tabs = document.getElementById('mockTabs');
   if(!tabs) return;
-  tabs.innerHTML = SECTION_ORDER.map(s=>{
+  const sectionMarkup = SECTION_ORDER.map(s=>{
     const inds = sectionIndexes(s);
     const exists = inds.length > 0;
     return `<button class="mock-tab ${currentSection()===s?'active':''}" data-section="${s}" ${exists?'':'disabled'}>${SECTION_LABEL[s]}<small>${exists?inds.length+' Aufgabe':'nicht verfügbar'}</small></button>`;
   }).join('');
+  const sec = currentSection();
+  const teilValues = [...new Set((state.session?.tasks||[]).filter(x=>x.section===sec).map(x=>String(x.teil||'')).filter(Boolean))];
+  const teilMarkup = teilValues.map(t=>`<button class="mock-teil-tab ${String(currentTask()?.teil||'')===t?'active':''}" data-teil="${esc(t)}">${esc(t)}</button>`).join('');
+  tabs.innerHTML = `<div class="mock-section-tabs">${sectionMarkup}</div>${teilMarkup?`<div class="mock-teil-tabs" aria-label="${esc(SECTION_LABEL[sec]||sec)} Teile">${teilMarkup}</div>`:''}`;
   document.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>jumpToSection(b.dataset.section));
+  document.querySelectorAll('[data-teil]').forEach(b=>b.onclick=()=>jumpToTeil(sec,b.dataset.teil));
 }
 function baseShell(inner){
   const sec = currentSection();

@@ -11691,3 +11691,332 @@ html[data-theme="dark"] .student-hub :where(.tag-audio,.speaking-qa-badge.q-badg
   background:rgba(255,122,47,.10) !important;
   border-color:rgba(255,122,47,.28) !important;
 }
+
+
+/* ========================================================================
+   TELC VOLL — UNIFIED OBSIDIAN-GREEN / ORANGE POLISH
+   Final pass: keeps existing RTL/LTR behavior and functionality intact.
+   ======================================================================== */
+:root {
+  --brand: #FF7A2F;
+  --brand-hover: #FF8D47;
+  --brand-active: #E5631A;
+  --brand-soft: rgba(255,122,47,.12);
+  --brand-glow: rgba(255,122,47,.26);
+  --brand-border: rgba(255,122,47,.35);
+  --green: #FF7A2F;
+  --green-dark: #E5631A;
+  --green-soft: rgba(255,122,47,.12);
+  --exercise-accent: #FF7A2F;
+  --exercise-accent-soft: rgba(255,122,47,.12);
+  --bg: #F7FAF9;
+  --surface: #FFFFFF;
+  --surface-elevated: #EEF5F2;
+  --surface-hover: #E4EEE9;
+  --surface-glass: rgba(255,255,255,.90);
+  --surface-glass-border: rgba(16,35,30,.10);
+  --line: #D6E3DE;
+  --line-subtle: #E7EFEC;
+  --ink: #10231E;
+  --text-secondary: #344E46;
+  --muted: #657A73;
+  --white: #FFFFFF;
+  --shadow-sm: 0 2px 8px rgba(16,35,30,.06);
+  --shadow: 0 8px 24px rgba(16,35,30,.08);
+  --shadow-lg: 0 16px 44px rgba(16,35,30,.12);
+}
+html[data-theme="dark"] {
+  --bg: #07100C;
+  --surface: #0C1712;
+  --surface-elevated: #102019;
+  --surface-hover: #14271F;
+  --surface-glass: rgba(12,23,18,.90);
+  --surface-glass-border: rgba(112,164,141,.18);
+  --line: #20382E;
+  --line-subtle: #172B23;
+  --ink: #F1F7F4;
+  --text-secondary: #C5D5CF;
+  --muted: #8FA89E;
+  --white: #0C1712;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,.28);
+  --shadow: 0 8px 24px rgba(0,0,0,.38);
+  --shadow-lg: 0 16px 44px rgba(0,0,0,.52);
+}
+
+/* Never expose the landing mobile-only controls on desktop. */
+@media (min-width: 701px) {
+  .top .mobile-menu-toggle,
+  .top .mobile-login { display: none !important; }
+}
+
+/* Student dashboard: remove any competing surface behind the command center. */
+body:has(.student-hub) .student-hub {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Dashboard desktop hierarchy: title/greeting on one side, account/progress on the other. */
+@media (min-width: 701px) {
+  .student-hub .hub-head {
+    display: grid !important;
+    grid-template-columns: minmax(0,1fr) auto !important;
+    align-items: start !important;
+    gap: 28px !important;
+  }
+  .student-hub .hub-title-block {
+    display: grid !important;
+    grid-template-columns: auto 1fr !important;
+    align-items: center !important;
+    column-gap: 14px !important;
+    row-gap: 5px !important;
+    min-width: 0 !important;
+  }
+  .student-hub .hub-title-block .hub-greeting { grid-column: 1 !important; grid-row: 1 !important; margin: 0 !important; }
+  .student-hub .hub-title-block h1 { grid-column: 2 !important; grid-row: 1 !important; margin: 0 !important; }
+  .student-hub .hub-title-block > .muted { grid-column: 1 / -1 !important; grid-row: 2 !important; }
+  .student-hub .hub-kpis { justify-content: flex-end !important; align-self: start !important; }
+  .student-hub .hub-status-card,
+  .student-hub .hub-progress-card { min-width: 245px !important; }
+}
+
+/* Student dashboard: compact five-button row; icon centered directly above label. */
+.student-hub .section-switch {
+  background: var(--surface) !important;
+  border-color: var(--line) !important;
+}
+.student-hub .section-switch .section-btn {
+  background: transparent !important;
+  color: var(--ink) !important;
+  border-color: transparent !important;
+}
+.student-hub .section-switch .section-btn > span:first-child,
+.student-hub .section-switch .section-btn-copy,
+.student-hub .section-switch .section-btn-copy b,
+.student-hub .section-switch .section-btn-copy small {
+  text-align: center !important;
+}
+.student-hub .section-switch .section-btn > span:first-child {
+  display: block !important;
+  margin: 0 auto 1px !important;
+}
+.student-hub .section-switch .section-btn.active {
+  background: linear-gradient(135deg,#FF7A2F 0%,#E5631A 100%) !important;
+  border-color: #FF7A2F !important;
+}
+
+/* Mobile: all five TELC sections in one compact row. */
+@media (max-width: 700px) {
+  .student-hub .section-switch {
+    display: grid !important;
+    grid-template-columns: repeat(5,minmax(0,1fr)) !important;
+    gap: 4px !important;
+    padding: 5px !important;
+    border-radius: 17px !important;
+  }
+  .student-hub .section-switch .section-btn,
+  .student-hub .section-switch .section-btn:nth-child(n) {
+    grid-column: auto !important;
+    grid-row: auto !important;
+    min-height: 72px !important;
+    height: 72px !important;
+    padding: 6px 2px !important;
+    border-radius: 12px !important;
+    gap: 2px !important;
+  }
+  .student-hub .section-switch .section-btn > span:first-child { font-size: 18px !important; line-height: 1 !important; }
+  .student-hub .section-switch .section-btn-copy b { font-size: clamp(8px,2.5vw,10px) !important; line-height: 1.15 !important; }
+  .student-hub .section-switch .section-btn-copy small { font-size: 8px !important; line-height: 1.1 !important; }
+}
+
+/* Dashboard topic controls: search, Teil tabs and shuffle remain a single clean row on desktop. */
+@media (min-width: 701px) {
+  .student-hub .topic-toolbar {
+    display: grid !important;
+    grid-template-columns: minmax(240px,320px) minmax(280px,1fr) 52px !important;
+    align-items: center !important;
+    gap: 14px !important;
+  }
+}
+.student-hub .topic-toolbar .shuffle-toggle {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 14px !important;
+  background: var(--green-soft) !important;
+  border-color: color-mix(in srgb,var(--green) 35%,var(--line)) !important;
+  color: var(--green) !important;
+}
+
+/* Exercise title bar: full-width, simple, curved bottom; title is primary. */
+body.exercise-page .exercise-header-card.exercise-heading {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  border-radius: 0 0 24px 24px !important;
+  background: var(--surface) !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--line) !important;
+  box-shadow: 0 8px 22px rgba(0,0,0,.08) !important;
+  padding: 10px 24px 14px !important;
+}
+body.exercise-page .exercise-single-top-bar {
+  width: 100% !important;
+  min-height: 58px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0,1fr) auto auto !important;
+  align-items: center !important;
+  gap: 14px !important;
+}
+body.exercise-page .top-bar-left-cluster { display: none !important; }
+body.exercise-page .top-bar-title-cluster {
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  width: auto !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  justify-self: start !important;
+  text-align: start !important;
+}
+body.exercise-page .top-bar-title-cluster .thema-title-row {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  width: auto !important;
+  margin: 0 !important;
+}
+body.exercise-page .top-bar-title-cluster .thema-title-content h1 {
+  margin: 0 !important;
+  font-size: clamp(18px,2vw,25px) !important;
+  line-height: 1.25 !important;
+  font-weight: 900 !important;
+  text-align: start !important;
+}
+body.exercise-page .top-bar-title-cluster .thema-tools { display:flex !important; align-items:center !important; gap:6px !important; }
+body.exercise-page .top-bar-title-cluster .text-tools .mini-tool {
+  width: 34px !important; height: 34px !important; min-width:34px !important; border-radius:10px !important;
+}
+body.exercise-page .top-bar-shuffle-cluster { grid-column: 2 !important; grid-row: 1 !important; justify-self: end !important; }
+body.exercise-page .top-bar-shuffle-cluster .exercise-heading-shuffle {
+  width: 42px !important; min-width:42px !important; height:42px !important; min-height:42px !important;
+  padding:0 !important; border-radius:12px !important; display:grid !important; place-items:center !important;
+  background:var(--green-soft) !important; border:1px solid color-mix(in srgb,var(--green) 35%,var(--line)) !important;
+  color:var(--green) !important;
+}
+body.exercise-page .top-bar-shuffle-cluster .exercise-heading-shuffle > span:not(.shuffle-icon) { display:none !important; }
+body.exercise-page .top-bar-shuffle-cluster .shuffle-icon { margin:0 !important; font-size:20px !important; }
+body.exercise-page .top-bar-timer-cluster { grid-column: 3 !important; grid-row: 1 !important; justify-self:end !important; }
+body.exercise-page .top-bar-timer-cluster .timer-icon { display:none !important; }
+body.exercise-page .top-bar-timer-cluster .progress-pill,
+body.exercise-page .top-bar-timer-cluster .modern-digital-clock {
+  min-width:76px !important; padding:7px 11px !important; border-radius:11px !important; font-variant-numeric:tabular-nums !important;
+}
+
+/* Hören's alternate header follows the same simplified title-bar language. */
+body.exercise-page .hoeren-choice-heading .exercise-heading-tags { display:none !important; }
+body.exercise-page .hoeren-choice-heading .exercise-heading-meta { display:grid !important; grid-template-columns:minmax(0,1fr) auto !important; width:100% !important; }
+body.exercise-page .hoeren-choice-heading .exercise-heading-timer .timer-icon { display:none !important; }
+
+/* Mock exam: timer only, no label/icon; section + Teil navigation. */
+.mock-top,
+.mock-top .mock-brand-bar,
+.mock-top .mock-exam-controls { background: var(--bg) !important; border-color: var(--line) !important; }
+.mock-top .mock-status [data-i18n="time_left"] { display:none !important; }
+.mock-top .mock-timer { background: var(--green-soft) !important; color: var(--green) !important; border-color: color-mix(in srgb,var(--green) 35%,var(--line)) !important; }
+.mock-top .mock-tab.active,
+.mock-top .mock-teil-tab.active { background: linear-gradient(135deg,#FF7A2F 0%,#E5631A 100%) !important; color:#fff !important; border-color:#FF7A2F !important; }
+.mock-top .mock-tab,
+.mock-top .mock-teil-tab { background: var(--surface) !important; color: var(--ink) !important; border-color: var(--line) !important; }
+.mock-top .mock-tab small { color: var(--muted) !important; }
+.mock-top .mock-teil-tabs { display:flex; gap:6px; flex-wrap:wrap; width:100%; margin-top:6px; }
+.mock-top .mock-teil-tab { flex:1; min-width:90px; min-height:40px; padding:7px 10px; border-radius:11px; font:inherit; font-weight:850; cursor:pointer; }
+@media (max-width:700px) {
+  .mock-top .mock-teil-tabs { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); }
+  .mock-top .mock-teil-tab { min-width:0; font-size:11px; }
+}
+
+/* Replace legacy blue/blue-grey UI accents with TELC orange/green neutrals. */
+.speaking-section-head { background: var(--surface-elevated) !important; }
+.speaking-section-kicker,
+.speaking-task-number,
+.speaking-qa-badge.q-badge { color: var(--green) !important; }
+.speaking-task-number { background: var(--green-soft) !important; border:1px solid var(--brand-border) !important; }
+.speaking-qa-badge.q-badge { background: var(--green-soft) !important; border-color: var(--brand-border) !important; }
+html[data-theme="dark"] .speaking-qa-badge.q-badge { background: var(--green-soft) !important; color: #FFAD66 !important; border-color: var(--brand-border) !important; }
+
+/* Dark mode: remove blue/grey-looking surfaces across the platform. */
+html[data-theme="dark"] body,
+html[data-theme="dark"] .student-hub,
+html[data-theme="dark"] .exam-workspace,
+html[data-theme="dark"] .exercise-page,
+html[data-theme="dark"] .mock-root,
+html[data-theme="dark"] .mock-top {
+  background-color: var(--bg) !important;
+  color: var(--ink) !important;
+}
+html[data-theme="dark"] .student-hub .hub-status-card,
+html[data-theme="dark"] .student-hub .hub-progress-card,
+html[data-theme="dark"] .student-hub .topic-card,
+html[data-theme="dark"] .student-hub .section-switch,
+html[data-theme="dark"] .student-hub .level-switch,
+html[data-theme="dark"] .modal-box,
+html[data-theme="dark"] .exam-side,
+html[data-theme="dark"] .exam-text-card,
+html[data-theme="dark"] .choice-card,
+html[data-theme="dark"] .side-question,
+html[data-theme="dark"] .side-option,
+html[data-theme="dark"] .word-card {
+  background: var(--surface) !important;
+  border-color: var(--line) !important;
+  color: var(--ink) !important;
+}
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select,
+html[data-theme="dark"] .topic-tools input,
+html[data-theme="dark"] .topic-tools select {
+  background: var(--surface) !important;
+  color: var(--ink) !important;
+  border-color: var(--line) !important;
+}
+html[data-theme="dark"] .student-hub .section-switch .section-btn:not(.active),
+html[data-theme="dark"] .student-hub .level-switch .level-btn:not(.active),
+html[data-theme="dark"] .teil-tabs .teil-tab:not(.active) {
+  background: var(--surface-elevated) !important;
+  color: var(--ink) !important;
+}
+html[data-theme="dark"] .student-hub .section-switch .section-btn.active,
+html[data-theme="dark"] .student-hub .level-switch .level-btn.active,
+html[data-theme="dark"] .teil-tabs .teil-tab.active {
+  background: linear-gradient(135deg,#FF7A2F 0%,#E5631A 100%) !important;
+  color:#fff !important;
+}
+
+/* Mobile notifications: always centered inside the viewport. */
+@media (max-width:700px) {
+  .notif-dropdown {
+    position: fixed !important;
+    left: 50% !important;
+    right: auto !important;
+    top: 68px !important;
+    transform: translateX(-50%) !important;
+    width: min(92vw, 380px) !important;
+    max-width: calc(100vw - 20px) !important;
+    margin: 0 !important;
+    z-index: 1000 !important;
+  }
+}
+
+
+/* Mock exam header order: sections span the main row, timer stays on the right. */
+.mock-top .mock-exam-controls {
+  grid-template-columns: minmax(0,1fr) max-content !important;
+  grid-template-areas: "tabs status" !important;
+}
+.mock-top .mock-exam-controls > .mock-tabs { grid-area: tabs !important; }
+.mock-top .mock-exam-controls > .mock-status { grid-area: status !important; justify-self:end !important; }
+@media (max-width:700px) {
+  .mock-top .mock-exam-controls {
+    grid-template-columns:minmax(0,1fr) !important;
+    grid-template-areas:"status" "tabs" !important;
+  }
+  .mock-top .mock-exam-controls > .mock-status { justify-self:stretch !important; }
+}

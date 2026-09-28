@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1310"><title>تمرين TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260928-polished-v1">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#0d1310"><title>تمرين TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260928-polished-v3">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
@@ -1479,7 +1479,7 @@ function renderHoerenChoiceQuestions(){
  const items=model.items||[];
  const activeDuration=duration || (model?.exercise ? getTelcDurationSeconds(model.exercise) : 600);
  const initialMin=String(Math.floor(activeDuration/60)).padStart(2,'0');
- const timer=(mockMode||activeDuration)?`<div class="progress-pill ${mockMode?'mock-global-timer':''}" id="timerEl"><span class="timer-icon" aria-hidden="true">⏱️</span> <span class="timer-digits">${initialMin}:00</span></div>`:'';
+ const timer=(mockMode||activeDuration)?`<div class="progress-pill ${mockMode?'mock-global-timer':''}" id="timerEl"><span class="timer-digits">${initialMin}:00</span></div>`:'';
  const title=mockMode?'':`<div class="thema-title-row"><h1 id="thema-title" data-content-id="thema-title" data-source="${esc(model.exercise.title||'')}">${esc(model.exercise.title||'')}</h1><div class="thema-tools">${textTools(model.exercise.title||'','thema-title')}</div></div>`;
  const heading=`<div class="exercise-heading hoeren-choice-heading">
   <div class="exercise-heading-meta">
@@ -2083,7 +2083,7 @@ function startExerciseTimer(){
     if(!curEl) return;
     const remaining = Math.max(0, Math.ceil((exerciseTimerEnd - Date.now()) / 1000));
     const timeStr = String(Math.floor(remaining / 60)).padStart(2, '0') + ':' + String(remaining % 60).padStart(2, '0');
-    curEl.innerHTML = `<span class="timer-icon" aria-hidden="true">⏱️</span> <span class="timer-digits">${timeStr}</span>`;
+    curEl.innerHTML = `<span class="timer-digits">${timeStr}</span>`;
     curEl.classList.toggle('timer-danger', remaining <= 60);
     if(remaining <= 0){
       clearInterval(exerciseTimerInterval);
@@ -2094,7 +2094,7 @@ function startExerciseTimer(){
   tick();
   exerciseTimerInterval = setInterval(tick, 500);
 }
-function startMockTimer(){const el=document.getElementById('timerEl');if(!mockMode||!el||el.dataset.started)return;el.dataset.started='1';const tick=()=>{const n=mockRemaining();const timeStr=String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');el.innerHTML=`<span class="timer-icon" aria-hidden="true">⏱️</span> <span class="timer-digits">${timeStr}</span>`;el.classList.toggle('timer-danger',n<=60);if(n>0)window.setTimeout(tick,250);else finishMockSession();};tick();}
+function startMockTimer(){const el=document.getElementById('timerEl');if(!mockMode||!el||el.dataset.started)return;el.dataset.started='1';const tick=()=>{const n=mockRemaining();const timeStr=String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');el.innerHTML=`<span class="timer-digits">${timeStr}</span>`;el.classList.toggle('timer-danger',n<=60);if(n>0)window.setTimeout(tick,250);else finishMockSession();};tick();}
 function parseSpeakingTasks(body){
  const raw=String(body||'').replace(/\r/g,'');
  const settings=parseSettings(model.exercise);
@@ -2730,11 +2730,11 @@ function renderExerciseHeaderCard(){
   const title = String(ex.title || '');
   const activeDuration = duration || (model?.exercise ? getTelcDurationSeconds(model.exercise) : 1200);
   const initialMin = String(Math.floor(activeDuration / 60)).padStart(2, '0');
-  const timer = (mockMode||activeDuration) ? `<div class="modern-digital-clock progress-pill ${mockMode?'mock-global-timer':''}" id="timerEl" role="timer" aria-label="Timer"><span class="timer-icon" aria-hidden="true">⏱</span><span class="timer-digits">${initialMin}:00</span></div>` : '';
+  const timer = (mockMode||activeDuration) ? `<div class="modern-digital-clock progress-pill ${mockMode?'mock-global-timer':''}" id="timerEl" role="timer" aria-label="Timer"><span class="timer-digits">${initialMin}:00</span></div>` : '';
   const canShuffle = !mockMode && isShuffleAllowed(sec, teil);
   const headingShuffle = canShuffle ? `<button type="button" class="exercise-heading-shuffle" id="headingShuffleBtn" title="${text('خلط الأسئلة','Aufgaben mischen')}" aria-label="${text('خلط الأسئلة','Aufgaben mischen')}"><span class="shuffle-icon" aria-hidden="true">⤨</span><span>${text('خلط الأسئلة','Aufgaben mischen')}</span></button>` : '';
   const titleMarkup = title ? `<div class="thema-title-row is-revealed-title"><div class="thema-title-content"><h1 id="thema-title" data-content-id="thema-title" data-source="${esc(title)}">${esc(title)}</h1></div><div class="thema-tools">${textTools(title,'thema-title')}</div></div>` : '';
-  return `<header class="exercise-header-card exercise-heading exercise-sticky-bar" id="exerciseStickyBar"><div class="exercise-single-top-bar exercise-heading-meta exercise-control-bar exercise-sub-bar" id="exerciseControlBar"><div class="top-bar-left-cluster exercise-heading-tags exercise-meta-frame"><span class="tag tag-level-section">Telc ${esc(level)} · ${esc(sec)}</span>${teil?`<span class="tag tag-teil">${esc(teil)}</span>`:''}</div>${titleMarkup?`<div class="top-bar-title-cluster exercise-card-title-bar exercise-heading-title">${titleMarkup}</div>`:''}<div class="top-bar-shuffle-cluster exercise-control-shuffle-slot">${headingShuffle}</div>${timer?`<div class="top-bar-timer-cluster exercise-card-timer exercise-heading-timer">${timer}</div>`:''}</div></header>`;
+  return `<header class="exercise-header-card exercise-heading exercise-sticky-bar" id="exerciseStickyBar"><div class="exercise-single-top-bar exercise-heading-meta exercise-control-bar exercise-sub-bar" id="exerciseControlBar">${titleMarkup?`<div class="top-bar-title-cluster exercise-card-title-bar exercise-heading-title">${titleMarkup}</div>`:''}<div class="top-bar-shuffle-cluster exercise-control-shuffle-slot">${headingShuffle}</div>${timer?`<div class="top-bar-timer-cluster exercise-card-timer exercise-heading-timer">${timer}</div>`:''}</div></header>`;
 }
 function renderExerciseControlBar(){
   // Fully integrated into the unified sticky exercise header card
