@@ -1092,7 +1092,7 @@ html[dir="ltr"] .student-hub .topic-toolbar .topic-search-input{text-align:left!
   --ink: #0f172a;
   --ink-rgb: 15, 23, 42;
   --muted: #65736f;
-  --line: #d6e2dc;
+  --line: #ffffff;
   --bg: #f8fafc;
   --white: #ffffff;
   --gold: #f59e0b;
@@ -6216,7 +6216,7 @@ h1,h2,h3{overflow-wrap:break-word;word-break:break-word;white-space:normal}
 }
 
 .assignment-selected:hover {
-  background: #121815 !important;
+  background:  #141414 !important;
   transform: scale(1.02) !important;
 }
 
@@ -8735,10 +8735,10 @@ html[data-theme="light"] {
   --bg: #F8FAFC;
   --surface: #FFFFFF;
   --surface-elevated: #eef5f2;
-  --surface-hover: #d6e2dc;
+  --surface-hover: #ffffff;
   --surface-glass: rgba(255, 255, 255, 0.88);
   --surface-glass-border: rgba(0, 0, 0, 0.08);
-  --line: #d6e2dc;
+  --line: #ffffff;
   --line-subtle: #EDF2F7;
   --ink: #0F172A;
   --text-secondary: #3f5750;
@@ -8984,7 +8984,7 @@ body::after {
 
 html[data-theme="light"] .level-switch {
   background: #EDF2F6 !important;
-  border-color: #d6e2dc !important;
+  border-color: #ffffff !important;
 }
 
 .level-btn {
