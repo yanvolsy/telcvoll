@@ -1223,7 +1223,7 @@ function renderMatching(){
    const cid='head-'+key;
    return `<div class="heading-option-wrap ${selectedForActive?'is-active-match':''} ${isUsed?'heading-used':''} ${selectedForActive?'heading-current':''}">
       <button type="button" class="choice-card ${selectedForActive?'selected':''} ${resultClass} ${modelClass}" data-choice="${key}" ${isUsed&&!selectedForActive?'disabled':''}><b id="${cid}" data-content-id="${cid}" data-source="${esc(displayHeading)}">${esc(displayHeading)}</b>${isUsed?`<small class="heading-used-badge">✓ ${text('تم اختياره','Ausgewählt')}</small>`:''}</button>
-
+      ${textTools(displayHeading, cid)}
    </div>`;
  }).join('');
 

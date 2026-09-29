@@ -3466,9 +3466,12 @@ body:not(.is-admin-page) .speaking-model-qa-card * {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: rgba(5, 10, 8, 0.76);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background:
+    radial-gradient(circle 420px at 50% 48%, rgba(255, 122, 47, 0.075), transparent 72%),
+    radial-gradient(circle 700px at 82% 18%, rgba(255, 122, 47, 0.035), transparent 74%),
+    rgba(0, 0, 0, 0.74);
+  backdrop-filter: blur(18px) saturate(115%);
+  -webkit-backdrop-filter: blur(18px) saturate(115%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3486,16 +3489,16 @@ body:not(.is-admin-page) .speaking-model-qa-card * {
 }
 
 .variation-modal-dialog {
-  background: #101814;
-  backdrop-filter: blur(24px) saturate(180%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  color: #f8fafc;
-  border: 1px solid rgba(255, 122, 0, 0.28);
+  background: #080808;
+  backdrop-filter: blur(24px) saturate(115%);
+  -webkit-backdrop-filter: blur(24px) saturate(115%);
+  color: #eef5f2;
+  border: 1px solid #222222;
   border-radius: 24px;
   max-width: 450px;
   width: 100%;
   padding: 28px 24px 24px;
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.65), 0 0 35px rgba(255, 122, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.72), 0 0 35px rgba(255, 122, 47, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.055);
   position: relative;
   text-align: center;
   animation: scaleInVarModal 0.22s cubic-bezier(0.16, 1, 0.3, 1);
@@ -3563,6 +3566,15 @@ html[data-theme="light"] .variation-modal-close:hover {
 
 .variation-modal-header {
   margin-bottom: 20px;
+}
+
+.variation-topic-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #eef5f2;
+  filter: grayscale(1) brightness(1.45);
+  opacity: .92;
 }
 
 .variation-modal-icon {
