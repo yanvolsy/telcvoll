@@ -98,7 +98,7 @@ html[data-theme="light"] .exercise-topbar {
 
 .tag-level-section {
   background: rgba(244, 123, 32, 0.14) !important;
-  color: #f47b20 !important;
+  color: #FF7A2F !important;
   border: 1px solid rgba(244, 123, 32, 0.28) !important;
 }
 
@@ -194,7 +194,7 @@ html[data-theme="light"] .exercise-topbar {
 }
 
 .title-reveal-btn.title-eye-btn:hover {
-  border-color: #f47b20 !important;
+  border-color: #FF7A2F !important;
 }
 
 
@@ -282,8 +282,8 @@ html[data-theme="light"] .exercise-topbar {
 }
 
 .exercise-heading-shuffle:hover {
-  border-color: #f47b20 !important;
-  color: #f47b20 !important;
+  border-color: #FF7A2F !important;
+  color: #FF7A2F !important;
 }
 
 
@@ -463,11 +463,11 @@ select[data-paragraph-select] {
 
 
 select.mock-select:focus {
-  border-color: #f47b20 !important;
+  border-color: #FF7A2F !important;
 }
 
 select.mock-select.answered {
-  border-color: #f47b20 !important;
+  border-color: #FF7A2F !important;
 }
 
 /* Validated Dropdown States */
@@ -527,8 +527,8 @@ body[dir="rtl"] .paragraph-tools-row {
 }
 
 .mini-tool:hover {
-  color: #f47b20 !important;
-  border-color: #f47b20 !important;
+  color: #FF7A2F !important;
+  border-color: #FF7A2F !important;
 }
 
 
@@ -1185,7 +1185,7 @@ function renderMatching(){
     const fullCorrectAnswerText = getFullAnswerText(it, correctVal, heads);
     const correctHint=answerFeedbackMarkup(detail,correctVal,fullCorrectAnswerText);
     return `<article class="exam-text-card ${selected?'answered':''} ${resultClass} ${showModelAnswers?'model-shown':''} ${String(activeItem)===String(it.position_no)?'active-item':''}" data-item="${it.position_no}">
-      ${isReversedLesen3?`<div style="margin:0 0 10px;color:#f47b20;font-size:17px;font-weight:950;">${reverseAdLetter}</div>`:''}
+      ${isReversedLesen3?`<div style="margin:0 0 10px;color:#FF7A2F;font-size:17px;font-weight:950;">${reverseAdLetter}</div>`:''}
       <div class="paragraph-assignment">
         <div class="paragraph-assignment-head" style="display:none !important;" aria-hidden="true"></div>
         <div class="paragraph-assignment-controls">
@@ -1258,7 +1258,7 @@ function renderMatching(){
          return `
          <div class="heading-entry lesen3-ad-card ${assignedSitNo ? 'is-used' : ''}" id="card-ad-${letter}" style="background:var(--bg);border:1.5px solid var(--line);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:12px;">
            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-             <strong style="font-size:16px;font-weight:950;color:#f47b20;display:inline-flex;align-items:center;gap:8px;">
+             <strong style="font-size:16px;font-weight:950;color:#FF7A2F;display:inline-flex;align-items:center;gap:8px;">
                <span>${cardTitle}</span>
                ${!isReversedLesen3&&ad.title ? `<span style="color:var(--ink);font-weight:800;">— ${esc(ad.title)}</span>` : ''}
              </strong>

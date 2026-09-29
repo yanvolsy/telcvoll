@@ -269,7 +269,7 @@
           </div>
           <div style="display:flex;gap:8px;">
             <button type="button" class="btn light" id="cancelComposer">إلغاء</button>
-            <button type="button" class="btn" id="confirmSendBtn" style="background:#f47b20;">🚀 إرسال الحملة الآن</button>
+            <button type="button" class="btn" id="confirmSendBtn" style="background:#FF7A2F;">🚀 إرسال الحملة الآن</button>
           </div>
         </div>
       </form>
@@ -325,7 +325,7 @@
       <div style="font-size:46px;margin-bottom:12px;">⚠️</div>
       <h2 style="margin:0 0 10px;font-size:22px;">تأكيد إرسال الحملة البريدية</h2>
       <p style="color:#52615c;font-size:14px;line-height:1.7;margin:0 0 20px;">
-        أنت على وشك إرسال هذه الرسالة إلى <b id="confirmAudienceNum" style="color:#f47b20;">…</b> طالب عبر بوابة <b>Resend</b> الرسمية.<br>
+        أنت على وشك إرسال هذه الرسالة إلى <b id="confirmAudienceNum" style="color:#FF7A2F;">…</b> طالب عبر بوابة <b>Resend</b> الرسمية.<br>
         لا يمكن التراجع عن هذا الإجراء بمجرد بدئه.
       </p>
       <div style="background:#f7faf9;padding:14px;border-radius:12px;margin-bottom:20px;text-align:right;font-size:13px;">
@@ -334,7 +334,7 @@
       </div>
       <div style="display:flex;justify-content:center;gap:12px;">
         <button type="button" class="btn light" id="cancelSendConfirm">تراجع وإلغاء</button>
-        <button type="button" class="btn" id="executeSendBtn" style="background:#f47b20;padding:12px 24px;">نعم، إرسال لجميع الطلاب الآن ←</button>
+        <button type="button" class="btn" id="executeSendBtn" style="background:#FF7A2F;padding:12px 24px;">نعم، إرسال لجميع الطلاب الآن ←</button>
       </div>
     </div>
   </div>
@@ -548,12 +548,12 @@
         .replace(/\{\{\s*email\s*\}\}/gi, sample.email)
         .replace(/\{\{\s*plan\s*\}\}/gi, sample.plan)
         .replace(/\{\{\s*expires_at\s*\}\}/gi, sample.expires_at)
-        .replace(/\{\{\s*access_code\s*\}\}/gi, `<span style="font-family:monospace;background:#f3f7f5;padding:3px 8px;border-radius:6px;font-weight:bold;color:#f47b20;">${sample.access_code}</span>`);
+        .replace(/\{\{\s*access_code\s*\}\}/gi, `<span style="font-family:monospace;background:#f3f7f5;padding:3px 8px;border-radius:6px;font-weight:bold;color:#FF7A2F;">${sample.access_code}</span>`);
 
       return `
         <div style="font-family: Cairo, Arial, sans-serif; direction: rtl; text-align: right; padding: 20px; background: #fff;">
           <div style="background: #080808; padding: 18px; border-radius: 12px; text-align: center; color: #fff;">
-            <h2 style="margin: 0; color: #fff; font-size: 20px;"><span style="color: #f47b20;">●</span> TELC Voll</h2>
+            <h2 style="margin: 0; color: #fff; font-size: 20px;"><span style="color: #FF7A2F;">●</span> TELC Voll</h2>
           </div>
           <div style="padding: 24px 8px;">
             <h3 style="color:#080808;font-size:18px;margin-bottom:14px;">${esc($('campSubject').value || 'معاينة رسالة TELC Voll')}</h3>
@@ -561,7 +561,7 @@
               ${personalized}
             </div>
             <div style="margin-top: 25px; text-align: center;">
-              <a href="https://telcvoll.de" style="display: inline-block; background: #f47b20; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: bold; font-size: 14px;">الانتقال إلى المنصة ←</a>
+              <a href="https://telcvoll.de" style="display: inline-block; background: #FF7A2F; color: #fff; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: bold; font-size: 14px;">الانتقال إلى المنصة ←</a>
             </div>
           </div>
           <div style="border-top: 1px solid #e1e8e5; padding-top: 14px; text-align: center; font-size: 11px; color: #83978f;">

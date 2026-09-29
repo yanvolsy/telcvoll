@@ -21,11 +21,11 @@
 
 .result-icon-glow{width:86px;height:86px;border-radius:50%;display:grid;place-items:center;margin:0 auto 16px;font-size:42px;box-shadow:0 8px 24px rgba(0,0,0,0.06);transition:transform .3s ease}
 .result-hero.pass .result-icon-glow{background:#dff5e8;color:#228151;border:2px solid rgba(34,129,81,0.2)}
-.result-hero.encourage .result-icon-glow{background:#fff3eb;color:#f47b20;border:2px solid rgba(244,123,32,0.25)}
+.result-hero.encourage .result-icon-glow{background:#fff3eb;color:#FF7A2F;border:2px solid rgba(244,123,32,0.25)}
 
 .result-status{font-size:clamp(26px,4.5vw,42px);font-weight:1000;letter-spacing:-.03em;margin:8px 0 12px;line-height:1.25}
 .result-hero.pass .result-status{color:#1e7e52}
-.result-hero.encourage .result-status{color:#f47b20}
+.result-hero.encourage .result-status{color:#FF7A2F}
 
 
 
@@ -40,7 +40,7 @@
 
 .telc-cert-head{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid var(--line);padding-bottom:16px;margin-bottom:22px;flex-wrap:wrap;gap:10px}
 .telc-cert-title{font-size:20px;font-weight:1000;color:var(--ink);display:flex;align-items:center;gap:10px}
-.telc-cert-pill{background:rgba(244,123,32,0.12);color:#f47b20;border:1px solid rgba(244,123,32,0.3);padding:4px 14px;border-radius:999px;font-size:13px;font-weight:900}
+.telc-cert-pill{background:rgba(244,123,32,0.12);color:#FF7A2F;border:1px solid rgba(244,123,32,0.3);padding:4px 14px;border-radius:999px;font-size:13px;font-weight:900}
 
 .telc-cert-table{display:flex;flex-direction:column;gap:14px;max-width:760px;margin:0 auto}
 .telc-cert-row{display:flex;align-items:baseline;justify-content:space-between;padding:10px 0;font-size:18px;font-weight:850;color:var(--ink)}
@@ -48,7 +48,7 @@
 .telc-cert-row.sub-row{color:var(--ink);font-size:17px;font-weight:800;padding-inline-start:12px}
 .telc-cert-score-wrap{display:inline-flex;align-items:baseline;gap:8px;font-variant-numeric:tabular-nums;font-weight:900}
 .telc-cert-score-val{display:inline-block;min-width:68px;text-align:end;padding-bottom:2px;border-bottom:1.5px solid var(--ink);font-size:19px;font-weight:1000}
-.telc-cert-row.total-row .telc-cert-score-val{font-size:23px;border-bottom-width:2.5px;color:#f47b20}
+.telc-cert-row.total-row .telc-cert-score-val{font-size:23px;border-bottom-width:2.5px;color:#FF7A2F}
 .telc-cert-max{color:var(--muted);font-size:16px;font-weight:850}
 
 /* Section Breakdown Cards */
@@ -70,7 +70,7 @@
 /* Actions */
 .result-actions{display:flex;justify-content:center;gap:12px;margin-top:32px;flex-wrap:wrap}
 .result-actions .btn{font-size:15px;padding:12px 24px;border-radius:14px;font-weight:900}
-.result-actions .btn-orange{background:#f47b20;color:#fff;border:none;box-shadow:0 4px 16px rgba(244,123,32,0.35)}
+.result-actions .btn-orange{background:#FF7A2F;color:#fff;border:none;box-shadow:0 4px 16px rgba(244,123,32,0.35)}
 .result-actions .btn-orange:hover{background:#e06912}
 
 @media(max-width:760px){
@@ -192,7 +192,7 @@ function render() {
         </div>
         <div class="result-badge-item">
           <small>${text('النسبة المحققة', 'Erreichte Quote')}</small>
-          <strong style="color:${passed ? '#228151' : '#f47b20'}">${((schrift/225)*100).toFixed(1)}%</strong>
+          <strong style="color:${passed ? '#228151' : '#FF7A2F'}">${((schrift/225)*100).toFixed(1)}%</strong>
         </div>
       </div>
     </section>

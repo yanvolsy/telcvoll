@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#0d1310">
+  <meta name="theme-color" content="#0F1B1A">
   <title>نتيجة الدفع | TELC Voll</title>
   <link rel="stylesheet" href="/assets/app.css?v=20260928-polished-v1">
   <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
@@ -14,10 +14,10 @@
     body { background: radial-gradient(circle at 50% 8%, rgba(244,123,32,.05), transparent 34%), var(--bg); }
     .payment-result-shell { min-height: calc(100vh - 80px); display:flex; align-items:center; justify-content:center; padding:48px 18px 76px; }
     .result-card { width:min(680px,100%); background:var(--white); border:1px solid rgba(244,123,32,.24); border-radius:28px; box-shadow:var(--shadow); padding:clamp(26px,5vw,46px); text-align:center; position:relative; overflow:hidden; color:var(--ink); }
-    .result-card::before { content:""; position:absolute; inset:0 0 auto; height:4px; background:linear-gradient(90deg,#f47b20,#ff9b48,#f47b20); }
+    .result-card::before { content:""; position:absolute; inset:0 0 auto; height:4px; background:linear-gradient(90deg,#FF7A2F,#ff9b48,#FF7A2F); }
     .result-icon-wrap { width:82px;height:82px;margin:0 auto 22px;border-radius:50%;display:grid;place-items:center;font-size:42px;font-weight:900;box-shadow:0 12px 35px rgba(0,0,0,.22); }
     .result-icon-success { background:#e9fbf1;color:#18a85a; }
-    .result-icon-pending { background:#fff3e8;color:#f47b20; }
+    .result-icon-pending { background:#fff3e8;color:#FF7A2F; }
     .result-icon-failed { background:#ffebe8;color:#df4034; }
     .result-title { font-size:clamp(25px,4vw,34px);font-weight:900;margin:0 0 10px;color:var(--ink);letter-spacing:-.035em;line-height:1.35; }
     .result-subtitle { font-size:15px;color:var(--muted);margin:0 auto 28px;line-height:1.9;max-width:560px; }
@@ -32,7 +32,7 @@
     .btn-direct,.btn-home { min-height:50px;border-radius:14px;font-size:15px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;text-decoration:none;transition:transform .18s,box-shadow .18s,background .18s; }
     .btn-direct { background:var(--bg);color:var(--ink);border:1px solid var(--line);padding:13px 20px; }
     .btn-direct:hover { background:var(--green-soft);border-color:var(--green);transform:translateY(-1px); }
-    .btn-home { background:transparent;color:#f47b20;border:1px solid rgba(244,123,32,.32);padding:12px 20px; }
+    .btn-home { background:transparent;color:#FF7A2F;border:1px solid rgba(244,123,32,.32);padding:12px 20px; }
     .btn-home:hover { background:rgba(244,123,32,.06); }
     .activation-note { display:flex;align-items:flex-start;gap:12px;text-align:right;background:var(--green-soft);border:1px solid color-mix(in srgb,var(--green) 22%,transparent);border-radius:16px;padding:15px 17px;color:var(--ink);font-size:13px;line-height:1.85;margin:20px 0 4px; }
     .activation-note-icon { width:30px;height:30px;flex:0 0 30px;display:grid;place-items:center;border-radius:50%;background:rgba(25,170,91,.13);color:#15934d;font-weight:950; }

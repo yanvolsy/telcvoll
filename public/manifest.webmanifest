@@ -3,8 +3,8 @@
   "short_name": "TELC Voll",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#14201D",
-  "theme_color": "#E98232",
+  "background_color": "#0F1B1A",
+  "theme_color": "#FF7A2F",
   "icons": [
     {
       "src": "/assets/icons/TELC_Voll_AppIcon_Light.png",
