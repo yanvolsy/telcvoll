@@ -2501,3 +2501,236 @@ html[data-theme="dark"] .tag[style*="background:#f4f6f8"] { background: #1b2420 
 html[data-theme="dark"] .channel-badge { background: var(--green-soft) !important; color: var(--green) !important; }
 html[data-theme="dark"] .admin-footer { background: rgba(11,15,14,.92) !important; color: var(--muted) !important; border-color: var(--line) !important; }
 html[data-theme="dark"] body::before { opacity: .8; }
+
+
+/* =========================================================
+   TELC Voll — Current-version missing Variation Modal CSS
+   Added only for the existing dashboard modal markup.
+   Uses the current app.css theme variables; no HTML/JS changes.
+   ========================================================= */
+.variation-modal-overlay{
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:
+    radial-gradient(circle 420px at 50% 48%, rgba(244,123,32,.075), transparent 72%),
+    radial-gradient(circle 700px at 82% 18%, rgba(244,123,32,.035), transparent 74%),
+    rgba(0,0,0,.86);
+  backdrop-filter:blur(18px) saturate(110%);
+  -webkit-backdrop-filter:blur(18px) saturate(110%);
+  animation:variationModalFadeIn .20s cubic-bezier(.16,1,.3,1);
+}
+.variation-modal-overlay[hidden]{display:none!important}
+body.modal-open{overflow:hidden}
+
+.variation-modal-dialog{
+  position:relative;
+  width:100%;
+  max-width:450px;
+  padding:28px 24px 24px;
+  box-sizing:border-box;
+  border:1px solid #222;
+  border-radius:24px;
+  background:#080808!important;
+  background-color:#080808!important;
+  color:#eef5f2;
+  box-shadow:
+    0 28px 70px rgba(0,0,0,.72),
+    0 0 35px rgba(244,123,32,.08),
+    inset 0 1px 0 rgba(255,255,255,.055);
+  text-align:center;
+  animation:variationModalScaleIn .22s cubic-bezier(.16,1,.3,1);
+}
+
+.variation-modal-close{
+  position:absolute;
+  top:12px;
+  inset-inline-end:12px;
+  width:34px;
+  height:34px;
+  padding:0;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid #292929;
+  border-radius:10px;
+  background:#101010;
+  color:#a7a7a7;
+  font:inherit;
+  font-size:22px;
+  line-height:1;
+  cursor:pointer;
+  transition:all .16s ease;
+}
+.variation-modal-close:hover{
+  background:#171717;
+  border-color:#3a3a3a;
+  color:#fff;
+  transform:translateY(-1px);
+}
+
+.variation-modal-header{padding:2px 34px 18px}
+.variation-topic-header{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:34px;
+  margin-bottom:10px;
+}
+.variation-topic-icon{
+  width:32px;
+  height:32px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid #282828;
+  border-radius:9px;
+  background:#101010;
+  color:#eef5f2;
+  font-size:17px;
+  line-height:1;
+}
+.variation-topic-name{
+  max-width:230px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#f5f5f5;
+  font-size:14px;
+  font-weight:900;
+}
+.variation-topic-trans{
+  max-width:150px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#9d9d9d;
+  font-size:12px;
+}
+.variation-modal-title{
+  margin:0;
+  color:#f5f5f5;
+  font-size:21px;
+  font-weight:950;
+  line-height:1.3;
+}
+.variation-modal-subtitle{
+  margin:7px 0 0;
+  color:#999;
+  font-size:13px;
+  line-height:1.6;
+}
+
+.variation-modal-list{
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  max-height:min(52vh,430px);
+  overflow-y:auto;
+  padding:2px 2px 4px;
+  scrollbar-width:thin;
+  scrollbar-color:#333 transparent;
+}
+.variation-modal-list::-webkit-scrollbar{width:6px}
+.variation-modal-list::-webkit-scrollbar-track{background:transparent}
+.variation-modal-list::-webkit-scrollbar-thumb{background:#333;border-radius:999px}
+
+.variation-item-btn{
+  width:100%;
+  min-height:58px;
+  box-sizing:border-box;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:10px 12px;
+  border:1px solid #252525!important;
+  border-radius:14px;
+  background:#101010!important;
+  background-color:#101010!important;
+  color:#eef5f2!important;
+  text-decoration:none!important;
+  text-align:start;
+  transition:transform .16s ease,border-color .16s ease,background .16s ease,box-shadow .16s ease;
+}
+.variation-item-btn:hover{
+  transform:translateY(-1px);
+  border-color:rgba(244,123,32,.45)!important;
+  background:#151515!important;
+  box-shadow:0 8px 24px rgba(0,0,0,.28);
+}
+.variation-item-btn.locked-var-item:hover{
+  border-color:#3a2927!important;
+  background:#131010!important;
+}
+.variation-item-content{
+  min-width:0;
+  flex:1;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.variation-item-label{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#f1f1f1;
+  font-size:13px;
+  font-weight:850;
+}
+.variation-audio-badge,
+.variation-done-badge,
+.variation-play-icon{
+  flex:0 0 auto;
+}
+.variation-audio-badge,
+.variation-done-badge{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:24px;
+  height:24px;
+  padding:0 6px;
+  box-sizing:border-box;
+  border:1px solid #292929;
+  border-radius:7px;
+  background:#0b0b0b;
+  color:#aaa;
+  font-size:11px;
+  font-weight:900;
+}
+.variation-done-badge{color:#42c98a}
+.variation-play-icon{
+  width:32px;
+  height:32px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border:1px solid #292929;
+  border-radius:9px;
+  background:#080808;
+  color:#f47b20;
+  font-size:14px;
+  line-height:1;
+}
+.locked-var-item .variation-play-icon{color:#991b1b!important}
+
+@keyframes variationModalFadeIn{from{opacity:0}to{opacity:1}}
+@keyframes variationModalScaleIn{from{opacity:0;transform:scale(.96) translateY(6px)}to{opacity:1;transform:scale(1) translateY(0)}}
+
+@media(max-width:560px){
+  .variation-modal-overlay{padding:12px}
+  .variation-modal-dialog{max-width:none;padding:24px 14px 16px;border-radius:20px}
+  .variation-modal-header{padding-inline:28px;padding-bottom:14px}
+  .variation-modal-title{font-size:18px}
+  .variation-topic-name{max-width:170px}
+  .variation-topic-trans{display:none}
+  .variation-modal-list{max-height:60vh}
+  .variation-item-btn{min-height:54px;padding:9px 10px;border-radius:12px}
+}
