@@ -739,7 +739,10 @@ html[dir="rtl"] .topic-tools select{background-position:calc(0% + 17px) 19px,cal
 .topic-toolbar .shuffle-toggle:hover{transform:translateY(-2px)!important;background:var(--exercise-accent-soft)!important;border-color:var(--exercise-accent)!important;color:var(--exercise-accent)!important;box-shadow:0 11px 26px rgba(244,123,32,.13)!important}
 .topic-toolbar .shuffle-toggle.is-active{background:var(--exercise-accent-soft)!important;border-color:var(--exercise-accent)!important;color:var(--exercise-accent)!important}
 .topic-toolbar .shuffle-icon{width:34px!important;height:34px!important;border-radius:11px!important;background:transparent!important;color:currentColor!important}
-.topic-toolbar .shuffle-toggle.is-active .shuffle-icon{background:var(--exercise-accent)!important;color:#fff!important}
+.topic-toolbar .shuffle-toggle.is-active .shuffle-icon{
+  background:transparent!important;
+  color:currentColor!important;
+}
 .topic-toolbar .shuffle-icon svg{width:19px!important;height:19px!important}
 .topic-toolbar .shuffle-label{display:none!important}
 .topic-toolbar .teil-tabs{grid-column:2!important;grid-row:1!important;width:100%!important;min-width:0!important;min-height:52px!important;height:52px!important;display:flex!important;direction:rtl!important;align-items:center!important;justify-content:center!important;gap:4px!important;border:1px solid var(--line)!important;border-radius:17px!important;background:var(--white)!important;padding:5px!important;box-shadow:0 8px 24px rgba(16,35,30,.055)!important}
@@ -943,14 +946,56 @@ html[dir="ltr"] .student-hub .topic-toolbar .topic-search-input{text-align:left!
   html[dir="ltr"] .student-hub .topic-toolbar{grid-template-columns:52px minmax(240px,1fr) 280px!important}
 }
 @media(max-width:700px){
+
   html[dir="rtl"] .student-hub .topic-toolbar,
-  html[dir="ltr"] .student-hub .topic-toolbar{grid-template-columns:52px minmax(0,1fr)!important;grid-template-rows:auto auto!important;direction:ltr!important}
+  html[dir="ltr"] .student-hub .topic-toolbar{
+    display:grid!important;
+    grid-template-columns:64px minmax(0,1fr)!important;
+    grid-template-rows:48px auto!important;
+    column-gap:16px!important;
+    row-gap:12px!important;
+    direction:ltr!important;
+    align-items:center!important;
+  }
+
+  /* زر الخلط */
   html[dir="rtl"] .student-hub .topic-toolbar .shuffle-toggle,
-  html[dir="ltr"] .student-hub .topic-toolbar .shuffle-toggle{grid-column:1!important;grid-row:1!important}
+  html[dir="ltr"] .student-hub .topic-toolbar .shuffle-toggle{
+    grid-column:1!important;
+    grid-row:1!important;
+
+    width:48px!important;
+    height:48px!important;
+    min-width:48px!important;
+    min-height:48px!important;
+
+    margin:0!important;
+    justify-self:center!important;
+    align-self:center!important;
+  }
+
+  /* أزرار Teil */
   html[dir="rtl"] .student-hub .topic-toolbar .teil-tabs,
-  html[dir="ltr"] .student-hub .topic-toolbar .teil-tabs{grid-column:2!important;grid-row:1!important}
+  html[dir="ltr"] .student-hub .topic-toolbar .teil-tabs{
+    grid-column:2!important;
+    grid-row:1!important;
+
+    width:100%!important;
+    height:48px!important;
+    min-height:48px!important;
+
+    margin:0!important;
+  }
+
+  /* البحث يبقى في السطر الثاني */
   html[dir="rtl"] .student-hub .topic-toolbar .topic-search-wrap,
-  html[dir="ltr"] .student-hub .topic-toolbar .topic-search-wrap{grid-column:1 / -1!important;grid-row:2!important;width:100%!important;max-width:none!important;justify-self:stretch!important}
+  html[dir="ltr"] .student-hub .topic-toolbar .topic-search-wrap{
+    grid-column:1 / -1!important;
+    grid-row:2!important;
+
+    width:100%!important;
+    margin:0!important;
+  }
 }
 
 /* Sprechen Teil 3 — structured TELC-style planning tasks and model dialogue */
@@ -2501,61 +2546,3 @@ html[data-theme="dark"] .tag[style*="background:#f4f6f8"] { background: #1b2420 
 html[data-theme="dark"] .channel-badge { background: var(--green-soft) !important; color: var(--green) !important; }
 html[data-theme="dark"] .admin-footer { background: rgba(11,15,14,.92) !important; color: var(--muted) !important; border-color: var(--line) !important; }
 html[data-theme="dark"] body::before { opacity: .8; }
-
-
-/* TELC VOLL - Shuffle button mobile layout fix */
-@media(max-width:700px){
-
-  html[dir="rtl"] .student-hub .topic-toolbar,
-  html[dir="ltr"] .student-hub .topic-toolbar{
-    display:grid!important;
-    grid-template-columns:64px minmax(0,1fr)!important;
-    grid-template-rows:48px auto!important;
-    column-gap:16px!important;
-    row-gap:12px!important;
-    direction:ltr!important;
-    align-items:center!important;
-  }
-
-  /* Shuffle button: same height as the Teil tabs, with separation */
-  html[dir="rtl"] .student-hub .topic-toolbar .shuffle-toggle,
-  html[dir="ltr"] .student-hub .topic-toolbar .shuffle-toggle{
-    grid-column:1!important;
-    grid-row:1!important;
-    width:48px!important;
-    height:48px!important;
-    min-width:48px!important;
-    min-height:48px!important;
-    margin:0!important;
-    justify-self:center!important;
-    align-self:center!important;
-  }
-
-  /* Teil tabs */
-  html[dir="rtl"] .student-hub .topic-toolbar .teil-tabs,
-  html[dir="ltr"] .student-hub .topic-toolbar .teil-tabs{
-    grid-column:2!important;
-    grid-row:1!important;
-    width:100%!important;
-    height:48px!important;
-    min-height:48px!important;
-    margin:0!important;
-  }
-
-  /* Search stays below */
-  html[dir="rtl"] .student-hub .topic-toolbar .topic-search-wrap,
-  html[dir="ltr"] .student-hub .topic-toolbar .topic-search-wrap{
-    grid-column:1 / -1!important;
-    grid-row:2!important;
-    width:100%!important;
-    margin:0!important;
-  }
-}
-
-/* TELC VOLL - Remove orange inner area from shuffle icon */
-.topic-toolbar .shuffle-toggle .shuffle-icon,
-.topic-toolbar .shuffle-toggle.is-active .shuffle-icon{
-  background:transparent!important;
-  color:currentColor!important;
-  box-shadow:none!important;
-}
