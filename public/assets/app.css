@@ -11833,7 +11833,7 @@ html body > #content.exercise-page .exercise-heading-shuffle > span:not(.shuffle
    Applies only the global site background; component colors remain unchanged.
    ========================================================================== */
 html, body {
-  background-color: #080808 !important;
+  background-color: var(--bg) !important;
 }
 
 body::before {
@@ -11864,7 +11864,7 @@ body::before {
       rgba(255,122,47,.018) 30%,
       transparent 72%
     ),
-    #080808 !important;
+    var(--bg) !important;
 
   background-attachment: fixed !important;
   background-repeat: no-repeat !important;
@@ -11888,8 +11888,7 @@ body::after {
       circle at 50% 40%,
       rgba(255,122,47,.018) 0%,
       transparent 48%
-    ),
-    rgba(0,0,0,.08) !important;
+    ) !important;
 
   display: block !important;
 }
