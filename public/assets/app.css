@@ -11832,59 +11832,7 @@ html body > #content.exercise-page .exercise-heading-shuffle > span:not(.shuffle
    FINAL GLOBAL AMBIENT BACKGROUND — BLACK/WHITE + ORANGE GLOW
    Applies only the global site background; component colors remain unchanged.
    ========================================================================== */
-html, body { background-color: #080808 !important; }
 
-body::before {
-  content: "" !important;
-  position: fixed !important;
-  inset: -8% !important;
-  width: 116vw !important;
-  height: 116vh !important;
-  pointer-events: none !important;
-  z-index: -2 !important;
-  background:
-    radial-gradient(ellipse 42% 34% at 8% 8%, rgba(255,122,47,.115) 0%, rgba(255,122,47,.045) 28%, transparent 68%),
-    radial-gradient(ellipse 38% 32% at 88% 18%, rgba(255,122,47,.075) 0%, rgba(255,122,47,.028) 30%, transparent 70%),
-    radial-gradient(ellipse 46% 38% at 72% 88%, rgba(255,122,47,.055) 0%, rgba(255,122,47,.018) 30%, transparent 72%),
-    #080808 !important;
-  background-attachment: fixed !important;
-  background-repeat: no-repeat !important;
-  background-size: 100% 100% !important;
-  filter: blur(22px) !important;
-  transform: scale(1.04) !important;
-}
-
-body::after {
-  content: "" !important;
-  position: fixed !important;
-  inset: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  pointer-events: none !important;
-  z-index: -1 !important;
-  background:
-    radial-gradient(circle at 50% 40%, rgba(255,122,47,.018) 0%, transparent 48%),
-    rgba(0,0,0,.08) !important;
-  display: block !important;
-}
-
-html[data-theme="light"],
-html[data-theme="light"] body { background-color: #ffffff !important; }
-
-html[data-theme="light"] body::before {
-  background:
-    radial-gradient(ellipse 42% 34% at 8% 8%, rgba(255,122,47,.095) 0%, rgba(255,122,47,.035) 28%, transparent 68%),
-    radial-gradient(ellipse 38% 32% at 88% 18%, rgba(255,122,47,.065) 0%, rgba(255,122,47,.024) 30%, transparent 70%),
-    radial-gradient(ellipse 46% 38% at 72% 88%, rgba(255,122,47,.045) 0%, rgba(255,122,47,.015) 30%, transparent 72%),
-    #ffffff !important;
-}
-
-html[data-theme="light"] body::after {
-  background:
-    radial-gradient(circle at 50% 40%, rgba(255,122,47,.012) 0%, transparent 48%),
-    rgba(255,255,255,.08) !important;
-  display: block !important;
-}
 
 /* TELC Voll — subtle translucent cards over ambient background */
 html[data-theme="dark"] :where(.card,.panel,.topic-card,.student-card,.admin-card,.admin-stat,.admin-tool,.stat,.plan-item,.exam-card,.table-card,.toolbar-panel,.code-table-wrap,.table-wrap,.modal-box,.modal,.editor-wrapper,.preview-frame) {
