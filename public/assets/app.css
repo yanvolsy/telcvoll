@@ -11782,3 +11782,186 @@ html[data-theme="light"] :where(.card,.panel,.topic-card,.student-card,.admin-ca
   backdrop-filter: blur(10px) !important;
   -webkit-backdrop-filter: blur(10px) !important;
 }
+
+/* ========================================================================
+   FINAL USER REQUEST — Student section buttons + shuffle control
+   Scope: visual/layout only. No content or behavior changes.
+   ======================================================================== */
+
+/* Shuffle: same neutral gray surface and border as the other controls. */
+.student-hub .shuffle-toggle {
+  background: var(--white) !important;
+  border: 1px solid var(--line) !important;
+  color: var(--brand) !important;
+}
+
+/* Keep the neutral appearance on hover; only the icon remains orange. */
+.student-hub .shuffle-toggle:hover {
+  background: var(--white) !important;
+  border-color: var(--line) !important;
+  color: var(--brand) !important;
+  box-shadow: var(--shadow-sm) !important;
+  transform: none !important;
+}
+
+/* All five TELC sections: icon centered above label. */
+.student-hub .section-switch .section-btn {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+.student-hub .section-switch .section-btn > span:first-child {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 auto !important;
+  text-align: center !important;
+}
+
+.student-hub .section-switch .section-btn-copy {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+
+/* Mobile: all five sections in one row, with compact icons above text. */
+@media (max-width: 700px) {
+  .student-hub .section-switch {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 3px !important;
+    padding: 3px !important;
+    border-radius: 13px !important;
+  }
+
+  .student-hub .section-switch .section-btn,
+  .student-hub .section-switch .section-btn:nth-child(1),
+  .student-hub .section-switch .section-btn:nth-child(2),
+  .student-hub .section-switch .section-btn:nth-child(3),
+  .student-hub .section-switch .section-btn:nth-child(4),
+  .student-hub .section-switch .section-btn:nth-child(5) {
+    grid-column: auto !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    min-height: 58px !important;
+    height: 58px !important;
+    padding: 4px 2px !important;
+    border-radius: 10px !important;
+    gap: 2px !important;
+  }
+
+  .student-hub .section-switch .section-btn > span:first-child {
+    width: 100% !important;
+    height: 18px !important;
+    font-size: 15px !important;
+    line-height: 1 !important;
+    margin: 0 auto !important;
+  }
+
+  .student-hub .section-switch .section-btn-copy {
+    width: 100% !important;
+    min-width: 0 !important;
+    gap: 0 !important;
+  }
+
+  .student-hub .section-switch .section-btn-copy b {
+    width: 100% !important;
+    max-width: 100% !important;
+    font-size: 8.5px !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    text-align: center !important;
+  }
+
+  .student-hub .section-switch .section-btn-copy small {
+    font-size: 7.5px !important;
+    line-height: 1.05 !important;
+    text-align: center !important;
+  }
+}
+
+
+/* FINAL MOBILE / SECTION BUTTON REFINEMENTS
+   - Shuffle button uses the same neutral background/border as the other controls.
+   - Section icons are centered above their labels.
+   - On mobile all five section buttons remain on one row with compact icons/text.
+*/
+.topic-toolbar .shuffle-btn,
+.topic-toolbar .shuffle-button,
+.topic-toolbar button[class*="shuffle"],
+.topic-toolbar .shuffle {
+  background: var(--white) !important;
+  border: 1px solid var(--line) !important;
+  color: var(--ink) !important;
+  box-shadow: none !important;
+}
+
+.topic-toolbar .shuffle-btn:hover,
+.topic-toolbar .shuffle-button:hover,
+.topic-toolbar button[class*="shuffle"]:hover,
+.topic-toolbar .shuffle:hover {
+  background: var(--white) !important;
+  border-color: var(--line) !important;
+  color: var(--brand) !important;
+}
+
+.section-switch {
+  align-items: stretch;
+}
+
+.section-btn {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  gap: 3px !important;
+  min-width: 0 !important;
+}
+
+.section-btn span {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-inline-end: 0 !important;
+  line-height: 1 !important;
+  font-size: 24px !important;
+}
+
+@media (max-width: 720px) {
+  .section-switch {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 2px !important;
+    padding: 3px !important;
+    width: 100% !important;
+    border-radius: 16px !important;
+  }
+
+  .section-btn {
+    min-width: 0 !important;
+    width: 100% !important;
+    padding: 8px 2px !important;
+    gap: 3px !important;
+    border-radius: 11px !important;
+    font-size: 10px !important;
+    font-weight: 850 !important;
+    line-height: 1.15 !important;
+    white-space: nowrap !important;
+  }
+
+  .section-btn span {
+    width: 100% !important;
+    height: 20px !important;
+    margin: 0 !important;
+    font-size: 15px !important;
+    line-height: 1 !important;
+  }
+}
