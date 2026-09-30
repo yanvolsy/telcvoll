@@ -11700,7 +11700,7 @@ html body > #content.exercise-page .exercise-heading-shuffle > span:not(.shuffle
 
 /* ========================================================================== 
    FINAL GLOBAL AMBIENT BACKGROUND — BLACK/WHITE + ORANGE GLOW
-   Applies only the global site background; component colors remain unchanged.
+   Global background only: translucent glass layer over the orange glow.
    ========================================================================== */
 html {
   background-color: var(--bg) !important;
@@ -11711,6 +11711,7 @@ body {
   isolation: isolate;
 }
 
+/* Glow stays underneath the glass background. */
 body::before {
   content: "" !important;
   position: fixed !important;
@@ -11718,7 +11719,7 @@ body::before {
   width: 116vw !important;
   height: 116vh !important;
   pointer-events: none !important;
-  z-index: -1 !important;
+  z-index: -2 !important;
 
   background:
     radial-gradient(
@@ -11749,6 +11750,7 @@ body::before {
   transform: scale(1.04) !important;
 }
 
+/* Translucent blurred veil: the glow remains visible through it. */
 body::after {
   content: "" !important;
   position: fixed !important;
@@ -11757,15 +11759,15 @@ body::after {
   height: 100vh !important;
   pointer-events: none !important;
   z-index: -1 !important;
-
-  background:
-    radial-gradient(
-      circle at 50% 40%,
-      rgba(255,122,47,.018) 0%,
-      transparent 48%
-    ) !important;
-
   display: block !important;
+
+  background: rgba(8,8,8,.20) !important;
+  backdrop-filter: blur(18px) saturate(115%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(115%) !important;
+}
+
+html[data-theme="light"] body::after {
+  background: rgba(255,255,255,.22) !important;
 }
 
 /* TELC Voll — subtle translucent cards over ambient background */
