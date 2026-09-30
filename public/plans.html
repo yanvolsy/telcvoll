@@ -365,10 +365,15 @@ async function loadPlans() {
             <div class="active-subscription-banner guarded">
               <div class="sub-banner-left">
                 <div class="sub-banner-badge">🛡️</div>
-                <div class="sub-banner-text">
-                  <h3>لديك اشتراك نشط حالياً (${currentSubscription?.plan_name || 'اشتراك كامل'})</h3>
-                  <p>ينتهي اشتراكك بعد <strong>${subscriptionRemainingDays} يوماً</strong>. وفقاً لسياسة المنصة، يمكنك تجديد خطتك أو الاشتراك من جديد فقط خلال <strong>آخر 3 أيام</strong> من نهاية اشتراكك الحالي.</p>
-                </div>
+               <div class="sub-banner-text">
+  <h3>لديك اشتراك نشط حالياً (${currentSubscription?.plan_name || 'اشتراك كامل'})</h3>
+
+  <p>
+    ينتهي اشتراكك بعد <strong>${subscriptionRemainingDays} يوماً</strong>.<br>
+    وفقاً لسياسة المنصة، يمكنك تجديد خطتك أو الاشتراك من جديد فقط خلال
+    <strong>آخر 3 أيام</strong> من نهاية اشتراكك الحالي.
+  </p>
+</div>
               </div>
               <div class="sub-banner-days">
                 <span class="days-num">${subscriptionRemainingDays}</span>
