@@ -3,16 +3,15 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#080808"><title>لوحة الطالب</title>
-<link rel="stylesheet" href="/assets/app.css?v=20261002-polished-v5">
+<link rel="stylesheet" href="/assets/app.css?v=20260928-polished-v1">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
 <link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="/manifest.webmanifest">
-<script>document.documentElement.classList.add('js-ready');</script>
 <style>
 .pres-studio-active-grid { display: block !important; width: 100% !important; grid-column: 1 / -1; }
-/* In-app Student Notification Center - Design Tokens */
+/* In-app Student Notification Center */
 .notif-wrapper {
   position: relative;
   display: inline-flex;
@@ -22,39 +21,39 @@
   position: relative;
   width: 38px;
   height: 38px;
-  border-radius: var(--radius-full, 999px);
-  border: 1px solid var(--border-subtle, var(--line));
-  background: var(--bg-surface, var(--white));
-  color: var(--text-primary, var(--ink));
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--white);
+  color: var(--ink);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all var(--duration-fast, 0.18s) var(--ease-spring);
+  transition: all 0.18s ease;
   padding: 0;
   box-sizing: border-box;
 }
 .notif-bell-btn.icon-btn:hover {
-  background: var(--brand-subtle);
-  border-color: var(--brand-primary);
-  color: var(--brand-primary);
+  background: var(--green-soft);
+  border-color: var(--green);
+  color: var(--green);
 }
 .notif-badge {
   position: absolute;
   top: -4px;
   inset-inline-end: -4px;
-  background: var(--brand-primary, #FF7A2F);
-  color: #FFFFFF;
+  background: var(--green, #FF7A2F);
+  color: #fff;
   font-size: 10px;
   font-weight: 900;
   min-width: 17px;
   height: 17px;
-  border-radius: var(--radius-full, 999px);
+  border-radius: 999px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0 4px;
-  border: 2px solid var(--bg-surface, #fff);
+  border: 2px solid var(--white);
   line-height: 1;
 }
 .notif-dropdown {
@@ -63,63 +62,57 @@
   inset-inline-end: 0;
   width: min(360px, calc(100vw - 28px));
   max-height: 420px;
-  background: var(--bg-surface, #fff);
-  border: 1px solid var(--border-subtle, #e2e8e5);
-  border-radius: var(--radius-card, 20px);
-  box-shadow: var(--shadow-modal, 0 16px 40px rgba(0, 0, 0, 0.18));
+  background: var(--white, #fff);
+  border: 1px solid var(--line, #e2e8e5);
+  border-radius: 18px;
+  box-shadow: 0 16px 40px rgba(16, 35, 30, 0.15);
   z-index: 1200;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   text-align: right;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
 }
 .notif-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--border-subtle, var(--line));
-  background: var(--bg-surface-elevated, var(--bg));
-  color: var(--text-primary);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
 }
 .notif-btn-text {
   background: none;
   border: none;
-  color: var(--brand-primary, #FF7A2F);
+  color: var(--green, #FF7A2F);
   font-size: 12px;
   font-weight: 800;
   cursor: pointer;
   padding: 4px 6px;
-  border-radius: 6px;
-  transition: opacity var(--duration-fast, 0.15s);
 }
-.notif-btn-text:hover { opacity: 0.8; text-decoration: underline; }
+.notif-btn-text:hover { text-decoration: underline; }
 .notif-list {
   overflow-y: auto;
   max-height: 360px;
 }
 .notif-item {
-  padding: 13px 16px;
-  border-bottom: 1px solid var(--border-subtle, var(--line));
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
   position: relative;
-  transition: background var(--duration-fast, 0.15s);
-  color: var(--text-primary);
+  transition: background 0.15s;
 }
 .notif-item:last-child { border-bottom: none; }
 .notif-item.unread {
-  background: var(--brand-subtle);
+  background: var(--green-soft);
 }
 .notif-item.unread::before {
   content: "";
   position: absolute;
-  top: 16px;
+  top: 14px;
   inset-inline-end: 8px;
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--brand-primary);
+  background: var(--green);
 }
 .notif-item-top {
   display: flex;
@@ -131,27 +124,25 @@
 .notif-title {
   font-size: 13px;
   font-weight: 800;
-  color: var(--text-primary);
+  color: var(--ink);
   margin: 0;
-  font-family: var(--font-family-arabic);
 }
 .notif-badge-pill {
   font-size: 10px;
   font-weight: 800;
   padding: 2px 7px;
-  border-radius: var(--radius-full, 999px);
+  border-radius: 999px;
   display: inline-block;
-  line-height: 1.2;
 }
-.notif-pill-important, .notif-pill-urgent { background: var(--state-danger-subtle); color: var(--state-danger); border: 1px solid var(--state-danger-border); }
-.notif-pill-warning { background: var(--state-warning-subtle); color: var(--state-warning); border: 1px solid var(--state-warning-border); }
-.notif-pill-info { background: var(--brand-subtle); color: var(--brand-primary); border: 1px solid var(--brand-border); }
-.notif-pill-success { background: var(--state-success-subtle); color: var(--state-success); border: 1px solid var(--state-success-border); }
-.notif-pill-announcement { background: rgba(168, 85, 247, 0.12); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.25); }
+.notif-pill-important, .notif-pill-urgent { background: rgba(239, 68, 68, 0.14); color: var(--danger); }
+.notif-pill-warning { background: rgba(245, 158, 11, 0.14); color: var(--gold); }
+.notif-pill-info { background: rgba(59, 130, 246, 0.14); color: #3b82f6; }
+.notif-pill-success { background: rgba(34, 197, 94, 0.14); color: #16a34a; }
+.notif-pill-announcement { background: rgba(168, 85, 247, 0.14); color: #9333ea; }
 .notif-msg {
-  font-size: 12.5px;
-  color: var(--text-secondary);
-  line-height: 1.55;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
   margin: 4px 0 6px;
 }
 .notif-meta {
@@ -159,26 +150,27 @@
   justify-content: space-between;
   align-items: center;
   font-size: 11px;
-  color: var(--text-muted);
+  color: var(--muted);
 }
 .notif-mark-single-btn {
   background: none;
   border: none;
-  color: var(--text-muted);
+  color: var(--muted);
   font-size: 11px;
   cursor: pointer;
   padding: 0;
   text-decoration: underline;
 }
-.notif-mark-single-btn:hover { color: var(--brand-primary); }
+.notif-mark-single-btn:hover { color: var(--green); }
 .notif-empty {
-  padding: 36px 20px;
+  padding: 30px 20px;
   text-align: center;
-  color: var(--text-muted);
-  font-size: 13.5px;
+  color: var(--muted);
+  font-size: 13px;
 }
+
 </style>
-<style>/* TELC Voll: unified typography */
+<style>/* TELC Voll: unified homepage typography */
 html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
 html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}</style>
 </head>
@@ -250,11 +242,11 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
   </div>
 </div>
 <div id="lockModal" class="variation-modal-overlay" hidden aria-hidden="true">
-  <div class="variation-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="lockModalTitle" style="max-width:440px;text-align:center;padding:32px 24px;border-radius:var(--radius-card, 24px);background:var(--bg-surface);border:1px solid var(--border-subtle);box-shadow:var(--shadow-modal);">
+  <div class="variation-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="lockModalTitle" style="max-width:440px;text-align:center;padding:32px 24px;">
     <button type="button" class="variation-modal-close" onclick="closeLockModal()" aria-label="إغلاق">×</button>
-    <div style="width:58px;height:58px;border-radius:18px;background:var(--brand-subtle);color:var(--brand-primary);font-size:26px;display:grid;place-items:center;margin:0 auto 16px;">🔒</div>
-    <h2 id="lockModalTitle" style="font-size:22px;font-weight:900;margin:0 0 10px;color:var(--text-primary);font-family:var(--font-family-arabic);">محتوى مخصص للمشتركين</h2>
-    <p id="lockModalMsg" style="font-size:14px;line-height:1.65;color:var(--text-secondary);margin-bottom:24px;">
+    <div style="font-size:46px;margin-bottom:12px;">🔒</div>
+    <h2 id="lockModalTitle" style="font-size:22px;margin:0 0 10px;color:var(--ink);">محتوى مدفوع</h2>
+    <p id="lockModalMsg" class="muted" style="font-size:14px;line-height:1.6;margin-bottom:24px;">
       هذا التمرين متاح فقط لأصحاب الاشتراكات المدفوعة. حسابك الحالي مجاني ويتيح لك الوصول إلى جميع التمارين المصنفة كمجانية.
     </p>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
@@ -341,11 +333,7 @@ function render(){
   const has=levelAvailable(state.level);
   contentEl.innerHTML=`
     <section class="hub-head">
-      <div class="hub-title-block">
-        <span class="landing-kicker hub-greeting"><span class="landing-kicker-dot"></span> ${text('مرحباً، '+(state.student?.name||'الطالب'),'Hallo, '+(state.student?.name||'Student'))}</span>
-        <h1>${text('منصة الطالب','Student Platform')}</h1>
-        <p class="muted">${text('اختر المستوى والقسم ثم افتح التمرين.','Wähle Niveau und Prüfungsteil und öffne anschließend die Übung.')}</p>
-      </div>
+      <div class="hub-title-block"><span class="hub-greeting"><span>✨</span> ${text('مرحباً، '+(state.student?.name||'الطالب'),'Hallo, '+(state.student?.name||'Student'))}</span><h1>${text('منصة الطالب','Student Platform')}</h1><p class="muted">${text('اختر المستوى والقسم ثم افتح التمرين.','Wähle Niveau und Prüfungsteil und öffne anschließend die Übung.')}</p></div>
       <div class="hub-kpis">
         ${(state.subscription?.is_paid || state.subscription?.active) ? `
           <div class="hub-status-card">
@@ -353,7 +341,7 @@ function render(){
               <span class="hub-status-card-title">${text('نوع الحساب','Kontoart')}</span>
               <span class="hub-badge-pill paid"><i class="hub-badge-dot"></i>${text('حساب مميز','Premium')}</span>
             </div>
-            <div style="font-size:13px;font-weight:800;color:var(--text-primary);">${text(remainingDays + ' يوم متبقٍ في الاشتراك', remainingDays + ' Tage verbleibend')}</div>
+            <div style="font-size:13px;font-weight:800;color:var(--ink);">${text(remainingDays + ' يوم متبقٍ في الاشتراك', remainingDays + ' Tage verbleibend')}</div>
             <a href="/plans.html" class="hub-status-card-action">
               <span>${text('تفاصيل الخطة','Plan-Details')}</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
@@ -365,8 +353,8 @@ function render(){
               <span class="hub-status-card-title">${text('نوع الحساب','Kontoart')}</span>
               <span class="hub-badge-pill free"><i class="hub-badge-dot"></i>${text('حساب تجريبي مجاني','Kostenloses Konto')}</span>
             </div>
-            <div style="font-size:12px;color:var(--text-secondary);">${text('الترقية تفتح الاستديو والمساعد والامتحانات','Upgrade schaltet Studio & Assistent frei')}</div>
-            <a href="/plans.html" class="hub-status-card-action hub-status-upgrade-action">
+            <div style="font-size:12px;color:var(--muted);">${text('الترقية تفتح الاستديو والمساعد والامتحانات','Upgrade schaltet Studio & Assistent frei')}</div>
+            <a href="/plans.html" class="hub-status-card-action" style="background:var(--green);color:#fff;border-color:var(--green);">
               <span>${text('ترقية الاشتراك ⚡','Upgrade ⚡')}</span>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
             </a>
@@ -694,15 +682,14 @@ function showPaidOnlyModal(msg) {
   if (modal) modal.remove();
   modal = document.createElement('div');
   modal.id = 'paidOnlyModal';
-  modal.className = 'variation-modal-overlay';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
   modal.innerHTML = `
-    <div class="variation-modal-dialog" style="background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--radius-card, 24px);padding:32px 24px;max-width:440px;width:100%;text-align:center;box-shadow:var(--shadow-modal);">
-      <div style="width:56px;height:56px;border-radius:18px;background:var(--brand-subtle);color:var(--brand-primary);font-size:26px;display:grid;place-items:center;margin:0 auto 16px;">✦</div>
-      <h3 style="margin:0 0 10px;font-size:21px;font-weight:900;color:var(--text-primary);font-family:var(--font-family-arabic);">${text('ميزة حصرية للمشتركين','Exklusiv für Abonnenten')}</h3>
-      <p style="margin:0 0 24px;font-size:14px;line-height:1.65;color:var(--text-secondary);">${esc(msg || text('توليد نموذج العرض الكامل وأسئلة اللجنة متاح في الباقات المدفوعة فقط. يمكنك استعراض كافة المحاور مجاناً.','Die KI-Generierung von Präsentationen ist Abonnenten vorbehalten.'))}</p>
+    <div style="background:var(--white);border:1px solid var(--line);border-radius:22px;padding:32px;max-width:440px;width:100%;text-align:center;box-shadow:var(--shadow);">
+      <div style="width:54px;height:54px;border-radius:16px;background:var(--green-soft);color:var(--green);font-size:26px;display:grid;place-items:center;margin:0 auto 16px;">✦</div>
+      <h3 style="margin:0 0 10px;font-size:21px;color:var(--ink);">${text('ميزة حصرية للمشتركين','Exklusiv für Abonnenten')}</h3>
+      <p class="muted" style="margin:0 0 24px;font-size:14px;line-height:1.7;">${esc(msg || text('توليد نموذج العرض الكامل وأسئلة اللجنة متاح في الباقات المدفوعة فقط. يمكنك استعراض كافة المحاور مجاناً.','Die KI-Generierung von Präsentationen ist Abonnenten vorbehalten.'))}</p>
       <div style="display:flex;gap:10px;flex-direction:column;">
-        <a href="/plans.html" class="btn" style="width:100%;font-weight:900;">${text('ترقية الاشتراك الآن ⚡','Jetzt upgraden ⚡')}</a>
+        <a href="/plans.html" class="btn" style="width:100%;">${text('ترقية الاشتراك الآن ⚡','Jetzt upgraden ⚡')}</a>
         <button type="button" class="btn light" onclick="document.getElementById('paidOnlyModal').remove()">${text('إغلاق','Schließen')}</button>
       </div>
     </div>
@@ -935,7 +922,7 @@ function renderPresResultDashboard(data, isSaved){
           }
         });
         out.innerHTML = `
-        <div class="speaking-eval" style="border:1px solid var(--border-subtle);border-radius:var(--radius-card, 18px);padding:24px;background:var(--bg-surface);box-shadow:var(--shadow-card);">
+        <div class="speaking-eval" style="border:1px solid var(--line);border-radius:16px;padding:20px;background:var(--white)">
           <div class="speaking-eval-head">
             <strong>${text('تقييم Jerry للعرض التقديمي','Jerry-Bewertung')}</strong>
             <b>${esc(res.total)} / 25</b>
@@ -1466,10 +1453,10 @@ document.addEventListener('click', (e) => {
       const contentEl = $('content');
       if (contentEl) {
         contentEl.innerHTML = `
-          <div class="empty-panel" style="margin:60px auto;max-width:520px;text-align:center;padding:36px 24px;border-radius:var(--radius-card, 20px);background:var(--bg-surface);border:1px solid var(--border-subtle);box-shadow:var(--shadow-card);">
-            <h3 style="margin-bottom:10px;color:var(--text-primary);font-weight:900;">${esc(title)}</h3>
-            <p style="margin-bottom:20px;color:var(--text-secondary);font-size:14px;line-height:1.6;">${esc(msg)}</p>
-            <button class="btn" type="button" onclick="location.reload()" style="font-weight:900;">${esc(retry)}</button>
+          <div class="empty-panel" style="margin:60px auto;max-width:520px;text-align:center;padding:30px;border-radius:20px;background:var(--white)">
+            <h3 style="margin-bottom:10px">${esc(title)}</h3>
+            <p class="muted" style="margin-bottom:20px">${esc(msg)}</p>
+            <button class="btn" type="button" onclick="location.reload()">${esc(retry)}</button>
           </div>`;
       }
     }
