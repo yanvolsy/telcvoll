@@ -12,32 +12,33 @@
 <link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="/manifest.webmanifest">
 <style>
-/* Admin dashboard: same visual language as the student platform, with management-focused density. */
-.admin-dashboard{min-height:calc(100vh - 74px);padding:34px clamp(18px,4vw,56px) 70px;max-width:1480px;margin:auto}
-.admin-dashboard-head{display:flex;align-items:flex-end;justify-content:space-between;gap:28px;padding:28px 0 24px}
-.admin-dashboard-head h1{font-size:clamp(38px,5vw,66px);line-height:1.02;letter-spacing:-.055em;margin:9px 0 10px}
-.admin-dashboard-head p{margin:0;max-width:760px;font-size:15px}
-.admin-head-side{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
-.admin-overview{display:grid;grid-template-columns:repeat(5,1fr);gap:13px;margin:4px 0 28px}
-.admin-stat{background:var(--white);border:1px solid var(--line);border-radius:18px;padding:17px 18px;box-shadow:var(--shadow);min-width:0;position:relative;overflow:hidden}
-.admin-stat:before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--green)}
-.admin-stat .stat-label{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--muted);font-size:12px;font-weight:800}
-.admin-stat .stat-icon{width:30px;height:30px;display:grid;place-items:center;border-radius:9px;background:var(--green-soft);color:var(--green);font-weight:950}
-.admin-stat strong{display:block;font-size:32px;line-height:1;margin-top:15px;letter-spacing:-.04em}
-.admin-section-head{display:flex;align-items:end;justify-content:space-between;gap:15px;margin:34px 0 13px}
-.admin-section-head h2{margin:0;font-size:25px;letter-spacing:-.03em}
-.admin-section-head p{margin:0;color:var(--muted);font-size:12px}
-.admin-tools-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-.admin-tool{display:flex;flex-direction:column;min-height:190px;padding:20px;background:var(--white);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);text-decoration:none;transition:transform .18s,border-color .18s,box-shadow .18s}
-.admin-tool:hover{transform:translateY(-2px);border-color:var(--green);box-shadow:0 18px 40px rgba(16,35,30,.11)}
-.admin-tool-icon{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:var(--green-soft);color:var(--green);font-size:19px;font-weight:950;margin-bottom:15px}
-.admin-tool h3{margin:0 0 6px;font-size:18px}.admin-tool p{margin:0;color:var(--muted);font-size:12px;line-height:1.7}
-.admin-tool .tool-link{margin-top:auto;padding-top:17px;color:var(--green);font-size:12px;font-weight:900}
-.admin-footer{padding:22px 4vw;color:var(--muted);font-size:11px;text-align:center;border-top:1px solid var(--line)}
-@media(max-width:1100px){.admin-overview{grid-template-columns:repeat(3,1fr)}.admin-tools-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:700px){.admin-dashboard{padding:20px 13px 55px}.admin-dashboard-head{align-items:flex-start;flex-direction:column}.admin-dashboard-head h1{font-size:42px}.admin-head-side{width:100%;justify-content:flex-start}.admin-overview{grid-template-columns:1fr 1fr}.admin-tools-grid{grid-template-columns:1fr}.admin-stat strong{font-size:28px}}
+/* Modern Quiet Luxury Admin Dashboard */
+.admin-dashboard{min-height:calc(100vh - 74px);padding:30px clamp(16px,4vw,50px) 70px;max-width:1440px;margin:auto}
+.admin-dashboard-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;padding:20px 0 24px}
+.admin-dashboard-head h1{font-size:clamp(32px,4.5vw,56px);line-height:1.05;letter-spacing:-.045em;margin:8px 0 8px;color:var(--text-primary, #111827)}
+.admin-dashboard-head p{margin:0;max-width:720px;font-size:15px;color:var(--text-muted, #6B7280)}
+.admin-overview{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:8px 0 28px}
+.admin-stat{background:var(--bg-surface, #fff);border:1px solid var(--border-subtle, rgba(0,0,0,0.08));border-radius:20px;padding:20px;box-shadow:var(--shadow-card, 0 4px 16px rgba(0,0,0,0.04));min-width:0;position:relative;overflow:hidden;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);transition:transform .18s var(--ease-spring),border-color .18s}
+.admin-stat:hover{transform:translateY(-2px);border-color:var(--brand-border, rgba(255,122,47,0.35))}
+.admin-stat:before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--brand-primary, #FF7A2F)}
+.admin-stat .stat-label{display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--text-muted, #6B7280);font-size:12.5px;font-weight:800}
+.admin-stat .stat-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:var(--brand-subtle, rgba(255,122,47,0.09));color:var(--brand-primary, #FF7A2F);font-weight:950;font-size:15px}
+.admin-stat strong{display:block;font-size:34px;line-height:1.1;margin-top:14px;letter-spacing:-.03em;color:var(--text-primary, #111827)}
+.admin-section-head{display:flex;align-items:end;justify-content:space-between;gap:15px;margin:32px 0 16px}
+.admin-section-head h2{margin:0;font-size:24px;letter-spacing:-.03em;color:var(--text-primary, #111827)}
+.admin-section-head p{margin:0;color:var(--text-muted, #6B7280);font-size:13px}
+.admin-tools-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.admin-tool{display:flex;flex-direction:column;min-height:200px;padding:22px;background:var(--bg-surface, #fff);border:1px solid var(--border-subtle, rgba(0,0,0,0.08));border-radius:22px;box-shadow:var(--shadow-card, 0 4px 16px rgba(0,0,0,0.04));text-decoration:none;transition:transform .18s var(--ease-spring),border-color .18s,box-shadow .18s}
+.admin-tool:hover{transform:translateY(-3px);border-color:var(--brand-primary, #FF7A2F);box-shadow:0 18px 40px rgba(255,122,47,0.10)}
+.admin-tool-icon{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:var(--brand-subtle, rgba(255,122,47,0.09));color:var(--brand-primary, #FF7A2F);font-size:20px;font-weight:950;margin-bottom:14px}
+.admin-tool h3{margin:0 0 7px;font-size:18px;color:var(--text-primary, #111827);font-weight:850}
+.admin-tool p{margin:0;color:var(--text-secondary, #4B5563);font-size:12.5px;line-height:1.65}
+.admin-tool .tool-link{margin-top:auto;padding-top:18px;color:var(--brand-primary, #FF7A2F);font-size:12.5px;font-weight:900}
+.admin-footer{padding:24px 4vw;color:var(--text-muted, #6B7280);font-size:12px;text-align:center;border-top:1px solid var(--border-subtle, rgba(0,0,0,0.08))}
+@media(max-width:1100px){.admin-overview{grid-template-columns:repeat(2,1fr)}.admin-tools-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.admin-dashboard{padding:18px 12px 60px}.admin-dashboard-head{align-items:flex-start;flex-direction:column}.admin-dashboard-head h1{font-size:36px}.admin-overview{grid-template-columns:1fr 1fr}.admin-tools-grid{grid-template-columns:1fr}.admin-stat strong{font-size:28px}}
 </style>
-<style><!-- TELC Voll: unified homepage typography -->
+<style>/* TELC Voll: unified typography */
 html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
 html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}</style>
 </head>
@@ -47,9 +48,13 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
     <span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span>
     <span class="admin-badge">Admin</span>
   </a>
+  <button type="button" class="admin-mobile-toggle" id="adminMobileNavToggle" aria-label="فتح القائمة" aria-expanded="false" aria-controls="adminMobileNavPanel">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14"></path></svg>
+  </button>
   <nav class="admin-top-links" aria-label="لوحة الإدارة">
-    <a href="/admin/index.html">الرئيسية</a>
+    <a href="/admin/index.html" class="active">الرئيسية</a>
     <a href="/admin/questions.html">التمارين</a>
+    <a href="/admin/exams.html">الامتحان التجريبي</a>
     <a href="/admin/students.html">الطلاب</a>
     <a href="/admin/plans.html">الخطط</a>
     <a href="/admin/orders.html">طلبات الدفع</a>
@@ -59,6 +64,18 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
     <a href="#" id="logoutLink" class="nav-logout-btn">خروج</a>
   </nav>
 </header>
+<nav class="admin-mobile-menu" id="adminMobileNavPanel" role="navigation" aria-label="لوحة الإدارة">
+  <a href="/admin/index.html" class="active">الرئيسية</a>
+  <a href="/admin/questions.html">التمارين</a>
+  <a href="/admin/exams.html">الامتحان التجريبي</a>
+  <a href="/admin/students.html">الطلاب</a>
+  <a href="/admin/plans.html">الخطط</a>
+  <a href="/admin/orders.html">طلبات الدفع</a>
+  <a href="/admin/campaigns.html">البريد</a>
+  <a href="/admin/notifications.html">التنبيهات</a>
+  <a href="/admin/settings.html">الإعدادات</a>
+  <a href="#" id="mobileLogoutLink" class="nav-logout-btn">خروج</a>
+</nav>
 
 <main class="admin-dashboard">
   <section class="admin-dashboard-head">
@@ -67,13 +84,11 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
       <h1 id="pageTitle">إدارة المنصة</h1>
       <p class="muted" id="pageDesc">إدارة المحتوى والطلاب والامتحانات والخطط والإحصائيات من مكان واحد.</p>
     </div>
-
   </section>
 
   <section class="admin-overview" id="stats" aria-label="Overview">
     <div class="admin-stat"><div class="stat-label"><span>الطلاب</span><span class="stat-icon">◉</span></div><strong>—</strong></div>
     <div class="admin-stat"><div class="stat-label"><span>التمارين</span><span class="stat-icon">✦</span></div><strong>—</strong></div>
-    <div class="admin-stat"><div class="stat-label"><span>رموز الدخول</span><span class="stat-icon">⌁</span></div><strong>—</strong></div>
     <div class="admin-stat"><div class="stat-label"><span>الامتحانات</span><span class="stat-icon">▣</span></div><strong>—</strong></div>
     <div class="admin-stat"><div class="stat-label"><span>المحاولات</span><span class="stat-icon">↗</span></div><strong>—</strong></div>
   </section>
@@ -89,7 +104,6 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
       <a class="admin-tool" href="/admin/plans.html">
         <span class="admin-tool-icon">◈</span><h3>إدارة الخطط</h3><p>إنشاء الخطط وتعديل المدة والمحاولات وميزات الوصول وحالة كل خطة.</p><span class="tool-link">فتح إدارة الخطط ←</span>
       </a>
-
       <a class="admin-tool" href="/admin/exams.html">
         <span class="admin-tool-icon">▣</span><h3>إدارة الامتحان التجريبي</h3><p>تحديد أقسام الامتحان والوقت والتمارين التي تظهر في المحاكاة.</p><span class="tool-link">فتح إدارة الامتحان ←</span>
       </a>
@@ -97,7 +111,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
         <span class="admin-tool-icon">◉</span><h3>الطلاب والإحصائيات</h3><p>إدارة الطلاب ومتابعة المحاولات والنتائج وتحليل أداء الأقسام والـ Teil.</p><span class="tool-link">فتح الطلاب والإحصائيات ←</span>
       </a>
       <a class="admin-tool" href="/admin/orders.html">
-        <span class="admin-tool-icon">💳</span><h3>طلبات الدفع</h3><p>متابعة المعاملات المالية، المدفوعات الإلكترونية، وإعادة إرسال الأكواد عبر البريد.</p><span class="tool-link">فتح طلبات الدفع ←</span>
+        <span class="admin-tool-icon">💳</span><h3>طلبات الدفع</h3><p>متابعة المعاملات المالية، المدفوعات الإلكترونية، والاشتراكات المؤكدة.</p><span class="tool-link">فتح طلبات الدفع ←</span>
       </a>
       <a class="admin-tool" href="/admin/notifications.html">
         <span class="admin-tool-icon">🔔</span><h3>تنبيهات الطلاب</h3><p>إرسال تنبيهات فورية تظهر داخل المنصة وعبر البريد الإلكتروني مع استهداف دقيق.</p><span class="tool-link">فتح تنبيهات الطلاب ←</span>
@@ -106,33 +120,98 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
         <span class="admin-tool-icon">✉</span><h3>البريد الجماعي</h3><p>إنشاء وإرسال حملات بريدية تفاعلية مع محرر نصوص غني ومتغيرات مخصصة عبر Resend.</p><span class="tool-link">فتح البريد الجماعي ←</span>
       </a>
       <a class="admin-tool" href="/admin/settings.html">
-        <span class="admin-tool-icon">⚙</span><h3>الإعدادات</h3><p>إدارة اسم المنصة والشعار ونسبة النجاح والإعدادات الأساسية.</p><span class="tool-link">فتح الإعدادات ←</span>
+        <span class="admin-tool-icon">⚙</span><h3>الإعدادات</h3><p>إدارة اسم المنصة والشعار ونسبة النجاح وحسابات التواصل الأساسية.</p><span class="tool-link">فتح الإعدادات ←</span>
       </a>
     </div>
   </section>
-
-
 </main>
 <footer class="admin-footer">TELC Voll — لوحة إدارة المنصة · B1 · B2 · C1</footer>
 
 <script src="/assets/i18n.js?v=20260927-subscription-activation-mail-v10"></script>
-<script src="/assets/app.js"></script><script src="/assets/admin-guard.js"></script>
+<script src="/assets/app.js"></script>
+<script src="/assets/admin-guard.js"></script>
 <script>
 const ADMIN_TEXT={
- ar:{eyebrow:'لوحة المشرف',title:'إدارة المنصة',desc:'إدارة المحتوى والطلاب والخطط والأكواد والامتحان التجريبي والمدفوعات من مكان واحد.',manage:'إدارة المنصة',manageDesc:'الوصول السريع إلى الأدوات الأساسية لإدارة TELC Voll.',home:'الرئيسية',logout:'خروج',stats:['الطلاب','التمارين','رموز الدخول','الامتحانات','المحاولات'],tools:[['إدارة التمارين','إنشاء وتعديل ونشر وإدارة جميع التمارين.','فتح إدارة التمارين ←'],['إدارة الخطط','إنشاء الخطط وتعديل المدة والمحاولات وحالة الوصول.','فتح إدارة الخطط ←'],['إدارة الأكواد','إنشاء رموز الدخول ومتابعة استخدامها.','فتح إدارة الأكواد ←'],['إدارة الامتحان التجريبي','تحديد أقسام ووقت وتمارين المحاكاة.','فتح إدارة الامتحان ←'],['الطلاب والإحصائيات','إدارة الطلاب ومتابعة النتائج وتحليل الأداء.','فتح الطلاب والإحصائيات ←'],['طلبات الدفع','متابعة المعاملات المالية، المدفوعات الإلكترونية، وإعادة إرسال الأكواد.','فتح طلبات الدفع ←'],['تنبيهات الطلاب','إرسال تنبيهات فورية داخل المنصة وعبر البريد مع استهداف دقيق.','فتح تنبيهات الطلاب ←'],['البريد الجماعي','إنشاء وإرسال حملات بريدية تفاعلية مع محرر نصوص غني ومتغيرات مخصصة عبر Resend.','فتح البريد الجماعي ←'],['الإعدادات','إدارة اسم المنصة والشعار والإعدادات الأساسية.','فتح الإعدادات ←']]},
- de:{eyebrow:'Adminbereich',title:'Plattform verwalten',desc:'Inhalte, Schüler, Pläne, Codes, Probeprüfung und Zahlungen an einem Ort verwalten.',manage:'Verwaltung',manageDesc:'Schneller Zugriff auf die wichtigsten TELC-Voll-Werkzeuge.',home:'Startseite',logout:'Abmelden',stats:['Schüler','Übungen','Zugangscodes','Prüfungen','Versuche'],tools:[['Übungen verwalten','Alle Übungen erstellen, bearbeiten und veröffentlichen.','Übungen öffnen →'],['Pläne verwalten','Pläne, Dauer, Versuche und Zugriff verwalten.','Pläne öffnen →'],['Zugangscodes verwalten','Codes erstellen und ihre Nutzung verwalten.','Codes öffnen →'],['Probeprüfung verwalten','Bereiche, Zeiten und Aufgaben der Simulation festlegen.','Probeprüfung öffnen →'],['Schüler & Statistiken','Schüler, Ergebnisse und Leistung analysieren.','Schüler & Statistiken öffnen →'],['Zahlungen verwalten','Transaktionen, Zahlungsstatus und Codes verfolgen.','Zahlungen öffnen →'],['Benachrichtigungen','Echtzeit-Mitteilungen auf der Plattform und per E-Mail senden.','Benachrichtigungen öffnen →'],['E-Mail-Kampagnen','Personalisierte Rundmails mit Rich-Text-Editor über Resend versenden.','Kampagnen öffnen →'],['Einstellungen','Plattformname und Grundeinstellungen verwalten.','Einstellungen öffnen →']]}
+ ar:{
+   eyebrow:'لوحة المشرف',
+   title:'إدارة المنصة',
+   desc:'إدارة المحتوى والطلاب والامتحانات والخطط والمدفوعات من مكان واحد.',
+   manage:'إدارة المنصة',
+   manageDesc:'الوصول السريع إلى الأدوات الأساسية لإدارة TELC Voll.',
+   home:'الرئيسية',
+   logout:'خروج',
+   stats:['الطلاب','التمارين','الامتحانات','المحاولات'],
+   tools:[
+     ['إدارة التمارين','إنشاء وتعديل ونشر وإدارة جميع التمارين.','فتح إدارة التمارين ←'],
+     ['إدارة الخطط','إنشاء الخطط وتعديل المدة والمحاولات وحالة الوصول.','فتح إدارة الخطط ←'],
+     ['إدارة الامتحان التجريبي','تحديد أقسام ووقت وتمارين المحاكاة.','فتح إدارة الامتحان ←'],
+     ['الطلاب والإحصائيات','إدارة الطلاب ومتابعة النتائج وتحليل الأداء.','فتح الطلاب والإحصائيات ←'],
+     ['طلبات الدفع','متابعة المعاملات المالية، المدفوعات والاشتراكات.','فتح طلبات الدفع ←'],
+     ['تنبيهات الطلاب','إرسال تنبيهات فورية داخل المنصة وعبر البريد مع استهداف دقيق.','فتح تنبيهات الطلاب ←'],
+     ['البريد الجماعي','إنشاء وإرسال حملات بريدية تفاعلية مع محرر نصوص غني عبر Resend.','فتح البريد الجماعي ←'],
+     ['الإعدادات','إدارة اسم المنصة والشعار والإعدادات الأساسية.','فتح الإعدادات ←']
+   ]
+ },
+ de:{
+   eyebrow:'Adminbereich',
+   title:'Plattform verwalten',
+   desc:'Inhalte, Schüler, Pläne, Probeprüfung und Zahlungen an einem Ort verwalten.',
+   manage:'Verwaltung',
+   manageDesc:'Schneller Zugriff auf die wichtigsten TELC-Voll-Werkzeuge.',
+   home:'Startseite',
+   logout:'Abmelden',
+   stats:['Schüler','Übungen','Prüfungen','Versuche'],
+   tools:[
+     ['Übungen verwalten','Alle Übungen erstellen, bearbeiten und veröffentlichen.','Übungen öffnen →'],
+     ['Pläne verwalten','Pläne, Dauer, Versuche und Zugriff verwalten.','Pläne öffnen →'],
+     ['Probeprüfung verwalten','Bereiche, Zeiten und Aufgaben der Simulation festlegen.','Probeprüfung öffnen →'],
+     ['Schüler & Statistiken','Schüler, Ergebnisse und Leistung analysieren.','Schüler & Statistiken öffnen →'],
+     ['Zahlungen verwalten','Transaktionen, Zahlungsstatus und Abonnements verfolgen.','Zahlungen öffnen →'],
+     ['Benachrichtigungen','Echtzeit-Mitteilungen auf der Plattform und per E-Mail senden.','Benachrichtigungen öffnen →'],
+     ['E-Mail-Kampagnen','Personalisierte Rundmails mit Rich-Text-Editor über Resend versenden.','Kampagnen öffnen →'],
+     ['Einstellungen','Plattformname und Grundeinstellungen verwalten.','Einstellungen öffnen →']
+   ]
+ }
 };
-const toolLinks=['/admin/questions.html','/admin/plans.html','/admin/exams.html','/admin/students.html','/admin/orders.html','/admin/notifications.html','/admin/campaigns.html','/admin/settings.html'];
+
 function renderAdminLang(){
  const L=ADMIN_TEXT[getLang()]||ADMIN_TEXT.ar;
- document.getElementById('eyebrow').textContent=L.eyebrow;document.getElementById('pageTitle').textContent=L.title;document.getElementById('pageDesc').textContent=L.desc;
- document.getElementById('manageTitle').textContent=L.manage;document.getElementById('manageDesc').textContent=L.manageDesc;
- document.querySelector('.admin-home-link').textContent=L.home;document.getElementById('logoutLink').textContent=L.logout;
- document.querySelectorAll('.admin-stat .stat-label span:first-child').forEach((el,i)=>el.textContent=L.stats[i]);
- document.querySelectorAll('.admin-tool').forEach((el,i)=>{if(L.tools[i]){el.querySelector('h3').textContent=L.tools[i][0];el.querySelector('p').textContent=L.tools[i][1];el.querySelector('.tool-link').textContent=L.tools[i][2];}});
+ document.getElementById('eyebrow').textContent=L.eyebrow;
+ document.getElementById('pageTitle').textContent=L.title;
+ document.getElementById('pageDesc').textContent=L.desc;
+ document.getElementById('manageTitle').textContent=L.manage;
+ document.getElementById('manageDesc').textContent=L.manageDesc;
+ document.querySelectorAll('.admin-stat .stat-label span:first-child').forEach((el,i)=>{ if(L.stats[i]) el.textContent=L.stats[i]; });
+ document.querySelectorAll('.admin-tool').forEach((el,i)=>{
+   if(L.tools[i]){
+     el.querySelector('h3').textContent=L.tools[i][0];
+     el.querySelector('p').textContent=L.tools[i][1];
+     el.querySelector('.tool-link').textContent=L.tools[i][2];
+   }
+ });
 }
-document.getElementById('logoutLink').onclick=async(e)=>{e.preventDefault();await api('admin-logout',{method:'POST'});location.href='/admin/login.html';};
-(async()=>{try{const {stats}=await api('admin-stats');const map={students:0,exercises:1,access_codes:2,exams:3,attempts:4};document.querySelectorAll('.admin-stat strong').forEach((el,i)=>{const key=Object.keys(map).find(k=>map[k]===i);el.textContent=Number(stats?.[key]||0).toLocaleString(getLang()==='ar'?'ar-DZ':'de-DE');});}catch(e){location.href='/admin/login.html';}})();
-document.addEventListener('langchange',renderAdminLang);renderAdminLang();
+
+document.getElementById('logoutLink').onclick=async(e)=>{
+ e.preventDefault();
+ await api('admin-logout',{method:'POST'});
+ location.href='/admin/login.html';
+};
+
+(async()=>{
+ try{
+   const {stats}=await api('admin-stats');
+   const map={students:0, exercises:1, exams:2, attempts:3};
+   document.querySelectorAll('.admin-stat strong').forEach((el,i)=>{
+     const key=Object.keys(map).find(k=>map[k]===i);
+     el.textContent=Number(stats?.[key]||0).toLocaleString(getLang()==='ar'?'ar-DZ':'de-DE');
+   });
+ }catch(e){
+   location.href='/admin/login.html';
+ }
+})();
+
+document.addEventListener('langchange',renderAdminLang);
+renderAdminLang();
 </script>
-</body></html>
+</body>
+</html>

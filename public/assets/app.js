@@ -129,7 +129,7 @@ function initMobileHeader() {
   if (location.pathname === '/dashboard.html' || location.pathname === '/dashboard') return;
   const top = document.querySelector('.top:not(.admin-nav)');
   if (!top || top.dataset.mobileReady === '1') return;
-  const nav = top.querySelector('nav');
+  const nav = top.querySelector('nav') || top.querySelector('.student-nav-links');
   if (!nav) return;
   top.dataset.mobileReady = '1';
   const actions = top.querySelector('.header-actions');
@@ -139,40 +139,63 @@ function initMobileHeader() {
   menuBtn.className = 'icon-btn mobile-menu-toggle';
   menuBtn.setAttribute('aria-label', 'فتح القائمة');
   menuBtn.setAttribute('aria-expanded', 'false');
-  menuBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>';
+  menuBtn.innerHTML = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>';
 
   const panel = document.createElement('div');
   panel.className = 'mobile-menu-panel';
   panel.setAttribute('aria-hidden', 'true');
 
-  [...nav.children].forEach((node) => {
-    if (node.classList?.contains('header-actions')) return;
-    if (node.classList?.contains('btn') && top.classList.contains('landing-top')) return;
-    const clone = node.cloneNode(true);
-    clone.removeAttribute('id');
-    if (node.id === 'logoutLink' || node.id === 'logout') {
-      clone.addEventListener('click', (e) => { e.preventDefault(); node.click(); closeMenu(); });
-    } else {
-      clone.addEventListener('click', closeMenu);
-    }
-    panel.appendChild(clone);
-  });
-
   function closeMenu() {
     panel.classList.remove('open');
     panel.setAttribute('aria-hidden', 'true');
     menuBtn.setAttribute('aria-expanded', 'false');
+    menuBtn.classList.remove('is-open');
   }
   function toggleMenu() {
     const open = !panel.classList.contains('open');
     panel.classList.toggle('open', open);
     panel.setAttribute('aria-hidden', open ? 'false' : 'true');
     menuBtn.setAttribute('aria-expanded', String(open));
+    menuBtn.classList.toggle('is-open', open);
   }
   menuBtn.addEventListener('click', toggleMenu);
   document.addEventListener('click', (e) => {
     if (!top.contains(e.target) && !panel.contains(e.target)) closeMenu();
   });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && panel.classList.contains('open')) {
+      closeMenu();
+      menuBtn.focus();
+    }
+  });
+
+  function populateMenu() {
+    panel.innerHTML = '';
+    [...nav.children].forEach((node) => {
+      if (node.classList?.contains('header-actions')) return;
+      if (node.classList?.contains('btn') && top.classList.contains('landing-top')) return;
+      const clone = node.cloneNode(true);
+      clone.removeAttribute('id');
+      if (node.id === 'logoutLink' || node.id === 'logout') {
+        clone.addEventListener('click', (e) => { e.preventDefault(); node.click(); closeMenu(); });
+      } else {
+        clone.addEventListener('click', closeMenu);
+      }
+      panel.appendChild(clone);
+    });
+    if (typeof applyI18n === 'function') applyI18n(panel);
+    if (typeof highlightActiveLinks === 'function') highlightActiveLinks();
+  }
+
+  populateMenu();
+
+  // Keep mobile panel in sync if nav DOM changes dynamically (e.g. auth resolution)
+  try {
+    const observer = new MutationObserver(() => {
+      populateMenu();
+    });
+    observer.observe(nav, { childList: true, subtree: true });
+  } catch (_) {}
 
   // Landing page keeps the main login action visible as a dedicated mobile icon.
   if (top.classList.contains('landing-top')) {
@@ -183,15 +206,14 @@ function initMobileHeader() {
       loginBtn.href = login.getAttribute('href') || '#access';
       loginBtn.setAttribute('aria-label', login.textContent.trim() || 'الدخول');
       loginBtn.title = login.textContent.trim() || 'الدخول';
-      loginBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17l5-5-5-5"></path><path d="M15 12H3"></path><path d="M21 19V5a2 2 0 0 0-2-2h-6"></path></svg>';
+      loginBtn.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17l5-5-5-5"></path><path d="M15 12H3"></path><path d="M21 19V5a2 2 0 0 0-2-2h-6"></path></svg>';
       top.insertBefore(loginBtn, actions || nav);
     }
   }
 
   top.insertBefore(menuBtn, actions || nav);
   top.appendChild(panel);
-  applyI18n(panel);
-  document.addEventListener('langchange', () => applyI18n(panel));
+  document.addEventListener('langchange', () => { if (typeof applyI18n === 'function') applyI18n(panel); });
 }
 
 document.addEventListener('DOMContentLoaded', initMobileHeader);
@@ -209,11 +231,34 @@ function initAdminHeader() {
   menuBtn.className = 'admin-mobile-toggle';
   menuBtn.setAttribute('aria-label', 'فتح قائمة الإدارة');
   menuBtn.setAttribute('aria-expanded', 'false');
-  menuBtn.innerHTML = '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>';
+  menuBtn.innerHTML = '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>';
 
   const panel = document.createElement('div');
   panel.className = 'admin-mobile-menu';
   panel.setAttribute('aria-hidden', 'true');
+
+  function closeMenu(){
+    panel.classList.remove('open');
+    panel.setAttribute('aria-hidden','true');
+    menuBtn.setAttribute('aria-expanded','false');
+    menuBtn.classList.remove('is-open');
+  }
+  function toggleMenu(){
+    const open=!panel.classList.contains('open');
+    panel.classList.toggle('open',open);
+    panel.setAttribute('aria-hidden',String(!open));
+    menuBtn.setAttribute('aria-expanded',String(open));
+    menuBtn.classList.toggle('is-open', open);
+  }
+  menuBtn.addEventListener('click', toggleMenu);
+  document.addEventListener('click',(e)=>{ if(!top.contains(e.target) && !panel.contains(e.target)) closeMenu(); });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && panel.classList.contains('open')) {
+      closeMenu();
+      menuBtn.focus();
+    }
+  });
+
   [...nav.children].forEach((node) => {
     if (node.classList?.contains('header-actions')) return;
     const clone = node.cloneNode(true);
@@ -223,14 +268,10 @@ function initAdminHeader() {
     panel.appendChild(clone);
   });
 
-  function closeMenu(){ panel.classList.remove('open'); panel.setAttribute('aria-hidden','true'); menuBtn.setAttribute('aria-expanded','false'); }
-  function toggleMenu(){ const open=!panel.classList.contains('open'); panel.classList.toggle('open',open); panel.setAttribute('aria-hidden',String(!open)); menuBtn.setAttribute('aria-expanded',String(open)); }
-  menuBtn.addEventListener('click', toggleMenu);
-  document.addEventListener('click',(e)=>{ if(!top.contains(e.target) && !panel.contains(e.target)) closeMenu(); });
-
   const actions = top.querySelector('.header-actions');
   top.insertBefore(menuBtn, actions || null);
   top.appendChild(panel);
+  if (typeof highlightActiveLinks === 'function') highlightActiveLinks();
 }
 
 document.addEventListener('DOMContentLoaded', initAdminHeader);
@@ -376,10 +417,9 @@ document.addEventListener('DOMContentLoaded', initAdminLoginTools);
   window.addEventListener('focus', checkSingleSession);
 })();
 
-// Universal Navigation Bar Synchronizer & Active Link Highlighter
-function initUniversalNavbar() {
+function highlightActiveLinks() {
   const path = (location.pathname || '').toLowerCase();
-  const navLinks = document.querySelectorAll('.top nav a, .admin-nav nav a, .student-nav-links a, .admin-top-links a');
+  const navLinks = document.querySelectorAll('.top nav a, .admin-nav nav a, .student-nav-links a, .admin-top-links a, .mobile-menu-panel a, .dashboard-mobile-nav a, .admin-mobile-menu a');
   navLinks.forEach(a => {
     const href = (a.getAttribute('href') || '').toLowerCase();
     if (!href || href === '#' || href.startsWith('javascript:')) return;
@@ -394,8 +434,43 @@ function initUniversalNavbar() {
       a.setAttribute('aria-current', 'page');
     }
   });
+}
 
-  const logoutLinks = document.querySelectorAll('#logoutLink, .nav-logout-btn, a[href="#logout"]');
+// Universal Navigation Bar Synchronizer & Active Link Highlighter
+function initUniversalNavbar() {
+  // Pre-resolve student nav state on public landing / plans to prevent UI flash
+  try {
+    const studentToken = localStorage.getItem('telc_student_token');
+    const path = (location.pathname || '').toLowerCase();
+    if (studentToken) {
+      const authSlot = document.getElementById('navAuthSlot');
+      if (authSlot && !authSlot.dataset.authResolved) {
+        authSlot.dataset.authResolved = '1';
+        authSlot.innerHTML = '<a class="btn small-btn" href="/dashboard.html">لوحة الطالب ←</a>';
+      }
+    } else if (path === '/plans.html' || path === '/plans') {
+      const navContainer = document.querySelector('.top .student-nav-links');
+      if (navContainer && !navContainer.dataset.guestResolved) {
+        navContainer.dataset.guestResolved = '1';
+        const brandLink = document.querySelector('.brand');
+        if (brandLink) brandLink.href = '/';
+        navContainer.className = '';
+        navContainer.innerHTML = `
+          <a href="/#services" data-i18n="nav_services">الخدمات</a>
+          <a href="/plans.html" class="active" data-i18n="nav_plans">الخطط</a>
+          <a href="/contact.html" data-i18n="nav_contact">اتصل بنا</a>
+          <span style="display:inline-flex;gap:8px;align-items:center;">
+            <a class="btn light small-btn" href="/login.html">تسجيل الدخول</a>
+            <a class="btn small-btn" href="/register.html">إنشاء حساب</a>
+          </span>
+        `;
+      }
+    }
+  } catch (_) {}
+
+  highlightActiveLinks();
+
+  const logoutLinks = document.querySelectorAll('#logoutLink, .nav-logout-btn, a[href="#logout"], #mobileLogoutLink');
   logoutLinks.forEach(btn => {
     if (btn && !btn._hasUniversalLogout) {
       btn._hasUniversalLogout = true;
@@ -416,8 +491,37 @@ function initUniversalNavbar() {
   });
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initUniversalNavbar);
-} else {
-  initUniversalNavbar();
+// Subtle Section Reveal on Scroll (Quiet Luxury & Performance)
+function initScrollReveals() {
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const elements = document.querySelectorAll('.reveal-on-scroll');
+  if (!elements.length) return;
+
+  if (prefersReduced || !('IntersectionObserver' in window)) {
+    elements.forEach(el => el.classList.add('is-revealed'));
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries, obs) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-revealed');
+        obs.unobserve(entry.target);
+      }
+    });
+  }, { rootMargin: '0px 0px -40px 0px', threshold: 0.08 });
+
+  elements.forEach(el => observer.observe(el));
 }
+
+function initAppFeatures() {
+  initUniversalNavbar();
+  initScrollReveals();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAppFeatures);
+} else {
+  initAppFeatures();
+}
+

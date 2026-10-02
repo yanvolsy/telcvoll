@@ -43,7 +43,6 @@
     bar.innerHTML = `
       <b>ADMIN</b>
       <a href="/admin/questions.html">Übungen</a>
-      <a href="/admin/codes.html">Codes</a>
       <a href="/admin/plans.html">Pläne</a>
       <a href="/admin/students.html">Schüler & Statistiken</a>
       <a href="/admin/orders.html">Bestellungen</a>
@@ -91,7 +90,7 @@
     box.innerHTML = `
       <div class="row">
         <span class="meta">Status: <b>${exercise.status === 'published' ? 'Veröffentlicht' : 'Entwurf'}</b>
-          · Zugriff: ${exercise.access_mode === 'free' ? 'Frei' : 'Code erforderlich'}
+          · Zugriff: ${exercise.access_mode === 'free' ? 'Frei' : 'Abo erforderlich'}
           · Niveau: ${exercise.level} · Bereich: ${exercise.section}</span>
         <a class="btn-a" href="/admin/questions.html?id=${id}">Bearbeiten</a>
         <button data-act="duplicate">Duplizieren</button>

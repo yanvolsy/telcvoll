@@ -3,16 +3,38 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>الإعدادات</title>
+<title>الإعدادات | TELC Voll</title>
 <link rel="stylesheet" href="/assets/app.css?v=20260927-subscription-activation-mail-v10">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
 <link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="/manifest.webmanifest">
-<style><!-- TELC Voll: unified homepage typography -->
-html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
-html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}</style>
+<style>
+html, html body, html body * { font-family: "Cairo", "Segoe UI", Arial, sans-serif !important; }
+.settings-page { max-width: 1040px; margin: auto; padding: 30px clamp(14px, 4vw, 40px) 70px; }
+.settings-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; margin-bottom: 25px; flex-wrap: wrap; }
+.settings-head h1 { font-size: clamp(26px, 4vw, 42px); margin: 8px 0 4px; letter-spacing: -0.04em; color: var(--text-primary); }
+
+.settings-card { background: var(--bg-surface, #fff); border: 1px solid var(--border-subtle, var(--line)); border-radius: 20px; padding: clamp(18px, 3vw, 28px); box-shadow: var(--shadow-card); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); margin-bottom: 24px; color: var(--text-primary); }
+.settings-card h2 { margin: 0 0 8px; font-size: 20px; color: var(--text-primary); letter-spacing: -0.02em; }
+.settings-card p.muted { margin: 0 0 18px; color: var(--text-muted); font-size: 13px; line-height: 1.6; }
+
+.form-field { margin-bottom: 16px; }
+.form-field label { display: block; font-size: 12px; font-weight: 800; color: var(--text-muted); margin-bottom: 6px; }
+.form-field input, .form-field select { width: 100%; box-sizing: border-box; padding: 11px 14px; border: 1px solid var(--border-subtle, var(--line)); border-radius: 12px; font-size: 13.5px; background: var(--bg-surface-elevated, var(--bg)); color: var(--text-primary); font-family: inherit; }
+.form-field input:focus, .form-field select:focus { outline: none; border-color: var(--brand-primary); box-shadow: 0 0 0 3px var(--brand-subtle); }
+
+.contact-card { background: var(--bg-surface-elevated, var(--bg)); border: 1px solid var(--border-subtle, var(--line)); border-radius: 14px; padding: 14px 18px; margin: 10px 0; display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; }
+.contact-badge { display: inline-flex; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 800; }
+.contact-on { background: var(--state-success-subtle); color: var(--state-success); }
+.contact-off { background: var(--bg-surface); color: var(--text-muted); border: 1px solid var(--border-subtle); }
+
+.alert { padding: 12px 16px; border-radius: 12px; margin-top: 14px; font-size: 13px; font-weight: 850; }
+.alert.ok { background: var(--state-success-subtle); color: var(--state-success); border: 1px solid var(--state-success-border); }
+.empty { padding: 28px; text-align: center; border: 1px dashed var(--border-subtle, var(--line)); border-radius: 14px; color: var(--text-muted); font-size: 13px; }
+</style>
+</head>
 <body class="admin-shell">
 <header class="top admin-nav">
   <a class="brand" href="/admin/index.html" aria-label="TELC Voll">
@@ -22,6 +44,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
   <nav class="admin-top-links" aria-label="لوحة الإدارة">
     <a href="/admin/index.html">الرئيسية</a>
     <a href="/admin/questions.html">التمارين</a>
+    <a href="/admin/exams.html">الامتحان التجريبي</a>
     <a href="/admin/students.html">الطلاب</a>
     <a href="/admin/plans.html">الخطط</a>
     <a href="/admin/orders.html">طلبات الدفع</a>
@@ -30,33 +53,84 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
     <a href="/admin/settings.html" class="active">الإعدادات</a>
     <a href="#" id="logoutLink" class="nav-logout-btn">خروج</a>
   </nav>
+  <button type="button" class="admin-mobile-toggle" id="adminMobileNavToggle" aria-label="القائمة" aria-expanded="false" aria-controls="adminMobileNavPanel">
+    <span></span><span></span><span></span>
+  </button>
+  <nav class="admin-mobile-menu" id="adminMobileNavPanel" aria-label="قائمة الإدارة للجوال">
+    <a href="/admin/index.html">الرئيسية</a>
+    <a href="/admin/questions.html">التمارين</a>
+    <a href="/admin/exams.html">الامتحان التجريبي</a>
+    <a href="/admin/students.html">الطلاب</a>
+    <a href="/admin/plans.html">الخطط</a>
+    <a href="/admin/orders.html">طلبات الدفع</a>
+    <a href="/admin/campaigns.html">البريد</a>
+    <a href="/admin/notifications.html">التنبيهات</a>
+    <a href="/admin/settings.html" class="active">الإعدادات</a>
+    <a href="#" id="mobileLogoutLink" class="nav-logout-btn">خروج</a>
+  </nav>
 </header>
-<main class="wrap">
-  <div class="panel">
-    <h1>الإعدادات</h1>
+<main class="settings-page">
+  <div class="settings-head">
+    <div>
+      <span class="tag">النظام والتكوين</span>
+      <h1>إعدادات المنصة</h1>
+      <p class="muted">التحكم في اسم الموقع ونصوص الشعار، ونسبة النجاح الافتراضية، وحسابات الدعم والتواصل.</p>
+    </div>
+  </div>
+
+  <section class="settings-card">
+    <h2>الإعدادات العامة</h2>
+    <p class="muted">تعديل البيانات الأساسية التي تظهر في ترويسة الموقع ونتائج الاختبارات.</p>
     <form id="f">
-      <input name="site_name" placeholder="اسم الموقع">
-      <input name="logo_text" placeholder="نص الشعار">
-      <input name="default_passing_percent" type="number" placeholder="60">
-      <button class="btn">حفظ</button>
+      <div class="form-field">
+        <label>اسم الموقع (Site Name)</label>
+        <input name="site_name" placeholder="TELC Voll">
+      </div>
+      <div class="form-field">
+        <label>نص الشعار (Logo Text)</label>
+        <input name="logo_text" placeholder="TELC Voll">
+      </div>
+      <div class="form-field">
+        <label>نسبة النجاح الافتراضية (%)</label>
+        <input name="default_passing_percent" type="number" placeholder="60">
+      </div>
+      <div style="display:flex;justify-content:flex-start;margin-top:20px;">
+        <button class="btn" type="submit">حفظ الإعدادات ✓</button>
+      </div>
     </form>
     <div id="msg"></div>
-  </div>
-  <div class="panel" style="margin-top:18px">
-    <h2>حسابات التواصل</h2>
-    <p class="muted">هذه الحسابات تظهر في صفحة «اتصل بنا». لا تظهر إلا الحسابات المفعّلة.</p>
+  </section>
+
+  <section class="settings-card">
+    <h2>حسابات التواصل والدعم</h2>
+    <p class="muted">هذه الحسابات تظهر للطلاب في صفحة «اتصل بنا» للمساعدة والدعم الفني. تظهر فقط الحسابات المفعّلة.</p>
     <div id="contactsList"></div>
-    <form id="contactForm" style="margin-top:16px">
+    <form id="contactForm" style="margin-top:20px;border-top:1px solid var(--border-subtle,var(--line));padding-top:20px;">
       <input type="hidden" name="id">
-      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
-        <input name="label" placeholder="المنصة: WhatsApp / Telegram / Email" required>
-        <input name="value" placeholder="رقم الهاتف أو اسم المستخدم أو البريد" required>
+      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+        <div class="form-field">
+          <label>المنصة *</label>
+          <input name="label" placeholder="مثال: WhatsApp أو Telegram أو Email" required>
+        </div>
+        <div class="form-field">
+          <label>القيمة (رقم / معرف / بريد) *</label>
+          <input name="value" placeholder="+49... أو info@telcvoll.de" required>
+        </div>
       </div>
-      <input name="url" placeholder="الرابط المباشر للحساب (اختياري)">
-      <label style="display:flex;align-items:center;gap:8px;margin:10px 0"><input type="checkbox" name="active" checked> الحساب ظاهر للطلاب</label>
-      <div class="actions"><button class="btn" type="submit">حفظ الحساب</button><button class="btn light" type="button" id="cancelContact">إلغاء</button></div>
+      <div class="form-field">
+        <label>الرابط المباشر للحساب (اختياري)</label>
+        <input name="url" placeholder="https://wa.me/... أو https://t.me/...">
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;margin:14px 0;cursor:pointer;font-weight:700;font-size:13px;">
+        <input type="checkbox" name="active" checked style="accent-color:var(--brand-primary);width:16px;height:16px;">
+        <span>الحساب مفعّل وظاهر للطلاب</span>
+      </label>
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button class="btn" type="submit">حفظ حساب التواصل</button>
+        <button class="btn light" type="button" id="cancelContact">إلغاء</button>
+      </div>
     </form>
-  </div>
+  </section>
 </main>
 <footer class="admin-footer">TELC Voll — لوحة إدارة المنصة</footer>
 <script src="/assets/i18n.js?v=20260927-subscription-activation-mail-v10"></script>
@@ -66,10 +140,19 @@ logoutLink.onclick = async (e) => { e.preventDefault(); await api('admin-logout'
 
 let contactAccounts = [];
 function renderContacts(){
-  contactsList.innerHTML = contactAccounts.length ? contactAccounts.map((a,i)=>`<div class="card" style="margin:8px 0;display:flex;justify-content:space-between;gap:10px;align-items:center">
-    <div><b>${esc(a.label)}</b><div class="muted">${esc(a.value)} ${a.active===false?' · معطّل':' · نشط'}</div></div>
-    <div class="actions"><button type="button" class="btn light" data-edit-contact="${i}">تعديل</button><button type="button" class="btn dark" data-del-contact="${i}">حذف</button></div>
-  </div>`).join('') : '<div class="empty">لا توجد حسابات تواصل.</div>';
+  contactsList.innerHTML = contactAccounts.length ? contactAccounts.map((a,i)=>`<div class="contact-card">
+    <div>
+      <div style="font-weight:900;color:var(--text-primary);font-size:14px;">${esc(a.label)}</div>
+      <div style="color:var(--text-muted);font-size:12.5px;margin-top:2px;">
+        ${esc(a.value)}
+        <span class="contact-badge ${a.active===false ? 'contact-off' : 'contact-on'}" style="margin-right:6px;">${a.active===false ? 'معطّل' : 'نشط ✓'}</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button type="button" class="btn light small-btn" data-edit-contact="${i}">تعديل</button>
+      <button type="button" class="btn light small-btn" style="color:var(--state-danger);border-color:var(--state-danger-border);" data-del-contact="${i}">حذف</button>
+    </div>
+  </div>`).join('') : '<div class="empty">لا توجد حسابات تواصل مضافة حالياً.</div>';
 }
 function resetContact(){contactForm.reset();contactForm.id.value='';contactForm.active.checked=true;}
 contactsList.onclick = async e => {
@@ -92,8 +175,8 @@ async function saveSettings(){
     renderContacts();
   } catch (err) { location.href = '/admin/login.html'; }
 })();
-f.onsubmit = async (e) => { e.preventDefault(); await saveSettings(); msg.innerHTML = '<div class="alert ok">تم الحفظ.</div>'; };
-contactForm.onsubmit=async e=>{e.preventDefault();const fd=new FormData(contactForm);const obj={id:fd.get('id')||crypto.randomUUID(),label:String(fd.get('label')||'').trim(),value:String(fd.get('value')||'').trim(),url:String(fd.get('url')||'').trim(),active:fd.get('active')==='on'};if(!obj.label||!obj.value)return;const idx=contactAccounts.findIndex(a=>a.id===obj.id);if(idx>=0)contactAccounts[idx]=obj;else contactAccounts.push(obj);await saveSettings();renderContacts();resetContact();msg.innerHTML='<div class="alert ok">تم حفظ حساب التواصل.</div>';};
+f.onsubmit = async (e) => { e.preventDefault(); await saveSettings(); msg.innerHTML = '<div class="alert ok">تم حفظ الإعدادات بنجاح ✓</div>'; setTimeout(() => { msg.innerHTML = ''; }, 3000); };
+contactForm.onsubmit=async e=>{e.preventDefault();const fd=new FormData(contactForm);const obj={id:fd.get('id')||crypto.randomUUID(),label:String(fd.get('label')||'').trim(),value:String(fd.get('value')||'').trim(),url:String(fd.get('url')||'').trim(),active:fd.get('active')==='on'};if(!obj.label||!obj.value)return;const idx=contactAccounts.findIndex(a=>a.id===obj.id);if(idx>=0)contactAccounts[idx]=obj;else contactAccounts.push(obj);await saveSettings();renderContacts();resetContact();msg.innerHTML='<div class="alert ok">تم حفظ حساب التواصل بنجاح ✓</div>'; setTimeout(() => { msg.innerHTML = ''; }, 3000);};
 </script>
 </body>
 </html>

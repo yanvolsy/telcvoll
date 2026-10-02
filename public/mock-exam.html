@@ -5,828 +5,1149 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#080808">
 <title>الامتحان التجريبي — TELC Voll</title>
-<link rel="stylesheet" href="/assets/app.css?v=20260928-polished-v1">
+<link rel="stylesheet" href="/assets/app.css?v=20261002-mock-v7b">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="/manifest.webmanifest">
 <style>
-.mock-root{direction:ltr;max-width:1280px;margin:0 auto;padding:18px 22px 130px}
-.mock-top{direction:ltr;position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid var(--line);padding:10px 0}
-.mock-top-inner{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:14px}
-.mock-brand{font-weight:950;color:var(--ink);text-decoration:none;white-space:nowrap;display:flex;align-items:center;gap:8px}
-.mock-status{display:flex;align-items:center;gap:10px;justify-content:flex-end}
-.mock-timer{font-variant-numeric:tabular-nums;font-weight:950;font-size:20px;padding:8px 16px;border-radius:14px;background:rgba(244,123,32,0.1);color:#FF7A2F;min-width:105px;text-align:center;border:1.5px solid rgba(244,123,32,0.3);box-shadow:0 2px 10px rgba(244,123,32,0.1)}
-.mock-timer.danger{background:#fff0ee;color:#b7372d;border-color:#e6a39d;animation:pulseTimer 1s infinite alternate}
-@keyframes pulseTimer{from{transform:scale(1)}to{transform:scale(1.03)}}
-.mock-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-.mock-tab{border:1.5px solid var(--line);background:var(--white);color:var(--ink);border-radius:14px;padding:9px 12px;cursor:pointer;font:inherit;font-weight:900;box-shadow:var(--shadow-sm);min-width:0;transition:all .18s ease;text-align:center}
-.mock-tab small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
-.mock-tab.active{border-color:#FF7A2F;box-shadow:0 0 0 2px rgba(244,123,32,0.18);background:rgba(244,123,32,0.08);color:#FF7A2F}
-.mock-tab:disabled{opacity:.4;cursor:not-allowed}
-.mock-progress{display:flex;justify-content:space-between;gap:14px;align-items:center;margin:16px 0}
-.mock-progress-bar{height:8px;background:var(--line);border-radius:999px;overflow:hidden;flex:1}
-.mock-progress-bar i{display:block;height:100%;background:linear-gradient(90deg,#FF7A2F,#ff9a4d);border-radius:inherit;transition:width .25s ease}
-.mock-card{direction:ltr;background:var(--white);border:1.5px solid var(--line);border-radius:24px;box-shadow:0 8px 30px rgba(0,0,0,0.04);padding:32px;box-sizing:border-box}
+/* TELC Voll — Mock Exam Question Workspaces (Phase 7C Modernization) */
+.mock-root {
+  direction: ltr !important;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 18px 24px 140px;
+  box-sizing: border-box;
+}
 
-.mock-section-label{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
-.mock-section-label .tag{font-weight:900;background:rgba(244,123,32,0.12);color:#FF7A2F;border:1px solid rgba(244,123,32,0.3);padding:5px 14px;border-radius:999px;font-size:13px}
-.mock-task-count{font-size:14px;font-weight:850;color:var(--muted);background:var(--bg);border:1px solid var(--line);padding:5px 12px;border-radius:999px}
-.mock-reading-panel{font-size:17px;line-height:1.9;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:18px;padding:24px;margin:20px 0}
+/* Progress bar */
+.mock-progress {
+  display: flex !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  align-items: center !important;
+  margin: 16px 0 20px !important;
+  font-weight: 850;
+  color: var(--text-primary, var(--ink));
+}
+.mock-progress-bar {
+  height: 6px !important;
+  background: var(--border-subtle, var(--line)) !important;
+  border-radius: var(--radius-full, 999px) !important;
+  overflow: hidden !important;
+  flex: 1 !important;
+}
+.mock-progress-bar i {
+  display: block !important;
+  height: 100% !important;
+  background: linear-gradient(90deg, var(--brand-primary, #ea580c), #ff9a4d) !important;
+  border-radius: inherit !important;
+  transition: width 0.25s ease !important;
+}
 
-/* Inline select inside Sprachbausteine text */
-.mock-inline-gap-select{display:inline-block;vertical-align:middle;padding:5px 12px;margin:3px 5px;border:1.5px solid var(--line);border-radius:10px;background:var(--white);color:var(--ink);font-weight:850;font-size:14px;cursor:pointer;transition:all .18s ease;box-shadow:0 2px 6px rgba(0,0,0,0.03);outline:none;max-width:230px}
-.mock-inline-gap-select:hover{border-color:#FF7A2F}
-.mock-inline-gap-select.answered{border-color:#FF7A2F;background:rgba(244,123,32,0.1);color:#FF7A2F;font-weight:900}
+/* Master Exercise Card */
+.mock-card {
+  direction: ltr !important;
+  background: var(--bg-surface-elevated, var(--white)) !important;
+  border: 1px solid var(--border-subtle, var(--line)) !important;
+  border-radius: var(--radius-card, 24px) !important;
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.04)) !important;
+  padding: clamp(20px, 3.5vw, 36px) !important;
+  box-sizing: border-box !important;
+}
 
+/* Section label & task count pills */
+.mock-section-label {
+  display: flex !important;
+  gap: 10px !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  margin-bottom: 20px !important;
+}
+.mock-section-label .tag {
+  font-weight: 850 !important;
+  background: var(--brand-subtle, rgba(234, 88, 12, 0.08)) !important;
+  color: var(--brand-primary, #ea580c) !important;
+  border: 1px solid var(--brand-border, rgba(234, 88, 12, 0.25)) !important;
+  padding: 5px 14px !important;
+  border-radius: var(--radius-pill, 999px) !important;
+  font-size: 13px !important;
+}
+.mock-task-count {
+  font-size: 13.5px !important;
+  font-weight: 850 !important;
+  color: var(--text-secondary, var(--muted)) !important;
+  background: var(--bg-surface, var(--bg)) !important;
+  border: 1px solid var(--border-subtle, var(--line)) !important;
+  padding: 5px 14px !important;
+  border-radius: var(--radius-pill, 999px) !important;
+}
 
+/* Head block inside workspaces */
+.mock-spb-head {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin: 20px 0 16px !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+}
+.mock-spb-head h3 {
+  margin: 0 !important;
+  font-size: 17.5px !important;
+  font-weight: 900 !important;
+  color: var(--text-primary, var(--ink)) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
 
-/* Questions container below text */
-.mock-spb-container{margin-top:28px;padding-top:22px;border-top:1.5px solid var(--line)}
-.mock-spb-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px}
-.mock-spb-head h3{margin:0;font-size:18px;font-weight:900;display:flex;align-items:center;gap:8px}
-.mock-spb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
-.mock-spb-card{background:var(--bg);border:1.5px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;transition:all .18s ease}
-.mock-spb-card.answered{border-color:rgba(244,123,32,0.4);background:rgba(244,123,32,0.02)}
-.mock-spb-card-title{display:flex;align-items:center;gap:8px;font-weight:900;font-size:14.5px;color:var(--ink)}
-.mock-spb-card-title .mock-num-badge{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;background:rgba(244,123,32,0.12);color:#FF7A2F;font-size:13px;font-weight:950}
-.mock-spb-options{display:grid;gap:8px}
-.mock-spb-option-btn{display:flex;align-items:center;gap:10px;width:100%;border:1.5px solid var(--line);background:var(--white);color:var(--ink);border-radius:12px;padding:10px 14px;text-align:start;cursor:pointer;font:inherit;font-size:14px;font-weight:750;transition:all .18s ease}
-.mock-spb-option-btn:hover{border-color:#FF7A2F;background:rgba(244,123,32,0.04)}
-.mock-spb-option-btn.selected{border-color:#FF7A2F;background:rgba(244,123,32,0.12);color:#FF7A2F;box-shadow:0 0 0 1px #FF7A2F;font-weight:900}
-.mock-btn-key{font-weight:950;color:#FF7A2F;min-width:24px}
+/* FLAT READING SURFACES: long German reading texts */
+.mock-reading-panel,
+.long-text.mock-reading-panel {
+  font-size: 16.5px !important;
+  line-height: 1.85 !important;
+  color: var(--text-primary, var(--ink)) !important;
+  background: var(--bg-surface, var(--bg)) !important;
+  border: 1px solid var(--border-subtle, var(--line)) !important;
+  border-radius: var(--radius-card, 16px) !important;
+  padding: 24px 28px !important;
+  margin: 18px 0 24px !important;
+  box-shadow: none !important;
+  direction: ltr !important;
+  word-break: break-word;
+}
+.mock-task-body {
+  font-size: 15.5px !important;
+  line-height: 1.8 !important;
+  color: var(--text-primary, var(--ink)) !important;
+  direction: ltr !important;
+}
 
+/* Generic question item cards */
+.mock-item {
+  border: 1px solid var(--border-subtle, var(--line)) !important;
+  border-radius: var(--radius-card, 16px) !important;
+  padding: 22px 24px !important;
+  margin: 16px 0 !important;
+  background: var(--bg-surface-elevated, var(--white)) !important;
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.03)) !important;
+  transition: border-color var(--duration-fast, 0.18s) ease !important;
+  direction: ltr !important;
+}
+.mock-item.answered {
+  border-color: var(--brand-border, rgba(234, 88, 12, 0.35)) !important;
+}
+.mock-item-prompt {
+  font-weight: 850 !important;
+  font-size: 16px !important;
+  line-height: 1.65 !important;
+  margin-bottom: 14px !important;
+  color: var(--text-primary, var(--ink)) !important;
+}
 
+/* Native select styling */
+.mock-select {
+  width: 100% !important;
+  padding: 11px 16px !important;
+  border: 1.5px solid var(--border-subtle, var(--line)) !important;
+  border-radius: var(--radius-button, 12px) !important;
+  background: var(--bg-surface, var(--white)) !important;
+  font: inherit !important;
+  font-size: 14.5px !important;
+  font-weight: 800 !important;
+  color: var(--text-primary, var(--ink)) !important;
+  cursor: pointer !important;
+  outline: none !important;
+  transition: all var(--duration-fast, 0.18s) ease !important;
+  box-sizing: border-box !important;
+}
+.mock-select:hover, .mock-select:focus {
+  border-color: var(--brand-primary, #ea580c) !important;
+}
+.mock-select.answered {
+  border-color: var(--brand-primary, #ea580c) !important;
+  background: var(--brand-subtle, rgba(234, 88, 12, 0.04)) !important;
+}
 
-/* Word Bank (Sprachbausteine 2) */
-.mock-wordbank-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
-.mock-word-card{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--white);border:1.5px solid var(--line);border-radius:12px;font-size:14px;font-weight:800;color:var(--ink);transition:all .18s ease;box-shadow:0 1px 4px rgba(0,0,0,0.02)}
-.mock-word-card small{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:6px;background:rgba(244,123,32,0.12);color:#FF7A2F;font-size:12px;font-weight:950}
-.mock-word-card.used{opacity:.5;background:var(--bg);border-style:dashed}
-.mock-word-card .mock-word-check{margin-inline-start:auto;color:#2d9b68;font-weight:950}
+/* Number badge helper */
+.mock-num-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 28px !important;
+  height: 28px !important;
+  padding: 0 8px !important;
+  border-radius: var(--radius-button, 8px) !important;
+  background: var(--brand-subtle, rgba(234, 88, 12, 0.1)) !important;
+  color: var(--brand-primary, #ea580c) !important;
+  border: 1px solid var(--brand-border, rgba(234, 88, 12, 0.25)) !important;
+  font-size: 13px !important;
+  font-weight: 950 !important;
+  flex-shrink: 0 !important;
+}
 
+/* ─── Sprachbausteine Teil 1 & 2 ─── */
+.mock-inline-gap-select {
+  display: inline-block !important;
+  vertical-align: middle !important;
+  height: 38px !important;
+  padding: 0 12px !important;
+  margin: 3px 5px !important;
+  border: 1.5px solid var(--border-subtle, var(--line)) !important;
+  border-radius: var(--radius-button, 10px) !important;
+  background: var(--bg-surface-elevated, var(--white)) !important;
+  color: var(--text-primary, var(--ink)) !important;
+  font-family: inherit !important;
+  font-weight: 850 !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+  transition: all var(--duration-fast, 0.18s) ease !important;
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.04)) !important;
+  outline: none !important;
+  max-width: 250px !important;
+  box-sizing: border-box !important;
+}
+.mock-inline-gap-select:hover {
+  border-color: var(--brand-primary, #ea580c) !important;
+}
+.mock-inline-gap-select:focus-visible {
+  outline: 2px solid var(--brand-primary, #ea580c) !important;
+  outline-offset: 2px !important;
+}
+.mock-inline-gap-select.answered {
+  border-color: var(--brand-primary, #ea580c) !important;
+  background: var(--brand-subtle, rgba(234, 88, 12, 0.08)) !important;
+  color: var(--brand-primary, #ea580c) !important;
+  font-weight: 900 !important;
+}
 
-/* Headings Bank (Lesen 1) */
-.mock-headings-bank{background:var(--bg);border:1.5px solid var(--line);border-radius:18px;padding:20px;margin-bottom:24px}
-.mock-headings-bank h3{margin:0 0 12px;font-size:17px;font-weight:900;display:flex;align-items:center;gap:8px}
-.mock-headings-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px}
-.mock-heading-item{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--white);border:1px solid var(--line);border-radius:12px;font-size:14px;line-height:1.6}
-.mock-heading-letter{font-weight:950;color:#FF7A2F;min-width:24px}
+.mock-spb-container {
+  margin-top: 28px !important;
+  padding-top: 22px !important;
+  border-top: 1.5px solid var(--border-subtle, var(--line)) !important;
+}
+.mock-spb-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+  gap: 14px !important;
+}
+.mock-spb-card {
+  background: var(--bg-surface-elevated, var(--white)) !important;
+  border: 1px solid var(--border-subtle, var(--line)) !important;
+  border-radius: var(--radius-card, 16px) !important;
+  padding: 16px 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  transition: all var(--duration-fast, 0.18s) ease !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+.mock-spb-card.answered {
+  border-color: var(--brand-border, rgba(234, 88, 12, 0.35)) !important;
+}
+.mock-spb-card-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  font-weight: 900 !important;
+  font-size: 14.5px !important;
+  color: var(--text-primary, var(--ink)) !important;
+}
+.mock-spb-options {
+  display: grid !important;
+  gap: 8px !important;
+}
+.mock-spb-option-btn {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  border: 1px solid var(--border-subtle, var(--line)) !important;
+  background: var(--bg-surface, var(--bg)) !important;
+  color: var(--text-primary, var(--ink)) !important;
+  border-radius: var(--radius-button, 10px) !important;
+  padding: 10px 14px !important;
+  text-align: start !important;
+  cursor: pointer !important;
+  font: inherit !important;
+  font-size: 14px !important;
+  font-weight: 750 !important;
+  transition: all var(--duration-fast, 0.18s) ease !important;
+  box-sizing: border-box !important;
+}
+.mock-spb-option-btn:hover {
+  border-color: var(--brand-primary, #ea580c) !important;
+  background: var(--brand-subtle, rgba(234, 88, 12, 0.05)) !important;
+}
+.mock-spb-option-btn.selected {
+  border-color: var(--brand-primary, #ea580c) !important;
+  background: var(--brand-subtle, rgba(234, 88, 12, 0.12)) !important;
+  color: var(--brand-primary, #ea580c) !important;
+  box-shadow: 0 0 0 1px var(--brand-primary, #ea580c) !important;
+  font-weight: 900 !important;
+}
+.mock-btn-key {
+  font-weight: 950 !important;
+  color: var(--brand-primary, #ea580c) !important;
+  min-width: 24px !important;
+}
 
-/* Lesen 3: Ads and situations */
-.mock-ads-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:32px}
-.mock-ad-card{background:var(--white);border:1.5px solid var(--line);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,0.03)}
-.mock-ad-card .ad-tag{display:inline-block;background:#0f172a;color:#fff;font-weight:900;font-size:12.5px;padding:3px 10px;border-radius:6px;align-self:flex-start}
-.mock-ad-card h4{margin:4px 0 6px;font-size:16px;font-weight:850;color:#2d9b68}
-.mock-ad-card .ad-body{font-size:14px;line-height:1.75;color:var(--ink)}
+/* Word bank (Sprachbausteine 2) */
+.mock-wordbank-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+  gap: 10px !important;
+}
+.mock-word-card {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 11px 14px !important;
+  background: var(--bg-surface-elevated, var(--white)) !important;
+  border: 1px solid var(--border-subtle, var(--line)) !important;
+  border-radius: var(--radius-button, 12px) !important;
+  font-size: 14px !important;
+  font-weight: 800 !important;
+  color: var(--text-primary, var(--ink)) !important;
+  transition: all var(--duration-fast, 0.18s) ease !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+.mock-word-card small {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: var(--radius-sm, 6px) !important;
+  background: var(--brand-subtle, rgba(234, 88, 12, 0.1)) !important;
+  color: var(--brand-primary, #ea580c) !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+}
+.mock-word-card.used {
+  opacity: 0.55 !important;
+  background: var(--bg-surface, var(--bg)) !important;
+  border-style: dashed !important;
+}
+.mock-word-card .mock-word-check {
+  margin-inline-start: auto !important;
+  color: var(--state-success, #22c55e) !important;
+  font-weight: 950 !important;
+}
 
-/* Audio player */
-.mock-audio{padding:18px 22px;border:1.5px solid var(--line);background:var(--white);border-radius:20px;margin:20px 0;box-shadow:0 4px 16px rgba(0,0,0,0.04);display:flex;flex-direction:column;gap:12px}
-.mock-audio-header{display:flex;align-items:center;justify-content:space-between;font-size:13.5px;font-weight:900}
-.mock-audio-header span:first-child{color:#2d9b68;display:flex;align-items:center;gap:6px}
-.mock-audio audio{width:100%;height:46px;border-radius:12px;accent-color:#2d9b68}
+/* ─── Headings Bank (Lesen 1) ─── */
+.mock-headings-bank {
+  background: var(--bg-surface, var(--bg)) !important;
+  border: 1px solid var(--border-subtle, var(--line)) !important;
+  border-radius: var(--radius-card, 18px) !important;
+  padding: 22px !important;
+  margin-top: 28px !important;
+}
+.mock-headings-bank h3 {
+  margin: 0 0 14px !important;
+  font-size: 17px !important;
+  font-weight: 900 !important;
+  color: var(--text-primary, var(--ink)) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+.mock-headings-list {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)) !important;
+  gap: 12px !important;
+}
+.mock-heading-item {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 10px !important;
+  padding: 12px 14px !important;
+  background: var(--bg-surface-elevated, var(--white)) !important;
+  border: 1px solid var(--border-subtle, var(--line)) !important;
+  border-radius: var(--radius-button, 12px) !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  color: var(--text-primary, var(--ink)) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+.mock-heading-letter {
+  font-weight: 950 !important;
+  color: var(--brand-primary, #ea580c) !important;
+  min-width: 24px !important;
+}
 
-/* Generic question item */
-.mock-item{border:1.5px solid var(--line);border-radius:18px;padding:20px;margin:16px 0;background:var(--bg);transition:all .18s ease}
-.mock-item.answered{border-color:rgba(244,123,32,0.35)}
-.mock-item-prompt{font-weight:850;font-size:16px;line-height:1.7;margin-bottom:14px;color:var(--ink)}
-.mock-select{width:100%;padding:13px 16px;border:1.5px solid var(--line);border-radius:12px;background:var(--white);font:inherit;font-size:14.5px;font-weight:800;color:var(--ink);cursor:pointer;outline:none;transition:all .18s ease}
-.mock-select:hover,.mock-select:focus{border-color:#FF7A2F}
-.mock-select.answered{border-color:#FF7A2F;background:rgba(244,123,32,0.04)}
+/* ─── Lesen Teil 1 List ─── */
+.mock-l1-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 18px !important;
+}
+.mock-l1-item-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-bottom: 14px !important;
+}
 
-/* True/False buttons */
-.mock-tf-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.mock-tf-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;border:1.5px solid var(--line);border-radius:14px;background:var(--white);color:var(--ink);font-size:15px;font-weight:900;cursor:pointer;transition:all .18s ease}
-.mock-tf-btn:hover{border-color:#FF7A2F}
-.mock-tf-btn.selected.tf-richtig{background:rgba(45,155,104,0.15);border-color:#2d9b68;color:#2d9b68;box-shadow:0 0 0 1px #2d9b68}
-.mock-tf-btn.selected.tf-falsch{background:rgba(201,74,67,0.15);border-color:#c94a43;color:#c94a43;box-shadow:0 0 0 1px #c94a43}
+/* ─── Lesen Teil 2 Question Cards & Options ─── */
+.lesen2-questions-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+}
+.lesen2-question {
+  background: var(--bg-surface-elevated, var(--white)) !important;
+  border: 1px solid var(--border-subtle, var(--line)) !important;
+  border-radius: var(--radius-card, 18px) !important;
+  padding: 22px 24px !important;
+  box-shadow: var(--shadow-sm) !important;
+  transition: border-color var(--duration-fast, 0.18s) ease !important;
+  margin-bottom: 0 !important;
+}
+.lesen2-question.answered {
+  border-color: var(--brand-border, rgba(234, 88, 12, 0.35)) !important;
+}
+.question-prompt-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  gap: 12px !important;
+  margin-bottom: 16px !important;
+}
+.question-prompt-text {
+  font-size: 16px !important;
+  font-weight: 850 !important;
+  line-height: 1.6 !important;
+  color: var(--text-primary, var(--ink)) !important;
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 10px !important;
+}
+.question-num {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 28px !important;
+  height: 28px !important;
+  background: var(--brand-subtle, rgba(234, 88, 12, 0.1)) !important;
+  color: var(--brand-primary, #ea580c) !important;
+  border: 1px solid var(--brand-border, rgba(234, 88, 12, 0.25)) !important;
+  border-radius: var(--radius-button, 8px) !important;
+  font-size: 13.5px !important;
+  font-weight: 900 !important;
+  flex-shrink: 0 !important;
+}
+.options-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+.side-option.mock-option {
+  width: 100% !important;
+  text-align: start !important;
+  justify-content: flex-start !important;
+  padding: 12px 18px !important;
+  border-radius: var(--radius-button, 12px) !important;
+  font-size: 14.5px !important;
+  font-weight: 750 !important;
+  background: var(--bg-surface, var(--bg)) !important;
+  color: var(--text-primary, var(--ink)) !important;
+  border: 1px solid var(--border-subtle, var(--line)) !important;
+  cursor: pointer !important;
+  transition: all var(--duration-fast, 0.18s) ease !important;
+  box-sizing: border-box !important;
+}
+.side-option.mock-option:hover {
+  border-color: var(--brand-primary, #ea580c) !important;
+  background: var(--brand-subtle, rgba(234, 88, 12, 0.04)) !important;
+}
+.side-option.mock-option.selected {
+  border: 2px solid var(--brand-primary, #ea580c) !important;
+  background: var(--brand-subtle, rgba(234, 88, 12, 0.12)) !important;
+  color: var(--brand-primary, #ea580c) !important;
+  box-shadow: 0 0 0 1px var(--brand-primary, #ea580c) !important;
+  font-weight: 900 !important;
+}
+.mock-option-key {
+  font-weight: 900 !important;
+  color: var(--brand-primary, #ea580c) !important;
+  margin-inline-end: 6px !important;
+}
 
-/* Writing Box */
-.mock-writing-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:stretch}
-.mock-writing-box{border:1.5px solid var(--line);border-radius:20px;padding:22px;background:var(--bg)}
-.mock-writing-box h3{margin-top:0;font-size:18px;font-weight:900;color:var(--ink)}
-.mock-writing-editor textarea{width:100%;min-height:620px;resize:vertical;border:1.5px solid var(--line);border-radius:16px;padding:18px;background:var(--white);font:inherit;font-size:15.5px;line-height:1.85;box-sizing:border-box;color:var(--ink);outline:none;transition:border-color .18s ease}
-.mock-writing-editor textarea:focus{border-color:#FF7A2F;box-shadow:0 0 0 2px rgba(244,123,32,0.15)}
-.mock-editor-meta{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;font-weight:800;margin-top:8px;gap:10px;flex-wrap:wrap}.mock-writing-char-toolbar{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:0 0 10px}.mock-writing-char-btn{min-width:40px;height:38px;padding:0 10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit;font-weight:950;cursor:pointer}.mock-writing-char-btn:hover{border-color:#FF7A2F;color:#FF7A2F;background:rgba(244,123,32,.08)}
+/* ─── Lesen Teil 3 Ads & Situations ─── */
+.mock-l3-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+}
+.paragraph-assignment-controls {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin-bottom: 12px !important;
+  flex-wrap: wrap !important;
+}
+.paragraph-assignment-controls .mock-select {
+  flex: 1 1 280px !important;
+}
+.assignment-selected {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 6px 14px !important;
+  border-radius: var(--radius-pill, 999px) !important;
+  background: var(--brand-subtle, rgba(234, 88, 12, 0.1)) !important;
+  border: 1px solid var(--brand-border, rgba(234, 88, 12, 0.3)) !important;
+  color: var(--brand-primary, #ea580c) !important;
+  font-size: 13px !important;
+  font-weight: 850 !important;
+  cursor: pointer !important;
+  transition: all var(--duration-fast, 0.18s) ease !important;
+}
+.assignment-selected:hover {
+  background: var(--state-danger-subtle, rgba(239, 68, 68, 0.12)) !important;
+  border-color: var(--state-danger-border, rgba(239, 68, 68, 0.35)) !important;
+  color: var(--state-danger, #ef4444) !important;
+}
+.lesen3-overview-head {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  margin-bottom: 16px !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+}
+.lesen3-ads-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+}
+.lesen3-ad-card {
+  background: var(--bg-surface-elevated, var(--white)) !important;
+  border: 1px solid var(--border-subtle, var(--line)) !important;
+  border-radius: var(--radius-card, 14px) !important;
+  padding: 18px 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+.lesen3-ad-card.is-used {
+  border-color: var(--brand-border, rgba(234, 88, 12, 0.35)) !important;
+}
+.lesen3-ad-head {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+}
+.lesen3-ad-title {
+  font-size: 15.5px !important;
+  font-weight: 950 !important;
+  color: var(--text-primary, var(--ink)) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+.mock-badge-letter {
+  color: var(--brand-primary, #ea580c) !important;
+  font-weight: 950 !important;
+}
+.lesen3-assigned-tag {
+  background: var(--brand-primary, #ea580c) !important;
+  color: #ffffff !important;
+  font-weight: 850 !important;
+  font-size: 11.5px !important;
+  padding: 3px 10px !important;
+  border-radius: 6px !important;
+}
+.mock-ad-content {
+  font-size: 14.5px !important;
+  line-height: 1.75 !important;
+  color: var(--text-primary, var(--ink)) !important;
+}
 
-/* Bottom Actions Toolbar */
-.mock-actions{direction:ltr;position:fixed;bottom:0;left:0;right:0;z-index:60;background:color-mix(in srgb,var(--bg) 85%,transparent);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);border-top:1.5px solid var(--line);padding:14px 20px;box-shadow:0 -4px 24px rgba(0,0,0,0.06)}
-.mock-actions-inner{max-width:1280px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:12px}
-.mock-nav-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:14px;font-size:15px;font-weight:900;cursor:pointer;transition:all .2s ease;text-decoration:none;border:none}
-.mock-nav-btn.light{background:var(--white);border:1.5px solid var(--line);color:var(--ink)}
-.mock-nav-btn.light:hover:not(:disabled){border-color:#FF7A2F;color:#FF7A2F}
-.mock-nav-btn.light:disabled{opacity:.4;cursor:not-allowed}
-.mock-nav-btn.dark{background:#141414;color:#fff}
-.mock-nav-btn.dark:hover{background:#222222;transform:translateY(-1px)}
-.mock-nav-btn.btn-finish-mock{background:#FF7A2F !important;color:#fff !important;box-shadow:0 4px 18px rgba(244,123,32,0.4) !important}
-.mock-nav-btn.btn-finish-mock:hover{background:#e06912 !important;transform:scale(1.02)}
+/* ─── Hören Teil 1 (R/F Table) ─── */
+.hoeren-table-card {
+  margin-top: 24px !important;
+  background: var(--bg-surface-elevated, var(--white)) !important;
+  border: 1px solid var(--border-subtle, var(--line)) !important;
+  border-radius: var(--radius-card, 20px) !important;
+  overflow: hidden !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+.hoeren-stmt-num {
+  font-weight: 900 !important;
+  color: var(--brand-primary, #ea580c) !important;
+  font-size: 15px !important;
+}
 
-.mock-finish{max-width:720px;margin:80px auto;text-align:center;padding:40px;border-radius:24px;background:var(--white);border:1.5px solid var(--line);box-shadow:var(--shadow)}
-.mock-finish .spinner{width:48px;height:48px;border:4px solid var(--line);border-top-color:#FF7A2F;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px}
+/* ─── Schreiben Workspace ─── */
+.mock-writing-grid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 22px !important;
+  align-items: stretch !important;
+}
+.mock-writing-box {
+  border: 1px solid var(--border-subtle, var(--line)) !important;
+  border-radius: var(--radius-card, 18px) !important;
+  padding: 22px 24px !important;
+  background: var(--bg-surface, var(--bg)) !important;
+}
+.mock-writing-box h3 {
+  margin-top: 0 !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  color: var(--text-primary, var(--ink)) !important;
+}
+.mock-writing-editor {
+  background: var(--bg-surface-elevated, var(--white)) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+.mock-writing-editor textarea {
+  width: 100% !important;
+  min-height: 520px !important;
+  resize: vertical !important;
+  border: 1.5px solid var(--border-subtle, var(--line)) !important;
+  border-radius: var(--radius-card, 14px) !important;
+  padding: 18px !important;
+  background: var(--bg-surface, var(--white)) !important;
+  font: inherit !important;
+  font-size: 15.5px !important;
+  line-height: 1.85 !important;
+  box-sizing: border-box !important;
+  color: var(--text-primary, var(--ink)) !important;
+  outline: none !important;
+  transition: border-color var(--duration-fast, 0.18s) ease !important;
+  direction: ltr !important;
+}
+.mock-writing-editor textarea:focus {
+  border-color: var(--brand-primary, #ea580c) !important;
+  box-shadow: 0 0 0 2px var(--brand-subtle, rgba(234, 88, 12, 0.15)) !important;
+}
+.mock-editor-meta {
+  display: flex !important;
+  justify-content: space-between !important;
+  color: var(--text-secondary, var(--muted)) !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  margin-top: 10px !important;
+  gap: 10px !important;
+  flex-wrap: wrap !important;
+}
+#writingWords {
+  color: var(--brand-primary, #ea580c) !important;
+  font-weight: 900 !important;
+  font-variant-numeric: tabular-nums !important;
+}
+.mock-writing-char-toolbar {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex-wrap: wrap !important;
+  margin: 0 0 12px !important;
+}
+.mock-writing-char-btn {
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  padding: 0 !important;
+  border: 1px solid var(--border-subtle, var(--line)) !important;
+  border-radius: var(--radius-button, 9px) !important;
+  background: var(--bg-surface, var(--bg)) !important;
+  color: var(--text-primary, var(--ink)) !important;
+  font: inherit !important;
+  font-weight: 950 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all var(--duration-fast, 0.15s) ease !important;
+}
+.mock-writing-char-btn:hover {
+  border-color: var(--brand-primary, #ea580c) !important;
+  color: var(--brand-primary, #ea580c) !important;
+  background: var(--brand-subtle, rgba(234, 88, 12, 0.08)) !important;
+}
+
+/* ─── Responsive Adjustments ─── */
+@media (max-width: 900px) {
+  .mock-writing-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+@media (max-width: 600px) {
+  .mock-root {
+    padding: 12px 14px 140px !important;
+  }
+  .mock-card {
+    padding: 18px 16px !important;
+    border-radius: var(--radius-card, 16px) !important;
+  }
+  .mock-reading-panel {
+    font-size: 15px !important;
+    padding: 16px 14px !important;
+  }
+  .lesen2-question, .mock-item {
+    padding: 16px 14px !important;
+  }
+  .mock-writing-editor textarea {
+    min-height: 420px !important;
+  }
+}
+.mock-finish{max-width:720px;margin:80px auto;text-align:center;padding:40px;border-radius:24px;background:var(--bg-surface-elevated,var(--white));border:1px solid var(--border-subtle,var(--line));box-shadow:var(--shadow)}
+.mock-finish .spinner{width:48px;height:48px;border:4px solid var(--border-subtle,var(--line));border-top-color:var(--brand-primary,#ea580c);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-@media(max-width:900px){
-  .mock-top-inner{grid-template-columns:auto 1fr}
-  .mock-status{grid-column:2;grid-row:1}
-  .mock-tabs{grid-column:1/-1;grid-row:2}
-  .mock-writing-grid{grid-template-columns:1fr}
-}
-@media(max-width:600px){
-  .mock-root{padding:12px 12px 120px}
-  .mock-top-inner{gap:8px}
-  .mock-brand{font-size:13px}
-  .mock-status .muted{display:none}
-  .mock-timer{font-size:17px;min-width:92px;padding:7px 10px}
-  .mock-tabs{grid-template-columns:repeat(2,1fr)}
-  .mock-card{padding:18px}
-  .mock-reading-panel{font-size:15px;padding:16px}
-  .mock-actions{padding:10px 14px}
-  .mock-nav-btn{font-size:13px;padding:10px 14px}
-}
-/* Fixed, balanced mock-exam header: identity and timer on the first row, sections below. */
-.mock-top-inner {
-  grid-template-columns: auto minmax(0,1fr) auto !important;
-  grid-template-areas: "back brand status" "tabs tabs tabs" !important;
-  gap: 8px 14px !important;
-}
-.mock-top .back-link {
-  grid-area: back;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--white);
-  border: 1px solid var(--line);
-  color: var(--ink);
-  text-decoration: none;
-  font-size: 20px;
-  line-height: 1;
-  transition: border-color .2s, background .2s, color .2s;
-}
-.mock-top .back-link:hover { border-color: var(--green); color: var(--green); }
-.mock-top .back-link:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
-.mock-brand { grid-area: brand; justify-self: start; min-width: 0; }
-.mock-status { grid-area: status; display: flex !important; align-items: center !important; justify-content: flex-end !important; direction: ltr !important; }
-.mock-tabs { grid-area: tabs; width: 100%; margin-top: 2px; }
-.mock-tab { min-height: 52px; }
-.mock-top { padding: 9px 0 11px; }
-.mock-top > .mock-root { padding-top: 0 !important; padding-bottom: 0 !important; }
-.mock-error { max-width: 680px; margin: 24px auto; color: var(--danger); text-align: center; }
-.mock-load-error { max-width: 640px; margin: 54px auto; padding: 28px; border: 1px solid var(--line); border-radius: 20px; background: var(--white); text-align: center; box-shadow: var(--shadow); }
-.mock-load-error p { color: var(--muted); }
-
-
-
-
-@media(max-width:600px) {
-  .mock-top-inner { grid-template-columns: auto minmax(0,1fr) auto !important; grid-template-areas: "back brand status" "tabs tabs tabs" !important; gap: 7px !important; }
-  .mock-top > .mock-root { padding-left: 12px !important; padding-right: 12px !important; }
-  .mock-brand { font-size: 12px; overflow: hidden; text-overflow: ellipsis; }
-  .mock-status { gap: 6px; }
-  .mock-timer { min-width: 76px; padding: 6px 8px; font-size: 15px; }
-  .mock-status .header-actions { gap: 4px !important; }
-  .mock-status .header-actions .icon-btn { width: 30px !important; height: 30px !important; min-width: 30px !important; border-radius: 9px !important; }
-  .mock-tab { min-height: 46px; padding: 7px 6px; font-size: 12px; }
-}
+.mock-error{max-width:680px;margin:24px auto;color:var(--danger);text-align:center}
+.mock-load-error{max-width:640px;margin:54px auto;padding:28px;border:1px solid var(--border-subtle,var(--line));border-radius:20px;background:var(--bg-surface-elevated,var(--white));text-align:center;box-shadow:var(--shadow)}
+.mock-load-error p{color:var(--muted)}
 </style>
 <style>/* TELC Voll: unified homepage typography */
 html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
 html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}</style>
 
-<style id="telc-final-complete-rework-styles">
-/* ==========================================================================
-   TELC VOLL — FINAL COMPLETE EXERCISE PRESENTATION SYSTEM
-   Centered 1140px, One Frame with Subtle Orange Outline, Clean Flow
-   ========================================================================== */
+<style id="mock-exam-modern-shell">
+/* TELC Voll — Mock Exam Modern Shell & Header System (Quiet Luxury / Precision) */
 
-/* 1. Page Shell & Body */
-body.exercise-page {
-  direction: ltr !important;
-  background: var(--bg) !important;
-  color: var(--ink) !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow-x: hidden !important;
-}
-
-/* 2. Top Header & Fixed Sticky Exercise Bar */
-.exercise-topbar {
-  direction: ltr !important;
-  position: sticky !important;
-  top: 0 !important;
-  z-index: 90 !important;
-  min-height: 70px !important;
-  height: 70px !important;
-  background: rgba(8, 8, 8, 0.94) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  border-bottom: 1px solid var(--line) !important;
-  box-sizing: border-box !important;
-}
-
-html[data-theme="light"] .exercise-topbar {
-  background: rgba(255, 255, 255, 0.94) !important;
-}
-
-.exercise-header-card.exercise-sticky-bar {
-  position: sticky !important;
-  top: 70px !important;
-  z-index: 85 !important;
-  background: var(--bg) !important;
-  border-bottom: 1.5px solid var(--line) !important;
-  border-top: none !important;
-  border-left: none !important;
-  border-right: none !important;
-  border-radius: 0 !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05) !important;
-  padding: 10px 0 !important;
-  margin: 0 auto 20px auto !important;
+/* 1. Header Container */
+.mock-top {
+  position: fixed !important;
+  inset: 0 0 auto !important;
   width: 100% !important;
-  max-width: 1140px !important;
-  box-sizing: border-box !important;
+  height: auto !important;
+  min-height: 0 !important;
+  z-index: 1000 !important;
+  background: var(--bg-surface-glass, rgba(8, 8, 8, 0.88)) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-bottom: 1px solid var(--border-subtle, var(--line)) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05) !important;
+  padding: 0 !important;
   direction: ltr !important;
+  box-sizing: border-box !important;
 }
 
+html[data-theme="light"] .mock-top {
+  background: rgba(255, 255, 255, 0.90) !important;
+  border-bottom-color: var(--border-subtle, #e2e8f0) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03) !important;
+}
 
-
-.exercise-single-top-bar {
+/* 2. Top Row: Brand & Back Navigation */
+.mock-top .mock-brand-bar {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
+  min-height: 56px !important;
+  width: 100% !important;
+  max-width: 1280px !important;
+  margin: 0 auto !important;
+  padding: 8px 24px !important;
+  border-bottom: 1px solid var(--border-subtle, var(--line)) !important;
+  box-sizing: border-box !important;
+}
+
+.mock-brand-group {
+  display: inline-flex !important;
+  align-items: center !important;
   gap: 12px !important;
-  width: 100% !important;
-  padding: 0 16px !important;
-  box-sizing: border-box !important;
-  direction: ltr !important;
+  min-width: 0 !important;
 }
 
-/* Cluster 1: Section & Teil Tags */
-.top-bar-left-cluster {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  flex: 0 0 auto !important;
-}
-
-.top-bar-left-cluster .tag {
+.mock-top .back-link {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: var(--radius-button, 10px) !important;
   display: inline-flex !important;
   align-items: center !important;
-  height: 36px !important;
-  padding: 0 12px !important;
-  border-radius: 8px !important;
-  font-size: 13px !important;
-  font-weight: 800 !important;
-  box-sizing: border-box !important;
-  white-space: nowrap !important;
-}
-
-.tag-level-section {
-  background: rgba(244, 123, 32, 0.14) !important;
-  color: #FF7A2F !important;
-  border: 1px solid rgba(244, 123, 32, 0.28) !important;
-}
-
-.tag-teil {
-  background: var(--bg) !important;
-  color: var(--ink) !important;
-  border: 1.5px solid var(--line) !important;
-}
-
-
-
-/* Cluster 2: Controlled Title Area */
-.top-bar-title-cluster {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  flex: 0 1 240px !important;
-  max-width: 240px !important;
-  min-width: 0 !important;
-  overflow: hidden !important;
-}
-
-.top-bar-title-cluster .thema-title-row {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  width: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-}
-
-.thema-masked-wrapper {
-  flex: 1 !important;
-  height: 36px !important;
-  min-height: 36px !important;
-  display: flex !important;
-  align-items: center !important;
   justify-content: center !important;
-  padding: 0 10px !important;
-  border-radius: 8px !important;
-  background: rgba(244, 123, 32, 0.08) !important;
-  border: 1px dashed rgba(244, 123, 32, 0.35) !important;
-  cursor: pointer !important;
+  background: var(--bg-surface, var(--white)) !important;
+  border: 1px solid var(--border-subtle, var(--line)) !important;
+  color: var(--text-secondary, var(--ink)) !important;
+  text-decoration: none !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
+  transition: all var(--duration-fast, 0.18s) var(--ease-spring, ease) !important;
   box-sizing: border-box !important;
 }
 
-.frosted-ghost-bars {
-  display: flex !important;
-  align-items: center !important;
-  gap: 5px !important;
-  width: 100% !important;
+.mock-top .back-link:hover {
+  background: var(--bg-surface-hover, rgba(255, 255, 255, 0.08)) !important;
+  border-color: var(--brand-primary, #ea580c) !important;
+  color: var(--brand-primary, #ea580c) !important;
+  transform: translateX(-1px) !important;
 }
 
-.ghost-bar {
+.mock-top .back-link:focus-visible {
+  outline: 2px solid var(--brand-primary, #ea580c) !important;
+  outline-offset: 2px !important;
+}
+
+.mock-brand {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 9px !important;
+  font-family: var(--font-family-arabic, "Cairo", sans-serif) !important;
+  color: var(--text-primary, var(--ink)) !important;
+  font-size: 18px !important;
+  font-weight: 950 !important;
+  letter-spacing: -0.02em !important;
+  text-decoration: none !important;
+  transition: opacity var(--duration-fast, 0.18s) ease !important;
+}
+
+.mock-brand:hover {
+  opacity: 0.88 !important;
+}
+
+.mock-brand .brand-dot {
+  width: 8px !important;
+  height: 8px !important;
+  border-radius: 50% !important;
+  background: var(--brand-primary, #ea580c) !important;
+  box-shadow: 0 0 10px var(--brand-glow, rgba(234, 88, 12, 0.35)) !important;
   display: inline-block !important;
-  height: 10px !important;
-  background: rgba(244, 123, 32, 0.25) !important;
-  border-radius: 4px !important;
-  filter: blur(2px) !important; /* ONLY MASK THE TITLE */
+  flex-shrink: 0 !important;
 }
 
-.ghost-bar-long {
-  flex: 2 !important;
-}
-
-.ghost-bar-short {
-  flex: 1 !important;
-}
-
-.title-reveal-btn.title-eye-btn {
+.mock-top .header-actions {
   display: inline-flex !important;
   align-items: center !important;
-  justify-content: center !important;
-  width: 36px !important;
-  height: 36px !important;
-  min-width: 36px !important;
-  border-radius: 8px !important;
-  border: 1.5px solid var(--line) !important;
-  background: var(--bg) !important;
-  cursor: pointer !important;
-  padding: 0 !important;
+  gap: 10px !important;
+}
+
+/* 3. Second Row: Exam Controls (Tabs, Timer, Teil Tabs) */
+.mock-top .mock-exam-controls {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  grid-template-areas: "tabs status" "teils teils" !important;
+  align-items: center !important;
+  gap: 10px 18px !important;
+  max-width: 1280px !important;
+  margin: 0 auto !important;
+  padding: 10px 24px !important;
   box-sizing: border-box !important;
-  transition: all 0.15s ease !important;
 }
 
-.title-reveal-btn.title-eye-btn:hover {
-  border-color: #FF7A2F !important;
-}
-
-
-
-.thema-title-content {
-  flex: 1 !important;
-  min-width: 0 !important;
-  overflow: hidden !important;
-}
-
-.thema-title-content h1 {
-  margin: 0 !important;
-  padding: 0 !important;
-  font-size: 14.5px !important;
-  font-weight: 850 !important;
-  color: var(--ink) !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-}
-
-/* Cluster 3: FIXED RESERVED RESULT AREA (170px) */
-.top-bar-result-cluster {
-  width: 170px !important;
-  min-width: 170px !important;
-  max-width: 170px !important;
-  flex: 0 0 170px !important;
-  height: 36px !important;
+.mock-top .mock-exam-controls > .mock-status {
+  grid-area: status !important;
   display: flex !important;
   align-items: center !important;
-  justify-content: center !important;
-  box-sizing: border-box !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  min-width: max-content !important;
+  white-space: nowrap !important;
 }
 
-.inline-result-panel {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 6px !important;
-  padding: 0 14px !important;
-  height: 36px !important;
-  border-radius: 8px !important;
-  font-size: 13.5px !important;
-  font-weight: 850 !important;
-  white-space: nowrap !important;
-  box-sizing: border-box !important;
+.mock-top .mock-exam-controls > .mock-tabs {
+  grid-area: tabs !important;
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 8px !important;
   width: 100% !important;
+  min-width: 0 !important;
+  margin: 0 !important;
 }
 
-.inline-result-panel.pass {
-  background: rgba(16, 185, 129, 0.12) !important;
-  border: 1px solid rgba(16, 185, 129, 0.32) !important;
-  color: #10b981 !important;
-}
-
-.inline-result-panel.fail {
-  background: rgba(239, 68, 68, 0.12) !important;
-  border: 1px solid rgba(239, 68, 68, 0.32) !important;
-  color: #ef4444 !important;
-}
-
-/* Cluster 4: Shuffle Button */
-.top-bar-shuffle-cluster {
-  flex: 0 0 auto !important;
-}
-
-.exercise-heading-shuffle {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 6px !important;
-  height: 36px !important;
-  min-height: 36px !important;
-  padding: 0 12px !important;
-  border-radius: 8px !important;
-  border: 1.5px solid var(--line) !important;
-  background: var(--bg) !important;
-  color: var(--ink) !important;
-  font-size: 13px !important;
-  font-weight: 750 !important;
-  cursor: pointer !important;
-  transition: all 0.15s ease !important;
-  box-sizing: border-box !important;
-  white-space: nowrap !important;
-}
-
-.exercise-heading-shuffle:hover {
-  border-color: #FF7A2F !important;
-  color: #FF7A2F !important;
-}
-
-
-
-/* Cluster 5: Modern Digital Clock */
-.top-bar-timer-cluster {
-  flex: 0 0 auto !important;
-}
-
-.modern-digital-clock,
-.progress-pill {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 6px !important;
-  height: 36px !important;
-  min-height: 36px !important;
-  padding: 0 12px !important;
-  border-radius: 8px !important;
-  border: 1.5px solid var(--line) !important;
-  background: var(--bg) !important;
-  color: var(--ink) !important;
-  font-size: 13.5px !important;
-  font-weight: 800 !important;
+/* 4. Exam Timer */
+.mock-timer {
   font-variant-numeric: tabular-nums !important;
-  box-sizing: border-box !important;
-  white-space: nowrap !important;
+  font-family: var(--font-family-latin, "Inter", system-ui, sans-serif) !important;
+  font-weight: 850 !important;
+  font-size: 16px !important;
+  letter-spacing: 0.04em !important;
+  padding: 7px 16px !important;
+  border-radius: var(--radius-pill, 999px) !important;
+  background: var(--brand-subtle, rgba(234, 88, 12, 0.08)) !important;
+  color: var(--brand-primary, #ea580c) !important;
+  min-width: 100px !important;
+  text-align: center !important;
+  border: 1px solid var(--brand-border, rgba(234, 88, 12, 0.25)) !important;
+  box-shadow: 0 1px 6px var(--brand-subtle, rgba(234, 88, 12, 0.1)) !important;
+  transition: all var(--duration-fast, 0.18s) ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
+.mock-timer.danger {
+  background: var(--state-danger-subtle, rgba(239, 68, 68, 0.12)) !important;
+  color: var(--state-danger, #ef4444) !important;
+  border-color: var(--state-danger-border, rgba(239, 68, 68, 0.35)) !important;
+  box-shadow: 0 0 14px rgba(239, 68, 68, 0.25) !important;
+  animation: pulseDanger 1.2s infinite alternate ease-in-out !important;
+}
 
+@keyframes pulseDanger {
+  from { transform: scale(1); }
+  to { transform: scale(1.025); }
+}
 
-.modern-digital-clock .timer-icon,
-.progress-pill .timer-icon {
-  font-size: 14px !important;
+/* 5. Section Tabs */
+.mock-tab {
+  border: 1px solid var(--border-subtle, var(--line)) !important;
+  background: var(--bg-surface, var(--white)) !important;
+  color: var(--text-secondary, var(--ink)) !important;
+  border-radius: var(--radius-card, 12px) !important;
+  padding: 8px 10px !important;
+  min-height: 48px !important;
+  cursor: pointer !important;
+  font: inherit !important;
+  font-weight: 850 !important;
+  font-size: 13.5px !important;
+  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.04)) !important;
+  min-width: 0 !important;
+  transition: all var(--duration-fast, 0.18s) ease !important;
+  text-align: center !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1.25 !important;
+}
+
+.mock-tab:hover:not(:disabled) {
+  border-color: var(--border-strong, rgba(255, 255, 255, 0.2)) !important;
+  background: var(--bg-surface-hover, rgba(255, 255, 255, 0.06)) !important;
+  color: var(--text-primary, var(--ink)) !important;
+}
+
+.mock-tab small {
+  display: block !important;
+  color: var(--text-muted, var(--muted)) !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  margin-top: 2px !important;
+}
+
+.mock-tab.active {
+  border-color: var(--brand-primary, #ea580c) !important;
+  box-shadow: 0 0 0 1px var(--brand-primary, #ea580c), 0 2px 10px var(--brand-subtle, rgba(234, 88, 12, 0.15)) !important;
+  background: var(--brand-subtle, rgba(234, 88, 12, 0.08)) !important;
+  color: var(--brand-primary, #ea580c) !important;
+  font-weight: 900 !important;
+}
+
+.mock-tab.active small {
+  color: var(--brand-primary, #ea580c) !important;
   opacity: 0.85 !important;
 }
 
-.modern-digital-clock .timer-digits,
-.progress-pill .timer-digits {
-  font-family: inherit !important;
-  font-size: 14px !important;
-  font-weight: 850 !important;
-  letter-spacing: 0.04em !important;
+.mock-tab:disabled {
+  opacity: 0.35 !important;
+  cursor: not-allowed !important;
 }
 
-/* 3. ONE MAIN ELEGANT EXERCISE FRAME (1140px, Subtle Orange Outline, Centered) */
-.exam-workspace {
-  display: block !important;
-  width: 100% !important;
-  max-width: 1140px !important;
-  margin: 0 auto !important;
-  padding: 0 16px 80px 16px !important;
-  box-sizing: border-box !important;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-.exam-main {
-  display: block !important;
-  width: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  background: transparent !important;
-  border: none !important;
-}
-
-.exercise-content-frame,
-.main-exam-frame {
-  display: block !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-  border: 1.5px solid rgba(244, 123, 32, 0.28) !important; /* SUBTLE ORANGE OUTLINE ONLY */
-  border-radius: 16px !important;
-  padding: 24px 28px !important;
-  background: rgba(20, 20, 20, 0.5) !important; /* Transparent/subtle interior in dark mode */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-
-html[data-theme="light"] .exercise-content-frame,
-html[data-theme="light"] .main-exam-frame {
-  background: rgba(255, 255, 255, 0.75) !important;
-  border-color: rgba(244, 123, 32, 0.32) !important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
-}
-
-/* 4. PARAGRAPHS INSIDE MAIN FRAME: NO SEPARATE BLUE-GRAY CARDS */
-.exam-text-card,
-.exam-text-card.answer-wrong,
-.exam-text-card.answer-correct,
-.exam-text-card.active-item,
-.exam-text-card.answered,
-.exercise-page:has(.exam-workspace) .exam-text-card,
-.exercise-page:has(.exam-workspace) .exam-text-card.answer-wrong,
-.exercise-page:has(.exam-workspace) .exam-text-card.answer-correct {
-  background: transparent !important;
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border-radius: 0 !important;
-  padding: 0 0 22px 0 !important;
-  margin: 0 0 22px 0 !important;
-  border-bottom: 1px solid var(--line) !important;
-  display: block !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-.exam-text-card:last-child {
-  border-bottom: none !important;
-  padding-bottom: 0 !important;
-  margin-bottom: 0 !important;
-}
-
-
-
-/* 5. HEADING SELECTION: COMPACT 42PX HEIGHT */
-.paragraph-assignment {
-  display: block !important;
-  width: 100% !important;
-  margin: 0 0 6px 0 !important;
-  padding: 0 !important;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-.paragraph-assignment-controls {
-  display: block !important;
-  width: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  background: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-.paragraph-assignment select,
-.paragraph-assignment-controls .mock-select,
-select.mock-select,
-select[data-paragraph-select] {
-  display: block !important;
-  width: 100% !important;
-  height: 42px !important;
-  min-height: 42px !important;
-  max-height: 42px !important;
-  line-height: 42px !important;
-  flex: none !important;
-  margin: 0 !important;
-  padding: 0 14px !important;
-  font-size: 14.5px !important;
-  font-weight: 700 !important;
-  border-radius: 9px !important;
-  border: 1.5px solid var(--line) !important;
-  background: var(--bg) !important;
-  color: var(--ink) !important;
-  outline: none !important;
-  cursor: pointer !important;
-  box-sizing: border-box !important;
-  transition: border-color 0.15s ease !important;
-}
-
-
-
-select.mock-select:focus {
-  border-color: #FF7A2F !important;
-}
-
-select.mock-select.answered {
-  border-color: #FF7A2F !important;
-}
-
-/* Validated Dropdown States */
-select.mock-select.assignment-model-correct {
-  border: 2px solid #10b981 !important;
-  background: rgba(16, 185, 129, 0.08) !important;
-  color: #10b981 !important;
-}
-
-select.mock-select.assignment-model-wrong {
-  border: 2px solid #ef4444 !important;
-  background: rgba(239, 68, 68, 0.08) !important;
-  color: #ef4444 !important;
-}
-
-/* 6. TRANSLATION & PRONUNCIATION: ATTACHED TO PARAGRAPH ON THE RIGHT */
-.paragraph-tools-row,
-.exercise-page .paragraph-tools-row,
-html[lang="ar"] .paragraph-tools-row,
-body[dir="rtl"] .paragraph-tools-row {
-  direction: ltr !important;
+/* 6. Teil Sub-tabs */
+.mock-teil-tabs {
+  grid-area: teils !important;
+  grid-column: 1 / -1 !important;
   display: flex !important;
-  justify-content: flex-end !important;
-  align-items: center !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-  margin: 4px 0 6px 0 !important;
-  padding: 0 !important;
-}
-
-.paragraph-tools-row .text-tools {
-  display: flex !important;
-  justify-content: flex-end !important;
-  align-items: center !important;
-  gap: 8px !important;
-  margin-left: auto !important;
-  margin-inline-start: auto !important;
-}
-
-.mini-tool {
-  display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  height: 32px !important;
-  min-height: 32px !important;
-  width: 34px !important;
-  min-width: 34px !important;
-  border-radius: 7px !important;
-  font-size: 14px !important;
-  border: 1.5px solid var(--line) !important;
-  background: var(--bg) !important;
-  color: var(--muted) !important;
-  cursor: pointer !important;
-  transition: all 0.15s ease !important;
-  padding: 0 !important;
-  box-sizing: border-box !important;
-}
-
-.mini-tool:hover {
-  color: #FF7A2F !important;
-  border-color: #FF7A2F !important;
-}
-
-
-
-/* 7. COMPACT CORRECT & WRONG FEEDBACK (NO GIANT CARDS) */
-.assignment-correct-answer{
-  display: flex !important;
-  align-items: center !important;
-  gap: 6px !important;
-  margin: 4px 0 8px 0 !important;
-  padding: 2px 0 !important;
-  background: transparent !important;
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  color: #10b981 !important;
-  font-size: 14px !important;
-  font-weight: 750 !important;
-  width: auto !important;
-}
-
-.assignment-correct-answer.model-answer-bar {
-  color: #f97316 !important;
-}
-
-.assignment-correct-answer .correct-badge {
-  font-weight: 900 !important;
-  font-size: 14px !important;
-  color: inherit !important;
-  background: transparent !important;
-  padding: 0 !important;
+  gap: 8px !important;
+  width: 100% !important;
+  padding-top: 4px !important;
   margin: 0 !important;
 }
 
-.assignment-correct-answer .correct-full-text {
-  font-weight: 750 !important;
-  font-size: 14px !important;
-  color: inherit !important;
+.mock-teil-tab {
+  min-width: 84px !important;
+  min-height: 34px !important;
+  padding: 6px 14px !important;
+  border: 1px solid var(--border-subtle, var(--line)) !important;
+  border-radius: var(--radius-pill, 999px) !important;
+  background: var(--bg-surface, var(--white)) !important;
+  color: var(--text-secondary, var(--ink)) !important;
+  font: inherit !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  transition: all var(--duration-fast, 0.18s) ease !important;
 }
 
-/* 8. PARAGRAPH TYPOGRAPHY */
-.exam-text,
-.exam-text-card .exam-text {
-  font-size: 16px !important;
-  line-height: 1.85 !important;
-  letter-spacing: -0.01em !important;
-  margin: 0 0 10px 0 !important;
-  padding: 0 !important;
-  background: transparent !important;
+.mock-teil-tab:hover {
+  border-color: var(--brand-primary, #ea580c) !important;
+  color: var(--brand-primary, #ea580c) !important;
 }
 
-
-
-html[data-theme="light"] .exam-text,
-html[data-theme="light"] .exam-text-card .exam-text {
-  color: #1a202c !important;
+.mock-teil-tab.active {
+  background: var(--brand-primary, #ea580c) !important;
+  border-color: var(--brand-primary, #ea580c) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px var(--brand-glow, rgba(234, 88, 12, 0.25)) !important;
+  font-weight: 900 !important;
 }
 
-/* 9. BOTTOM ACTION BAR: CENTERED & CLEAN */
-.exercise-actions {
+/* 7. Bottom Actions Bar */
+.mock-actions {
+  direction: ltr !important;
   position: fixed !important;
   bottom: 0 !important;
   left: 0 !important;
   right: 0 !important;
-  z-index: 80 !important;
-  background: rgba(8, 8, 8, 0.92) !important;
-  backdrop-filter: blur(14px) !important;
-  -webkit-backdrop-filter: blur(14px) !important;
-  border-top: 1px solid var(--line) !important;
-  padding: 12px 16px !important;
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
+  z-index: 60 !important;
+  background: var(--bg-surface-glass, rgba(8, 8, 8, 0.88)) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-top: 1px solid var(--border-subtle, var(--line)) !important;
+  padding: 12px 24px calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.06) !important;
 }
 
-html[data-theme="light"] .exercise-actions {
+html[data-theme="light"] .mock-actions {
   background: rgba(255, 255, 255, 0.92) !important;
+  border-top-color: var(--border-subtle, #e2e8f0) !important;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.04) !important;
 }
 
-.exercise-nav {
+.mock-actions-inner {
+  max-width: 1280px !important;
+  margin: 0 auto !important;
   display: flex !important;
+  justify-content: space-between !important;
   align-items: center !important;
-  gap: 12px !important;
+  gap: 14px !important;
 }
 
-.exercise-nav .btn {
-  height: 42px !important;
+.mock-nav-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
   min-height: 42px !important;
-  padding: 0 24px !important;
-  border-radius: 9px !important;
-  font-size: 14.5px !important;
-  font-weight: 800 !important;
+  height: 42px !important;
+  padding: 0 22px !important;
+  border-radius: var(--radius-button, 10px) !important;
+  font-size: 14px !important;
+  font-weight: 850 !important;
   cursor: pointer !important;
+  transition: all var(--duration-fast, 0.18s) ease !important;
+  text-decoration: none !important;
   box-sizing: border-box !important;
 }
 
-/* 10. RESPONSIVE MEDIA QUERIES */
-@media (max-width: 900px) {
-  .exercise-single-top-bar {
-    flex-wrap: wrap !important;
-    gap: 8px !important;
-    justify-content: center !important;
+.mock-nav-btn.light {
+  background: var(--bg-surface-elevated, var(--white)) !important;
+  border: 1px solid var(--border-subtle, var(--line)) !important;
+  color: var(--text-primary, var(--ink)) !important;
+}
+
+.mock-nav-btn.light:hover:not(:disabled) {
+  border-color: var(--border-strong, rgba(255, 255, 255, 0.2)) !important;
+  background: var(--bg-surface-hover, rgba(255, 255, 255, 0.08)) !important;
+  color: var(--text-primary, var(--ink)) !important;
+}
+
+.mock-nav-btn.light:disabled {
+  opacity: 0.35 !important;
+  cursor: not-allowed !important;
+}
+
+.mock-nav-btn.dark {
+  background: var(--bg-surface, #141414) !important;
+  border: 1px solid var(--border-subtle, var(--line)) !important;
+  color: #ffffff !important;
+}
+
+.mock-nav-btn.dark:hover {
+  background: var(--bg-surface-hover, #222222) !important;
+  transform: translateY(-1px) !important;
+}
+
+.mock-nav-btn.btn-finish-mock {
+  background: var(--brand-primary, #ea580c) !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 4px 14px var(--brand-glow, rgba(234, 88, 12, 0.35)) !important;
+}
+
+.mock-nav-btn.btn-finish-mock:hover {
+  background: var(--brand-hover, #c2410c) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* 8. Main App Dynamic Offset */
+.mock-root#app {
+  padding-top: calc(var(--mock-header-height, 120px) + 20px) !important;
+}
+
+/* 9. Responsive Breakpoints */
+@media (max-width: 768px) {
+  .mock-top .mock-brand-bar {
+    min-height: 52px !important;
+    padding: 6px 14px !important;
   }
-  .exercise-content-frame,
-  .main-exam-frame {
-    padding: 18px 16px !important;
-    border-radius: 12px !important;
+  .mock-brand {
+    font-size: 16px !important;
+  }
+  .mock-top .header-actions {
+    gap: 6px !important;
+  }
+  .mock-top .header-actions .icon-btn {
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+  }
+  .mock-top .mock-exam-controls {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    grid-template-areas: "tabs status" "teils teils" !important;
+    gap: 8px !important;
+    padding: 8px 14px !important;
+  }
+  .mock-top .mock-exam-controls > .mock-tabs {
+    gap: 6px !important;
+  }
+  .mock-top .mock-tab {
+    min-height: 44px !important;
+    padding: 5px 4px !important;
+    font-size: 12px !important;
+  }
+  .mock-top .mock-tab small {
+    font-size: 10px !important;
+  }
+  .mock-timer {
+    font-size: 14.5px !important;
+    min-width: 86px !important;
+    padding: 5px 10px !important;
+  }
+  .mock-root {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
   }
 }
-</style>
-<style id="mock-exam-brand-header">
-.mock-top{position:fixed!important;inset:0 0 auto!important;width:100%;z-index:1000;background:var(--bg)!important;border-bottom:1px solid var(--line)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;padding:0!important}
-.mock-top .mock-brand-bar{display:flex;align-items:center;justify-content:space-between;min-height:64px;width:100%;max-width:none!important;margin:0!important;padding:10px 24px!important;border-bottom:1px solid var(--line);box-sizing:border-box}
-.mock-brand-group{display:flex;align-items:center;gap:12px;min-width:0}
-.mock-brand{color:var(--green)!important;font-size:18px;font-weight:950}
-.mock-top .header-actions{display:flex;align-items:center;gap:10px}
-.mock-top .mock-exam-controls{display:grid!important;grid-template-columns:minmax(0,1fr) max-content!important;grid-template-areas:"tabs status"!important;align-items:center;gap:16px;padding-top:10px!important;padding-bottom:10px!important}
-.mock-top .mock-exam-controls>.mock-status{grid-area:status!important;display:flex;align-items:center;justify-content:flex-end;gap:10px;min-width:max-content;white-space:nowrap}
-.mock-top .mock-exam-controls>.mock-tabs{grid-area:tabs!important;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));width:100%;min-width:0;margin:0}
-.mock-root#app{padding-top:calc(var(--mock-header-height, 0px) + 18px)!important}
 
-@media(max-width:700px){
-  .mock-top .mock-brand-bar{min-height:58px;padding-left:12px!important;padding-right:12px!important}
-  .mock-brand{font-size:16px}
-  .mock-top .header-actions{gap:6px}
-  .mock-top .header-actions .icon-btn{width:36px!important;height:36px!important;min-width:36px!important}
-  .mock-top .mock-exam-controls{grid-template-columns:minmax(0,1fr)!important;grid-template-areas:"status" "tabs"!important;gap:8px;padding:8px 12px!important}
-  .mock-top .mock-exam-controls>.mock-status{justify-content:flex-end;min-width:0}
-  .mock-top .mock-exam-controls>.mock-tabs{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
-  .mock-top .mock-tab{min-height:44px;padding:6px 4px;font-size:11px}
-  .mock-top .mock-tab small{font-size:10px}
+@media (max-width: 520px) {
+  .mock-top .mock-exam-controls {
+    grid-template-columns: 1fr auto !important;
+    grid-template-areas: "status status" "tabs tabs" "teils teils" !important;
+    gap: 6px !important;
+    padding: 6px 10px !important;
+  }
+  .mock-top .mock-exam-controls > .mock-status {
+    justify-content: flex-end !important;
+  }
+  .mock-top .mock-exam-controls > .mock-tabs {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 4px !important;
+  }
+  .mock-top .mock-tab {
+    min-height: 40px !important;
+    padding: 4px 2px !important;
+    font-size: 11px !important;
+  }
+  .mock-top .mock-tab small {
+    display: none !important;
+  }
+  .mock-actions {
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  .mock-nav-btn {
+    font-size: 13px !important;
+    padding: 0 14px !important;
+  }
 }
 </style>
 
@@ -1058,7 +1379,7 @@ function bindHoerenAudioPlayer(){
       durationEl.textContent=formatAudioTime(dur);
       const pct = dur ? (audio.currentTime / dur * 100) : 0;
       progress.value = pct;
-      progress.style.background = `linear-gradient(to right, var(--green) 0%, var(--green) ${pct}%, var(--line) ${pct}%, var(--line) 100%)`;
+      progress.style.background = `linear-gradient(to right, var(--brand-primary, #ea580c) 0%, var(--brand-primary, #ea580c) ${pct}%, var(--border-subtle, var(--line)) ${pct}%, var(--border-subtle, var(--line)) 100%)`;
       icon.textContent=audio.paused?'▶':'❚❚';
       card.classList.toggle('is-playing',!audio.paused);
       play.setAttribute('aria-label',audio.paused?text('تشغيل الصوت','Audio abspielen'):text('إيقاف مؤقت','Pause'));
@@ -1068,7 +1389,7 @@ function bindHoerenAudioPlayer(){
       if (volume) {
         volume.value=v;
         const vPct = v * 100;
-        volume.style.background = `linear-gradient(to right, var(--green) 0%, var(--green) ${vPct}%, var(--line) ${vPct}%, var(--line) 100%)`;
+        volume.style.background = `linear-gradient(to right, var(--brand-primary, #ea580c) 0%, var(--brand-primary, #ea580c) ${vPct}%, var(--border-subtle, var(--line)) ${vPct}%, var(--border-subtle, var(--line)) 100%)`;
       }
       if (volumeIcon) volumeIcon.textContent=v===0?'🔇':v<.5?'🔉':'🔊';
     };
@@ -1253,7 +1574,7 @@ function renderMockSpb2(model){
         ${sharedOpts.map(([k, v]) => {
           const isUsed = Object.values(window.__mockAnswers).some(ans => String(ans).toLowerCase() === String(k).toLowerCase());
           return `
-          <div class="mock-word-card ${isUsed ? 'used' : ''}">
+          <div class="mock-word-card ${isUsed ? 'used' : ''}" data-word-key="${esc(k)}">
             <small>${esc(k)}</small>
             <span>${esc(v)}</span>
             ${isUsed ? `<span class="mock-word-check">✓</span>` : ''}
@@ -1280,13 +1601,14 @@ function renderMockLesen1(model){
   const usedKeys = new Set(Object.values(window.__mockAnswers).filter(Boolean).map(v => String(v).toUpperCase()));
 
   const headingsBankMarkup = `
-    <div class="mock-headings-bank" style="margin-top:28px;">
+    <div class="mock-headings-bank">
       <h3><span>📋</span> <span>${text('قائمة العناوين (Überschriften A bis J):', 'Überschriften (A bis J):')}</span></h3>
       <div class="mock-headings-list">
         ${heads.map((h, i) => {
           const letter = String.fromCharCode(65 + i);
           return `
           <div class="mock-heading-item">
+            <strong class="mock-heading-letter">${letter}</strong>
             <span>${esc(h)}</span>
           </div>`;
         }).join('')}
@@ -1304,14 +1626,15 @@ function renderMockLesen1(model){
     }).join('');
 
     return `
-    <article class="mock-item ${val ? 'answered' : ''}" style="background:transparent !important;background-color:transparent !important;border:none !important;box-shadow:none !important;border-radius:0 !important;padding:14px 0 28px 0 !important;margin:0 0 28px 0 !important;border-bottom:1px solid var(--line) !important;">
-      <div style="margin-bottom:10px;">
+    <article class="mock-item mock-l1-item ${val ? 'answered' : ''}">
+      <div class="mock-l1-item-header">
+        <span class="mock-num-badge">Text ${idx + 1}</span>
         <select class="mock-select ${val ? 'answered' : ''}" data-answer-q="${esc(n)}" aria-label="Text ${idx + 1}">
           <option value="">— ${text('اختر العنوان', 'Passende Überschrift auswählen')} —</option>
           ${selectOptions}
         </select>
       </div>
-      <div class="mock-task-body" style="font-size:16px;line-height:1.8;">${escBody(it.prompt || it.body || '')}</div>
+      <div class="mock-task-body">${escBody(it.prompt || it.body || '')}</div>
     </article>`;
   }).join('');
 
@@ -1320,11 +1643,11 @@ function renderMockLesen1(model){
       <span class="tag">Telc ${esc(model.exercise.level||state.session.level)}</span>
       <span class="mock-task-count">${esc(model.exercise.section)} · ${esc(model.exercise.teil)}</span>
     </div>
-    <div class="mock-spb-head" style="margin-top:14px;margin-bottom:16px;">
+    <div class="mock-spb-head">
       <h3><span>📖</span> <span>${text('النصوص (1 إلى 5):', 'Texte (1 bis 5):')}</span></h3>
       <span class="mock-task-count">${Object.keys(window.__mockAnswers).length} / ${items.length}</span>
     </div>
-    <div style="display:flex;flex-direction:column;gap:18px;">
+    <div class="mock-l1-list">
       ${cardsMarkup}
     </div>
     ${headingsBankMarkup}
@@ -1342,20 +1665,20 @@ function renderMockLesen2(model){
     const opts = (it.options || []).slice(0, 3);
 
     return `
-    <div class="lesen2-question ${val ? 'answered' : ''}" data-item="${esc(n)}" style="background:var(--white);border:1.5px solid var(--line);border-radius:20px;padding:22px 24px;box-shadow:var(--shadow-sm);margin-bottom:18px;">
-      <div class="question-prompt-row" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px;">
-        <div class="question-prompt-text" style="font-size:16px;font-weight:850;line-height:1.6;color:var(--ink);">
-          <span class="question-num" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:var(--green-soft);color:var(--green-dark);border-radius:8px;margin-inline-end:10px;font-size:13.5px;font-weight:900;">${it.position_no}</span>
+    <div class="lesen2-question ${val ? 'answered' : ''}" data-item="${esc(n)}">
+      <div class="question-prompt-row">
+        <div class="question-prompt-text">
+          <span class="question-num">${it.position_no}</span>
           <span>${esc(it.prompt || '')}</span>
         </div>
       </div>
-      <div class="options-list" style="display:flex;flex-direction:column;gap:10px;">
+      <div class="options-list">
         ${opts.map(o => {
           const isSelected = String(val).toLowerCase() === String(o.option_key).toLowerCase();
           return `
           <div class="option-row">
-            <button type="button" class="side-option mock-option ${isSelected ? 'selected' : ''}" data-answer-q="${esc(n)}" data-answer="${esc(o.option_key)}" style="width:100%;text-align:start;justify-content:flex-start;padding:12px 18px;border-radius:12px;font-size:14.5px;font-weight:750;background:var(--bg);color:var(--ink);border:${isSelected ? '2.5px solid var(--green)' : '1.5px solid var(--line)'};box-shadow:${isSelected ? '0 0 0 1px var(--green)' : 'none'};cursor:pointer;">
-              <span class="option-text"><span class="mock-option-key" style="font-weight:900;color:var(--green-dark);margin-inline-end:6px;">${esc(o.option_key)})</span> ${esc(o.option_text || o.option_key)}</span>
+            <button type="button" class="side-option mock-option ${isSelected ? 'selected' : ''}" data-answer-q="${esc(n)}" data-answer="${esc(o.option_key)}">
+              <span class="option-text"><span class="mock-option-key">${esc(o.option_key)})</span> ${esc(o.option_text || o.option_key)}</span>
             </button>
           </div>`;
         }).join('')}
@@ -1368,14 +1691,14 @@ function renderMockLesen2(model){
       <span class="tag">Telc ${esc(model.exercise.level||state.session.level)}</span>
       <span class="mock-task-count">${esc(model.exercise.section)} · ${esc(model.exercise.teil)}</span>
     </div>
-    <div class="long-text lesen2-long-text mock-reading-panel" style="margin-bottom:24px;background:var(--white);border:1.5px solid var(--line);border-radius:20px;padding:26px;box-shadow:var(--shadow-sm);backdrop-filter:blur(16px);font-size:16px;line-height:1.9;color:var(--ink);">
+    <div class="long-text lesen2-long-text mock-reading-panel">
       <div class="long-text-content">${escBody(bodyText)}</div>
     </div>
-    <div class="mock-spb-head" style="margin-top:24px;margin-bottom:16px;">
+    <div class="mock-spb-head">
       <h3><span>📝</span> <span>${text('أسئلة الاختيار من متعدد (6 إلى 10):', 'Aufgaben zum Text (6 bis 10):')}</span></h3>
       <span class="mock-task-count">${Object.keys(window.__mockAnswers).length} / ${items.length}</span>
     </div>
-    <div class="lesen2-questions-list" style="display:flex;flex-direction:column;gap:6px;">
+    <div class="lesen2-questions-list">
       ${questionsMarkup}
     </div>
   `);
@@ -1403,33 +1726,34 @@ function renderMockLesen3(model){
     }).join('') + `<option value="X" ${selected === 'X' ? 'selected' : ''}>${text('لا يوجد عنوان مناسب لهذه الفقرة', 'Keine passende Anzeige')}</option>`;
 
     return `
-    <article class="mock-item ${selected ? 'answered' : ''}" id="mock-sit-${q}" style="background:transparent !important;background-color:transparent !important;border:none !important;box-shadow:none !important;border-radius:0 !important;padding:14px 0 28px 0 !important;margin:0 0 28px 0 !important;border-bottom:1px solid var(--line) !important;">
-      <div class="paragraph-assignment" style="margin-bottom:14px;">
-        <div class="paragraph-assignment-controls" style="display:flex;flex-direction:column;align-items:stretch;gap:8px;">
+    <article class="mock-item mock-l3-item ${selected ? 'answered' : ''}" id="mock-sit-${q}">
+      <div class="paragraph-assignment">
+        <div class="paragraph-assignment-controls">
+          <span class="mock-num-badge">${text('الموقف', 'Situation')} ${q}</span>
           <select class="mock-select ${selected ? 'answered' : ''}" data-answer-q="${esc(q)}" data-mock-ad-select="${esc(q)}" aria-label="${esc(it.prompt)}">
-            <option value="">— ${text('اختر العنوان', 'Passende Überschrift auswählen')} —</option>
+            <option value="">— ${text('اختر العنوان أو الإعلان', 'Passende Anzeige auswählen')} —</option>
             ${options}
           </select>
           ${selected ? `<button type="button" class="assignment-selected" data-mock-clear="${esc(q)}" aria-label="${text('إلغاء الاختيار','Auswahl löschen')}"><span>${selected === 'X' ? 'X' : 'Text ' + selected}</span><b>×</b></button>` : ''}
         </div>
       </div>
-      <div class="mock-task-body" style="font-size:15.5px;line-height:1.85;color:var(--ink);">${escBody(it.prompt)}</div>
+      <div class="mock-task-body">${escBody(it.prompt)}</div>
     </article>`;
   }).join('');
 
   const headingsOverview = `
-    <div class="mock-headings-bank lesen3-headings-overview" style="margin-top:34px;padding:26px;background:var(--white);border:1.5px solid var(--line);border-radius:20px;box-shadow:var(--shadow-sm);">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+    <div class="mock-headings-bank lesen3-headings-overview">
+      <div class="lesen3-overview-head">
         <div>
-          <h3 style="margin:0 0 6px;font-size:18.5px;font-weight:900;display:flex;align-items:center;gap:8px;">
+          <h3>
             <span>📰</span>
             <span>${text('قائمة العناوين والإعلانات المتاحة (12 إعلاناً — Anzeigen A bis L):', 'Verfügbare Anzeigen (Text A bis L):')}</span>
           </h3>
-          <small class="muted" style="font-size:13.5px;line-height:1.6;">${text('اقرأ الفقرات الـ 10 بالأعلى واختر لكل فقرة العنوان المناسب، أو اختر (X) إذا لم يكن لها عنوان مناسب. لا يمكن استخدام العنوان لأكثر من فقرة واحدة.', 'Wählen Sie oben für jeden Absatz die passende Anzeige aus, oder X wenn keine Anzeige passt.')}</small>
+          <small class="muted">${text('اقرأ الفقرات الـ 10 بالأعلى واختر لكل فقرة العنوان المناسب، أو اختر (X) إذا لم يكن لها عنوان مناسب. لا يمكن استخدام العنوان لأكثر من فقرة واحدة.', 'Wählen Sie oben für jeden Absatz die passende Anzeige aus, oder X wenn keine Anzeige passt.')}</small>
         </div>
         <span class="mock-task-count">${Object.keys(window.__mockAnswers).length} / ${items.length}</span>
       </div>
-      <div class="mock-headings-list lesen3-ads-list" style="display:flex;flex-direction:column;gap:16px;">
+      <div class="mock-headings-list lesen3-ads-list">
         ${heads.map((h, i) => {
           const letter = String.fromCharCode(65 + i);
           const ad = parseAdText(h);
@@ -1437,15 +1761,15 @@ function renderMockLesen3(model){
           const assignedNo = assignedItem ? String(assignedItem.position_no) : '';
           const rawText = (typeof h === 'object') ? [h.title, h.body || h.text || h.content].filter(Boolean).join('\n\n') : String(h).trim();
           return `
-          <div class="mock-heading-item ${assignedNo ? 'is-used' : ''}" style="background:var(--bg);border:1.5px solid var(--line);border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:10px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;">
-              <strong style="font-size:15.5px;font-weight:950;color:#FF7A2F;display:inline-flex;align-items:center;gap:8px;">
-                <span>Text ${letter}</span>
-                ${ad.title ? `<span style="color:var(--ink);font-weight:800;">— ${esc(ad.title)}</span>` : ''}
+          <div class="mock-heading-item lesen3-ad-card ${assignedNo ? 'is-used' : ''}">
+            <div class="lesen3-ad-head">
+              <strong class="lesen3-ad-title">
+                <span class="mock-badge-letter">Text ${letter}</span>
+                ${ad.title ? `<span class="lesen3-ad-subtitle">— ${esc(ad.title)}</span>` : ''}
               </strong>
-              ${assignedNo ? `<span style="background:#0f172a;color:#fff;font-weight:900;font-size:11.5px;padding:3px 9px;border-radius:6px;">✓ ${text('مخصص للفقرة ' + assignedNo, 'Zugeordnet zu Absatz ' + assignedNo)}</span>` : ''}
+              ${assignedNo ? `<span class="lesen3-assigned-tag">✓ ${text('مخصص للفقرة ' + assignedNo, 'Zugeordnet zu Absatz ' + assignedNo)}</span>` : ''}
             </div>
-            <div class="mock-ad-content" style="font-size:14.5px;line-height:1.75;color:var(--ink);white-space:normal;word-break:break-word;">
+            <div class="mock-ad-content">
               ${escBody(ad.body || (ad.title ? '' : rawText))}
             </div>
           </div>`;
@@ -1458,11 +1782,11 @@ function renderMockLesen3(model){
       <span class="tag">Telc ${esc(model.exercise.level||state.session.level)}</span>
       <span class="mock-task-count">${esc(model.exercise.section)} · ${esc(model.exercise.teil)}</span>
     </div>
-    <div class="mock-spb-head" style="margin-top:14px;margin-bottom:16px;">
+    <div class="mock-spb-head">
       <h3><span>📋</span> <span>${text('الفقرات العشر (المواقف 1 إلى 10):', 'Die 10 Situationen (Absätze 1 bis 10):')}</span></h3>
       <span class="mock-task-count">${Object.keys(window.__mockAnswers).length} / ${items.length}</span>
     </div>
-    <div style="display:flex;flex-direction:column;gap:20px;">
+    <div class="mock-l3-list">
       ${paragraphsListMarkup}
     </div>
     ${headingsOverview}
@@ -1482,11 +1806,11 @@ function renderMockHoeren(model){
   let questionsMarkup = '';
   if (isTF) {
     questionsMarkup = `
-      <div class="hoeren-table-card" style="margin-top:24px;background:var(--white);border:1.5px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:var(--shadow-sm);backdrop-filter:blur(16px);">
-        <div class="hoeren-table-head" style="display:flex;align-items:center;padding:14px 20px;background:var(--bg);border-bottom:1.5px solid var(--line);font-weight:900;font-size:13.5px;color:var(--muted);">
-          <div class="hoeren-th hoeren-th-r" style="width:80px;text-align:center;">${text('صحيح','RICHTIG')}</div>
-          <div class="hoeren-th hoeren-th-f" style="width:80px;text-align:center;">${text('خطأ','FALSCH')}</div>
-          <div class="hoeren-th hoeren-th-statement" style="flex:1;padding-inline-start:16px;">${text('العبارة','AUSSAGE')}</div>
+      <div class="hoeren-table-card">
+        <div class="hoeren-table-head">
+          <div class="hoeren-th hoeren-th-r">${text('صحيح','RICHTIG')}</div>
+          <div class="hoeren-th hoeren-th-f">${text('خطأ','FALSCH')}</div>
+          <div class="hoeren-th hoeren-th-statement">${text('العبارة','AUSSAGE')}</div>
         </div>
         <div class="hoeren-table-body">
           ${items.map((it, idx) => {
@@ -1495,21 +1819,23 @@ function renderMockHoeren(model){
             const isR = val === 'richtig';
             const isF = val === 'falsch';
             return `
-            <div class="hoeren-table-row ${val ? 'answered' : ''}" data-item="${esc(n)}" style="display:flex;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line);gap:8px;">
-              <div class="hoeren-cell hoeren-cell-r" style="width:80px;display:flex;justify-content:center;">
+            <div class="hoeren-table-row ${val ? 'answered' : ''}" data-item="${esc(n)}">
+              <div class="hoeren-cell hoeren-cell-r">
                 <button type="button" class="hoeren-circle-radio-btn ${isR ? 'selected' : ''}" data-answer-q="${esc(n)}" data-answer="richtig" aria-label="${idx + 1} Richtig" title="Richtig">
                   <span class="hoeren-circle-radio"></span>
+                  <span class="hoeren-circle-radio-label">${text('صحيح','Richtig')}</span>
                 </button>
               </div>
-              <div class="hoeren-cell hoeren-cell-f" style="width:80px;display:flex;justify-content:center;">
+              <div class="hoeren-cell hoeren-cell-f">
                 <button type="button" class="hoeren-circle-radio-btn ${isF ? 'selected' : ''}" data-answer-q="${esc(n)}" data-answer="falsch" aria-label="${idx + 1} Falsch" title="Falsch">
                   <span class="hoeren-circle-radio"></span>
+                  <span class="hoeren-circle-radio-label">${text('خطأ','Falsch')}</span>
                 </button>
               </div>
-              <div class="hoeren-cell hoeren-cell-statement" style="flex:1;padding-inline-start:16px;">
-                <div class="hoeren-stmt-content" style="display:flex;align-items:baseline;gap:8px;">
-                  <span class="hoeren-stmt-num" style="font-weight:900;color:var(--green-dark);">${idx + 1}.</span>
-                  <span class="hoeren-stmt-text" style="font-size:15.5px;line-height:1.75;color:var(--ink);">${esc(it.prompt)}</span>
+              <div class="hoeren-cell hoeren-cell-statement">
+                <div class="hoeren-stmt-content">
+                  <span class="hoeren-stmt-num">${idx + 1}.</span>
+                  <span class="hoeren-stmt-text">${esc(it.prompt)}</span>
                 </div>
               </div>
             </div>`;
@@ -1518,26 +1844,26 @@ function renderMockHoeren(model){
       </div>`;
   } else {
     questionsMarkup = `
-      <div class="lesen2-questions-list" style="margin-top:24px;display:flex;flex-direction:column;gap:18px;">
+      <div class="lesen2-questions-list hoeren-choice-list">
         ${items.map((it, idx) => {
           const n = String(it.position_no);
           const val = String(window.__mockAnswers[n] || window.__mockAnswers[String(it.id)] || '').toLowerCase();
           const opts = it.options && it.options.length ? it.options : [{option_key:'a',option_text:'a'},{option_key:'b',option_text:'b'},{option_key:'c',option_text:'c'}];
           return `
-          <div class="lesen2-question ${val ? 'answered' : ''}" data-item="${esc(n)}" style="background:var(--white);border:1.5px solid var(--line);border-radius:20px;padding:22px 24px;box-shadow:var(--shadow-sm);">
-            <div class="question-prompt-row" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px;">
-              <div class="question-prompt-text" style="font-size:16px;font-weight:850;line-height:1.6;color:var(--ink);">
-                <span class="question-num" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;background:var(--green-soft);color:var(--green-dark);border-radius:8px;margin-inline-end:10px;font-size:13.5px;font-weight:900;">${idx + 1}</span>
+          <div class="lesen2-question hoeren-choice-card ${val ? 'answered' : ''}" data-item="${esc(n)}">
+            <div class="question-prompt-row">
+              <div class="question-prompt-text">
+                <span class="question-num">${idx + 1}</span>
                 <span>${esc(it.prompt || '')}</span>
               </div>
             </div>
-            <div class="options-list" style="display:flex;flex-direction:column;gap:10px;">
+            <div class="options-list">
               ${opts.map(o => {
                 const isSelected = val === String(o.option_key).toLowerCase();
                 return `
                 <div class="option-row">
-                  <button type="button" class="side-option mock-option ${isSelected ? 'selected' : ''}" data-answer-q="${esc(n)}" data-answer="${esc(o.option_key)}" style="width:100%;text-align:start;justify-content:flex-start;padding:12px 18px;border-radius:12px;font-size:14.5px;font-weight:750;background:var(--bg);color:var(--ink);border:${isSelected ? '2.5px solid var(--green)' : '1.5px solid var(--line)'};box-shadow:${isSelected ? '0 0 0 1px var(--green)' : 'none'};cursor:pointer;">
-                    <span class="option-text"><span class="mock-option-key" style="font-weight:900;color:var(--green-dark);margin-inline-end:6px;">${esc(o.option_key)})</span> ${esc(o.option_text || o.option_key)}</span>
+                  <button type="button" class="side-option mock-option ${isSelected ? 'selected' : ''}" data-answer-q="${esc(n)}" data-answer="${esc(o.option_key)}">
+                    <span class="option-text"><span class="mock-option-key">${esc(o.option_key)})</span> ${esc(o.option_text || o.option_key)}</span>
                   </button>
                 </div>`;
               }).join('')}
@@ -1553,7 +1879,7 @@ function renderMockHoeren(model){
       <span class="mock-task-count">${esc(model.exercise.section)} · ${esc(model.exercise.teil)}</span>
     </div>
     ${audioBox}
-    <div class="mock-spb-head" style="margin-top:24px;margin-bottom:16px;">
+    <div class="mock-spb-head">
       <h3><span>🎧</span> <span>${text('أسئلة الاستماع:', 'Hörverstehensaufgaben:')}</span></h3>
       <span class="mock-task-count">${Object.keys(window.__mockAnswers).length} / ${items.length}</span>
     </div>
@@ -1571,13 +1897,13 @@ function renderWriting(model){
       <span class="mock-task-count">Schreiben · ${esc(model.exercise.teil)}</span>
     </div>
     <div class="mock-writing-grid">
-      <div>
-        <div class="mock-writing-box">
+      <div class="mock-writing-left-col">
+        <div class="mock-writing-box mock-writing-situation">
           <h3>Situation</h3>
           <div class="mock-task-body">${escBody(settings.situation_text||model.exercise.body||'')}</div>
         </div>
         ${settings.task_text ? `
-          <div class="mock-writing-box" style="margin-top:14px">
+          <div class="mock-writing-box mock-writing-task" style="margin-top:16px">
             <h3>Aufgabe</h3>
             <div class="mock-task-body">${escBody(settings.task_text)}</div>
           </div>` : ''}
@@ -1610,14 +1936,7 @@ function renderChoice(model){
     <div class="mock-task-body">${escBody(model.exercise.body||'')}</div>`;
 
   if(model.exercise.audio_url){
-    html += `
-      <div class="mock-audio">
-        <div class="mock-audio-header">
-          <span>🎧 ${text('الملف الصوتي TELC Hören','Audiodatei TELC Hören')}</span>
-          <span>${esc(model.exercise.teil)}</span>
-        </div>
-        <audio controls preload="metadata" src="${esc(model.exercise.audio_url)}"></audio>
-      </div>`;
+    html += renderUnifiedAudioPlayer(model.exercise.audio_url);
   }
 
   html += items.map(it => {
@@ -1636,12 +1955,14 @@ function renderChoice(model){
     return `
     <article class="mock-item">
       <div class="mock-item-prompt">${esc(it.prompt)}</div>
-      <div class="mock-options">
+      <div class="options-list">
         ${opts.map(o=>`
-          <button type="button" class="mock-option ${String(val)===String(o.option_key)?'selected':''}" data-answer-q="${esc(it.position_no)}" data-answer="${esc(o.option_key)}">
-            <span class="mock-option-key">${esc(o.option_key)}</span>
-            <span>${esc(o.option_text)}</span>
-          </button>
+          <div class="option-row">
+            <button type="button" class="side-option mock-option ${String(val)===String(o.option_key)?'selected':''}" data-answer-q="${esc(it.position_no)}" data-answer="${esc(o.option_key)}">
+              <span class="mock-option-key">${esc(o.option_key)})</span>
+              <span>${esc(o.option_text)}</span>
+            </button>
+          </div>
         `).join('')}
       </div>
     </article>`;

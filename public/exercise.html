@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#080808"><title>تمرين TELC Voll</title><link rel="stylesheet" href="/assets/app.css?v=20260928-polished-v1">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#080808"><title>تمرين TELC Voll</title><script>document.documentElement.classList.add('js-ready');</script><link rel="stylesheet" href="/assets/app.css?v=20261002-polished-v6h">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
@@ -680,7 +680,7 @@ html[data-theme="light"] .exercise-actions {
 </style>
 
 </head>
-<body>
+<body class="exercise-page">
 <header class="top exercise-topbar">
   <div class="exercise-topbar-left">
     <a class="back-link" id="exerciseBack" href="/dashboard.html" aria-label="العودة">←</a>
@@ -1184,8 +1184,22 @@ function renderMatching(){
     const selectResultClass = detail && selected ? (detail.ok ? 'assignment-model-correct' : 'assignment-model-wrong') : '';
     const fullCorrectAnswerText = getFullAnswerText(it, correctVal, heads);
     const correctHint=answerFeedbackMarkup(detail,correctVal,fullCorrectAnswerText);
+    const itemLabel = isLesen3 ? text(`الموقف ${it.position_no}`, `Situation ${it.position_no}`) : text(`الفقرة ${it.position_no}`, `Text ${it.position_no}`);
     return `<article class="exam-text-card ${selected?'answered':''} ${resultClass} ${showModelAnswers?'model-shown':''} ${String(activeItem)===String(it.position_no)?'active-item':''}" data-item="${it.position_no}">
       ${isReversedLesen3?`<div style="margin:0 0 10px;color:#FF7A2F;font-size:17px;font-weight:950;">${reverseAdLetter}</div>`:''}
+      <div class="paragraph-card-header paragraph-tools-row">
+        <div class="paragraph-card-badge">
+          <span class="paragraph-num-pill">${itemLabel}</span>
+          ${selected ? `<span class="paragraph-status-badge">✓ ${esc(selected)}</span>` : ''}
+        </div>
+        <div class="text-tools">
+          <button type="button" class="mini-tool" data-translate="${cid}" data-source-id="${cid}" aria-label="${text('ترجمة','Übersetzen')}" title="${text('ترجمة النص في مكانه','Text an Ort und Stelle übersetzen')}" aria-pressed="false">文</button>
+          <button type="button" class="mini-tool" data-speak="${cid}" aria-label="${text('نطق بالألمانية','Deutsch vorlesen')}" aria-pressed="false">◉</button>
+        </div>
+      </div>
+      ${correctHint}
+      <div class="exam-text" id="${cid}" data-content-id="${cid}" data-source="${esc(it.prompt)}">${isReversedLesen3?`<div style="margin-bottom:8px;color:var(--accent);font-weight:850;">${esc(reverseAd?.title||'')}</div>${escBody(reverseAd?.body||'')}`:escBody(it.prompt)}</div>
+      <div class="inline-translation" id="${cid}-translation"></div>
       <div class="paragraph-assignment">
         <div class="paragraph-assignment-head" style="display:none !important;" aria-hidden="true"></div>
         <div class="paragraph-assignment-controls">
@@ -1195,15 +1209,6 @@ function renderMatching(){
           </select>
         </div>
       </div>
-      <div class="paragraph-tools-row">
-        <div class="text-tools">
-          <button type="button" class="mini-tool" data-translate="${cid}" data-source-id="${cid}" aria-label="${text('ترجمة','Übersetzen')}" title="${text('ترجمة النص في مكانه','Text an Ort und Stelle übersetzen')}" aria-pressed="false">文</button>
-          <button type="button" class="mini-tool" data-speak="${cid}" aria-label="${text('نطق بالألمانية','Deutsch vorlesen')}" aria-pressed="false">◉</button>
-        </div>
-      </div>
-      ${correctHint}
-       <div class="exam-text" id="${cid}" data-content-id="${cid}" data-source="${esc(it.prompt)}">${isReversedLesen3?`<div style="margin-bottom:8px;color:var(--accent);font-weight:850;">${esc(reverseAd?.title||'')}</div>${escBody(reverseAd?.body||'')}`:escBody(it.prompt)}</div>
-      <div class="inline-translation" id="${cid}-translation"></div>
     </article>`;
   }).join('');
 
@@ -1293,7 +1298,21 @@ function renderMatching(){
    </div>
  `;
 
- document.getElementById('content').innerHTML = layout(main + headingsBankUnder, '', isLesen3 ? 'lesen3-workspace' : '');
+ const isLesen1 = model.exercise.section === 'Lesen' && model.exercise.teil === 'Teil 1';
+ let layoutContent = main + headingsBankUnder;
+ if (isLesen1) {
+   layoutContent = `
+     <div class="lesen1-split-grid">
+       <div class="lesen1-paragraphs-col">
+         ${bodySection}
+         <div class="matching-cards-stream">${cards}</div>
+       </div>
+       <aside class="lesen1-headings-sidebar">
+         ${headingsBankUnder}
+       </aside>
+     </div>`;
+ }
+ document.getElementById('content').innerHTML = layout(layoutContent, '', isLesen3 ? 'lesen3-workspace' : isLesen1 ? 'lesen1-workspace' : '');
 
  document.querySelectorAll('[data-item]').forEach(c=>{
    c.onmousedown=e=>{if(e.target.closest('select,.text-tools,.mini-tool,.clear-selection'))return;e.preventDefault();};
@@ -1337,6 +1356,7 @@ function renderMatching(){
  const sh=document.getElementById('headingShuffleBtn');
  if(sh)sh.onclick=e=>{e.stopPropagation();const st=captureExerciseScroll();matchingOrder=shuffle(matchingOrder);activeItem=null;renderMatching();restoreExerciseScroll(st);bindActions();};
  bindTextTools();
+ if(model?.exercise?.audio_url) bindHoerenAudioPlayer();
 }
 function renderSprachbausteine1(){
  const items=(model.items||[]); const longTextId='spb1-text';
@@ -1428,7 +1448,7 @@ function renderHoerenChoiceQuestions(){
     return `<article class="hoeren-choice-card ${detail?(detail.ok?'result-correct':'result-wrong'):''}" data-item="${esc(n)}">
       <div class="hoeren-choice-question-row"><span class="hoeren-choice-number">${index+1}.</span><div class="hoeren-choice-question" id="${qid}" data-content-id="${qid}" data-source="${esc(it.prompt||'')}">${esc(it.prompt||'')}</div><div class="hoeren-choice-question-tools">${textTools(it.prompt||'',qid)}</div></div>
       ${correctHint}
-      <div class="hoeren-choice-options">${ordered.map((o,oi)=>{const oid=`hoeren-choice-o-${n}-${oi}`;const selected=String(chosen)===String(o.option_key);const isCorrect=shouldShowCorrectAnswer()&&String(correct)===String(o.option_key);const resultClass=detail&&selected?(detail.ok?'result-correct':'result-wrong'):'';return `<div class="hoeren-choice-option-wrap"><button type="button" class="hoeren-choice-option ${selected?'selected':''} ${resultClass} ${isCorrect?'model-correct':''}" data-q="${esc(n)}" data-o="${esc(o.option_key)}"><span class="hoeren-choice-radio"></span><span class="hoeren-choice-option-text" id="${oid}" data-content-id="${oid}" data-source="${esc(o.option_text||'')}">${esc(o.option_text||'')}</span></button>${textTools(o.option_text||'',oid)}${translationBox(oid+'-translation')}</div>`;}).join('')}</div>
+      <div class="hoeren-choice-options">${ordered.map((o,oi)=>{const oid=`hoeren-choice-o-${n}-${oi}`;const selected=String(chosen)===String(o.option_key);const isCorrect=shouldShowCorrectAnswer()&&String(correct)===String(o.option_key);const resultClass=detail&&selected?(detail.ok?'result-correct':'result-wrong'):'';return `<div class="hoeren-choice-option-wrap"><button type="button" class="hoeren-choice-option ${selected?'selected':''} ${resultClass} ${isCorrect?'model-correct':''}" data-q="${esc(n)}" data-o="${esc(o.option_key)}"><span class="hoeren-choice-radio">${esc(o.option_key.toUpperCase())}</span><span class="hoeren-choice-option-text" id="${oid}" data-content-id="${oid}" data-source="${esc(o.option_text||'')}">${esc(o.option_text||'')}</span></button>${textTools(o.option_text||'',oid)}${translationBox(oid+'-translation')}</div>`;}).join('')}</div>
       <div class="inline-translation hoeren-choice-question-translation" id="${qid}-translation"></div>
     </article>`;
   }).join('');
@@ -1438,6 +1458,7 @@ function renderHoerenChoiceQuestions(){
   document.querySelectorAll('.hoeren-choice-option[data-q]').forEach(b=>b.onclick=()=>selectAnswer(b.dataset.q,b.dataset.o));
   bindTextTools();
   bindHoerenAudioPlayer();
+ bindActions();
 }
 
 function renderChoiceQuestions(){
@@ -1480,6 +1501,7 @@ function renderChoiceQuestions(){
             return `<div class="option-row" style="position:relative;">
               <div class="option-tool-wrap" style="display:flex;align-items:center;gap:10px;">
                 <button type="button" class="side-option ${isSelected?'selected':''} ${optResultClass} ${isCorrectOption?'model-correct':''}" data-q="${esc(n)}" data-o="${esc(o.option_key)}" style="flex:1;text-align:start;justify-content:flex-start;padding:12px 16px;border-radius:12px;font-size:14.5px;font-weight:750;background:var(--bg);color:var(--ink);border:${isSelected?'2.5px solid var(--green)':'1.5px solid var(--line)'};box-shadow:${isSelected?'0 0 0 1px var(--green)':'none'};">
+                  <span class="choice-radio-indicator" aria-hidden="true">${esc(o.option_key)}</span>
                   <span class="option-text" id="${ocid}" data-content-id="${ocid}" data-source="${esc(cleanOptionPrefix(o.option_text||o.option_key))}">${esc(cleanOptionPrefix(o.option_text||o.option_key))}</span>
                 </button>
                 ${textTools(o.option_text||'',ocid)}
@@ -1575,7 +1597,7 @@ function renderChoiceQuestions(){
     ${genericQuestionsMarkup}
   </div>`;
 
-  document.getElementById('content').innerHTML = layout(main, '', isLesen2 ? 'lesen2' : '');
+  document.getElementById('content').innerHTML = layout(main, '', isLesen2 ? 'lesen2-workspace' : gap2 ? 'spb2-workspace' : '');
 
   if(gap2){
     document.querySelectorAll('[data-word]').forEach(b=>b.onclick=()=>{
@@ -1782,12 +1804,14 @@ function renderTF(){
       <div class="hoeren-table-row ${rowStatusClass}" data-item="${it.position_no}">
         <div class="hoeren-cell hoeren-cell-r">
           <button type="button" class="hoeren-circle-radio-btn ${rClass}" data-q="${it.position_no}" data-o="Richtig" aria-label="${dispNo} ${text('صحيح','Richtig')}" title="${text('صحيح','Richtig')}">
-            <span class="hoeren-circle-radio"></span>
+            <span class="hoeren-circle-radio" aria-hidden="true"></span>
+            <span class="hoeren-circle-radio-label">${text('صحيح','Richtig')}</span>
           </button>
         </div>
         <div class="hoeren-cell hoeren-cell-f">
           <button type="button" class="hoeren-circle-radio-btn ${fClass}" data-q="${it.position_no}" data-o="Falsch" aria-label="${dispNo} ${text('خطأ','Falsch')}" title="${text('خطأ','Falsch')}">
-            <span class="hoeren-circle-radio"></span>
+            <span class="hoeren-circle-radio" aria-hidden="true"></span>
+            <span class="hoeren-circle-radio-label">${text('خطأ','Falsch')}</span>
           </button>
         </div>
         <div class="hoeren-cell hoeren-cell-statement">
@@ -1927,52 +1951,92 @@ function renderWriting(){
  const durMin = Math.round(activeDur / 60);
  const wordLimit = String(model?.exercise?.level||'').toUpperCase() === 'C1' ? 350 : 150;
  const initialMin = String(durMin).padStart(2, '0');
+ const modelAnswerText = settings.model_answer || settings.sample_solution || settings.musterloesung || settings.sample_text || (modelAnswerData?.details?.[0]?.correct_answer) || '';
+ const hasWritingModel = !!(settings.model_answer || settings.sample_solution || settings.musterloesung || settings.sample_text || modelAnswerData?.details?.length);
+ if (hasWritingModel && !modelAnswerData && modelAnswerText) {
+   modelAnswerData = { exercise_id: id, details: [{ correct_answer: modelAnswerText }] };
+ }
 
-   document.getElementById('content').innerHTML=`<div class="writing-page-shell">
+ document.getElementById('content').innerHTML=`<div class="writing-page-shell">
    ${renderExerciseHeaderCard()}
    <div class="writing-workspace">
     <section class="writing-left">
-      <div class="writing-time-rule">${text(`الوقت: ${durMin} دقيقة | الحد الأدنى ${wordLimit} كلمة`,`Zeit: ${durMin} Minuten | Mindestens ${wordLimit} Wörter`)}</div>
-      <div class="writing-exam-note">Vergessen Sie nicht: Absender, Anschrift, Datum, Betreffzeile, Anrede und Schlussformel. Schreiben Sie mindestens ${wordLimit} Wörter.</div>
+      <div class="writing-time-rule"><span class="writing-time-rule-icon" aria-hidden="true">⏱</span> <span>${text(`الوقت: ${durMin} دقيقة | الحد الأدنى ${wordLimit} كلمة`,`Zeit: ${durMin} Minuten | Mindestens ${wordLimit} Wörter`)}</span></div>
+      <div class="writing-exam-note"><span class="writing-exam-note-icon" aria-hidden="true">ℹ</span> <div><strong>${text('تذكير بالامتحان:','Prüfungshinweis:')}</strong> Vergessen Sie nicht: Absender, Anschrift, Datum, Betreffzeile, Anrede und Schlussformel. Schreiben Sie mindestens ${wordLimit} Wörter.</div></div>
       <div class="writing-block"><h2>${text('الوضعية','Situation')}</h2><div class="question-text-tools">${textTools(situationRaw,sid)}<div id="${sid}" class="writing-german-content" data-content-id="${sid}" data-source="${esc(situationRaw)}">${escBody(situationRaw)}</div>${translationBox(sid+'-translation')}</div></div>
       ${taskRaw?`<div class="writing-block"><h2>${text('المطلوب','Aufgabe')}</h2><div class="writing-task question-text-tools">${textTools(taskRaw,tid)}<div id="${tid}" class="writing-german-content" data-content-id="${tid}" data-source="${esc(taskRaw)}">${escBody(taskRaw)}</div>${translationBox(tid+'-translation')}</div></div>`:''}
+      ${hasWritingModel && showModelAnswers && modelAnswerText ? `
+      <div class="writing-block writing-model-card" role="region" aria-label="${text('الإجابة النموذجية','Musterlösung')}">
+        <div class="writing-model-head">
+          <h2>${text('الإجابة النموذجية المقترحة','Musterlösung')}</h2>
+          <span class="tag">${text('نموذج تدريبي','Musterbeispiel')}</span>
+        </div>
+        <div class="writing-model-body writing-german-content">${escBody(modelAnswerText)}</div>
+      </div>` : ''}
     </section>
     <section class="writing-editor">
-      <div class="editor-tools"><div class="editor-chars">${['ä','ö','ü','ß','Ä','Ö','Ü'].map(c=>`<button type="button" class="char-btn" data-char="${c}">${c}</button>`).join('')}</div><div style="display:flex;align-items:center;gap:10px"><span id="wordCount">0 Wörter</span></div></div>
-      <textarea id="writingAnswer" placeholder="${text('ابدأ في كتابة إجابتك هنا…','Beginne hier mit deiner Antwort…')}"></textarea>
-      <div class="editor-bottom"><button class="btn ai-check-btn" id="aiWritingCheck">✦ ${text('تصحيح بالذكاء الاصطناعي','Mit KI korrigieren')}</button></div>
+      <div class="editor-tools">
+        <div class="editor-chars" role="toolbar" aria-label="${text('أحرف خاصة بالألمانية','Deutsche Sonderzeichen')}">${['ä','ö','ü','ß','Ä','Ö','Ü'].map(c=>`<button type="button" class="char-btn" data-char="${c}" aria-label="${text(`إدراج الحرف ${c}`,`Buchstabe ${c} einfügen`)}" title="${c}">${c}</button>`).join('')}</div>
+        <div class="editor-counter-wrap"><span id="wordCount" class="writing-word-counter">0 / ${wordLimit} ${text('كلمة','Wörter')}</span></div>
+      </div>
+      <textarea id="writingAnswer" spellcheck="false" autocomplete="off" autocapitalize="sentences" aria-label="${text('مساحة كتابة الإجابة','Textbereich für deine Antwort')}" placeholder="${text('ابدأ في كتابة إجابتك هنا…','Beginne hier mit deiner Antwort…')}"></textarea>
+      <div class="editor-bottom">
+        <button type="button" class="btn ai-check-btn" id="aiWritingCheck">
+          <span class="ai-sparkle-icon" aria-hidden="true">✦</span>
+          <span>${text('تصحيح بالذكاء الاصطناعي','Mit KI korrigieren')}</span>
+        </button>
+        ${hasWritingModel ? modelAnswerToggleMarkup() : ''}
+      </div>
     </section>
    </div>
    <div id="writingAiResult" class="writing-ai-result" hidden></div>
  </div>`;
  const ta=document.getElementById('writingAnswer');
  ta.value=localStorage.getItem('writing_'+id)||'';
- const update=()=>{document.getElementById('wordCount').textContent=(ta.value.trim()?ta.value.trim().split(/\s+/).length:0)+' '+text('كلمة','Wörter');localStorage.setItem('writing_'+id,ta.value);};
+ const update=()=>{
+   const count = ta.value.trim() ? ta.value.trim().split(/\s+/).length : 0;
+   const counterEl = document.getElementById('wordCount');
+   if(counterEl){
+     counterEl.textContent = `${count} / ${wordLimit} ` + text('كلمة', 'Wörter');
+     counterEl.classList.toggle('word-count-reached', count >= wordLimit);
+     counterEl.setAttribute('aria-label', `${count} von ${wordLimit} Wörtern`);
+   }
+   localStorage.setItem('writing_'+id, ta.value);
+ };
  ta.oninput=update; update();
  document.querySelectorAll('[data-char]').forEach(b=>b.onclick=()=>{const a=ta.selectionStart,c=ta.selectionEnd;ta.setRangeText(b.dataset.char,a,c,'end');ta.focus();update();});
  document.getElementById('aiWritingCheck').onclick=()=>runWritingAI(ta.value);
+ const mb=document.getElementById('modelBtn');
+ if(mb) mb.onclick=e=>{e.preventDefault(); toggleModelAnswers(mb);};
  bindTextTools();
  if(!mockMode) startExerciseTimer();
+ try {
+   const cachedAi = localStorage.getItem('writing_ai_result_' + id);
+   if (cachedAi) {
+     const parsed = JSON.parse(cachedAi);
+     if (parsed) renderWritingAIResult(parsed);
+   }
+ } catch(_) {}
 }
 
 function renderWritingAIResult(r){
  const box=document.getElementById('writingAiResult'); if(!box)return;
+ const lvl = String(model?.exercise?.level || 'B2').toUpperCase();
  const criteria=(r.criteria||[]).map(c=>{const pct=c.max?Math.round(c.score/c.max*100):0;return `<div class="ai-criterion"><div class="ai-criterion-head"><strong>${esc(c.label)}</strong><span>${c.score}/${c.max}</span></div><div class="ai-bar"><i style="width:${pct}%"></i></div><p>${esc(c.comment||'')}</p></div>`;}).join('');
- const corrections=(r.corrections||[]).map(c=>`<div class="ai-correction"><div><del>${esc(c.original)}</del><span>→</span><strong>${esc(c.corrected)}</strong></div><small>${esc(c.category)} — ${esc(c.explanation)}</small></div>`).join('');
+ const corrections=(r.corrections||[]).map(c=>`<div class="ai-correction"><div class="ai-correction-diff"><del>${esc(c.original)}</del><span class="ai-correction-arrow" aria-hidden="true">→</span><strong>${esc(c.corrected)}</strong></div><small class="ai-correction-meta">${esc(c.category)} — ${esc(c.explanation)}</small></div>`).join('');
  const strengths=(r.strengths||[]).map(x=>`<li>${esc(x)}</li>`).join('');
  const priorities=(r.priorities||[]).map(x=>`<li>${esc(x)}</li>`).join('');
  const missing=(r.task_completion?.missing_points||[]).map(x=>`<li>${esc(x)}</li>`).join('');
  box.hidden=false;
  box.innerHTML=`<div class="ai-result-head">
-   <div><span class="ai-label">${text('التقييم والتحليل','Bewertung & Analyse')}</span><div class="ai-score-line"><strong>${Math.round(r.overall_score||0)}</strong><span>/ 45</span></div><small class="ai-score-note">${text('نقاط تدريبية وفق معايير Schreiben في TELC B2','Trainingspunkte nach den Schreibkriterien von telc B2')}</small></div>
-   
+   <div><span class="ai-label">${text('التقييم والتحليل','Bewertung & Analyse')}</span><div class="ai-score-line"><strong>${Math.round(r.overall_score||0)}</strong><span>/ 45</span></div><small class="ai-score-note">${text(`نقاط تدريبية وفق معايير Schreiben في TELC ${lvl}`,`Trainingspunkte nach den Schreibkriterien von telc ${lvl}`)}</small></div>
  </div>
- <div class="ai-summary"><strong>${text('التحليل العام','Gesamtanalyse')}</strong><p>${esc(getLang()==='de'?(r.summary_de||''):(r.summary_ar||''))}</p></div>
+ <div class="ai-summary"><strong>${text('التحليل العام','Gesamtanalyse')}</strong><p>${esc(getLang()==='de'?(r.summary_de||r.summary_ar||''):(r.summary_ar||r.summary_de||''))}</p></div>
  <div class="ai-criteria">${criteria}</div>
  <div class="ai-two-col"><div><h3>${text('نقاط القوة','Stärken')}</h3><ul>${strengths||`<li>${text('لا توجد بيانات إضافية.','Keine zusätzlichen Angaben.')}</li>`}</ul></div><div><h3>${text('الأولوية للتحسين','Prioritäten')}</h3><ul>${priorities||'<li>—</li>'}</ul></div></div>
  ${missing?`<div class="ai-task-warning"><h3>${text('نقاط لم تتم الإجابة عنها','Nicht erfüllte Aufgabenpunkte')}</h3><ul>${missing}</ul></div>`:''}
  ${corrections?`<div class="ai-section"><h3>${text('الأخطاء والتصحيح','Fehler & Korrekturen')}</h3><div class="ai-corrections">${corrections}</div></div>`:''}
-  <div class="ai-disclaimer">${text('هذا تقييم تدريبي بالذكاء الاصطناعي وليس نتيجة رسمية من TELC.','Dies ist eine KI-Trainingsbewertung und keine offizielle telc-Prüfungsnote.')}</div>`;
+ <div class="ai-disclaimer">${text('هذا تقييم تدريبي بالذكاء الاصطناعي وليس نتيجة رسمية من TELC.','Dies ist eine KI-Trainingsbewertung und keine offizielle telc-Prüfungsnote.')}</div>`;
  box.scrollIntoView({behavior:'smooth',block:'start'});
 }
 async function runWritingAI(answer){
@@ -2148,16 +2212,19 @@ function renderTeil1Studio(){
   return `
   <section class="pres-studio-wrap">
     <div class="pres-input-panel">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-        <div><h3 style="margin:0;font-size:18px">${text('استوديو العرض التقديمي (Präsentation Studio)','Präsentations-Studio')}</h3><small class="muted">${text('اختر أحد مواضيع TELC الرسمية الـ 7، واكتب أفكارك لإنشاء عرض متكامل وفق العناصر الإلزامية (Leitpunkte).','Wähle eines der 7 offiziellen telc-Themen und erstelle eine vollständige Präsentation anhand der Leitpunkte.')}</small></div>
+      <div class="pres-studio-header">
+        <div>
+          <h3 class="pres-studio-title">${text('استوديو العرض التقديمي (Präsentation Studio)','Präsentations-Studio')}</h3>
+          <small class="pres-studio-subtitle muted">${text('اختر أحد مواضيع TELC الرسمية الـ 7، واكتب أفكارك لإنشاء عرض متكامل وفق العناصر الإلزامية (Leitpunkte).','Wähle eines der 7 offiziellen telc-Themen und erstelle eine vollständige Präsentation anhand der Leitpunkte.')}</small>
+        </div>
         <span class="tag">Teil 1 Präsentation</span>
       </div>
-      <div class="pres-categories">
+      <div class="pres-categories" role="tablist" aria-label="${text('مواضيع العرض التقديمي الرسمية','Offizielle telc-Präsentationsthemen')}">
         ${TELC_SPRECHEN_TEIL1_THEMEN.map(c => `
-          <button type="button" class="pres-cat-btn ${currentPresCategory === c.key ? 'active' : ''}" data-cat="${c.key}">
-            <span>${c.icon}</span>
-            <span>${c.title}</span>
-            <small style="font-size:10.5px;opacity:.85">${text(c.arTitle, c.title)}</small>
+          <button type="button" role="tab" class="pres-cat-btn ${currentPresCategory === c.key ? 'active' : ''}" data-cat="${c.key}" aria-selected="${currentPresCategory === c.key ? 'true' : 'false'}" aria-label="${c.title} - ${c.pointsDe}">
+            <span class="pres-cat-icon" aria-hidden="true">${c.icon}</span>
+            <span class="pres-cat-title">${c.title}</span>
+            <small class="pres-cat-artitle">${text(c.arTitle, c.title)}</small>
             <span class="pres-cat-points">${c.pointsDe}</span>
           </button>
         `).join('')}
@@ -2166,8 +2233,8 @@ function renderTeil1Studio(){
         <span class="pres-leitpunkte-tag">TELC Leitpunkte</span>
         <span class="pres-leitpunkte-text" id="presLeitpunkteText">${text('العناصر الرسمية المطلوبة: ', 'Pflichtpunkte: ')}${activePoints}</span>
       </div>
-      <label style="font-size:12px;font-weight:800;color:var(--muted)">${text('اكتب أفكارك أو تفاصيل تريد تضمينها (بالعربية أو الألمانية):','Schreiben Sie Ihre Notizen oder Stichpunkte (auf Arabisch oder Deutsch):')}</label>
-      <textarea id="presNotes" placeholder="${esc(activePlaceholder)}">${esc(localStorage.getItem('telc_pres_notes_'+currentPresCategory)||'')}</textarea>
+      <label for="presNotes" class="pres-notes-label">${text('اكتب أفكارك أو تفاصيل تريد تضمينها (بالعربية أو الألمانية):','Schreiben Sie Ihre Notizen oder Stichpunkte (auf Arabisch oder Deutsch):')}</label>
+      <textarea id="presNotes" aria-label="${text('ملاحظات العرض التقديمي','Notizen zur Präsentation')}" placeholder="${esc(activePlaceholder)}">${esc(localStorage.getItem('telc_pres_notes_'+currentPresCategory)||'')}</textarea>
       <button type="button" class="pres-generate-btn" id="presGenBtn">✦ ${text('إنشاء العرض التقديمي بالذكاء الاصطناعي مع أسئلة اللجنة','Präsentation mit KI & Jury-Fragen generieren')}</button>
       <div id="presResultWrap"></div>
     </div>
@@ -2580,7 +2647,7 @@ function renderSpeaking(){
      else if(t.includes('erfahrung')||t.includes('erlebnis')||t.includes('moment')) currentPresCategory='Erfahrung';
      else if(t.includes('reise')||t.includes('urlaub')||t.includes('stadt')||t.includes('land')) currentPresCategory='Reise';
    }
-   document.getElementById('content').innerHTML=`<div class="speaking-exercise-shell">
+   document.getElementById('content').innerHTML=`<div class="speaking-exercise-shell speaking-heading">
    ${renderExerciseHeaderCard()}
    ${renderTeil1Studio()}
    </div>`;
@@ -2590,11 +2657,11 @@ function renderSpeaking(){
    return;
  }
 
- document.getElementById('content').innerHTML=`<div class="speaking-exercise-shell">
+ document.getElementById('content').innerHTML=`<div class="speaking-exercise-shell speaking-heading">
    ${renderExerciseHeaderCard()}
    <div class="speaking-layout"><section class="speaking-task-panel"><div class="speaking-task-head"><span class="tag">${esc(model.exercise.level||'B2')} · ${esc(teil)}</span><strong>${text('الموضوع','Thema')}</strong></div><div class="speaking-task-text question-text-tools">${textTools(body,qid)}<div id="${qid}" data-content-id="${qid}" data-source="${esc(body)}">${escBody(body)}</div>${translationBox(qid+'-translation')}</div>${teil==='Teil 3'?renderSpeakingTaskList(body):''}<div class="speaking-hint">${esc(hint)}</div></section>
- <section class="speaking-simulator"><div class="speaking-sim-head"><div><span class="tag">${esc(teil)}</span><h2>${text('محادثة مع الشريك والممتحن','Gespräch mit Partner & Prüfer')}</h2><small>${text('اكتب إجابتك بالألمانية واستمع إلى رد الشريك صوتيًا.','Schreibe deine Antwort auf Deutsch und höre die Antwort deines Partners an.')}</small></div><span class="speaking-live-dot">●</span></div><div class="speaking-roles"><div class="speaking-role"><span class="speaking-avatar jerry-avatar">J</span><div><b>Jerry</b><small>${text('الممتحن والمدرب','Prüfer & Trainer')}</small></div></div><div class="speaking-role"><span class="speaking-avatar partner-avatar">P</span><div><b>${text('الشريك','Partner')}</b><small>${text('يتفاعل معك في المحادثة','Gesprächspartner')}</small></div></div></div><div class="speaking-chat" id="speakingChat"></div>
- <div class="speaking-writing-box"><div class="speaking-writing-label"><span>${text('إجابتك','Deine Antwort')}</span><small>${text('اكتب بالألمانية ثم اضغط إرسال','Auf Deutsch schreiben und Senden drücken')}</small></div><div class="speaking-input-row"><textarea id="speakingInput" placeholder="${text('اكتب ردك هنا بالألمانية…','Schreibe deine Antwort auf Deutsch…')}"></textarea><button type="button" class="btn dark" id="speakingSend">${text('إرسال','Senden')}</button></div></div>
+ <section class="speaking-simulator"><div class="speaking-sim-head"><div><span class="tag">${esc(teil)}</span><h2>${text('محادثة مع الشريك والممتحن','Gespräch mit Partner & Prüfer')}</h2><small>${text('اكتب إجابتك بالألمانية واستمع إلى رد الشريك صوتيًا.','Schreibe deine Antwort auf Deutsch und höre die Antwort deines Partners an.')}</small></div><span class="speaking-live-dot" aria-label="Live">●</span></div><div class="speaking-roles"><div class="speaking-role"><span class="speaking-avatar jerry-avatar">J</span><div><b>Jerry</b><small>${text('الممتحن والمدرب','Prüfer & Trainer')}</small></div></div><div class="speaking-role"><span class="speaking-avatar partner-avatar">P</span><div><b>${text('الشريك','Partner')}</b><small>${text('يتفاعل معك في المحادثة','Gesprächspartner')}</small></div></div></div><div class="speaking-chat" id="speakingChat" role="log" aria-live="polite"></div>
+ <div class="speaking-writing-box"><div class="speaking-writing-label"><span>${text('إجابتك','Deine Antwort')}</span><small>${text('اكتب بالألمانية أو تحدث بالميكروفون ثم اضغط إرسال','Auf Deutsch schreiben oder per Spracheingabe antworten')}</small></div><div class="speaking-input-row"><textarea id="speakingInput" aria-label="${text('إجابتك في المحادثة','Deine Antwort im Gespräch')}" placeholder="${text('اكتب ردك هنا بالألمانية…','Schreibe deine Antwort auf Deutsch…')}"></textarea><div class="speaking-input-actions"><button type="button" class="speaking-chat-mic" id="speakingChatMic" aria-label="${text('تسجيل صوتي للرد','Sprachaufnahme starten')}" title="${text('تسجيل صوتي للرد','Sprachaufnahme')}">🎙️</button><button type="button" class="btn dark" id="speakingSend" aria-label="${text('إرسال الرد','Antwort senden')}">${text('إرسال','Senden')}</button></div></div></div>
  <div class="speaking-controls"><span class="speaking-time" id="speakingTime">00:00</span><button type="button" class="btn model-btn speaking-model-btn" id="speakingModel" aria-expanded="false">${text('إجابة نموذجية بالذكاء الاصطناعي','KI-Musterantwort')}</button><button type="button" class="btn dark" id="speakingFinish">${text('إنهاء وتقييم','Beenden & bewerten')}</button></div><div id="speakingModelBox" class="speaking-model-box" hidden></div><div id="speakingEval" class="speaking-eval" hidden></div></section></div></div>`;
  initInlineSpeaking(teil);bindTextTools();bindActions();
  document.querySelector('[data-toggle-speaking-tasks]')?.addEventListener('click',e=>{const list=document.querySelector('[data-speaking-task-list]');if(!list)return;const hidden=list.hidden;list.hidden=!hidden;e.currentTarget.textContent=hidden?'▾':'▸';e.currentTarget.setAttribute('aria-expanded',String(hidden));});
@@ -2605,6 +2672,51 @@ function initInlineSpeaking(currentTeil){
  const add=(who,msg,autoSpeak=false)=>{const d=document.createElement('div');d.className='speaking-bubble '+who;const label=who==='jerry'?'Jerry':who==='partner'?text('الشريك','Partner'):text('أنت','Du');const safe=String(msg||'');d.dataset.message=safe;d.innerHTML=`<div class="speaking-bubble-head"><b>${label}</b><span class="speaking-bubble-tools"><button type="button" class="speaking-voice-btn" data-voice="${esc(safe)}" aria-label="${text('سماع الرسالة','Nachricht anhören')}">🔊</button><button type="button" class="speaking-translate-btn" data-translate-msg aria-label="${text('ترجمة الرسالة','Nachricht übersetzen')}">文</button></span></div><span class="speaking-bubble-text">${esc(safe)}</span><div class="speaking-bubble-translation" hidden></div>`;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;const vb=d.querySelector('[data-voice]');if(vb)vb.onclick=()=>speakGerman(vb.dataset.voice,vb);const tb=d.querySelector('[data-translate-msg]');if(tb)tb.onclick=async()=>{const box=d.querySelector('.speaking-bubble-translation');if(!box)return;if(!box.hidden){box.hidden=true;return}tb.disabled=true;box.textContent=text('جارٍ الترجمة…','Übersetzung…');box.hidden=false;try{box.textContent=await translateText(safe,'ar')}catch(e){box.textContent=text('تعذرت الترجمة.','Übersetzung nicht verfügbar.')}finally{tb.disabled=false}};if(autoSpeak&&vb)setTimeout(()=>speakGerman(safe,vb),120)};
  const clock=()=>{if(timer)return;startAt=Date.now();timer=setInterval(()=>{const n=Math.floor((Date.now()-startAt)/1000);timeEl.textContent=String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0')},500)};
  const sendText=async val=>{val=String(val||'').trim();if(!val||busy)return;busy=true;send.disabled=true;add('me',val);transcript.push('Schüler: '+val);history.push({role:'student',content:val});input.value='';clock();try{const r=await api('ai-speaking-session',{method:'POST',body:{id,mode:'turn',transcript:transcript.join('\n'),history,teil:currentTeil}});if(r.reply){add('partner',r.reply,true);history.push({role:'partner',content:r.reply})}}catch(e){add('jerry',e?.message||'AI-Fehler',true)}finally{busy=false;send.disabled=false;input.focus()}};
+ const chatMic=document.getElementById('speakingChatMic');
+ if(chatMic){
+   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+   if(SR){
+     let chatRec=null, chatActive=false;
+     chatMic.onclick=()=>{
+       if(!chatActive){
+         try{
+           chatRec=new SR();
+           chatRec.lang='de-DE';
+           chatRec.continuous=false;
+           chatRec.interimResults=true;
+           chatRec.onstart=()=>{
+             chatActive=true;
+             chatMic.classList.add('recording');
+             chatMic.setAttribute('aria-pressed','true');
+             chatMic.setAttribute('aria-label',text('إيقاف التسجيل الصوتي','Sprachaufnahme stoppen'));
+           };
+           chatRec.onresult=(ev)=>{
+             let tr='';
+             for(let i=0;i<ev.results.length;i++) tr+=ev.results[i][0].transcript;
+             if(tr) input.value=tr;
+           };
+           chatRec.onend=()=>{
+             chatActive=false;
+             chatMic.classList.remove('recording');
+             chatMic.setAttribute('aria-pressed','false');
+             chatMic.setAttribute('aria-label',text('تسجيل صوتي للرد','Sprachaufnahme starten'));
+           };
+           chatRec.onerror=()=>{
+             chatActive=false;
+             chatMic.classList.remove('recording');
+             chatMic.setAttribute('aria-pressed','false');
+             chatMic.setAttribute('aria-label',text('تسجيل صوتي للرد','Sprachaufnahme starten'));
+           };
+           chatRec.start();
+         }catch(_){}
+       }else{
+         try{chatRec?.stop();}catch(_){}
+       }
+     };
+   }else{
+     chatMic.style.display='none';
+   }
+ }
   add('jerry',currentTeil==='Teil 1'?'Bitte beginnen Sie mit Ihrer Präsentation. Danach reagiert Ihr Gesprächspartner und stellt Ihnen eine Jury-Frage.':currentTeil==='Teil 2'?'Bitte besprechen Sie zunächst den Inhalt des Themas. Danach äußern Sie Ihre Meinung und tauschen Sie sich mit Ihrem Gesprächspartner aus.':'Bitte planen Sie die Aufgabe gemeinsam. Machen Sie einen ersten Vorschlag und finden Sie am Ende eine gemeinsame Lösung.');
   if(currentTeil==='Teil 3'){
     (async()=>{try{const r=await api('ai-speaking-session',{method:'POST',body:{id,mode:'opening',teil:currentTeil}});add('partner',r.reply||'Hallo! Schön, dich zu sehen. Lass uns die Aufgabe gemeinsam planen. Wie fangen wir am besten an? Hast du schon eine Idee dazu?',true);history.push({role:'partner',content:r.reply||''});}catch{add('partner','Hallo! Schön, dich zu sehen. Lass uns die Aufgabe gemeinsam planen. Wie fangen wir am besten an? Hast du schon eine Idee dazu?',true);}})();
@@ -2660,7 +2772,7 @@ function renderExerciseResultCard(){
   const percentage=Number.isFinite(Number(resultData.percent))?Number(resultData.percent):(max?score/max*100:0);
   const passed=percentage>=60;
   return `<section class="exercise-result-card ${passed?'is-correct':'has-mistakes'}" id="exerciseResultCard" aria-live="polite">
-    <div class="exercise-result-heading"><span class="exercise-result-mark" aria-hidden="true">${passed?'✓':'×'}</span><div class="exercise-result-title"><h2>${text('نتيجة التمرين','Übungsergebnis')}</h2><p>${passed?text('اجتزت التمرين','Bestanden'):text('لم تصل إلى درجة النجاح بعد','Noch nicht bestanden')}</p></div><div class="exercise-result-score"><b>${esc(resultData.score)} <i>/</i> ${esc(resultData.max)}</b><small>${esc(percentage)}%</small></div></div>
+    <div class="exercise-result-heading"><span class="exercise-result-mark" aria-hidden="true">${passed?'✓':'×'}</span><div class="exercise-result-title"><h2>${text('نتيجة التمرين','Übungsergebnis')}</h2><p>${passed?text('اجتزت التمرين','Bestanden'):text('لم تصل إلى درجة النجاح بعد','Noch nicht bestanden')}</p></div><div class="exercise-result-score"><b>${esc(resultData.score)} <i>/</i> ${esc(resultData.max)}</b><small>${esc(percentage)}%</small></div></div><div class="result-panel-breakdown" style="display:none;" aria-hidden="true"><span class="result-pill-right">✓ ${esc(score)} richtig</span><span class="result-pill-wrong">✕ ${esc(Math.max(0, max - score))} falsch</span></div>
   </section>`;
 }
 
@@ -2756,9 +2868,14 @@ function renderWorkspace(){
   }));
   if(t==='WRITING')return renderWriting();
   if(t==='SPEAKING')return renderSpeaking();
-  // Hören always uses the dedicated TELC True/False layout: audio above the questions,
-  // RICHTIG / FALSCH / AUSSAGE table in the middle, with the existing header and bottom actions unchanged.
-  if(model.exercise.section==='Hören')return renderTF();
+  // Hören routing: Teil 1 (TF), Teil 2 (Choice/MC), Teil 3 (Matching or TF)
+  if(model.exercise.section==='Hören'){
+    if(model.exercise.teil==='Teil 2' && !isHoerenTF) return renderHoerenChoiceQuestions();
+    if(model.exercise.teil==='Teil 3' && isMatching) return renderMatching();
+    if(isHoerenTF || model.exercise.teil==='Teil 1') return renderTF();
+    if(model.exercise.teil==='Teil 2') return renderHoerenChoiceQuestions();
+    return renderTF();
+  }
   if(isSpb1)return renderSprachbausteine1();
   if(isMatching)return renderMatching();
   return renderChoiceQuestions();
