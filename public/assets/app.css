@@ -4388,6 +4388,7 @@ html[data-theme="light"] .variation-item-btn:hover .variation-play-icon {
   position: absolute;
   top: -12px;
   right: 24px;
+  z-index: 5;
   background: var(--brand);
   color: #fff;
   padding: 4px 14px;
@@ -4396,6 +4397,7 @@ html[data-theme="light"] .variation-item-btn:hover .variation-play-icon {
   font-weight: 900;
   letter-spacing: 0.05em;
   box-shadow: 0 4px 12px rgba(255,122,47,0.35);
+  white-space: nowrap;
 }
 [dir="ltr"] .plans-card-badge {
   right: auto;
@@ -5034,7 +5036,9 @@ html {
   display: flex !important;
   align-items: center !important;
   gap: 16px !important;
-  flex: none !important; height: 44px !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  height: auto !important;
 }
 
 .sub-banner-badge {
@@ -5118,6 +5122,10 @@ html {
   }
   .active-subscription-banner {
     padding: 16px 18px !important;
+  }
+  .sub-banner-left {
+    width: 100% !important;
+    height: auto !important;
   }
   .sub-banner-days {
     width: 100% !important;
@@ -9884,6 +9892,8 @@ html[dir="rtl"] .top-bar-timer-cluster {
 .plans-card.featured {
   border: 2px solid var(--brand) !important;
   box-shadow: var(--shadow-brand) !important;
+  position: relative !important;
+  z-index: 2 !important;
 }
 
 .plans-card-price {
@@ -9906,6 +9916,40 @@ html[dir="rtl"] .top-bar-timer-cluster {
   color: var(--ink) !important;
   border: 1px solid var(--line) !important;
   box-shadow: var(--shadow-lg) !important;
+}
+
+@media (max-width: 850px) {
+  .plans-page {
+    padding: 32px 16px 70px !important;
+  }
+  .landing-plan-grid, .plans-grid-wrap {
+    grid-template-columns: 1fr !important;
+    max-width: 520px !important;
+    margin-inline: auto !important;
+  }
+  .plans-card {
+    min-width: 0 !important;
+    padding: 28px 20px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .plans-page {
+    padding: 24px 12px 60px !important;
+  }
+  .plans-card {
+    padding: 24px 16px !important;
+    border-radius: 20px !important;
+  }
+  .plans-card-badge {
+    right: 18px;
+    font-size: 11px;
+    padding: 3px 12px;
+  }
+  [dir="ltr"] .plans-card-badge {
+    right: auto;
+    left: 18px;
+  }
 }
 
 /* --------------------------------------------------------------------------
