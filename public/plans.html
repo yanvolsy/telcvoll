@@ -270,8 +270,7 @@ function openCheckout(plan) {
     handleGuardedCheckout(subscriptionRemainingDays);
     return;
   }
-  const token = localStorage.getItem('telc_student_token');
-  if (!token && !currentUser) {
+  if (!currentUser) {
     try {
       sessionStorage.setItem('telc_pending_checkout', JSON.stringify(plan));
     } catch (_) {}
@@ -283,7 +282,7 @@ function openCheckout(plan) {
   checkoutError.textContent = '';
   document.getElementById('checkoutPlanId').value = plan.id;
   document.getElementById('summaryPlanName').textContent = plan.name;
-  const price = plan.price_dzd || (plan.duration_days <= 15 ? 1500 : plan.duration_days <= 30 ? 2500 : 6000);
+  const price = Number(plan.price_dzd || 0);
   document.getElementById('summaryPrice').textContent = Number(price).toLocaleString('fr-DZ') + ' دج';
   document.getElementById('summaryDuration').textContent = plan.duration_days + ' يوماً';
 
@@ -346,13 +345,8 @@ async function loadPlans() {
   const grid = document.getElementById('plansGrid');
   try {
     let plans = [];
-    try {
-      const pRes = await api('public-plans');
-      plans = Array.isArray(pRes?.plans) ? pRes.plans : [];
-    } catch (_) {
-      const fallbackRes = await api('plans');
-      plans = Array.isArray(fallbackRes?.plans) ? fallbackRes.plans : [];
-    }
+    const pRes = await api('public-plans');
+    plans = Array.isArray(pRes?.plans) ? pRes.plans : [];
 
     // Sort plans by duration ascending (smallest first)
     plans.sort((a, b) => (a.duration_days || 0) - (b.duration_days || 0));
@@ -411,7 +405,7 @@ async function loadPlans() {
     grid.innerHTML = plans.map(p => {
       const isFree = isPlanFree(p);
       const isFeatured = p.is_featured || (!isFree && p.duration_days === 30);
-      const price = p.price_dzd ? Number(p.price_dzd).toLocaleString('fr-DZ') + ' دج' : (isFree ? 'مجاناً' : '2,500 دج');
+      const price = p.price_dzd !== null && p.price_dzd !== undefined && Number(p.price_dzd) > 0 ? Number(p.price_dzd).toLocaleString('fr-DZ') + ' دج' : (isFree ? 'مجاناً' : 'غير محدد');
       const planJson = JSON.stringify(p).replace(/"/g, '&quot;');
       let btnHtml = '';
       if (isFree) {
@@ -461,22 +455,6 @@ async function loadPlans() {
 }
 
 (async () => {
-  const token = localStorage.getItem('telc_student_token');
-  const brandLink = document.querySelector('.brand');
-  const navContainer = document.querySelector('.student-nav-links');
-  if (!token && navContainer) {
-    if (brandLink) brandLink.href = '/';
-    navContainer.className = '';
-    navContainer.innerHTML = `
-      <a href="/#services">الخدمات</a>
-      <a href="/plans.html" class="active">الخطط</a>
-      <a href="/contact.html">اتصل بنا</a>
-      <span style="display:inline-flex;gap:8px;align-items:center;">
-        <a class="btn light small-btn" href="/login.html">تسجيل الدخول</a>
-        <a class="btn small-btn" href="/register.html">إنشاء حساب</a>
-      </span>
-    `;
-  }
   try {
     const meRes = await api('me');
     if (meRes?.student) {
@@ -489,7 +467,23 @@ async function loadPlans() {
       }
     }
   } catch (_) {}
-  await loadPlans();
+
+  const brandLink = document.querySelector('.brand');
+  const navContainer = document.querySelector('.student-nav-links');
+  if (!currentUser && navContainer) {
+    if (brandLink) brandLink.href = '/';
+    navContainer.className = '';
+    navContainer.innerHTML = `
+      <a href="/#services">الخدمات</a>
+      <a href="/plans.html" class="active">الخطط</a>
+      <a href="/contact.html">اتصل بنا</a>
+      <span style="display:inline-flex;gap:8px;align-items:center;">
+        <a class="btn light small-btn" href="/login.html">تسجيل الدخول</a>
+        <a class="btn small-btn" href="/register.html">إنشاء حساب</a>
+      </span>
+    `;
+  }
+    await loadPlans();
 })();
 </script>
 </body>

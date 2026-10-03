@@ -224,12 +224,7 @@ $('regForm').onsubmit = async (e) => {
         password
       }
     });
-
-    if (res.token) {
-      try { localStorage.setItem('telc_student_token', res.token); } catch (_) {}
-    }
-
-    let redirectUrl = qs('redirect');
+let redirectUrl = qs('redirect');
     let hasPendingCheckout = false;
     try { hasPendingCheckout = !!sessionStorage.getItem('telc_pending_checkout'); } catch (_) {}
 
@@ -284,12 +279,7 @@ async function handleGoogleCredential(credential, isSupabase = false) {
       method: 'POST',
       body: isSupabase ? { supabase_token: credential } : { credential }
     });
-
-    if (res.token) {
-      try { localStorage.setItem('telc_student_token', res.token); } catch (_) {}
-    }
-
-    routeAfterAuth();
+routeAfterAuth();
   } catch (err) {
     showAlert(err.data?.message || err.data?.error || 'فشل التسجيل بحساب Google.');
   }

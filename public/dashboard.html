@@ -1297,7 +1297,7 @@ window.addEventListener('keydown', (e) => {
 document.addEventListener('click',e=>{const a=e.target.closest('a[href*="/exercise.html"]');if(!a)return;try{sessionStorage.setItem('telc_dashboard_return',JSON.stringify({level:state.level,section:state.section,teil:selectedTeil,search:$('search')?.value||'',scrollY:window.scrollY}));}catch{}});
 
 const logoutBtn=$('logoutLink');
-if(logoutBtn) logoutBtn.onclick=async e=>{e.preventDefault();try{localStorage.removeItem('telc_student_token');}catch(_){}await api('auth-logout',{method:'POST'});location.href='/';};
+if(logoutBtn) logoutBtn.onclick=async e=>{e.preventDefault();await api('auth-logout',{method:'POST'});location.href='/';};
 
 // Student Notifications
 let dashboardNotifications = [];
@@ -1331,12 +1331,12 @@ function renderNotifications() {
 
   notifList.innerHTML = dashboardNotifications.map(n => {
     const isUnread = !n.read_at;
-    const typeClass = (n.type === 'important' || n.priority === 'urgent' || n.priority === 'high' || n.type === 'code_expired') ? 'notif-pill-important' :
-                      (n.type === 'warning' || n.type === 'code_expiry') ? 'notif-pill-warning' :
+    const typeClass = (n.type === 'important' || n.priority === 'urgent' || n.priority === 'high' || n.type === 'subscription_expired') ? 'notif-pill-important' :
+                      (n.type === 'warning' || n.type === 'subscription_expiry') ? 'notif-pill-warning' :
                       (n.type === 'success') ? 'notif-pill-success' :
                       (n.type === 'announcement') ? 'notif-pill-announcement' : 'notif-pill-info';
 
-    const typeName = (n.type === 'code_expiry' || n.type === 'code_expired') ? 'تنبيه اشتراك' :
+    const typeName = (n.type === 'subscription_expiry' || n.type === 'subscription_expired') ? 'تنبيه اشتراك' :
                      (n.type === 'important') ? 'هام' :
                      (n.type === 'warning') ? 'تحذير' :
                      (n.type === 'success') ? 'تأكيد' :
@@ -1443,7 +1443,7 @@ document.addEventListener('click', (e) => {
   } catch(e) {
     console.error('Dashboard init error:', e);
     if (e?.status === 401) {
-      try { localStorage.removeItem('telc_student_token'); } catch (_) {}
+      
       location.href = '/login.html?error=session';
     } else {
       const isDe = (typeof getLang === 'function' && getLang() === 'de');

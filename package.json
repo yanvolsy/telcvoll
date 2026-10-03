@@ -1,12 +1,14 @@
 {
-  "name": "telcvoll-med",
-  "version": "1.0.0",
+  "name": "telc-voll",
   "private": true,
-  "description": "TELC Voll Med Platform",
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
-    "pg": "^8.11.5",
+    "bcryptjs": "^3.0.2",
+    "cookie": "^1.0.2",
     "jsonwebtoken": "^9.0.2",
-    "bcryptjs": "^2.4.3",
-    "cookie": "^0.6.0"
+    "pg": "^8.16.3"
   }
 }

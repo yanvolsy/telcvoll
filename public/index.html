@@ -19,11 +19,9 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <script>
 (function() {
   try {
-    const token = localStorage.getItem('telc_student_token');
     const sp = new URLSearchParams(window.location.search);
-    if (token && !sp.has('landing') && !sp.has('error') && !sp.has('logout')) {
-      window.location.replace('/dashboard.html');
-    }
+    // Authentication is cookie-based; the HttpOnly session cannot be read here.
+
   } catch (_) {}
 })();
 </script>
@@ -266,8 +264,7 @@ function openCheckout(plan) {
   }
 
   // Check if student is authenticated; if not, require account registration or login
-  const token = localStorage.getItem('telc_student_token');
-  if (!token && !currentUser) {
+  if (!currentUser) {
     try {
       sessionStorage.setItem('telc_pending_checkout', JSON.stringify(plan));
     } catch (_) {}
@@ -279,7 +276,7 @@ function openCheckout(plan) {
   checkoutError.textContent = '';
   document.getElementById('checkoutPlanId').value = plan.id;
   document.getElementById('summaryPlanName').textContent = plan.name;
-  const price = plan.price_dzd || (plan.duration_days <= 15 ? 1500 : plan.duration_days <= 30 ? 2500 : 6000);
+  const price = Number(plan.price_dzd || 0);
   document.getElementById('summaryPrice').textContent = Number(price).toLocaleString('fr-DZ') + ' دج';
   document.getElementById('summaryDuration').textContent = plan.duration_days + ' يوماً';
 
@@ -341,8 +338,15 @@ checkoutForm.onsubmit = async (e) => {
 
 (async () => {
   try {
-    const token = localStorage.getItem('telc_student_token');
-    if (token) {
+    const meRes = await api('me');
+    if (meRes?.student) {
+      currentUser = meRes.student;
+      currentSubscription = meRes.subscription || null;
+      isUserPaid = !!(meRes.is_paid || currentSubscription?.active || currentSubscription?.is_paid);
+      if (isUserPaid && currentSubscription?.expires_at) {
+        const expTime = new Date(currentSubscription.expires_at).getTime();
+        subscriptionRemainingDays = Math.ceil((expTime - Date.now()) / (1000 * 60 * 60 * 24));
+      }
       const authSlot = document.getElementById('navAuthSlot');
       if (authSlot) {
         authSlot.innerHTML = `
@@ -350,19 +354,8 @@ checkoutForm.onsubmit = async (e) => {
           <a href="#" id="logoutLink" class="nav-logout-btn" style="color:var(--danger);font-size:13px;font-weight:800;padding:6px 10px;">خروج</a>
         `;
       }
-      try {
-        const meRes = await api('me');
-        if (meRes?.student) {
-          currentUser = meRes.student;
-          currentSubscription = meRes.subscription || null;
-          isUserPaid = !!(meRes.is_paid || currentSubscription?.active || currentSubscription?.is_paid);
-          if (isUserPaid && currentSubscription?.expires_at) {
-            const expTime = new Date(currentSubscription.expires_at).getTime();
-            subscriptionRemainingDays = Math.ceil((expTime - Date.now()) / (1000 * 60 * 60 * 24));
-          }
-        }
-      } catch (_) {}
     }
+  } catch (_) {}
     const { plans } = await api('public-plans');
     publicPlansList = plans || [];
     // Sort plans by duration ascending (shortest first)
@@ -414,7 +407,7 @@ checkoutForm.onsubmit = async (e) => {
     plansGrid.innerHTML = publicPlansList.length ? publicPlansList.map((p, i) => {
       const isFree = isPlanFree(p);
       const isFeatured = p.is_featured === true || p.is_featured === 'true' || (!isFree && p.duration_days === 30);
-      const price = p.price_dzd ? Number(p.price_dzd).toLocaleString('fr-DZ') + ' دج' : (isFree ? 'مجاناً' : '2,500 دج');
+      const price = p.price_dzd !== null && p.price_dzd !== undefined && Number(p.price_dzd) > 0 ? Number(p.price_dzd).toLocaleString('fr-DZ') + ' دج' : (isFree ? 'مجاناً' : 'غير محدد');
       const planJson = JSON.stringify(p).replace(/"/g, '&quot;');
       let btnHtml = '';
       if (isFree) {

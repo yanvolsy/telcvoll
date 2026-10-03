@@ -141,9 +141,6 @@
     const stateConfirmed = document.getElementById('stateConfirmed');
     const statePending = document.getElementById('statePending');
     const stateFailed = document.getElementById('stateFailed');
-    // The legacy access credential remains an internal handoff for the existing
-    // sign-in flow; it is never rendered on this page or sent by email.
-    let currentCode = '';
 
     async function verifyPayment() {
       stateLoading.style.display = 'block';
@@ -172,7 +169,6 @@
 
         if (res.status === 'CONFIRMED') {
           stateConfirmed.style.display = 'block';
-          currentCode = res.access_code || '';
           document.getElementById('confirmedPlanName').textContent = res.plan_name || 'اشتراك كامل';
           document.getElementById('confirmedDuration').textContent = (res.duration_days || '—') + ' يوماً';
           if (res.expires_at) {
@@ -195,23 +191,18 @@
     }
 
     document.getElementById('enterDashboardBtn').onclick = async () => {
-      if (!currentCode) {
-        location.href = '/';
-        return;
-      }
       const btn = document.getElementById('enterDashboardBtn');
       const oldHtml = btn.innerHTML;
       btn.disabled = true;
-      btn.innerHTML = '<span>جارٍ تسجيل الدخول وتفعيل المنصة…</span>';
+      btn.innerHTML = '<span>جارٍ فتح المنصة…</span>';
       try {
-        const authRes = await api('auth-login', { method: 'POST', body: { code: currentCode } });
-        if (authRes.token) {
-          try { localStorage.setItem('telc_student_token', authRes.token); } catch (_) {}
-        }
-        location.href = '/dashboard.html';
-      } catch (err) {
+        const me = await api('me');
+        if (me?.student) location.href = '/dashboard.html';
+        else location.href = '/login.html';
+      } catch (_) {
         location.href = '/login.html';
       }
+      btn.innerHTML = oldHtml;
     };
 
     document.getElementById('retryVerifyBtn').onclick = () => {

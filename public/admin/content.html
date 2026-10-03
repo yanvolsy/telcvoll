@@ -166,7 +166,7 @@ function editorHtml(t={}, items=[]){
       <div><label>Tags</label><input class="f-tags" value="${esc(t.tags||'')}" placeholder="Komma-getrennt"></div>
     </div>
     <label>Zugriff</label><select class="f-access">
-      <option value="code_required" ${t.access_mode!=='free'?'selected':''}>Code erforderlich</option>
+      <option value="paid" ${t.access_mode!=='free'?'selected':''}>Bezahlt / Abonnement erforderlich</option>
       <option value="free" ${t.access_mode==='free'?'selected':''}>Frei zugänglich</option>
     </select>
 
@@ -268,7 +268,7 @@ async function loadTopics(){
 
 (async () => {
   try {
-    const { levels } = await api('admin-codes');
+    const { levels } = await api('admin-plans');
     fLevel.innerHTML += (levels||['B1','B2','C1']).map(l=>`<option>${esc(l)}</option>`).join('');
   } catch {}
   fLevel.onchange = loadTopics; fSection.onchange = loadTopics; fDeleted.onchange = loadTopics;

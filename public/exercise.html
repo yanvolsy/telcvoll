@@ -2856,7 +2856,7 @@ document.addEventListener('langchange', () => {
   }catch(e){
     console.error('Exercise load error:', e);
     if (e?.status === 401) {
-      try { localStorage.removeItem('telc_student_token'); } catch (_) {}
+      
       location.href = '/login.html?error=login_required';
       return;
     }

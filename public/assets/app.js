@@ -1,10 +1,6 @@
 // أدوات مشتركة لكل الصفحات الثابتة.
 async function api(path, options = {}) {
-  const token = localStorage.getItem('telc_student_token') || localStorage.getItem('telc_admin_token');
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
-  if (token && !headers['Authorization']) {
-    headers['Authorization'] = 'Bearer ' + token;
-  }
   const controller = new AbortController();
   const timeoutMs = options.timeout || 12000;
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
@@ -22,7 +18,6 @@ async function api(path, options = {}) {
     if (!res.ok) {
       const isPublicPage = ['/', '/index.html', '/contact.html', '/login.html', '/login', '/register.html', '/register', '/forgot-password.html', '/reset-password.html'].includes(location.pathname) || location.pathname.startsWith('/admin');
       if (res.status === 401 && !isPublicPage) {
-        try { localStorage.removeItem('telc_student_token'); } catch (_) {}
         location.href = '/login.html?error=session';
       }
       throw Object.assign(new Error(data.error || res.statusText), { status: res.status, data });
@@ -265,7 +260,7 @@ document.addEventListener('DOMContentLoaded', initAdminLoginTools);
   }
 
   // Keep the context menu enabled inside editable fields so students can use
-  // Paste / Copy with the mouse (especially for TELC Voll access codes).
+  // Paste / Copy with the mouse for normal exercise content.
   // Keep the anti-copy protection everywhere else.
   document.addEventListener('contextmenu', function(e) {
     var t = e.target;
@@ -340,26 +335,20 @@ document.addEventListener('DOMContentLoaded', initAdminLoginTools);
 // Enforce single active session for student
 (function initStudentSessionWatcher() {
   if (location.pathname.startsWith('/admin') || location.pathname === '/' || location.pathname === '/index.html' || location.pathname === '/contact.html') return;
-  var token = localStorage.getItem('telc_student_token');
-  var hasCookie = document.cookie.includes('student_token');
-  if (!token && !hasCookie) return;
+  // student_token is HttpOnly; the server decides whether a session exists.
 
   var checking = false;
   async function checkSingleSession() {
     if (checking || document.hidden) return;
     checking = true;
     try {
-      var headers = {};
-      if (token) headers['Authorization'] = 'Bearer ' + token;
-      var res = await fetch('/api/session', { credentials: 'include', headers: headers });
+      var res = await fetch('/api/session', { credentials: 'include' });
       if (res.status === 401) {
-        try { localStorage.removeItem('telc_student_token'); } catch (_) {}
         location.href = '/?error=session';
         return;
       }
       var d = await res.json();
       if (d && d.role === null) {
-        try { localStorage.removeItem('telc_student_token'); } catch (_) {}
         location.href = '/?error=session';
       }
     } catch (_) {
@@ -403,12 +392,10 @@ function initUniversalNavbar() {
         e.preventDefault();
         const isAdmin = location.pathname.startsWith('/admin');
         if (isAdmin) {
-          try { localStorage.removeItem('telc_admin_token'); } catch (_) {}
-          try { await api('admin-logout', { method: 'POST' }); } catch (_) {}
+            try { await api('admin-logout', { method: 'POST' }); } catch (_) {}
           location.href = '/admin/login.html';
         } else {
-          try { localStorage.removeItem('telc_student_token'); } catch (_) {}
-          try { await api('auth-logout', { method: 'POST' }); } catch (_) {}
+            try { await api('auth-logout', { method: 'POST' }); } catch (_) {}
           location.href = '/';
         }
       });

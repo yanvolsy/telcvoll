@@ -155,7 +155,7 @@
               <th>الخطة والمبلغ</th>
               <th>مرجع عملية الدفع</th>
               <th>الحالة</th>
-              <th>كود الاشتراك</th>
+              <th>تاريخ الانتهاء</th>
               <th>البريد</th>
               <th>تاريخ الطلب</th>
               <th>إجراءات</th>
@@ -230,7 +230,7 @@
       }
 
       tbody.innerHTML = state.orders.map(o => {
-        const canResend = o.status === 'CONFIRMED' && o.access_code;
+        const canResend = o.status === 'CONFIRMED' && !!o.customer_email;
         return `
           <tr>
             <td>
@@ -257,12 +257,7 @@
             </td>
             <td>${statusBadge(o.status)}</td>
             <td>
-              ${o.access_code ? `
-                <div style="display:flex;align-items:center;gap:5px;">
-                  <span class="code-chip">${esc(o.access_code)}</span>
-                  <button type="button" class="btn-action" title="نسخ الكود" onclick="copyText('${esc(o.access_code)}')">📋</button>
-                </div>
-              ` : '<span class="muted">—</span>'}
+              ${o.expires_at ? formatDate(o.expires_at) : '<span class="muted">—</span>'}
             </td>
             <td>
               ${o.email_sent ?

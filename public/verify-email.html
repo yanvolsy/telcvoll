@@ -85,12 +85,7 @@ async function verifyToken() {
       method: 'POST',
       body: { token }
     });
-
-    if (res.token) {
-      try { localStorage.setItem('telc_student_token', res.token); } catch (_) {}
-    }
-
-    icon.className = 'verify-icon';
+icon.className = 'verify-icon';
     icon.textContent = '✓';
     title.textContent = 'تم تأكيد الحساب بنجاح!';
     desc.textContent = 'تم تفعيل بريدك الإلكتروني بنجاح في منصة TELC Voll. حسابك الآن جاهز ومفعل للتدرب.';

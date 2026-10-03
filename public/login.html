@@ -211,12 +211,7 @@ $('loginForm').onsubmit = async (e) => {
       method: 'POST',
       body: { email, password }
     });
-
-    if (res.token) {
-      try { localStorage.setItem('telc_student_token', res.token); } catch (_) {}
-    }
-
-    routeAfterLogin();
+routeAfterLogin();
   } catch (err) {
     submitBtn.disabled = false;
     submitBtn.style.opacity = '1';
@@ -248,12 +243,7 @@ async function handleGoogleCredential(credential, isSupabase = false) {
       method: 'POST',
       body: isSupabase ? { supabase_token: credential } : { credential }
     });
-
-    if (res.token) {
-      try { localStorage.setItem('telc_student_token', res.token); } catch (_) {}
-    }
-
-    routeAfterLogin();
+routeAfterLogin();
   } catch (err) {
     const code = err.data?.error || err.message;
     if (code === 'account_blocked') {

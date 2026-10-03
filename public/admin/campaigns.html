@@ -229,7 +229,6 @@
             <button type="button" class="var-chip" onclick="insertVar('{{email}}')">البريد {{email}}</button>
             <button type="button" class="var-chip" onclick="insertVar('{{plan}}')">اسم الخطة {{plan}}</button>
             <button type="button" class="var-chip" onclick="insertVar('{{expires_at}}')">تاريخ الانتهاء {{expires_at}}</button>
-            <button type="button" class="var-chip" onclick="insertVar('{{access_code}}')">كود الاشتراك {{access_code}}</button>
           </div>
         </div>
 
@@ -540,7 +539,6 @@
         email: 'ahmed.student@example.com',
         plan: 'خطة 30 يوماً B1+B2+C1',
         expires_at: '2026/10/25',
-        access_code: 'TV-54WJV8'
       };
 
       let personalized = rawHtml
@@ -548,7 +546,7 @@
         .replace(/\{\{\s*email\s*\}\}/gi, sample.email)
         .replace(/\{\{\s*plan\s*\}\}/gi, sample.plan)
         .replace(/\{\{\s*expires_at\s*\}\}/gi, sample.expires_at)
-        .replace(/\{\{\s*access_code\s*\}\}/gi, `<span style="font-family:monospace;background:#f3f7f5;padding:3px 8px;border-radius:6px;font-weight:bold;color:#FF7A2F;">${sample.access_code}</span>`);
+        
 
       return `
         <div style="font-family: Cairo, Arial, sans-serif; direction: rtl; text-align: right; padding: 20px; background: #fff;">
