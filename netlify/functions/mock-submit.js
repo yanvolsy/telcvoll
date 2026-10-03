@@ -1,6 +1,6 @@
 const { db } = require('./_lib/db');
 const { json } = require('./_lib/auth');
-const { requireStudent, checkExerciseAccess } = require('./_lib/guard');
+const { requireStudent } = require('./_lib/guard');
 const { requireSameOrigin, requestSize } = require('./_lib/request');
 const { rateLimit } = require('./_lib/ratelimit');
 
@@ -21,11 +21,7 @@ exports.handler = async (event) => {
     const sectionRaw={}; const details=[];
     for(const task of tasks){
       const id=parseInt(task.id,10); if(!id) continue;
-      const access = await checkExerciseAccess(client, id, student);
-      if(!access.allowed) {
-        return json(access.status || 403, { error: access.error || 'access_denied', message: access.message || 'غير مصرح لك بهذا التمرين.' });
-      }
-      const ex=access.exercise;
+      const ex=(await client.query("SELECT id,level,section,teil,title,status FROM exercises WHERE id=$1 AND status='published' AND deleted_at IS NULL",[id])).rows[0];
       if(!ex) continue;
       const items=(await client.query('SELECT id,position_no,prompt,correct_answer,points FROM items WHERE exercise_id=$1 ORDER BY position_no',[id])).rows;
       const given=task.answers&&typeof task.answers==='object'?task.answers:{};
@@ -51,5 +47,5 @@ exports.handler = async (event) => {
       sections[section]={score,max,percent:max?Math.round((score/max)*1000)/10:0,tasks:v.tasks};
     }
     return json(200,{level:body.level||'',sections,details});
-  }catch(e){console.error('mock-submit failed',e);return json(500,{error:'تعذر تصحيح الامتحان التجريبي حالياً.'});}finally{client.release();}
+  }catch(e){console.error('mock-submit failed',e);return json(500,{error:'تعذر تصحيح الامتحان التجريبي: '+(e.message||'خطأ في الخادم')});}finally{client.release();}
 };

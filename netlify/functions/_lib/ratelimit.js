@@ -1,33 +1,9 @@
 const { db } = require('./db');
 
-let rateLimitSchemaReady = false;
-let rateLimitSchemaPromise = null;
-
-async function ensureRateLimitSchema(pool) {
-  if (rateLimitSchemaReady) return;
-  if (!rateLimitSchemaPromise) {
-    rateLimitSchemaPromise = pool.query(`
-      CREATE TABLE IF NOT EXISTS rate_limits (
-        rkey VARCHAR(255) PRIMARY KEY,
-        attempts INTEGER NOT NULL DEFAULT 0,
-        window_started_at TIMESTAMP NOT NULL DEFAULT NOW()
-      );
-      CREATE INDEX IF NOT EXISTS idx_rate_limits_window_started_at
-      ON rate_limits(window_started_at);
-    `).then(() => {
-      rateLimitSchemaReady = true;
-    }).finally(() => {
-      rateLimitSchemaPromise = null;
-    });
-  }
-  await rateLimitSchemaPromise;
-}
-
 // Mirrors the original PHP rate_limit(): allows `maxAttempts` calls per `windowSeconds`.
 async function rateLimit(action, maxAttempts, windowSeconds, subject) {
   const key = `${action}:${subject}`;
   const pool = db();
-  await ensureRateLimitSchema(pool);
   const client = await pool.connect();
   try {
     await client.query('BEGIN');

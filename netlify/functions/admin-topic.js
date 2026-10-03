@@ -61,7 +61,7 @@ async function replaceItems(client, exerciseId, items) {
 exports.handler = async (event) => {
   if (!requireSameOrigin(event)) return json(403, { error: 'Cross-origin request blocked.' });
   if (!requestSize(event)) return json(413, { error: 'Request too large.' });
-  if (!await requireAdmin(event)) return json(401, { error: 'unauthenticated' });
+  if (!requireAdmin(event)) return json(401, { error: 'unauthenticated' });
   const pool = db();
 
   if (event.httpMethod === 'GET') {

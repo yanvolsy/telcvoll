@@ -10,7 +10,7 @@ exports.handler = async (event) => {
 
   const ip = clientIp(event);
   try {
-    const allowed = await rateLimit('login_ip', 30, 900, ip);
+    const allowed = await rateLimit('login', 30, 900, ip);
     if (!allowed) return json(429, { error: 'محاولات دخول متكررة كثيرة. يرجى الانتظار 15 دقيقة.' });
   } catch (err) {
     console.error('Rate limit unavailable:', err?.message);
@@ -22,16 +22,6 @@ exports.handler = async (event) => {
 
   const email = String(body.email || '').toLowerCase().trim();
   const password = String(body.password || '');
-
-  if (email) {
-    try {
-      const allowedEmail = await rateLimit('login_email', 10, 900, email);
-      if (!allowedEmail) return json(429, { error: 'محاولات دخول متكررة كثيرة لهذا الحساب. يرجى الانتظار 15 دقيقة.' });
-    } catch (err) {
-      console.error('Login email rate limit unavailable:', err?.message);
-      return json(503, { error: 'خدمة المصادقة غير متاحة مؤقتاً. يرجى المحاولة لاحقاً.' });
-    }
-  }
 
   const pool = db();
   const client = await pool.connect();
@@ -47,7 +37,7 @@ exports.handler = async (event) => {
 
       const { rows } = await client.query(
         `SELECT id, name, first_name, last_name, email, phone, country,
-                password_hash, auth_provider, is_blocked, profile_completed, session_version
+                password_hash, auth_provider, is_blocked, profile_completed
          FROM students
          WHERE LOWER(TRIM(email)) = $1
          LIMIT 1`,
@@ -76,7 +66,6 @@ exports.handler = async (event) => {
         student_id: student.id,
         email: student.email,
         name: student.name,
-        session_version: Number(student.session_version || 0),
       });
 
       return json(200, {
@@ -91,7 +80,7 @@ exports.handler = async (event) => {
           profile_completed: student.profile_completed !== false,
         },
       }, {
-        'Set-Cookie': setCookie('__Host-student_token', token, 60 * 60 * 24 * 30),
+        'Set-Cookie': setCookie('student_token', token, 60 * 60 * 24 * 30),
       });
     }
 

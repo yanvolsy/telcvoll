@@ -355,6 +355,7 @@ checkoutForm.onsubmit = async (e) => {
         `;
       }
     }
+  } catch (_) {}
     const { plans } = await api('public-plans');
     publicPlansList = plans || [];
     // Sort plans by duration ascending (shortest first)

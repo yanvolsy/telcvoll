@@ -159,7 +159,6 @@ exports.handler = async (event) => {
       student_id: studentId,
       email,
       name: rawName,
-      session_version: 0,
     });
 
     return json(200, {
@@ -168,14 +167,14 @@ exports.handler = async (event) => {
       verification_sent: true,
       message: 'تم إنشاء الحساب بنجاح وإرسال رابط التفعيل إلى بريدك الإلكتروني.'
     }, {
-      'Set-Cookie': setCookie('__Host-student_token', token, 60 * 60 * 24 * 30),
+      'Set-Cookie': setCookie('student_token', token, 60 * 60 * 24 * 30),
     });
   } catch (err) {
     console.error('Registration error:', err);
     if (err.code === '23505') {
       return json(409, { error: 'هذا البريد الإلكتروني مسجل بالفعل. يرجى تسجيل الدخول.' });
     }
-    return json(500, { error: 'حدث خطأ أثناء إنشاء الحساب. يرجى المحاولة مرة أخرى.' });
+    return json(500, { error: 'حدث خطأ أثناء إنشاء الحساب. يرجى المحاولة مرة أخرى: ' + (err.message || '') });
   } finally {
     client.release();
   }

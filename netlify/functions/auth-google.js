@@ -70,7 +70,7 @@ exports.handler = async (event) => {
 
     // 2. Check if student already exists by verified email or google_id
     const existingRes = await client.query(
-      `SELECT id, name, first_name, last_name, email, phone, is_blocked, profile_completed, session_version
+      `SELECT id, name, first_name, last_name, email, phone, is_blocked, profile_completed
        FROM students
        WHERE LOWER(TRIM(email)) = $1 OR google_id = $2
        LIMIT 1`,
@@ -114,7 +114,6 @@ exports.handler = async (event) => {
       student_id: student.id,
       email: student.email,
       name: student.name,
-      session_version: Number(student.session_version || 0),
     });
 
     return json(200, {
@@ -129,7 +128,7 @@ exports.handler = async (event) => {
         profile_completed: student.profile_completed !== false,
       },
     }, {
-      'Set-Cookie': setCookie('__Host-student_token', token, 60 * 60 * 24 * 30),
+      'Set-Cookie': setCookie('student_token', token, 60 * 60 * 24 * 30),
     });
   } catch (err) {
     console.error('Google auth error:', err);

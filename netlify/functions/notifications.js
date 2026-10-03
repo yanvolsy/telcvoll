@@ -58,6 +58,7 @@ exports.handler = async (event) => {
 
       const adminQuery = `
         SELECT an.id, an.title, an.message, an.type, an.priority, an.created_at,
+               an.target_type, an.target_value,
                r.read_at, 'admin' AS source
         FROM admin_notifications an
         LEFT JOIN admin_notification_reads r

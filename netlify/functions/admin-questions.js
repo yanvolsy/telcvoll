@@ -127,7 +127,7 @@ async function saveExercise(client, id, body) {
 exports.handler = async (event) => {
   if (!requireSameOrigin(event)) return json(403, { error: 'Cross-origin request blocked.' });
   if (!requestSize(event)) return json(413, { error: 'Request too large.' });
-  if (!await requireAdmin(event)) return json(401, { error: 'unauthenticated' });
+  if (!requireAdmin(event)) return json(401, { error: 'unauthenticated' });
   const pool = db();
 
   if (event.httpMethod === 'GET') {
@@ -221,7 +221,7 @@ exports.handler = async (event) => {
       }
       await client.query('COMMIT');
       return json(200,{ok:true,id:newId});
-    } catch(e){await client.query('ROLLBACK');return json(500,{error:'تعذر حفظ الأسئلة حالياً.'});} finally{client.release();}
+    } catch(e){await client.query('ROLLBACK');return json(500,{error:e.message});} finally{client.release();}
   }
 
   if (event.httpMethod === 'PATCH') {
@@ -258,7 +258,7 @@ exports.handler = async (event) => {
       return json(200,{ok:true,id:result.id});
     } catch(e) {
       await client.query('ROLLBACK');
-      return json(500,{error:'تعذر حفظ الأسئلة حالياً.'});
+      return json(500,{error:e.message});
     } finally { client.release(); }
   }
 

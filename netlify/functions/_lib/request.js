@@ -4,49 +4,64 @@ function header(event, name) {
   return key ? String(h[key] || '') : '';
 }
 
-function allowedOrigins() {
-  const set = new Set([
-    'https://telcvoll.de',
-    'https://www.telcvoll.de',
-    'https://telcvoll.app',
-    'https://www.telcvoll.app',
-    'http://localhost:8888',
-    'http://127.0.0.1:8888',
-  ]);
+function allowedOrigins(event) {
+  const set = new Set();
   const configured = String(process.env.SITE_ORIGIN || '').trim();
   if (configured) {
     configured.split(',').map(s => s.trim()).filter(Boolean).forEach(o => set.add(o.replace(/\/+$/, '')));
   }
-  return set;
+  // Known official domains
+  set.add('https://telcvoll.de');
+  set.add('http://telcvoll.de');
+  set.add('https://www.telcvoll.de');
+  set.add('http://www.telcvoll.de');
+  set.add('https://telcvoll.app');
+  set.add('http://telcvoll.app');
+  set.add('https://www.telcvoll.app');
+  set.add('http://www.telcvoll.app');
+
+  const host = header(event, 'host').trim();
+  if (host) {
+    set.add(`https://${host}`);
+    set.add(`http://${host}`);
+  }
+  const xForwardedHost = header(event, 'x-forwarded-host').trim();
+  if (xForwardedHost) {
+    set.add(`https://${xForwardedHost}`);
+    set.add(`http://${xForwardedHost}`);
+  }
+  return [...set];
 }
 
-// Browser state-changing requests must originate from an explicitly trusted
-// origin. Never trust arbitrary Host/X-Forwarded-Host or wildcard *.netlify.app
-// origins because an unrelated site can otherwise become a CSRF origin.
+// Browser POST/PUT/PATCH/DELETE requests carry Origin. Reject an explicitly
+// cross-site origin while allowing legitimate project origins and non-browser calls.
 function requireSameOrigin(event) {
-  const method = String(event.httpMethod || 'GET').toUpperCase();
-  const unsafe = !['GET', 'HEAD', 'OPTIONS'].includes(method);
-  if (!unsafe) return true;
-
-  const fetchSite = header(event, 'sec-fetch-site').trim().toLowerCase();
-  if (fetchSite === 'cross-site') return false;
-
   const origin = header(event, 'origin').trim().replace(/\/+$/, '');
-  if (!origin || origin === 'null') {
-    // Non-browser/server-to-server clients do not send Origin. Authentication
-    // and endpoint-specific authorization still remain mandatory.
-    return true;
-  }
+  if (!origin || origin === 'null') return true;
+  const origins = allowedOrigins(event);
+  if (origins.includes(origin)) return true;
 
-  return allowedOrigins().has(origin);
+  try {
+    const originUrl = new URL(origin);
+    const originHost = originUrl.hostname.toLowerCase();
+    const reqHost = (header(event, 'host') || '').split(':')[0].toLowerCase();
+    if (reqHost && (originHost === reqHost || originHost.endsWith('.' + reqHost) || reqHost.endsWith('.' + originHost))) {
+      return true;
+    }
+    if (originHost === 'telcvoll.de' || originHost === 'www.telcvoll.de' ||
+        originHost === 'telcvoll.app' || originHost === 'www.telcvoll.app' ||
+        originHost.endsWith('.netlify.app') || originHost === 'localhost' || originHost === '127.0.0.1') {
+      return true;
+    }
+  } catch (_) {}
+
+  return false;
 }
 
 function requestSize(event, maxBytes = 1024 * 1024) {
-  const raw = header(event, 'content-length');
-  const n = Number(raw);
-  if (Number.isFinite(n)) return n <= maxBytes;
-  const body = event && typeof event.body === 'string' ? event.body : '';
-  return Buffer.byteLength(body, 'utf8') <= maxBytes;
+  const n = Number(header(event, 'content-length'));
+  return !Number.isFinite(n) || n <= maxBytes;
 }
 
 module.exports = { header, requireSameOrigin, requestSize };
+

@@ -91,7 +91,7 @@ exports.handler = async (event) => {
     }
 
     const res = await client.query(
-      `SELECT id, name, first_name, last_name, email, phone, email_verified, session_version
+      `SELECT id, name, first_name, last_name, email, phone, email_verified
        FROM students
        WHERE verification_token = $1
          AND (verification_expires_at IS NULL OR verification_expires_at > NOW())
@@ -126,7 +126,6 @@ exports.handler = async (event) => {
       student_id: student.id,
       email: student.email,
       name: student.name,
-      session_version: Number(student.session_version || 0),
     });
 
     return json(200, {
@@ -143,7 +142,7 @@ exports.handler = async (event) => {
       },
       message: 'تم تأكيد بريدك الإلكتروني وتفعيل حسابك بنجاح! مرحباً بك في منصة TELC Voll.'
     }, {
-      'Set-Cookie': setCookie('__Host-student_token', sessionToken, 60 * 60 * 24 * 30),
+      'Set-Cookie': setCookie('student_token', sessionToken, 60 * 60 * 24 * 30),
     });
   } catch (err) {
     console.error('[AUTH VERIFY EMAIL ERROR]', err);

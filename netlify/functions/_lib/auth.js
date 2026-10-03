@@ -2,20 +2,18 @@ const jwt = require('jsonwebtoken');
 const cookie = require('cookie');
 
 const SECRET = process.env.JWT_SECRET;
-const STUDENT_COOKIE = '__Host-student_token';
-const ADMIN_COOKIE = '__Host-admin_token';
 if (!SECRET || SECRET.length < 32) {
   throw new Error('JWT_SECRET must be configured and at least 32 characters long.');
 }
 
 function sign(payload, expiresIn = '30d') {
-  return jwt.sign(payload, SECRET, { expiresIn, issuer: 'telcvoll.de', audience: 'telcvoll-web', algorithm: 'HS256' });
+  return jwt.sign(payload, SECRET, { expiresIn });
 }
 
 function verify(token) {
   if (!token) return null;
   try {
-    return jwt.verify(token, SECRET, { issuer: 'telcvoll.de', audience: 'telcvoll-web', algorithms: ['HS256'] });
+    return jwt.verify(token, SECRET);
   } catch {
     return null;
   }
@@ -28,8 +26,7 @@ function getCookies(event) {
 
 function setCookie(name, value, maxAgeSeconds) {
   const isDev = process.env.NETLIFY_DEV === 'true' || process.env.NODE_ENV === 'development';
-  const effectiveName = isDev && name.startsWith('__Host-') ? name.slice(7) : name;
-  return cookie.serialize(effectiveName, value, {
+  return cookie.serialize(name, value, {
     httpOnly: true,
     secure: !isDev,
     sameSite: 'Lax',
@@ -40,8 +37,7 @@ function setCookie(name, value, maxAgeSeconds) {
 
 function clearCookie(name) {
   const isDev = process.env.NETLIFY_DEV === 'true' || process.env.NODE_ENV === 'development';
-  const effectiveName = isDev && name.startsWith('__Host-') ? name.slice(7) : name;
-  return cookie.serialize(effectiveName, '', {
+  return cookie.serialize(name, '', {
     httpOnly: true,
     secure: !isDev,
     sameSite: 'Lax',
@@ -52,8 +48,7 @@ function clearCookie(name) {
 
 function studentFromEvent(event) {
   const cookies = getCookies(event);
-  let token = cookies[STUDENT_COOKIE];
-  if (!token && (process.env.NETLIFY_DEV === 'true' || process.env.NODE_ENV === 'development')) token = cookies.student_token;
+  let token = cookies.student_token;
   if (!token) {
     const auth = (event.headers && (event.headers.authorization || event.headers.Authorization)) || '';
     if (auth.startsWith('Bearer ')) token = auth.slice(7).trim();
@@ -63,8 +58,7 @@ function studentFromEvent(event) {
 
 function adminFromEvent(event) {
   const cookies = getCookies(event);
-  let token = cookies[ADMIN_COOKIE];
-  if (!token && (process.env.NETLIFY_DEV === 'true' || process.env.NODE_ENV === 'development')) token = cookies.admin_token;
+  let token = cookies.admin_token;
   if (!token) {
     const auth = (event.headers && (event.headers.authorization || event.headers.Authorization)) || '';
     if (auth.startsWith('Bearer ')) token = auth.slice(7).trim();

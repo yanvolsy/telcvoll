@@ -170,19 +170,9 @@ $('togglePassword').onclick = () => {
   $('togglePassword').textContent = isPwd ? '🙈' : '👁';
 };
 
-function safeLocalRedirect(value) {
-  const raw = String(value || '').trim();
-  if (!raw) return '';
-  try {
-    const u = new URL(raw, window.location.origin);
-    if (u.origin !== window.location.origin) return '';
-    return u.pathname + u.search + u.hash;
-  } catch (_) { return ''; }
-}
-
 // Route after login
 function routeAfterLogin() {
-  let redirectUrl = safeLocalRedirect(qs('redirect'));
+  let redirectUrl = qs('redirect');
   let hasPendingCheckout = false;
   try { hasPendingCheckout = !!sessionStorage.getItem('telc_pending_checkout'); } catch (_) {}
 
@@ -259,7 +249,7 @@ routeAfterLogin();
     if (code === 'account_blocked') {
       showAlert('تم حظر هذا الحساب من قبل المشرف.');
     } else {
-      showAlert(err.data?.message || err.data?.error || (err.status ? `فشل تسجيل الدخول بحساب Google (${err.status}).` : 'فشل تسجيل الدخول بحساب Google.'));
+      showAlert(err.data?.message || err.data?.error || 'فشل تسجيل الدخول بحساب Google.');
     }
   }
 }

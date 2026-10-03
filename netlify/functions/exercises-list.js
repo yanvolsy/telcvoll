@@ -12,7 +12,6 @@ exports.handler = async (event) => {
 
   const pool = db();
   const conditions = ["status='published'", "deleted_at IS NULL"];
-  if (!student.is_paid) conditions.push("COALESCE(access_mode, 'paid')='free'");
   const params = [];
 
   if (level) {
@@ -25,7 +24,7 @@ exports.handler = async (event) => {
   }
 
   const query = `
-    SELECT id, title, level, section, teil,
+    SELECT id, title, body, level, section, teil,
            COALESCE(access_mode, 'paid') AS access_mode, audio_url
     FROM exercises
     WHERE ${conditions.join(' AND ')}

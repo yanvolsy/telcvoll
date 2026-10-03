@@ -26,12 +26,10 @@ async function ensureSchema(p) {
     `ALTER TABLE students ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMP NULL;`,
     `ALTER TABLE students ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW();`,
     `ALTER TABLE students ADD COLUMN IF NOT EXISTS is_blocked BOOLEAN NOT NULL DEFAULT FALSE;`,
-    `ALTER TABLE students ADD COLUMN IF NOT EXISTS session_version INT NOT NULL DEFAULT 0;`,
     `ALTER TABLE students ADD COLUMN IF NOT EXISTS is_paid BOOLEAN NOT NULL DEFAULT FALSE;`,
     `ALTER TABLE students ADD COLUMN IF NOT EXISTS plan_id INT NULL;`,
     `ALTER TABLE students ADD COLUMN IF NOT EXISTS plan_name VARCHAR(150) NULL;`,
     `ALTER TABLE students ADD COLUMN IF NOT EXISTS subscription_expires_at TIMESTAMP NULL;`,
-    `ALTER TABLE admins ADD COLUMN IF NOT EXISTS session_version INT NOT NULL DEFAULT 0;`,
     `ALTER TABLE plans ADD COLUMN IF NOT EXISTS price_dzd NUMERIC(10,2) DEFAULT 0;`,
     `ALTER TABLE plans ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT FALSE;`,
     `ALTER TABLE exercises ADD COLUMN IF NOT EXISTS access_mode VARCHAR(20) NOT NULL DEFAULT 'paid';`,
@@ -39,9 +37,7 @@ async function ensureSchema(p) {
     `ALTER TABLE exercises ADD COLUMN IF NOT EXISTS duration_minutes INT DEFAULT NULL;`,
     `CREATE INDEX IF NOT EXISTS idx_students_google_id ON students (google_id) WHERE google_id IS NOT NULL;`,
     `CREATE INDEX IF NOT EXISTS idx_students_verification_token ON students (verification_token) WHERE verification_token IS NOT NULL;`,
-    `CREATE INDEX IF NOT EXISTS idx_exercises_access_mode ON exercises(access_mode);`,
-    `CREATE TABLE IF NOT EXISTS rate_limits (rkey VARCHAR(255) PRIMARY KEY, attempts INTEGER NOT NULL DEFAULT 0, window_started_at TIMESTAMP NOT NULL DEFAULT NOW());`,
-    `CREATE INDEX IF NOT EXISTS idx_rate_limits_window_started_at ON rate_limits(window_started_at);`
+    `CREATE INDEX IF NOT EXISTS idx_exercises_access_mode ON exercises(access_mode);`
   ];
 
   try {
@@ -64,7 +60,7 @@ function db() {
       connectionString: process.env.DATABASE_URL,
       ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('localhost')
         ? false
-        : { rejectUnauthorized: true },
+        : { rejectUnauthorized: false },
       max: 5,
       connectionTimeoutMillis: 5000,
       idleTimeoutMillis: 10000,
@@ -75,10 +71,8 @@ function db() {
       console.error('Unexpected error on idle pg client', err);
     });
 
-    // Run schema bootstrap before authenticated handlers query newly-added security columns.
-    // The first cold start waits for it; subsequent calls reuse schemaReady.
-    // Handlers that call db() may still query while the migration is running, so
-    // ensureSchema is also awaited explicitly where security-critical columns are used.
+    // Run ensureSchema once in the background
+    ensureSchema(pool).catch(() => {});
   }
   return pool;
 }

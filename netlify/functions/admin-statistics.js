@@ -3,7 +3,7 @@ const { json } = require('./_lib/auth');
 const { requireAdmin } = require('./_lib/guard');
 
 exports.handler = async (event) => {
-  if (!await requireAdmin(event)) return json(401, { error: 'unauthenticated' });
+  if (!requireAdmin(event)) return json(401, { error: 'unauthenticated' });
   const pool = db();
   const { rows } = await pool.query(
     `SELECT e.section, e.teil, COUNT(a.id)::int AS attempts, COALESCE(AVG(a.percent),0) AS avg_percent
