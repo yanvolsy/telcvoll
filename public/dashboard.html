@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#080808"><title>لوحة الطالب</title>
-<link rel="stylesheet" href="/assets/app.css?v=20261003-floating-tabs-v1">
+<link rel="stylesheet" href="/assets/app.css?v=20260928-polished-v1">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
@@ -273,16 +273,6 @@ const $=id=>document.getElementById(id);
 function lang(){return getLang();}
 var text = window.text || ((ar,de)=>(typeof getLang==='function' && getLang()==='de')?de:ar);
 var sectionIcon = window.sectionIcon || (s=>({Lesen:'📖',Hören:'🎧',Sprachbausteine:'🧩',Schreiben:'✍️',Sprechen:'🎙️'})[s]||'📄');
-function sectionNavIcon(s){
-  const icons={
-    Lesen:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5v-16Z"></path><path d="M4 18.5A2.5 2.5 0 0 1 6.5 16H20"></path></svg>',
-    Hören:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4"></path><path d="M8 7v10"></path><path d="M12 5v14"></path><path d="M16 8v8"></path><path d="M20 10v4"></path></svg>',
-    Sprachbausteine:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 3.5 10 6l2.5 1.5L10 9l-1.5 2.5L7 9 4.5 7 7 5.5 8.5 3.5Z"></path><path d="M17 11.5 18 14l2.5 1-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1 1-2.5Z"></path><path d="M5 14.5 6 16l1.5 1L6 18l-1 1.5L4 18l-1.5-1L4 16l1-1.5Z"></path></svg>',
-    Schreiben:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l10.5-10.5a2.1 2.1 0 0 0-3-3L5 17v3Z"></path><path d="m14.5 7.5 2 2"></path></svg>',
-    Sprechen:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3Z"></path><path d="M5 10a7 7 0 0 0 14 0"></path><path d="M12 17v4"></path><path d="M8 21h8"></path></svg>'
-  };
-  return icons[s]||'';
-}
 const TELC_DURATIONS = {
   B1: {
     Lesen: { 'Teil 1': 20, 'Teil 2': 20, 'Teil 3': 15, _default: 20 },
@@ -387,7 +377,7 @@ function render(){
       ${['B1','B2','C1'].map(l=>`<button type="button" class="level-btn ${String(state.level).toUpperCase()===l?'active':''} ${!levelAvailable(l)?'empty':''}" data-level="${l}" aria-pressed="${String(state.level).toUpperCase()===l?'true':'false'}">Telc ${l}</button>`).join('')}
     </section>
     <nav class="section-switch" aria-label="Prüfungsteile">
-      ${SECTION_ORDER.map(s=>{const count=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===s).length;const active=state.section===s;return `<button type="button" class="section-btn ${active?'active':''}" data-section="${s}" aria-current="${active?'page':'false'}"><span class="section-btn-icon">${sectionNavIcon(s)}</span><span class="section-btn-copy"><b>${s}</b><small>${count} ${text('تمرين','Übungen')}</small></span></button>`}).join('')}
+      ${SECTION_ORDER.map(s=>{const count=state.exercises.filter(x=>(x.level||'B2')===state.level && x.section===s).length;return `<button class="section-btn ${state.section===s?'active':''}" data-section="${s}"><span>${sectionIcon(s)}</span><span class="section-btn-copy"><b>${s}</b><small>${count} ${text('تمرين','Übungen')}</small></span></button>`}).join('')}
     </nav>
     <section class="topic-toolbar ${availableTeile.length <= 1 ? 'no-teil-tabs' : ''}">
       <button id="shuffleToggle" class="shuffle-toggle" type="button" aria-pressed="${shuffleEnabled?'true':'false'}" title="${shuffleEnabled?text('الخلط مفعّل — اضغط لإيقافه','Shuffle aktiv — klicken zum Ausschalten'):text('الترتيب العادي — اضغط لتفعيل الخلط','Normale Reihenfolge — klicken zum Aktivieren')}"><span class="shuffle-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h4.5c3.8 0 4.7 5 8.5 5H21"/><path d="m18 8 3-1-3-1"/><path d="M3 17h4.5c3.8 0 4.7 5 8.5 5H21"/><path d="m18 16 3 1-3 1"/></svg></span><span class="shuffle-label">${shuffleEnabled?text('خلط','Mischen'):text('ترتيب','Reihenfolge')}</span></button>
