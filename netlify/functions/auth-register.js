@@ -14,7 +14,8 @@ exports.handler = async (event) => {
     const allowed = await rateLimit('register', 20, 900, ip);
     if (!allowed) return json(429, { error: 'عدد محاولات التسجيل تجاوز الحد المسموح. يرجى الانتظار 15 دقيقة.' });
   } catch (err) {
-    console.warn('Rate limit non-fatal error:', err?.message);
+    console.error('Rate limit unavailable:', err?.message);
+    return json(503, { error: 'خدمة المصادقة غير متاحة مؤقتاً. يرجى المحاولة لاحقاً.' });
   }
 
   let body;
@@ -38,8 +39,8 @@ exports.handler = async (event) => {
     return json(422, { error: 'يرجى إدخال بريد إلكتروني صالح.' });
   }
 
-  if (!password || password.length < 6) {
-    return json(422, { error: 'يجب أن تتكون كلمة المرور من 6 أحرف على الأقل.' });
+  if (!password || password.length < 8) {
+    return json(422, { error: 'يجب أن تتكون كلمة المرور من 8 أحرف على الأقل.' });
   }
 
   if (confirmPassword && password !== confirmPassword) {
@@ -163,7 +164,6 @@ exports.handler = async (event) => {
     return json(200, {
       ok: true,
       student: { id: studentId, name: rawName, email, phone, email_verified: false },
-      token,
       verification_sent: true,
       message: 'تم إنشاء الحساب بنجاح وإرسال رابط التفعيل إلى بريدك الإلكتروني.'
     }, {

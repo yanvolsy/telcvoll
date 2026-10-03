@@ -118,7 +118,7 @@ exports.handler = async (event) => {
         t.level || 'B2', t.section, t.teil, t.title, t.task_type || 'custom',
         t.body || null, t.translation || null, t.instructions || null, t.vocabulary || null,
         t.difficulty || null, t.tags || null, t.audio_url || null, t.image_url || null,
-        parseInt(t.time_limit_seconds || 0, 10), t.access_mode || 'code_required', t.status || 'draft',
+        parseInt(t.time_limit_seconds || 0, 10), t.access_mode || 'paid', t.status || 'draft',
       ];
 
       if (id) {

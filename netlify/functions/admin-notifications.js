@@ -9,38 +9,44 @@ const { requireSameOrigin, requestSize } = require('./_lib/request');
  */
 async function resolveRecipients(client, targetType, targetValue) {
   let query = `
-    SELECT DISTINCT s.id AS student_id, s.name, s.email, c.code AS access_code, c.expires_at, p.name AS plan_name
+    SELECT DISTINCT ON (s.email) s.id AS student_id, s.name, s.email,
+           o.expires_at, o.plan_id, p.name AS plan_name, p.duration_days
     FROM students s
-    JOIN access_codes c ON c.student_id=s.id
-    JOIN plans p ON p.id=c.plan_id
+    LEFT JOIN LATERAL (
+      SELECT o.* FROM orders o
+      WHERE o.student_id=s.id AND o.status='CONFIRMED'
+      ORDER BY o.expires_at DESC, o.id DESC LIMIT 1
+    ) o ON TRUE
+    LEFT JOIN plans p ON p.id=o.plan_id
+    WHERE s.email IS NOT NULL AND s.email != '' AND s.email LIKE '%@%.%'
   `;
   const params = [];
   const whereClauses = [];
 
   switch (targetType) {
     case 'active':
-      whereClauses.push('c.active = TRUE AND c.expires_at > NOW()');
+      whereClauses.push('o.expires_at > NOW()');
       break;
     case 'expired':
-      whereClauses.push('(c.active = FALSE OR c.expires_at <= NOW())');
+      whereClauses.push('(o.expires_at IS NULL OR o.expires_at <= NOW())');
       break;
     case 'expiring_soon':
       whereClauses.push('c.active = TRUE AND c.expires_at > NOW() AND c.expires_at <= NOW() + INTERVAL \'3 days\'');
       break;
     case 'plan':
       params.push(parseInt(targetValue || 0, 10));
-      whereClauses.push(`c.plan_id = $${params.length}`);
+      whereClauses.push(`o.plan_id = $${params.length}`);
       break;
     case 'duration':
       params.push(parseInt(targetValue || 0, 10));
-      whereClauses.push(`p.duration_days = $${params.length}`);
+      whereClauses.push(`o.duration_days = $${params.length}`);
       break;
     case 'date_range':
       if (targetValue && targetValue.includes(':')) {
         const [from, to] = targetValue.split(':');
         params.push(from);
         params.push(to);
-        whereClauses.push(`c.created_at >= $${params.length - 1}::timestamp AND c.created_at <= $${params.length}::timestamp`);
+        whereClauses.push(`o.created_at >= $${params.length - 1}::timestamp AND o.created_at <= $${params.length}::timestamp`);
       }
       break;
     case 'specific_student':
@@ -48,8 +54,8 @@ async function resolveRecipients(client, targetType, targetValue) {
       whereClauses.push(`(LOWER(s.email) = $${params.length} OR s.id::text = $${params.length})`);
       break;
     case 'specific_code':
-      params.push(String(targetValue || '').trim().toUpperCase().replace(/\s+/g, ''));
-      whereClauses.push(`REPLACE(UPPER(c.code),' ','') = $${params.length}`);
+      // Access-code targeting was removed with the legacy code system.
+      whereClauses.push('1=0');
       break;
     case 'all':
     default:

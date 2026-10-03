@@ -69,7 +69,7 @@ function adminFromEvent(event) {
 
 function clientIp(event) {
   const h = event.headers || {};
-  return (h['x-forwarded-for'] || h['client-ip'] || '0.0.0.0').split(',')[0].trim();
+  return (h['x-nf-client-connection-ip'] || h['x-forwarded-for'] || h['client-ip'] || '0.0.0.0').split(',')[0].trim();
 }
 
 function json(statusCode, body, extraHeaders = {}) {
@@ -90,8 +90,8 @@ function json(statusCode, body, extraHeaders = {}) {
 const bcrypt = require('bcryptjs');
 
 async function hashPassword(plainPassword) {
-  if (!plainPassword || typeof plainPassword !== 'string' || plainPassword.length < 6) {
-    throw new Error('Password must be at least 6 characters long.');
+  if (!plainPassword || typeof plainPassword !== 'string' || plainPassword.length < 8) {
+    throw new Error('Password must be at least 8 characters long.');
   }
   return bcrypt.hash(plainPassword, 10);
 }

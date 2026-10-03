@@ -140,7 +140,6 @@ exports.handler = async (event) => {
         phone: student.phone,
         email_verified: true,
       },
-      token: sessionToken,
       message: 'تم تأكيد بريدك الإلكتروني وتفعيل حسابك بنجاح! مرحباً بك في منصة TELC Voll.'
     }, {
       'Set-Cookie': setCookie('student_token', sessionToken, 60 * 60 * 24 * 30),

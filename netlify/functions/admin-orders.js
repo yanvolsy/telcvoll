@@ -41,7 +41,6 @@ exports.handler = async (event) => {
         OR LOWER(o.customer_name) LIKE $${params.length}
         OR LOWER(o.customer_email) LIKE $${params.length}
         OR LOWER(COALESCE(o.customer_phone, '')) LIKE $${params.length}
-        OR LOWER(COALESCE(o.access_code, '')) LIKE $${params.length}
       )`);
     }
 
@@ -56,26 +55,14 @@ exports.handler = async (event) => {
       LIMIT ${limit} OFFSET ${offset}
     `, params);
 
-    // Summary stats. Older databases may not yet have code_id; keep the
-    // orders page usable while the migration is being applied.
-    const colRes = await pool.query(`
-      SELECT EXISTS (
-        SELECT 1 FROM information_schema.columns
-        WHERE table_schema='public' AND table_name='orders' AND column_name='code_id'
-      ) AS has_code_id
-    `);
-    const hasCodeId = !!colRes.rows[0]?.has_code_id;
-    const revenueFilter = hasCodeId
-      ? "status='CONFIRMED' AND code_id IS NOT NULL"
-      : "status='CONFIRMED' AND access_code IS NOT NULL";
-
+    // Revenue is based on confirmed orders, never on legacy access-code state.
     const statsRes = await pool.query(`
       SELECT
         COUNT(*)::int AS total_orders,
         COUNT(*) FILTER (WHERE status='CONFIRMED')::int AS confirmed_orders,
         COUNT(*) FILTER (WHERE status='PENDING')::int AS pending_orders,
         COUNT(*) FILTER (WHERE status='FAILED' OR status='CANCELLED')::int AS failed_orders,
-        COALESCE(SUM(amount) FILTER (WHERE ${revenueFilter}), 0)::numeric AS total_revenue
+        COALESCE(SUM(amount) FILTER (WHERE status='CONFIRMED'), 0)::numeric AS total_revenue
       FROM orders
     `);
 
@@ -85,7 +72,6 @@ exports.handler = async (event) => {
       orders: ordersRes.rows,
       stats: statsRes.rows[0] || {},
       plans: plansRes.rows,
-      schema: { has_code_id: hasCodeId }
     });
     } catch (err) {
       console.error('admin-orders GET failed:', err?.message || err);

@@ -81,7 +81,7 @@ exports.handler = async (event) => {
       is_paid: isPaid,
       exercises,
       exams,
-      ai_enabled: isPaid ? (student.ai_enabled || true) : false,
+      ai_enabled: isPaid && student.ai_enabled === true,
     });
   } catch (err) {
     console.error('Fatal error in me.js:', err);

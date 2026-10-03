@@ -1,17 +1,9 @@
-const crypto = require('crypto');
 const { db } = require('./_lib/db');
-const { json } = require('./_lib/auth');
+const { json, studentFromEvent } = require('./_lib/auth');
 const { sendSubscriptionActivatedEmail } = require('./_lib/email');
 const { requireSameOrigin, requestSize } = require('./_lib/request');
 const { safeLog } = require('./_lib/security');
 
-function makeSecureAccessCode() {
-  const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
-  const buf = crypto.randomBytes(6);
-  let code = '';
-  for (let i = 0; i < 6; i++) code += chars[buf[i] % chars.length];
-  return `TV-${code}`;
-}
 
 exports.handler = async (event) => {
   if (!requireSameOrigin(event)) return json(403, { error: 'Cross-origin request blocked.' });
@@ -49,9 +41,20 @@ exports.handler = async (event) => {
       return json(404, { error: 'لم يتم العثور على الطلب المطلوب في النظام.' });
     }
 
+    const authStudent = studentFromEvent(event);
+    if (!authStudent?.student_id) {
+      return json(401, { error: 'يجب تسجيل الدخول قبل تأكيد الاشتراك.' });
+    }
+    if (order.student_id && String(order.student_id) !== String(authStudent.student_id)) {
+      return json(403, { error: 'هذا الطلب لا ينتمي إلى الحساب الحالي.' });
+    }
+    if (!order.student_id && order.customer_email && String(order.customer_email).toLowerCase().trim() !== String(authStudent.email || '').toLowerCase().trim()) {
+      return json(403, { error: 'هذا الطلب لا ينتمي إلى الحساب الحالي.' });
+    }
+
     // 2. IDEMPOTENCY CHECK: If order was already confirmed, return existing result immediately!
     // Never create a duplicate code or extra subscription.
-    if (order.status === 'CONFIRMED' && order.access_code) {
+    if (order.status === 'CONFIRMED') {
       safeLog('IDEMPOTENT_VERIFY_HIT', { orderId: order.order_id, paymentRef: order.payment_ref });
       return json(200, {
         ok: true,
@@ -61,9 +64,6 @@ exports.handler = async (event) => {
         plan_name: order.plan_name,
         duration_days: order.duration_days,
         expires_at: order.expires_at,
-        access_code: order.access_code,
-        customer_name: order.customer_name,
-        customer_email: order.customer_email,
         already_processed: true
       });
     }
@@ -105,65 +105,79 @@ exports.handler = async (event) => {
     const rawStatus = checkData.status || checkData.data?.status || checkData.paymentStatus || '';
     const status = String(rawStatus).trim().toUpperCase();
 
-    // 4. Access Code is ONLY created when gateway status is CONFIRMED
+    // 4. A confirmed payment activates the student's subscription directly.
+    // Access codes are intentionally not created or returned.
     if (status === 'CONFIRMED') {
       await client.query('BEGIN');
 
-      // Double check inside locked transaction for concurrency safety (Idempotency)
-      const lockRes = await client.query('SELECT status, access_code FROM orders WHERE id=$1 FOR UPDATE', [order.id]);
-      if (lockRes.rows[0]?.status === 'CONFIRMED' && lockRes.rows[0]?.access_code) {
+      const lockRes = await client.query(
+        'SELECT status, student_id, expires_at FROM orders WHERE id=$1 FOR UPDATE',
+        [order.id]
+      );
+      if (lockRes.rows[0]?.status === 'CONFIRMED') {
         await client.query('ROLLBACK');
         return json(200, {
           ok: true,
           status: 'CONFIRMED',
           order_id: order.order_id,
-          access_code: lockRes.rows[0].access_code,
+          payment_ref: order.payment_ref,
           plan_name: order.plan_name,
           duration_days: order.duration_days,
+          expires_at: order.expires_at,
           already_processed: true
         });
       }
 
-      // Generate cryptographically unique TELC Voll code (TV-XXXXXX)
-      let code;
-      for (;;) {
-        code = makeSecureAccessCode();
-        const exists = await client.query('SELECT id FROM access_codes WHERE code=$1', [code]);
-        if (!exists.rows.length) break;
-      }
-
-      // Find or create student record
-      let studentId = order.student_id;
+      // Prefer the student already attached to the order. If checkout happened
+      // before login, resolve the account by normalized email.
+      let studentId = authStudent.student_id || order.student_id;
       if (!studentId && order.customer_email) {
-        const sMatch = await client.query('SELECT id FROM students WHERE LOWER(TRIM(email))=$1 ORDER BY id ASC LIMIT 1', [order.customer_email]);
+        const sMatch = await client.query(
+          'SELECT id FROM students WHERE LOWER(TRIM(email))=$1 ORDER BY id ASC LIMIT 1',
+          [String(order.customer_email).toLowerCase().trim()]
+        );
         if (sMatch.rows[0]) {
           studentId = sMatch.rows[0].id;
         } else {
           const sNew = await client.query(
-            `INSERT INTO students(name, email, phone)
-             VALUES($1, $2, $3) RETURNING id`,
+            `INSERT INTO students(name, email, phone, is_paid, plan_id, plan_name, subscription_expires_at, created_at, updated_at)
+             VALUES($1, $2, $3, FALSE, NULL, NULL, NULL, NOW(), NOW()) RETURNING id`,
             [order.customer_name || 'Student', order.customer_email, order.customer_phone || null]
           );
           studentId = sNew.rows[0].id;
         }
       }
 
-      // Calculate expiration interval based on plan duration
-      const codeRes = await client.query(
-        `INSERT INTO access_codes(code, plan_id, student_id, active, expires_at)
-         VALUES($1, $2, $3, TRUE, NOW() + ($4 || ' days')::interval)
-         RETURNING id, expires_at`,
-        [code, order.plan_id, studentId, order.duration_days]
-      );
-      const codeRow = codeRes.rows[0];
+      if (!studentId) {
+        await client.query('ROLLBACK');
+        return json(422, { error: 'لا يمكن ربط عملية الدفع بحساب طالب.' });
+      }
 
-      // Update order to CONFIRMED
+      // Extend from the current expiry when a renewal happens within the
+      // allowed renewal window; never shorten an existing subscription.
+      const subRes = await client.query(
+        `UPDATE students s
+         SET is_paid=TRUE,
+             plan_id=$1,
+             plan_name=$2,
+             subscription_expires_at = GREATEST(COALESCE(s.subscription_expires_at, NOW()), NOW()) + ($3 || ' days')::interval,
+             updated_at=NOW()
+         WHERE s.id=$4
+         RETURNING subscription_expires_at`,
+        [order.plan_id, order.plan_name, order.duration_days, studentId]
+      );
+      const expiresAt = subRes.rows[0]?.subscription_expires_at;
+      if (!expiresAt) {
+        await client.query('ROLLBACK');
+        return json(500, { error: 'تعذر تفعيل الاشتراك للحساب.' });
+      }
+
       await client.query(
         `UPDATE orders
-         SET status='CONFIRMED', access_code=$1, code_id=$2, student_id=$3,
-             paid_at=NOW(), expires_at=$4, updated_at=NOW()
-         WHERE id=$5`,
-        [code, codeRow.id, studentId, codeRow.expires_at, order.id]
+         SET status='CONFIRMED', student_id=$1, paid_at=NOW(), expires_at=$2,
+             access_code=NULL, code_id=NULL, updated_at=NOW()
+         WHERE id=$3`,
+        [studentId, expiresAt, order.id]
       );
 
       await client.query('COMMIT');
@@ -172,18 +186,17 @@ exports.handler = async (event) => {
         orderId: order.order_id,
         paymentRef: order.payment_ref,
         planId: order.plan_id,
-        durationDays: order.duration_days
+        durationDays: order.duration_days,
+        studentId
       });
 
-      // Send the branded subscription activation notice; never include the
-      // internal sign-in credential in customer-facing email.
       try {
         const emailResult = await sendSubscriptionActivatedEmail({
           to: order.customer_email,
           name: order.customer_name,
           planName: order.plan_name,
           durationDays: order.duration_days,
-          expiresAt: codeRow.expires_at,
+          expiresAt,
         });
         if (emailResult.ok) {
           await pool.query('UPDATE orders SET email_sent=TRUE WHERE id=$1', [order.id]);
@@ -199,10 +212,7 @@ exports.handler = async (event) => {
         payment_ref: order.payment_ref,
         plan_name: order.plan_name,
         duration_days: order.duration_days,
-        expires_at: codeRow.expires_at,
-        access_code: code,
-        customer_name: order.customer_name,
-        customer_email: order.customer_email
+        expires_at: expiresAt
       });
     }
 

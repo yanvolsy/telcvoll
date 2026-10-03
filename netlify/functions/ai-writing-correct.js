@@ -1,7 +1,8 @@
 const { db } = require('./_lib/db');
 const { json } = require('./_lib/auth');
-const { requireStudent } = require('./_lib/guard');
+const { requireStudent, checkExerciseAccess } = require('./_lib/guard');
 const { requireSameOrigin, requestSize } = require('./_lib/request');
+const { rateLimit } = require('./_lib/ratelimit');
 
 const MAX_TEXT = 14000;
 const GEMINI_MODEL = process.env.GEMINI_WRITING_MODEL || 'gemini-2.5-flash';
@@ -168,6 +169,16 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return json(405, { error: 'Method not allowed' });
   const student = await requireStudent(event);
   if (!student) return json(401, { error: 'unauthenticated' });
+  if (!student.is_paid || !student.subscription?.active || student.ai_enabled !== true) {
+    return json(403, { error: 'ai_subscription_required', message: 'ميزة تصحيح الكتابة بالذكاء الاصطناعي متاحة مع الاشتراك المفعّل الذي يتضمن AI.' });
+  }
+  try {
+    const allowed = await rateLimit('ai_writing', 10, 3600, String(student.student_id));
+    if (!allowed) return json(429, { error: 'ai_rate_limit', message: 'تم الوصول إلى حد استخدام التصحيح بالذكاء الاصطناعي. حاول لاحقاً.' });
+  } catch (err) {
+    console.error('AI writing rate limit unavailable:', err?.message);
+    return json(503, { error: 'الخدمة غير متاحة مؤقتاً. يرجى المحاولة لاحقاً.' });
+  }
 
   let body;
   try { body = JSON.parse(event.body || '{}'); } catch { return json(400, { error: 'Bad request' }); }
@@ -184,6 +195,8 @@ exports.handler = async (event) => {
     const exercise = exRes.rows[0];
     if (!exercise || exercise.status !== 'published') return json(404, { error: 'Exercise not found' });
     if (exercise.task_type !== 'WRITING' && exercise.section !== 'Schreiben') return json(400, { error: 'This exercise is not a Schreiben exercise.' });
+    const access = await checkExerciseAccess(client, exerciseId, student);
+    if (!access.allowed) return json(access.status, { error: access.error, message: access.message });
 
     const settings = exercise.settings_json && typeof exercise.settings_json === 'object' ? exercise.settings_json : {};
     const prompt = buildPrompt({

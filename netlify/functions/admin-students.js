@@ -39,11 +39,11 @@ exports.handler = async (event) => {
          FROM students s
          LEFT JOIN attempts a ON a.student_id = s.id
          LEFT JOIN LATERAL (
-           SELECT p.name AS plan_name, p.id AS plan_id, c.expires_at
-           FROM access_codes c
-           JOIN plans p ON p.id = c.plan_id
-           WHERE c.student_id = s.id AND c.active = TRUE AND c.expires_at > NOW()
-           ORDER BY c.expires_at DESC LIMIT 1
+           SELECT COALESCE(p.name, o.plan_name) AS plan_name, o.plan_id, o.expires_at
+           FROM orders o
+           LEFT JOIN plans p ON p.id = o.plan_id
+           WHERE o.student_id = s.id AND o.status = 'CONFIRMED' AND o.expires_at > NOW()
+           ORDER BY o.expires_at DESC, o.id DESC LIMIT 1
          ) sub ON TRUE
          GROUP BY s.id, sub.plan_name, sub.plan_id, sub.expires_at, s.plan_name, s.plan_id, s.subscription_expires_at
          ORDER BY s.id DESC`
@@ -121,7 +121,6 @@ exports.handler = async (event) => {
     // 0. Delete Student Account Permanently
     if (body.action === 'delete_student') {
       try { await pool.query('DELETE FROM attempts WHERE student_id = $1', [id]); } catch (_) {}
-      try { await pool.query('DELETE FROM access_codes WHERE student_id = $1', [id]); } catch (_) {}
       try { await pool.query('DELETE FROM orders WHERE student_id = $1', [id]); } catch (_) {}
       try { await pool.query('DELETE FROM student_notifications WHERE student_id = $1', [id]); } catch (_) {}
       try { await pool.query('DELETE FROM speaking_sessions WHERE student_id = $1', [id]); } catch (_) {}
@@ -151,7 +150,7 @@ exports.handler = async (event) => {
 
       const newPass = body.new_password ? String(body.new_password).trim() : '';
       if (newPass) {
-        if (newPass.length < 6) return json(422, { error: 'كلمة المرور يجب أن لا تقل عن 6 أحرف.' });
+        if (newPass.length < 8) return json(422, { error: 'كلمة المرور يجب أن لا تقل عن 8 أحرف.' });
         const hash = await hashPassword(newPass);
         await pool.query(
           `UPDATE students
@@ -182,9 +181,6 @@ exports.handler = async (event) => {
         } catch (_) {
           try { await pool.query('UPDATE students SET is_paid = FALSE, updated_at = NOW() WHERE id = $1', [id]); } catch (_) {}
         }
-        try {
-          await pool.query('UPDATE access_codes SET active = FALSE WHERE student_id = $1', [id]);
-        } catch (_) {}
         try {
           await pool.query('UPDATE orders SET expires_at = NOW() WHERE student_id = $1 AND expires_at > NOW()', [id]);
         } catch (_) {}
@@ -234,57 +230,27 @@ exports.handler = async (event) => {
         expiresAt = new Date(Date.now() + days * 86400000);
       }
 
-      // 1. Generate active access code for this student
-      const codeStr = 'ADM-' + Math.random().toString(36).substring(2, 9).toUpperCase();
-      let codeId = null;
-      try {
-        const codeRes = await pool.query(
-          `INSERT INTO access_codes(code, plan_id, student_id, active, expires_at)
-           VALUES($1, $2, $3, TRUE, $4)
-           RETURNING id`,
-          [codeStr, plan.id, id, expiresAt]
-        );
-        codeId = codeRes.rows[0]?.id;
-      } catch (err) {
-        console.warn('access_codes insert error:', err.message);
-      }
+      // Manual admin activation creates a normal confirmed order and updates the
+      // student's subscription. No access code is generated.
+      const orderId = 'ORD-ADM-' + Date.now().toString(36).toUpperCase();
+      await pool.query(
+        `INSERT INTO orders(
+          order_id, plan_id, plan_name, customer_name, customer_email, customer_phone,
+          amount, currency, payment_provider, status, student_id, paid_at, expires_at
+        ) VALUES($1, $2, $3, $4, $5, $6, 0, 'DZD', 'manual_admin', 'CONFIRMED', $7, NOW(), $8)`,
+        [orderId, plan.id, plan.name, st.name || 'طالب', st.email, st.phone || '', id, expiresAt]
+      );
 
-      // 2. Insert confirmed manual order record
-      const orderId = 'ORD-ADM-' + Date.now();
-      try {
-        await pool.query(
-          `INSERT INTO orders(
-            order_id, plan_id, plan_name, customer_name, customer_email, customer_phone,
-            amount, currency, payment_provider, status, access_code, code_id, student_id,
-            paid_at, expires_at
-          ) VALUES($1, $2, $3, $4, $5, $6, 0, 'DZD', 'manual_admin', 'CONFIRMED', $7, $8, $9, NOW(), $10)`,
-          [
-            orderId, plan.id, plan.name, st.name || 'طالب', st.email, st.phone || '',
-            codeStr, codeId, id, expiresAt
-          ]
-        );
-      } catch (err) {
-        console.warn('orders insert error:', err.message);
-      }
-
-      // 3. Mark student as paid and store subscription directly on students row
-      try {
-        await pool.query(
-          `UPDATE students
-           SET is_paid = TRUE,
-               plan_id = $1,
-               plan_name = $2,
-               subscription_expires_at = $3,
-               updated_at = NOW()
-           WHERE id = $4`,
-          [plan.id, plan.name, expiresAt, id]
-        );
-      } catch (paidErr) {
-        console.warn('students update with plan notice:', paidErr.message);
-        try {
-          await pool.query('UPDATE students SET is_paid = TRUE, updated_at = NOW() WHERE id = $1', [id]);
-        } catch (_) {}
-      }
+      await pool.query(
+        `UPDATE students
+         SET is_paid = TRUE,
+             plan_id = $1,
+             plan_name = $2,
+             subscription_expires_at = $3,
+             updated_at = NOW()
+         WHERE id = $4`,
+        [plan.id, plan.name, expiresAt, id]
+      );
 
       const dateFormatted = `${String(expiresAt.getDate()).padStart(2, '0')}/${String(expiresAt.getMonth() + 1).padStart(2, '0')}/${expiresAt.getFullYear()}`;
       return json(200, {
@@ -305,7 +271,6 @@ exports.handler = async (event) => {
     if (!id) return json(422, { error: 'معرّف الطالب مطلوب.' });
 
     try { await pool.query('DELETE FROM attempts WHERE student_id = $1', [id]); } catch (_) {}
-    try { await pool.query('DELETE FROM access_codes WHERE student_id = $1', [id]); } catch (_) {}
     try { await pool.query('DELETE FROM orders WHERE student_id = $1', [id]); } catch (_) {}
     try { await pool.query('DELETE FROM student_notifications WHERE student_id = $1', [id]); } catch (_) {}
     try { await pool.query('DELETE FROM speaking_sessions WHERE student_id = $1', [id]); } catch (_) {}

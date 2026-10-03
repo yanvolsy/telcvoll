@@ -15,7 +15,8 @@ exports.handler = async (event) => {
     const allowed = await rateLimit('forgot_pw', 5, 900, ip);
     if (!allowed) return json(429, { error: 'طلبات استعادة كلمة المرور كثيرة. يرجى الانتظار 15 دقيقة.' });
   } catch (err) {
-    console.warn('Rate limit non-fatal error:', err?.message);
+    console.error('Rate limit unavailable:', err?.message);
+    return json(503, { error: 'خدمة المصادقة غير متاحة مؤقتاً. يرجى المحاولة لاحقاً.' });
   }
 
   let body;

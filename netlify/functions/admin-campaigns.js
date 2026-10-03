@@ -9,10 +9,15 @@ const { requireSameOrigin, requestSize } = require('./_lib/request');
  */
 async function resolveCampaignRecipients(client, targetType, targetValue) {
   let query = `
-    SELECT DISTINCT ON (s.email) s.id AS student_id, s.name, s.email, c.code AS access_code, c.expires_at, p.name AS plan_name
+    SELECT DISTINCT ON (s.email) s.id AS student_id, s.name, s.email,
+           o.expires_at, o.plan_id, p.name AS plan_name, p.duration_days
     FROM students s
-    JOIN access_codes c ON c.student_id=s.id
-    JOIN plans p ON p.id=c.plan_id
+    LEFT JOIN LATERAL (
+      SELECT o.* FROM orders o
+      WHERE o.student_id=s.id AND o.status='CONFIRMED'
+      ORDER BY o.expires_at DESC, o.id DESC LIMIT 1
+    ) o ON TRUE
+    LEFT JOIN plans p ON p.id=o.plan_id
     WHERE s.email IS NOT NULL AND s.email != '' AND s.email LIKE '%@%.%'
   `;
   const params = [];
@@ -20,28 +25,28 @@ async function resolveCampaignRecipients(client, targetType, targetValue) {
 
   switch (targetType) {
     case 'active':
-      whereClauses.push('c.active = TRUE AND c.expires_at > NOW()');
+      whereClauses.push('o.expires_at > NOW()');
       break;
     case 'expired':
-      whereClauses.push('(c.active = FALSE OR c.expires_at <= NOW())');
+      whereClauses.push('(o.expires_at IS NULL OR o.expires_at <= NOW())');
       break;
     case 'expiring_soon':
       whereClauses.push('c.active = TRUE AND c.expires_at > NOW() AND c.expires_at <= NOW() + INTERVAL \'3 days\'');
       break;
     case 'plan':
       params.push(parseInt(targetValue || 0, 10));
-      whereClauses.push(`c.plan_id = $${params.length}`);
+      whereClauses.push(`o.plan_id = $${params.length}`);
       break;
     case 'duration':
       params.push(parseInt(targetValue || 0, 10));
-      whereClauses.push(`p.duration_days = $${params.length}`);
+      whereClauses.push(`o.duration_days = $${params.length}`);
       break;
     case 'date_range':
       if (targetValue && targetValue.includes(':')) {
         const [from, to] = targetValue.split(':');
         params.push(from);
         params.push(to);
-        whereClauses.push(`c.created_at >= $${params.length - 1}::timestamp AND c.created_at <= $${params.length}::timestamp`);
+        whereClauses.push(`o.created_at >= $${params.length - 1}::timestamp AND o.created_at <= $${params.length}::timestamp`);
       }
       break;
     case 'specific_email':
@@ -66,7 +71,7 @@ async function resolveCampaignRecipients(client, targetType, targetValue) {
     query += ' AND ' + whereClauses.join(' AND ');
   }
 
-  query += ' ORDER BY s.email, c.expires_at DESC';
+  query += ' ORDER BY s.email, o.expires_at DESC NULLS LAST';
   const res = await client.query(query, params);
   return res.rows;
 }
@@ -79,14 +84,13 @@ function renderPersonalizedHtml(templateHtml, student) {
   const email = student.email || '';
   const plan = student.plan_name || 'اشتراك TELC Voll';
   const expiresAt = student.expires_at ? new Date(student.expires_at).toLocaleDateString('ar-DZ') : '—';
-  const accessCode = student.access_code || '—';
 
   return templateHtml
     .replace(/\{\{\s*name\s*\}\}/gi, escapeHtml(name))
     .replace(/\{\{\s*email\s*\}\}/gi, escapeHtml(email))
     .replace(/\{\{\s*plan\s*\}\}/gi, escapeHtml(plan))
     .replace(/\{\{\s*expires_at\s*\}\}/gi, escapeHtml(expiresAt))
-    .replace(/\{\{\s*access_code\s*\}\}/gi, escapeHtml(accessCode));
+    
 }
 
 function wrapInOfficialTemplate(contentHtml, subject) {
@@ -215,7 +219,6 @@ exports.handler = async (event) => {
           plan_name: 'خطة 30 يوماً B1+B2+C1',
           duration_days: 30,
           expires_at: new Date(Date.now() + 30 * 86400000),
-          access_code: 'TV-DEMO-TEST-2026'
         };
 
         const personalizedHtml = renderPersonalizedHtml(rawContent, sampleStudent);

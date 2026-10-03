@@ -88,7 +88,7 @@ exports.handler = async (event) => {
       await client.query(
         `UPDATE students
          SET google_id = COALESCE(google_id, $1),
-             auth_provider = CASE WHEN auth_provider IS NULL OR auth_provider='legacy_code' THEN 'google' ELSE auth_provider END,
+             auth_provider = COALESCE(NULLIF(auth_provider, ''), 'google'),
              email_verified = TRUE,
              last_login_at = NOW(),
              updated_at = NOW()
@@ -127,7 +127,6 @@ exports.handler = async (event) => {
         phone: student.phone,
         profile_completed: student.profile_completed !== false,
       },
-      token,
     }, {
       'Set-Cookie': setCookie('student_token', token, 60 * 60 * 24 * 30),
     });

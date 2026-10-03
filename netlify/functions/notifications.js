@@ -9,11 +9,13 @@ exports.handler = async (event) => {
 
   try {
     const sub = await pool.query(
-      `SELECT c.id AS code_id, c.code, c.expires_at, c.active, c.plan_id, p.name AS plan_name, p.duration_days, s.email, s.id AS s_id
-       FROM access_codes c
-       JOIN plans p ON p.id=c.plan_id
-       JOIN students s ON s.id=c.student_id
-       WHERE c.id=$1`, [student.code_id]
+      `SELECT o.expires_at, o.plan_id, COALESCE(p.name, o.plan_name) AS plan_name,
+              p.duration_days, s.email, s.id AS s_id
+       FROM orders o
+       LEFT JOIN plans p ON p.id=o.plan_id
+       JOIN students s ON s.id=o.student_id
+       WHERE o.student_id=$1 AND o.status='CONFIRMED'
+       ORDER BY o.expires_at DESC, o.id DESC LIMIT 1`, [student.student_id]
     );
     const c = sub.rows[0];
 
@@ -23,20 +25,21 @@ exports.handler = async (event) => {
       if (ms > 0 && days <= 2) {
         await pool.query(
           `INSERT INTO notifications(student_id,type,title,message)
-           VALUES($1,'code_expiry','تجديد رمز الدخول',$2)
+           VALUES($1,'subscription_expiry','تجديد الاشتراك',$2)
            ON CONFLICT (student_id,type) DO UPDATE SET message=EXCLUDED.message`,
-          [student.student_id, `تبقى ${days} ${days === 1 ? 'يوم' : 'يومين'} على انتهاء خطة ${c.plan_name}. تواصل معنا لتجديد رمز الدخول قبل انتهاء الوصول.`]
+          [student.student_id, `تبقى ${days} ${days === 1 ? 'يوم' : 'يومين'} على انتهاء خطة ${c.plan_name || 'TELC Voll'}. يمكنك التجديد من صفحة الخطط.`]
         );
       }
       if (ms <= 0) {
         await pool.query(
           `INSERT INTO notifications(student_id,type,title,message)
-           VALUES($1,'code_expired','انتهى رمز الدخول',$2)
+           VALUES($1,'subscription_expired','انتهى الاشتراك',$2)
            ON CONFLICT (student_id,type) DO UPDATE SET message=EXCLUDED.message`,
-          [student.student_id, `انتهت صلاحية خطة ${c.plan_name}. يمكنك التواصل معنا لتجديد الاشتراك.`]
+          [student.student_id, `انتهت صلاحية خطة ${c.plan_name || 'TELC Voll'}. يمكنك تجديد الاشتراك من صفحة الخطط.`]
         );
       }
     }
+
 
     // 1. Fetch personal / system notifications
     const sysRows = await pool.query(
@@ -50,8 +53,8 @@ exports.handler = async (event) => {
     let adminList = [];
     try {
       const ms = c ? new Date(c.expires_at).getTime() - Date.now() : 0;
-      const isExpired = !c || !c.active || ms <= 0;
-      const isExpiringSoon = c && c.active && ms > 0 && ms <= 3 * 86400000;
+      const isExpired = !c || ms <= 0;
+      const isExpiringSoon = !!c && ms > 0 && ms <= 3 * 86400000;
 
       const adminQuery = `
         SELECT an.id, an.title, an.message, an.type, an.priority, an.created_at,
@@ -83,7 +86,7 @@ exports.handler = async (event) => {
               String(c.s_id) === String(an.target_value)
             );
           case 'specific_code':
-            return c && String(c.code).replace(/\s+/g, '').toUpperCase() === String(an.target_value).replace(/\s+/g, '').toUpperCase();
+            return false;
           default: return true;
         }
       });

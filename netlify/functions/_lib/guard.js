@@ -5,40 +5,25 @@ const { studentFromEvent, adminFromEvent } = require('./auth');
  * Fetch active paid subscription for a student
  */
 async function getStudentSubscription(pool, studentId) {
-  if (!studentId) return { active: false, plan: null, plan_key: null, expires_at: null, ai_enabled: false };
-  try {
-    // 1. Check access_codes for unexpired active codes
-    const codeRes = await pool.query(
-      `SELECT c.id AS code_id, c.expires_at, p.name AS plan_name, p.plan_key, p.duration_days, p.ai_enabled
-       FROM access_codes c
-       JOIN plans p ON p.id = c.plan_id
-       WHERE c.student_id = $1 AND c.active = TRUE AND c.expires_at > NOW()
-       ORDER BY c.expires_at DESC LIMIT 1`,
-      [studentId]
-    );
-    if (codeRes.rows[0]) {
-      const c = codeRes.rows[0];
-      return {
-        active: true,
-        is_paid: true,
-        plan: c.plan_name,
-        plan_name: c.plan_name,
-        plan_key: c.plan_key,
-        duration_days: c.duration_days,
-        expires_at: c.expires_at,
-        ai_enabled: !!c.ai_enabled,
-      };
-    }
+  if (!studentId) return { active: false, is_paid: false, plan: null, plan_name: null, plan_key: null, expires_at: null, ai_enabled: false };
 
-    // 2. Fallback check for CONFIRMED orders with unexpired subscription
+  try {
+    // Current source of truth: confirmed orders tied to the student.
+    // Legacy access_codes are intentionally ignored; they are no longer an
+    // authentication or subscription mechanism.
     const orderRes = await pool.query(
-      `SELECT o.id, o.expires_at, o.plan_name, p.plan_key, p.duration_days, p.ai_enabled
+      `SELECT o.id, o.expires_at, o.plan_name,
+              p.plan_key, p.duration_days, p.ai_enabled
        FROM orders o
        LEFT JOIN plans p ON p.id = o.plan_id
-       WHERE o.student_id = $1 AND o.status = 'CONFIRMED' AND o.expires_at > NOW()
-       ORDER BY o.expires_at DESC LIMIT 1`,
+       WHERE o.student_id = $1
+         AND o.status = 'CONFIRMED'
+         AND o.expires_at > NOW()
+       ORDER BY o.expires_at DESC, o.id DESC
+       LIMIT 1`,
       [studentId]
     );
+
     if (orderRes.rows[0]) {
       const o = orderRes.rows[0];
       return {
@@ -46,36 +31,40 @@ async function getStudentSubscription(pool, studentId) {
         is_paid: true,
         plan: o.plan_name,
         plan_name: o.plan_name,
-        plan_key: o.plan_key,
-        duration_days: o.duration_days,
+        plan_key: o.plan_key || 'b1_b2_c1',
+        duration_days: o.duration_days || null,
         expires_at: o.expires_at,
-        ai_enabled: o.ai_enabled !== false,
+        ai_enabled: o.ai_enabled === true,
       };
     }
 
-    // 3. Fallback check on students table directly
-    try {
-      const stRes = await pool.query(
-        `SELECT is_paid, plan_id, plan_name, subscription_expires_at FROM students WHERE id = $1`,
-        [studentId]
-      );
-      if (stRes.rows[0] && stRes.rows[0].is_paid) {
-        const st = stRes.rows[0];
-        const isUnexpired = !st.subscription_expires_at || new Date(st.subscription_expires_at) > new Date();
-        if (isUnexpired) {
-          return {
-            active: true,
-            is_paid: true,
-            plan: st.plan_name || 'اشتراك كامل B1 · B2 · C1',
-            plan_name: st.plan_name || 'اشتراك كامل B1 · B2 · C1',
-            plan_key: 'b1_b2_c1',
-            duration_days: 30,
-            expires_at: st.subscription_expires_at || new Date(Date.now() + 30 * 86400000).toISOString(),
-            ai_enabled: true,
-          };
-        }
+    // Compatibility for subscriptions created directly on the student record.
+    // This remains useful for existing customers while orders become the normal
+    // source for newly confirmed payments.
+    const stRes = await pool.query(
+      `SELECT s.is_paid, s.plan_id, s.plan_name, s.subscription_expires_at,
+              p.plan_key, p.duration_days, p.ai_enabled
+       FROM students s
+       LEFT JOIN plans p ON p.id = s.plan_id
+       WHERE s.id = $1`,
+      [studentId]
+    );
+    const st = stRes.rows[0];
+    if (st && st.is_paid === true && st.subscription_expires_at) {
+      const expires = new Date(st.subscription_expires_at);
+      if (!Number.isNaN(expires.getTime()) && expires > new Date()) {
+        return {
+          active: true,
+          is_paid: true,
+          plan: st.plan_name || 'اشتراك كامل B1 · B2 · C1',
+          plan_name: st.plan_name || 'اشتراك كامل B1 · B2 · C1',
+          plan_key: st.plan_key || 'b1_b2_c1',
+          duration_days: st.duration_days || null,
+          expires_at: expires.toISOString(),
+          ai_enabled: st.ai_enabled === true,
+        };
       }
-    } catch (_) {}
+    }
   } catch (err) {
     console.error('Error fetching student subscription:', err);
   }
@@ -96,14 +85,6 @@ async function requireStudent(event, options = {}) {
   const pool = db();
   let studentId = payload.student_id;
 
-  // Legacy fallback if only code_id is present
-  if (!studentId && payload.code_id) {
-    try {
-      const cRes = await pool.query('SELECT student_id FROM access_codes WHERE id=$1', [payload.code_id]);
-      studentId = cRes.rows[0]?.student_id;
-    } catch (_) {}
-  }
-
   if (!studentId) return null;
 
   try {
@@ -119,18 +100,6 @@ async function requireStudent(event, options = {}) {
     }
 
     const subscription = await getStudentSubscription(pool, s.id);
-    // The source of truth is an active/unexpired subscription. A legacy paid flag is
-    // accepted only when its stored expiry is still in the future.
-    const legacyExpiry = s.subscription_expires_at ? new Date(s.subscription_expires_at) : null;
-    const legacyActive = !!(s.is_paid === true && legacyExpiry && !Number.isNaN(legacyExpiry.getTime()) && legacyExpiry > new Date());
-    if (!subscription.active && legacyActive) {
-      subscription.active = true;
-      subscription.is_paid = true;
-      subscription.plan = subscription.plan || 'اشتراك كامل B1 · B2 · C1';
-      subscription.plan_name = subscription.plan_name || 'اشتراك كامل B1 · B2 · C1';
-      subscription.expires_at = subscription.expires_at || legacyExpiry.toISOString();
-      subscription.ai_enabled = subscription.ai_enabled === true;
-    }
     const isPaid = subscription.active === true;
 
     return {

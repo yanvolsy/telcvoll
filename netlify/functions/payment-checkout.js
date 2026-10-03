@@ -26,7 +26,9 @@ exports.handler = async (event) => {
   const clientIp = getClientIp(event);
   const planId = parseInt(body.plan_id, 10);
   const name = String(body.name || authStudent?.name || '').trim();
-  const email = normalizeEmail(body.email || authStudent?.email || '');
+  // When authenticated, payment identity must match the account. The browser
+  // cannot switch the order to another email by editing the checkout payload.
+  const email = normalizeEmail(authenticatedStudentId ? (authStudent?.email || '') : (body.email || ''));
   const rawPhone = String(body.phone || authStudent?.phone || '').trim();
   const cleanPhone = rawPhone.replace(/[\s\-\(\)]/g, '');
   const termsAccepted = body.terms === true || body.terms === 'true' || body.terms === 1;
@@ -50,6 +52,15 @@ exports.handler = async (event) => {
   }
 
   const pool = db();
+
+  if (authenticatedStudentId) {
+    const verifiedRes = await pool.query('SELECT email_verified, is_blocked FROM students WHERE id=$1', [authenticatedStudentId]);
+    const account = verifiedRes.rows[0];
+    if (!account || account.is_blocked) return json(403, { error: 'الحساب غير متاح للدفع.' });
+    if (account.email_verified !== true) {
+      return json(403, { error: 'يرجى تأكيد بريدك الإلكتروني قبل إتمام عملية الدفع.' });
+    }
+  }
 
   // 1. Enforce Rate Limiting & Fast Duplicate Prevention (IP & Email limits)
   const rateLimit = await checkPaymentRateLimit(pool, { ip: clientIp, email, planId });
@@ -104,12 +115,10 @@ exports.handler = async (event) => {
   }
 
   // Server-side price resolution — NEVER trust price from browser. body.amount is strictly ignored!
-  let amount = Number(plan.price_dzd);
-  if (!amount || isNaN(amount) || amount <= 0) {
-    if (plan.duration_days <= 15) amount = 1500;
-    else if (plan.duration_days <= 30) amount = 2500;
-    else if (plan.duration_days <= 90) amount = 6000;
-    else amount = 10000;
+  const amount = Number(plan.price_dzd);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    safeLog('PLAN_PRICE_MISSING', { planId: plan.id });
+    return json(500, { error: 'سعر الخطة غير مضبوط في إعدادات المنصة. يرجى التواصل مع الإدارة.' });
   }
 
   // Enforce payment amount boundaries (500 DZD <= amount <= 500,000 DZD)

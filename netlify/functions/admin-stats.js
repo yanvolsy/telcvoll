@@ -10,8 +10,8 @@ exports.handler = async (event) => {
     await ensureSchema(pool);
   } catch (_) {}
 
-  const tables = ['students', 'access_codes', 'exercises', 'exams', 'attempts'];
-  const stats = { students: 0, access_codes: 0, exercises: 0, exams: 0, attempts: 0 };
+  const tables = ['students', 'exercises', 'exams', 'attempts'];
+  const stats = { students: 0, exercises: 0, exams: 0, attempts: 0, active_subscriptions: 0 };
 
   for (const t of tables) {
     try {
@@ -22,6 +22,13 @@ exports.handler = async (event) => {
       console.warn(`[admin-stats] count error for ${t}:`, err.message);
       stats[t] = 0;
     }
+  }
+
+  try {
+    const { rows } = await pool.query("SELECT COUNT(*)::int AS n FROM students WHERE is_paid=TRUE AND subscription_expires_at > NOW()");
+    stats.active_subscriptions = rows[0]?.n || 0;
+  } catch (err) {
+    console.warn('[admin-stats] active subscription count failed:', err.message);
   }
 
   return json(200, { stats });
