@@ -88,7 +88,7 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return json(405,{error:'Method not allowed.'});
   const student = await requireStudent(event);
   if (!student) return json(401,{error:'unauthenticated'});
-  if (!student.ai_enabled) return json(403,{error:'AI is not included in your plan.'});
+  if (!student.is_paid || !student.subscription?.active) return json(403,{error:'AI assistant requires an active subscription.',code:'SUBSCRIPTION_REQUIRED'});
   if (!await rateLimit('ai_telc_chat',30,3600,String(student.student_id))) return json(429,{error:'You have reached the AI usage limit for this hour.'});
 
   let body={};
