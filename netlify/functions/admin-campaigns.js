@@ -1,7 +1,7 @@
 const { db } = require('./_lib/db');
 const { json } = require('./_lib/auth');
 const { requireAdmin } = require('./_lib/guard');
-const { sendEmail } = require('./_lib/email');
+const { sendEmail, wrapBrandedEmail, escapeHtml } = require('./_lib/email');
 const { requireSameOrigin, requestSize } = require('./_lib/request');
 
 /**
@@ -94,46 +94,9 @@ function renderPersonalizedHtml(templateHtml, student) {
 }
 
 function wrapInOfficialTemplate(contentHtml, subject) {
-  const siteUrl = process.env.SITE_URL || 'https://telcvoll.de';
-  return `<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${escapeHtml(subject)}</title>
-  <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Cairo', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f6f8f7; margin: 0; padding: 0; color: #1a2e26; direction: rtl; text-align: right; }
-    .container { max-width: 600px; margin: 25px auto; background: #ffffff; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.06); border: 1px solid #e1e8e5; }
-    .header { background: #0d1310; padding: 28px 30px; text-align: center; color: #ffffff; }
-    .brand { font-size: 24px; font-weight: 900; color: #ffffff; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
-    .dot { width: 10px; height: 10px; background-color: #f47b20; border-radius: 50%; display: inline-block; }
-    .content { padding: 35px 30px; line-height: 1.8; font-size: 15px; color: #2d4239; }
-    .footer { background: #fbfdfc; border-top: 1px solid #e1e8e5; padding: 22px; text-align: center; font-size: 12px; color: #83978f; line-height: 1.6; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <div class="brand"><span class="dot"></span> TELC Voll</div>
-    </div>
-    <div class="content">
-      ${contentHtml}
-    </div>
-    <div class="footer">
-      <strong>TELC Voll</strong><br>
-      German Exam Preparation Platform · B1 · B2 · C1<br>
-      <a href="${siteUrl}" style="color:#f47b20; text-decoration:none;">${siteUrl}</a>
-    </div>
-  </div>
-</body>
-</html>`;
+  return wrapBrandedEmail(contentHtml, subject);
 }
 
-function escapeHtml(str) {
-  return String(str ?? '').replace(/[&<>"']/g, c => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-  }[c]));
-}
 
 exports.handler = async (event) => {
   if (!requireSameOrigin(event)) return json(403, { error: 'Cross-origin request blocked.' });

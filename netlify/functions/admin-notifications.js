@@ -1,7 +1,7 @@
 const { db } = require('./_lib/db');
 const { json } = require('./_lib/auth');
 const { requireAdmin } = require('./_lib/guard');
-const { sendEmail } = require('./_lib/email');
+const { sendEmail, wrapBrandedEmail, escapeHtml } = require('./_lib/email');
 const { requireSameOrigin, requestSize } = require('./_lib/request');
 
 /**
@@ -164,23 +164,14 @@ exports.handler = async (event) => {
         const recipients = await resolveRecipients(client, targetType, targetValue);
         let sent = 0, failed = 0;
 
-        const emailHtml = `
-          <div style="font-family: Cairo, Arial, sans-serif; direction: rtl; text-align: right; max-width: 600px; margin: auto; padding: 20px; background: #fff; border: 1px solid #e1e8e5; border-radius: 16px;">
-            <div style="background: #0d1310; padding: 20px; border-radius: 12px; text-align: center; color: #fff;">
-              <h2 style="margin: 0; color: #fff;"><span style="color: #f47b20;">●</span> TELC Voll</h2>
-            </div>
-            <div style="padding: 24px 10px;">
-              <h1 style="font-size: 20px; color: #0d1310; margin-bottom: 12px;">${escapeHtml(title)}</h1>
-              <div style="font-size: 15px; line-height: 1.8; color: #3d5249; white-space: pre-wrap;">${escapeHtml(message)}</div>
-              <div style="margin-top: 30px; text-align: center;">
-                <a href="${process.env.SITE_URL || 'https://telcvoll.de'}" style="display: inline-block; background: #f47b20; color: #fff; text-decoration: none; padding: 12px 28px; border-radius: 10px; font-weight: bold;">فتح منصة TELC Voll ←</a>
-              </div>
-            </div>
-            <div style="border-top: 1px solid #e1e8e5; padding-top: 15px; text-align: center; font-size: 12px; color: #83978f;">
-              منصة TELC Voll للتدريب على الامتحانات · B1 · B2 · C1
-            </div>
+        const emailContent = `
+          <h1 style="font-size:22px;color:#0d1310;margin:0 0 14px;font-weight:900;">${escapeHtml(title)}</h1>
+          <div style="font-size:15px;line-height:1.9;color:#3d5249;white-space:pre-wrap;">${escapeHtml(message)}</div>
+          <div style="margin-top:30px;text-align:center;">
+            <a href="${escapeHtml(process.env.SITE_URL || 'https://telcvoll.de')}" target="_blank" style="display:inline-block;background:#f47b20;color:#fff;text-decoration:none;padding:12px 28px;border-radius:10px;font-weight:900;">فتح منصة TELC Voll ←</a>
           </div>
         `;
+        const emailHtml = wrapBrandedEmail(emailContent, title, { compact: true });
 
         for (const r of recipients) {
           if (!r.email) continue;
@@ -202,8 +193,3 @@ exports.handler = async (event) => {
   return json(405, { error: 'Method not allowed' });
 };
 
-function escapeHtml(str) {
-  return String(str ?? '').replace(/[&<>"']/g, c => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-  }[c]));
-}
