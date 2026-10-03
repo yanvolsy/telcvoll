@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0F1B1A"><title data-i18n-title="chat_page_title">مساعد TELC</title>
-<link rel="stylesheet" href="/assets/app.css?v=20260928-polished-v1">
+<link rel="stylesheet" href="/assets/app.css?v=20261003-ai-chat-v1">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
@@ -13,8 +13,8 @@
 html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
 html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}</style>
 </head>
-<body>
-<header class="top">
+<body class="telc-ai-body">
+<header class="top telc-ai-top">
   <a class="brand" href="/dashboard.html"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
   <nav class="student-nav-links">
     <a href="/dashboard.html" data-i18n="nav_home_student">منصة الطالب</a>
@@ -24,36 +24,60 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
     <a href="#" id="logoutLink" data-i18n="nav_logout" class="nav-logout-btn">خروج</a>
   </nav>
 </header>
-<main class="telc-chat-page">
-  <section class="telc-chat-shell">
-    <div class="telc-chat-head">
-      <div>
-        <span class="tag" data-i18n="chat_tag">TELC Voll AI Mentor</span>
-        <h1 data-i18n="chat_title">مساعد TELC ومستشار ألمانيا الذكي</h1>
-        <p class="muted" data-i18n="chat_desc">اسألني صوتيًا أو كتابيًا عن امتحان TELC، تعلم اللغة الألمانية، أو متطلبات الدراسة، الأوسبيلدونغ (Ausbildung)، بطاقة الفرصة (Chancenkarte)، والاعتراف المهني (Anerkennung) في ألمانيا.</p>
+<main class="telc-ai-page">
+  <section class="telc-ai-app" aria-label="TELC Voll AI">
+    <header class="telc-ai-header">
+      <div class="telc-ai-identity">
+        <div class="telc-ai-logo" aria-hidden="true">TV</div>
+        <div>
+          <div class="telc-ai-name">TELC Voll AI</div>
+          <div class="telc-ai-status"><span class="telc-ai-status-dot"></span><span id="aiStatusText">جاهز للمحادثة</span></div>
+        </div>
       </div>
-      <div class="chat-voice-toggle-wrap">
-        <button type="button" class="btn light chat-voice-toggle" id="ttsToggleBtn" aria-pressed="true">
-          <span id="ttsToggleIcon">🔊</span>
-          <span id="ttsToggleLabel">صوت المساعد: مفعل</span>
+      <div class="telc-ai-header-actions">
+        <button type="button" class="ai-header-btn" id="newChatBtn" title="محادثة جديدة" aria-label="محادثة جديدة">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+        <button type="button" class="ai-header-btn" id="ttsToggleBtn" aria-pressed="true" title="الصوت">
+          <svg id="ttsIconSvg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6l-5 4H4Zm12.5-1.5a5 5 0 0 1 0 7M18.5 6a9 9 0 0 1 0 12"/></svg>
         </button>
       </div>
-    </div>
-    <div id="chatMessages" class="telc-chat-messages" aria-live="polite">
-      <div id="welcome" class="telc-chat-welcome">
-        <div class="telc-chat-welcome-icon">✦</div>
-        <h2 data-i18n="chat_welcome_title">مساعدك الذكي للدراسة وألمانيا</h2>
-        <p data-i18n="chat_welcome_desc">مرحباً بك! أنا هنا لمساعدتك في التحضير لشهادة TELC (B1, B2, C1)، الإجابة على استفسارات القواعد والكتابة والتحدث، وإرشادك في مسار الدراسة والفيزا والعمل في ألمانيا 🇩🇪. يمكنك التحدث معي صوتيًا أو كتابيًا.</p>
+    </header>
+
+    <div id="chatMessages" class="telc-ai-messages" aria-live="polite" aria-atomic="false">
+      <div id="welcome" class="telc-ai-welcome">
+        <div class="telc-ai-welcome-mark">TV</div>
+        <h1>كيف يمكنني مساعدتك؟</h1>
+        <p>اسأل عن TELC، تعلم الألمانية، أو الدراسة والعمل في ألمانيا.</p>
+        <div class="telc-ai-suggestions">
+          <button type="button" data-prompt="اشرح لي الفرق بين obwohl و trotzdem مع أمثلة على مستوى B2">اشرح قاعدة ألمانية</button>
+          <button type="button" data-prompt="كيف أستعد لجزء Schreiben في TELC B2؟">حضّرني لـ Schreiben</button>
+          <button type="button" data-prompt="أعطني محادثة قصيرة للتدرب على Sprechen B2">تدرّب على Sprechen</button>
+        </div>
       </div>
     </div>
-    <form id="chatForm" class="telc-chat-form">
-      <div class="chat-input-bar">
-        <button type="button" class="icon-btn voice-input-btn" id="micBtn" title="تحدث عبر الميكروفون" aria-label="تسجيل صوتي">🎙️</button>
-        <textarea id="chatInput" rows="2" maxlength="4000" data-i18n-ph="chat_placeholder" placeholder="اكتب سؤالك أو اضغط على الميكروفون للتحدث…" required></textarea>
+
+    <div id="voiceStatus" class="telc-ai-voice-status" hidden>
+      <div class="voice-orb" id="voiceOrb"><span></span><span></span><span></span><span></span><span></span></div>
+      <div class="voice-status-copy"><strong id="voiceStatusTitle">استمع إليك الآن</strong><span id="voiceStatusSub">تحدث بشكل طبيعي، وسأرد عليك صوتياً.</span></div>
+      <button type="button" id="voiceStopBtn" class="voice-stop-btn">إيقاف</button>
+    </div>
+
+    <form id="chatForm" class="telc-ai-composer">
+      <div class="telc-ai-composer-inner">
+        <textarea id="chatInput" rows="1" maxlength="4000" data-i18n-ph="chat_placeholder" placeholder="اكتب رسالتك…" required></textarea>
+        <div class="telc-ai-composer-actions">
+          <button type="button" class="composer-icon-btn" id="voiceModeBtn" title="محادثة صوتية" aria-label="محادثة صوتية">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15a3 3 0 0 0 3-3V7a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3Zm-7-3a7 7 0 0 0 14 0M12 19v3M8 22h8"/></svg>
+          </button>
+          <button type="submit" class="composer-send-btn" id="sendBtn" aria-label="إرسال">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 4 16 8-16 8 3-8-3-8Zm3 8h13"/></svg>
+          </button>
+        </div>
       </div>
-      <button class="btn" id="sendBtn" type="submit" data-i18n="chat_send">إرسال ↑</button>
+      <div class="telc-ai-composer-hint"><span>Enter للإرسال</span><span>Shift + Enter لسطر جديد</span></div>
     </form>
-    <p class="telc-chat-note" data-i18n="chat_note">مساعدك الدراسي معزز بالذكاء الاصطناعي لمساعدتك في كل مراحل TELC وألمانيا.</p>
+    <p class="telc-ai-disclaimer">قد يخطئ الذكاء الاصطناعي. تحقّق من المعلومات الرسمية المتعلقة بالتأشيرات والقوانين.</p>
   </section>
 </main>
 <script src="/assets/i18n.js?v=20260927-subscription-activation-mail-v10"></script><script src="/assets/app.js"></script>
@@ -61,191 +85,150 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 const $ = id => document.getElementById(id);
 let history = [];
 let sending = false;
-let ttsEnabled = localStorage.getItem('telc_chat_tts') !== 'false';
+let voiceMode = false;
 let recognition = null;
 let isRecording = false;
+let recognitionShouldRestart = false;
+let ttsEnabled = localStorage.getItem('telc_chat_tts') !== 'false';
+
+const icons = {
+  copy:'<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>',
+  speak:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h4l5 4V6l-5 4H4Zm12.5-1.5a5 5 0 0 1 0 7M18.5 6a9 9 0 0 1 0 12"/></svg>'
+};
 
 function updateTtsUi(){
   $('ttsToggleBtn').setAttribute('aria-pressed', String(ttsEnabled));
-  $('ttsToggleIcon').textContent = ttsEnabled ? '🔊' : '🔇';
-  $('ttsToggleLabel').textContent = ttsEnabled ? 'صوت المساعد: مفعل' : 'صوت المساعد: معطل';
+  $('ttsIconSvg').innerHTML = ttsEnabled
+    ? '<path d="M4 10v4h4l5 4V6l-5 4H4Zm12.5-1.5a5 5 0 0 1 0 7M18.5 6a9 9 0 0 1 0 12"/>'
+    : '<path d="M4 10v4h4l5 4V6l-5 4H4ZM18 9l-4 6m0-6 4 6"/>';
 }
-$('ttsToggleBtn').onclick = () => {
-  ttsEnabled = !ttsEnabled;
-  localStorage.setItem('telc_chat_tts', String(ttsEnabled));
-  updateTtsUi();
-  if(!ttsEnabled) window.speechSynthesis.cancel();
-};
+$('ttsToggleBtn').onclick=()=>{ ttsEnabled=!ttsEnabled; localStorage.setItem('telc_chat_tts',String(ttsEnabled)); updateTtsUi(); if(!ttsEnabled) speechSynthesis?.cancel(); };
 updateTtsUi();
 
-function speakText(text){
-  if(!('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  // Detect language: if mostly latin characters, use German, else Arabic
-  const latinCount = (text.match(/[A-Za-zäöüÄÖÜß]/g) || []).length;
-  const arabicCount = (text.match(/[\u0600-\u06FF]/g) || []).length;
-  u.lang = latinCount >= arabicCount ? 'de-DE' : 'ar-SA';
-  u.rate = 0.95;
-  window.speechSynthesis.speak(u);
+function detectSpeechLang(text=''){
+  const de=(text.match(/[äöüÄÖÜß]/g)||[]).length + (text.match(/\b(der|die|das|und|ich|nicht|ist|für|mit)\b/gi)||[]).length;
+  const ar=(text.match(/[\u0600-\u06FF]/g)||[]).length;
+  return ar>de ? 'ar-SA' : 'de-DE';
+}
+function speakText(text, onEnd){
+  if(!('speechSynthesis' in window) || !text) { onEnd?.(); return; }
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text.replace(/[*_`#>]/g,''));
+  u.lang=detectSpeechLang(text); u.rate=.98; u.pitch=1;
+  u.onend=()=>onEnd?.();
+  u.onerror=()=>onEnd?.();
+  speechSynthesis.speak(u);
 }
 
-// Setup Speech Recognition
-const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-if(SpeechRec){
-  recognition = new SpeechRec();
-  recognition.continuous = false;
-  recognition.interimResults = false;
-  recognition.lang = getLang() === 'de' ? 'de-DE' : 'ar-SA';
-
-  recognition.onstart = () => {
-    isRecording = true;
-    $('micBtn').classList.add('recording-active');
-    $('micBtn').title = 'جارٍ الاستماع… اضغط للتوقف';
-  };
-  recognition.onresult = (ev) => {
-    const transcript = ev.results[0][0].transcript;
-    if(transcript){
-      const cur = $('chatInput').value;
-      $('chatInput').value = cur ? cur + ' ' + transcript : transcript;
-      $('chatInput').focus();
-    }
-  };
-  recognition.onerror = () => {
-    isRecording = false;
-    $('micBtn').classList.remove('recording-active');
-    $('micBtn').title = 'تحدث عبر الميكروفون';
-  };
-  recognition.onend = () => {
-    isRecording = false;
-    $('micBtn').classList.remove('recording-active');
-    $('micBtn').title = 'تحدث عبر الميكروفون';
-  };
-
-  $('micBtn').onclick = () => {
-    if(isRecording){
-      recognition.stop();
-    } else {
-      try {
-        recognition.lang = getLang() === 'de' ? 'de-DE' : 'ar-SA';
-        recognition.start();
-      } catch(_) {}
-    }
-  };
-} else {
-  $('micBtn').style.display = 'none';
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function inlineMarkdown(s){
+  let x=esc(s);
+  x=x.replace(/`([^`]+)`/g,'<code>$1</code>');
+  x=x.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g,'<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+  x=x.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+  x=x.replace(/__([^_]+)__/g,'<strong>$1</strong>');
+  x=x.replace(/~~([^~]+)~~/g,'<del>$1</del>');
+  x=x.replace(/\*([^*\n]+)\*/g,'<em>$1</em>');
+  x=x.replace(/_([^_\n]+)_/g,'<em>$1</em>');
+  return x;
 }
-
-function esc(s){
-  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-function add(role, text, allowTts = true){
-  const welcome = $('welcome');
-  if (welcome) welcome.remove();
-  const el = document.createElement('div');
-  el.className = 'telc-chat-msg ' + role;
-  const ttsBtn = role === 'assistant' ? `<button type="button" class="bubble-tts-btn" title="استماع للإجابة">🔊</button>` : '';
-  el.innerHTML = '<div class="telc-chat-avatar">' + (role === 'assistant' ? 'AI' : 'أنت') + '</div>' +
-    '<div class="telc-chat-bubble">' +
-      '<div class="telc-chat-bubble-content">' + esc(text).replace(/\n/g,'<br>') + '</div>' +
-      ttsBtn +
-    '</div>';
-  $('chatMessages').appendChild(el);
-  $('chatMessages').scrollTop = $('chatMessages').scrollHeight;
-
-  const btn = el.querySelector('.bubble-tts-btn');
-  if(btn) btn.onclick = () => speakText(text);
-
-  if(role === 'assistant' && allowTts && ttsEnabled){
-    speakText(text);
+function renderMarkdown(md){
+  const text=String(md||'').replace(/\r\n?/g,'\n').trim();
+  if(!text) return '';
+  const lines=text.split('\n'); let out='', inCode=false, code=[];
+  const closeCode=()=>{ if(inCode){ out+='<pre><code>'+esc(code.join('\n'))+'</code></pre>'; code=[]; inCode=false; }};
+  let list=null;
+  const closeList=()=>{if(list){out+='</'+list+'>';list=null;}};
+  for(let i=0;i<lines.length;i++){
+    const line=lines[i];
+    if(/^```/.test(line.trim())){ if(inCode) closeCode(); else {closeList();inCode=true;} continue; }
+    if(inCode){code.push(line);continue;}
+    if(!line.trim()){closeList();continue;}
+    const h=line.match(/^\s{0,3}#{1,3}\s+(.+)$/);
+    if(h){closeList(); const lvl=Math.min(3,(line.match(/^\s*(#+)/)||['','#'])[1].length); out+=`<h${lvl}>${inlineMarkdown(h[1])}</h${lvl}>`;continue;}
+    const bullet=line.match(/^\s*[-*+]\s+(.+)$/);
+    if(bullet){if(list!=='ul'){closeList();out+='<ul>';list='ul';} out+='<li>'+inlineMarkdown(bullet[1])+'</li>';continue;}
+    const num=line.match(/^\s*\d+[.)]\s+(.+)$/);
+    if(num){if(list!=='ol'){closeList();out+='<ol>';list='ol';} out+='<li>'+inlineMarkdown(num[1])+'</li>';continue;}
+    if(/^\s*>/.test(line)){closeList();out+='<blockquote>'+inlineMarkdown(line.replace(/^\s*>\s?/,'') )+'</blockquote>';continue;}
+    closeList();
+    out+='<p>'+inlineMarkdown(line)+'</p>';
   }
+  closeList(); closeCode();
+  return out;
 }
-function showTyping(){
-  const old = $('typing'); if (old) old.remove();
-  const el = document.createElement('div');
-  el.id='typing'; el.className='telc-chat-msg assistant';
-  el.innerHTML='<div class="telc-chat-avatar">AI</div><div class="telc-chat-bubble telc-chat-typing"><i></i><i></i><i></i></div>';
+function plainText(md){return String(md||'').replace(/```[\s\S]*?```/g,' ').replace(/[#*_>`]/g,'').replace(/\[([^\]]+)\]\([^)]*\)/g,'$1').trim();}
+
+function scrollBottom(){const box=$('chatMessages');box.scrollTo({top:box.scrollHeight,behavior:'smooth'});}
+function addMessage(role,text,{speak=true,stream=true}={}){
+  $('welcome')?.remove();
+  const el=document.createElement('article'); el.className='telc-ai-message '+role;
+  const isAssistant=role==='assistant';
+  el.innerHTML=`<div class="telc-ai-message-inner">${isAssistant?'<div class="telc-ai-avatar" aria-hidden="true">TV</div>':''}<div class="telc-ai-message-body"><div class="telc-ai-message-content"></div>${isAssistant?`<div class="telc-ai-message-tools"><button type="button" class="msg-tool copy-tool" title="نسخ">${icons.copy}</button><button type="button" class="msg-tool speak-tool" title="استماع">${icons.speak}</button></div>`:''}</div></div>`;
   $('chatMessages').appendChild(el);
-  $('chatMessages').scrollTop = $('chatMessages').scrollHeight;
+  const content=el.querySelector('.telc-ai-message-content');
+  const finish=()=>{ content.innerHTML=renderMarkdown(text); scrollBottom(); };
+  if(!stream || !isAssistant){ content.textContent=text; }
+  else {
+    const clean=String(text); let i=0; const step=()=>{i=Math.min(clean.length,i+Math.max(3,Math.ceil(clean.length/90))); content.innerHTML=renderMarkdown(clean.slice(0,i)); scrollBottom(); if(i<clean.length) requestAnimationFrame(step); else { finish(); if(speak&&ttsEnabled) speakText(plainText(clean)); }}; requestAnimationFrame(step);
+  }
+  const copy=el.querySelector('.copy-tool'); if(copy) copy.onclick=async()=>{try{await navigator.clipboard.writeText(plainText(text));copy.classList.add('done');setTimeout(()=>copy.classList.remove('done'),900);}catch{}};
+  const sb=el.querySelector('.speak-tool'); if(sb) sb.onclick=()=>speakText(plainText(text));
+  if(!isAssistant) scrollBottom();
+  return el;
 }
-function hideTyping(){ const el=$('typing'); if(el) el.remove(); }
+function showTyping(){hideTyping();const el=document.createElement('div');el.id='typing';el.className='telc-ai-message assistant';el.innerHTML='<div class="telc-ai-message-inner"><div class="telc-ai-avatar">TV</div><div class="telc-ai-message-body"><div class="telc-ai-typing"><i></i><i></i><i></i></div></div></div>'; $('chatMessages').appendChild(el);scrollBottom();}
+function hideTyping(){ $('typing')?.remove(); }
 
 async function sendMessage(message){
-  const previousHistory = history.slice(-12);
-  const res = await fetch('/api/ai-telc-chat', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    credentials:'same-origin',
-    body:JSON.stringify({message, history:previousHistory, lang:getLang()})
-  });
-  const raw = await res.text();
-  let data = {};
-  try { data = JSON.parse(raw); } catch {}
-  if (!res.ok) throw new Error(data.error || data.details || ('خطأ من الخادم: HTTP ' + res.status));
-  if (!data.answer) throw new Error('لم يرجع المساعد إجابة.');
+  const previousHistory=history.slice(-12);
+  const res=await fetch('/api/ai-telc-chat',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({message,history:previousHistory,lang:getLang()})});
+  const raw=await res.text(); let data={}; try{data=JSON.parse(raw)}catch{}
+  if(!res.ok) throw new Error(data.error||data.details||('خطأ من الخادم: HTTP '+res.status));
+  if(!data.answer) throw new Error('لم يرجع المساعد إجابة.');
   return data.answer;
 }
 
-$('chatForm').addEventListener('submit', async e => {
-  e.preventDefault();
-  if (sending) return;
-  const input=$('chatInput'), btn=$('sendBtn'), message=input.value.trim();
-  if(!message) return;
-  sending=true;
-  add('user', message);
-  input.value=''; input.style.height='58px'; btn.disabled=true; btn.textContent=t('chat_sending');
-  showTyping();
-  try {
-    const answer = await sendMessage(message);
-    hideTyping();
-    add('assistant', answer);
-    history.push({role:'user', content:message});
-    history.push({role:'assistant', content:answer});
-  } catch(err) {
-    hideTyping();
-    add('assistant', t('chat_error') + '\n' + (err.message || t('chat_unknown_error')));
-  } finally {
-    sending=false; btn.disabled=false; btn.textContent=t('chat_send'); input.focus();
-  }
-});
-
-$('chatInput').addEventListener('keydown', e => {
-  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); $('chatForm').requestSubmit(); }
-});
-$('chatInput').addEventListener('input', e => {
-  e.target.style.height='auto'; e.target.style.height=Math.min(e.target.scrollHeight,180)+'px';
-});
-$('logoutLink').onclick=async e=>{
-  e.preventDefault();
-  try { await fetch('/api/auth-logout',{method:'POST',credentials:'same-origin'}); } catch {}
-  location.href='/';
-};
-document.addEventListener('langchange', () => { applyI18n(); if (!sending) $('sendBtn').textContent=t('chat_send'); });
-
-(async()=>{
-  try {
-    const r=await fetch('/api/me',{credentials:'same-origin'});
-    if(!r.ok) { location.href='/login.html?error=session'; return; }
-    const d=await r.json();
-    if (!d.is_paid || !d.ai_enabled) {
-      const isDe = (typeof getLang === 'function' && getLang() === 'de');
-      const shell = document.querySelector('.telc-chat-shell');
-      if (shell) {
-        shell.innerHTML = `
-          <div class="empty-panel" style="margin:40px auto;max-width:560px;text-align:center;padding:40px 28px;background:var(--white);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow-lg)">
-            <div style="width:64px;height:64px;border-radius:20px;background:var(--green-soft);color:var(--green);font-size:32px;display:grid;place-items:center;margin:0 auto 20px;">✦</div>
-            <span class="tag" style="margin-bottom:12px;">${isDe ? 'Exklusives Feature' : 'ميزة حصرية للمشتركين'}</span>
-            <h2 style="margin:8px 0 12px;font-size:24px;color:var(--ink);">${isDe ? 'TELC Assistent ist für Abonnenten verfügbar' : 'مساعد TELC الذكي متاح في الباقات المدفوعة'}</h2>
-            <p class="muted" style="margin:0 0 28px;line-height:1.75;font-size:14.5px;">${isDe ? 'Der KI-Assistent bietet Sprach- und Textberatung zur Prüfungsvorbereitung und zu Aufenthaltswegen in Deutschland. Schalten Sie jetzt Ihren Vollzugang frei.' : 'يتيح لك مساعد TELC الصوتي والكتابي الاستفسار عن كافة تفاصيل الامتحان، نماذج الحل، وشروط الدراسة والعمل في ألمانيا. اشترك الآن في إحدى باقات المنصة لتفعيل المساعد الذكي.'}</p>
-            <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-              <a class="btn" href="/plans.html" style="padding:12px 26px;font-size:15px;font-weight:900;">${isDe ? 'Pläne ansehen & Freischalten ⚡' : 'عرض الخطط والاشتراك الآن ⚡'}</a>
-              <a class="btn light" href="/dashboard.html">${isDe ? 'Zurück zum Dashboard' : 'العودة لمنصة الطالب'}</a>
-            </div>
-          </div>
-        `;
-      }
+async function handleMessage(message,{fromVoice=false}={}){
+  if(sending || !message.trim()) return;
+  sending=true; $('sendBtn').disabled=true; $('voiceModeBtn').disabled=true;
+  addMessage('user',message,{stream:false});
+  $('chatInput').value=''; autoGrow(); showTyping(); setAiStatus('يكتب الآن…');
+  try{
+    const answer=await sendMessage(message); hideTyping();
+    history.push({role:'user',content:message}); history.push({role:'assistant',content:answer});
+    addMessage('assistant',answer,{speak:fromVoice||ttsEnabled,stream:true});
+    setAiStatus(voiceMode?'استمع إليك الآن':'جاهز للمحادثة');
+    if(fromVoice && voiceMode){
+      const waitForSpeech=()=>{ if('speechSynthesis' in window && speechSynthesis.speaking){ setTimeout(waitForSpeech,300); } else startRecognition(); };
+      waitForSpeech();
     }
-  } catch { location.href='/login.html?error=session'; }
-})();
+  }catch(err){ hideTyping(); addMessage('assistant','تعذر إكمال الرد.\n\n'+(err.message||'حدث خطأ غير متوقع.'),{speak:false,stream:true}); setAiStatus(voiceMode?'لم أتمكن من إكمال الرد':'جاهز للمحادثة'); if(fromVoice&&voiceMode) startRecognition(); }
+  finally{sending=false;$('sendBtn').disabled=false;$('voiceModeBtn').disabled=false;}
+}
+$('chatForm').addEventListener('submit',e=>{e.preventDefault();const m=$('chatInput').value.trim();if(m)handleMessage(m);});
+$('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('chatForm').requestSubmit();}});
+function autoGrow(){const x=$('chatInput');x.style.height='auto';x.style.height=Math.min(x.scrollHeight,180)+'px';}
+$('chatInput').addEventListener('input',autoGrow);
+document.querySelectorAll('[data-prompt]').forEach(b=>b.onclick=()=>{ $('chatInput').value=b.dataset.prompt; autoGrow(); $('chatInput').focus(); });
+$('newChatBtn').onclick=()=>{history=[];speechSynthesis?.cancel();$('chatMessages').innerHTML='<div id="welcome" class="telc-ai-welcome"><div class="telc-ai-welcome-mark">TV</div><h1>كيف يمكنني مساعدتك؟</h1><p>اسأل عن TELC، تعلم الألمانية، أو الدراسة والعمل في ألمانيا.</p><div class="telc-ai-suggestions"><button type="button" data-prompt="اشرح لي الفرق بين obwohl و trotzdem مع أمثلة على مستوى B2">اشرح قاعدة ألمانية</button><button type="button" data-prompt="كيف أستعد لجزء Schreiben في TELC B2؟">حضّرني لـ Schreiben</button><button type="button" data-prompt="أعطني محادثة قصيرة للتدرب على Sprechen B2">تدرّب على Sprechen</button></div></div>'; document.querySelectorAll('[data-prompt]').forEach(b=>b.onclick=()=>{$('chatInput').value=b.dataset.prompt;autoGrow();$('chatInput').focus();});};
+
+function setAiStatus(t){$('aiStatusText').textContent=t;}
+function setVoiceUi(active){$('voiceStatus').hidden=!active;$('voiceModeBtn').classList.toggle('active',active); if(!active){$('voiceStatusTitle').textContent='استمع إليك الآن';$('voiceStatusSub').textContent='تحدث بشكل طبيعي، وسأرد عليك صوتياً.';}}
+const SpeechRec=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(SpeechRec){
+ recognition=new SpeechRec(); recognition.continuous=true; recognition.interimResults=true; recognition.maxAlternatives=1;
+ recognition.onstart=()=>{isRecording=true;setVoiceUi(true);$('voiceStatusTitle').textContent='أستمع إليك…';$('voiceStatusSub').textContent='تحدث بشكل طبيعي. سأتوقف عندما تنتهي.';setAiStatus('يستمع إليك…');$('voiceOrb').classList.add('listening');};
+ recognition.onresult=ev=>{let finalText='';let interim='';for(let i=ev.resultIndex;i<ev.results.length;i++){const t=ev.results[i][0].transcript;if(ev.results[i].isFinal)finalText+=t;else interim+=t;}if(interim){$('voiceStatusSub').textContent=interim;}if(finalText.trim()){const current=$('chatInput').value.trim();$('chatInput').value=(current+' '+finalText).trim();autoGrow();clearTimeout(window.__voiceSendTimer);window.__voiceSendTimer=setTimeout(()=>{const m=$('chatInput').value.trim();if(m&&!sending){recognitionShouldRestart=voiceMode;try{recognition.stop()}catch{};handleMessage(m,{fromVoice:true});}},650);}};
+ recognition.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed'){voiceMode=false;setVoiceUi(false);setAiStatus('الميكروفون غير متاح');}else if(voiceMode&&!sending){setTimeout(startRecognition,450);}};
+ recognition.onend=()=>{isRecording=false;$('voiceOrb').classList.remove('listening');if(voiceMode&&!sending&&recognitionShouldRestart){recognitionShouldRestart=false;setTimeout(startRecognition,250);}else if(!voiceMode){setVoiceUi(false);setAiStatus('جاهز للمحادثة');}};
+}else{$('voiceModeBtn').disabled=true;$('voiceModeBtn').title='المحادثة الصوتية غير مدعومة في هذا المتصفح';}
+function startRecognition(){if(!recognition||sending||!voiceMode)return;try{recognition.lang=getLang()==='de'?'de-DE':'ar-SA';recognitionShouldRestart=true;recognition.start();}catch{}}
+function stopVoice(){voiceMode=false;recognitionShouldRestart=false;try{recognition?.stop()}catch{};speechSynthesis?.cancel();setVoiceUi(false);setAiStatus('جاهز للمحادثة');}
+$('voiceModeBtn').onclick=()=>{if(!recognition)return;if(voiceMode)stopVoice();else{voiceMode=true;setVoiceUi(true);startRecognition();}};
+$('voiceStopBtn').onclick=stopVoice;
+$('logoutLink').onclick=async e=>{e.preventDefault();try{await fetch('/api/auth-logout',{method:'POST',credentials:'same-origin'});}catch{}location.href='/';};
+document.addEventListener('langchange',()=>{applyI18n();});
+(async()=>{try{const r=await fetch('/api/me',{credentials:'same-origin'});if(!r.ok){location.href='/login.html?next='+encodeURIComponent('/telc-chat.html');return;}const me=await r.json();if(me?.student&&!me.student.ai_enabled){$('chatInput').disabled=true;$('sendBtn').disabled=true;$('voiceModeBtn').disabled=true;setAiStatus('المساعد غير متاح في خطتك');}}catch{location.href='/login.html?next='+encodeURIComponent('/telc-chat.html');}})();
 </script>
 </body></html>
