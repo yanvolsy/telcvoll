@@ -51,11 +51,23 @@ exports.handler = async (event) => {
              WHEN 'Schreiben' THEN 4 WHEN 'Sprechen' THEN 5 ELSE 6 END,
            teil, id DESC`
       );
-      exercises = exRes.rows;
+      const isPaid = student.is_paid === true && student.subscription?.active === true;
+      exercises = exRes.rows.map((row) => {
+        const isFree = String(row.access_mode || 'paid').toLowerCase() === 'free';
+        if (isFree || isPaid) return row;
+        // Keep paid exercise metadata for the dashboard/self-test selectors,
+        // but never expose paid content, audio, or exercise settings to free users.
+        return { ...row, body: null, translation: null, audio_url: null, settings_json: null };
+      });
     } catch (_) {
       try {
         const exFallback = await pool.query("SELECT *, COALESCE(access_mode, 'paid') AS access_mode FROM exercises WHERE status='published' ORDER BY id DESC");
-        exercises = exFallback.rows;
+        const isPaid = student.is_paid === true && student.subscription?.active === true;
+        exercises = exFallback.rows.map((row) => {
+          const isFree = String(row.access_mode || 'paid').toLowerCase() === 'free';
+          if (isFree || isPaid) return row;
+          return { ...row, body: null, translation: null, audio_url: null, settings_json: null };
+        });
       } catch (_) {}
     }
 

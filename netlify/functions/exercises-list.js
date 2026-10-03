@@ -33,7 +33,15 @@ exports.handler = async (event) => {
 
   try {
     const { rows } = await pool.query(query, params);
-    return json(200, { ok: true, exercises: rows, is_paid: student.is_paid, subscription: student.subscription });
+    const isPaid = student.is_paid === true && student.subscription?.active === true;
+    const safeRows = rows.map((row) => {
+      const isFree = String(row.access_mode || 'paid').toLowerCase() === 'free';
+      if (isFree || isPaid) return row;
+      // Free students may see exercise metadata for navigation, but never
+      // receive paid exercise content or its audio URL from this endpoint.
+      return { ...row, body: null, audio_url: null };
+    });
+    return json(200, { ok: true, exercises: safeRows, is_paid: isPaid, subscription: student.subscription });
   } catch (e) {
 
     console.error('exercises-list error:', e);

@@ -168,6 +168,36 @@ async function checkExerciseAccess(pool, exerciseId, student) {
   }
 
   const mode = String(exercise.access_mode || 'paid').toLowerCase();
+
+  // If a free/revision exercise inherits its content from another exercise,
+  // the parent is part of the protected resource. Never let a free exercise
+  // become a side-channel for a paid parent.
+  if (exercise.parent_exercise_id) {
+    try {
+      const parentRes = await pool.query(
+        `SELECT id, access_mode, status, deleted_at FROM exercises WHERE id=$1`,
+        [exercise.parent_exercise_id]
+      );
+      const parent = parentRes.rows[0];
+      if (parent && (parent.deleted_at || parent.status !== 'published')) {
+        return { allowed: false, status: 404, error: 'Exercise not found' };
+      }
+      const parentMode = String(parent?.access_mode || 'paid').toLowerCase();
+      if (parent && parentMode !== 'free' && (!student || !student.is_paid || !student.subscription?.active)) {
+        return {
+          allowed: false,
+          status: 403,
+          error: 'payment_required',
+          message: 'هذا التمرين مرتبط بمحتوى مدفوع ويتطلب اشتراكاً مفعلاً في منصة TELC Voll.',
+        };
+      }
+    } catch (parentErr) {
+      // Do not fail open if the parent authorization cannot be established.
+      console.error('Exercise parent access check failed:', parentErr);
+      return { allowed: false, status: 403, error: 'access_denied', message: 'تعذر التحقق من صلاحية المحتوى.' };
+    }
+  }
+
   if (mode === 'free') {
     return { allowed: true, exercise, is_free: true };
   }
