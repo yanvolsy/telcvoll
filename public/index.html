@@ -35,8 +35,8 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
     <a href="#about" data-i18n="nav_about">عن المنصة</a>
     <a href="/contact.html" data-i18n="nav_contact">اتصل بنا</a>
     <span id="navAuthSlot" style="display:inline-flex;gap:8px;align-items:center;">
-      <a class="btn light small-btn" href="/login.html">تسجيل الدخول</a>
-      <a class="btn small-btn" href="/register.html">إنشاء حساب</a>
+      <a class="btn light small-btn" href="/login.html" data-auth-login>تسجيل الدخول</a>
+      <a class="btn small-btn nav-register-btn" href="/register.html" data-auth-register>إنشاء حساب</a>
     </span>
   </nav>
 </header>
@@ -55,8 +55,8 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
         <span>B1</span><span class="active">B2</span><span>C1</span>
       </div>
       <div class="actions landing-actions" id="heroActionsSlot">
-        <a class="btn" href="/register.html">ابدأ التدرب مجاناً ←</a>
-        <a class="btn light" href="/login.html">تسجيل الدخول</a>
+        <a class="btn" href="/register.html" data-auth-register>ابدأ التدرب مجاناً ←</a>
+        <a class="btn light" href="/login.html" data-auth-login>تسجيل الدخول</a>
       </div>
       <div class="landing-proof"><span>✓ B1</span><span>✓ B2</span><span>✓ C1</span><span>✓ 5 مهارات</span></div>
     </div>
@@ -198,35 +198,51 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <script>
 let currentUser = null;
 
-api('me').then(res => {
-  if (res && res.student && res.student.id) {
-    currentUser = res.student;
-    const navSlot = document.getElementById('navAuthSlot');
-    if (navSlot) navSlot.innerHTML = `<a class="btn small-btn" href="/dashboard.html">لوحة الطالب ←</a>`;
-    const heroSlot = document.getElementById('heroActionsSlot');
-    if (heroSlot) heroSlot.innerHTML = `<a class="btn" href="/dashboard.html">لوحة الطالب ومتابعة التدريب ←</a><a class="btn light" href="#plans">الخطط والاشتراكات</a>`;
+function renderHomepageAuth(res) {
+  const student = res && res.student && res.student.id ? res.student : null;
+  const navSlot = document.getElementById('navAuthSlot');
+  const heroSlot = document.getElementById('heroActionsSlot');
 
-    // Pre-fill checkout form if open or opened later
-    const nameInput = document.getElementById('custName');
-    const emailInput = document.getElementById('custEmail');
-    const phoneInput = document.getElementById('custPhone');
-    if (nameInput && !nameInput.value) nameInput.value = res.student.name || '';
-    if (emailInput && !emailInput.value) emailInput.value = res.student.email || '';
-    if (phoneInput && !phoneInput.value) phoneInput.value = res.student.phone || '';
+  if (!student) return;
 
-    // Check for pending checkout from session storage
-    try {
-      const rawPending = sessionStorage.getItem('telc_pending_checkout');
-      if (rawPending) {
-        const pendingPlan = JSON.parse(rawPending);
-        if (pendingPlan && pendingPlan.id) {
-          sessionStorage.removeItem('telc_pending_checkout');
-          setTimeout(() => openCheckout(pendingPlan), 300);
-        }
-      }
-    } catch (_) {}
+  currentUser = student;
+
+  // Authenticated students should never be shown login/register CTAs on the homepage.
+  // Keep the action explicit and consistent in both the top navigation and hero.
+  if (navSlot) {
+    navSlot.innerHTML = `
+      <a class="btn small-btn nav-student-btn" href="/dashboard.html">العودة إلى منصة الطالب</a>
+    `;
   }
-}).catch(() => {});
+
+  if (heroSlot) {
+    heroSlot.innerHTML = `
+      <a class="btn" href="/dashboard.html">العودة إلى منصة الطالب ←</a>
+      <a class="btn light" href="#plans">الخطط والاشتراكات</a>
+    `;
+  }
+
+  // Pre-fill checkout form if open or opened later.
+  const nameInput = document.getElementById('custName');
+  const emailInput = document.getElementById('custEmail');
+  const phoneInput = document.getElementById('custPhone');
+  if (nameInput && !nameInput.value) nameInput.value = student.name || '';
+  if (emailInput && !emailInput.value) emailInput.value = student.email || '';
+  if (phoneInput && !phoneInput.value) phoneInput.value = student.phone || '';
+
+  try {
+    const rawPending = sessionStorage.getItem('telc_pending_checkout');
+    if (rawPending) {
+      const pendingPlan = JSON.parse(rawPending);
+      if (pendingPlan && pendingPlan.id) {
+        sessionStorage.removeItem('telc_pending_checkout');
+        setTimeout(() => openCheckout(pendingPlan), 300);
+      }
+    }
+  } catch (_) {}
+}
+
+api('me').then(renderHomepageAuth).catch(() => {});
 
 // Checkout Modal Logic
 let publicPlansList = [];
@@ -350,12 +366,20 @@ checkoutForm.onsubmit = async (e) => {
       const authSlot = document.getElementById('navAuthSlot');
       if (authSlot) {
         authSlot.innerHTML = `
-          <a class="btn small-btn" href="/dashboard.html">منصة الطالب</a>
+          <a class="btn small-btn nav-student-btn" href="/dashboard.html">العودة إلى منصة الطالب</a>
           <a href="#" id="logoutLink" class="nav-logout-btn" style="color:var(--danger);font-size:13px;font-weight:800;padding:6px 10px;">خروج</a>
+        `;
+      }
+      const heroAuthSlot = document.getElementById('heroActionsSlot');
+      if (heroAuthSlot) {
+        heroAuthSlot.innerHTML = `
+          <a class="btn" href="/dashboard.html">العودة إلى منصة الطالب ←</a>
+          <a class="btn light" href="#plans">الخطط والاشتراكات</a>
         `;
       }
     }
   } catch (_) {}
+  try {
     const { plans } = await api('public-plans');
     publicPlansList = plans || [];
     // Sort plans by duration ascending (shortest first)

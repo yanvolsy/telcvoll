@@ -469,6 +469,18 @@ body.mock-mode .mock-global-timer.timer-danger{background:#9b2d24!important;anim
 .top nav>a:hover{background:var(--brand-soft);color:var(--brand-active)}
 .top nav>a.btn{padding:11px 18px;border-radius:12px;color:#fff;background:var(--brand);box-shadow:0 7px 18px rgba(244,123,32,.16)}
 .top nav>a.btn:hover{color:#fff;background:var(--brand-active)}
+/* Homepage authenticated navigation */
+#navAuthSlot .nav-register-btn,
+#navAuthSlot .nav-student-btn {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
+#navAuthSlot .nav-register-btn:hover,
+#navAuthSlot .nav-student-btn:hover {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
+
 .header-actions{gap:7px;margin-inline-start:5px}
 .icon-btn{width:40px;height:40px}
 .mobile-menu-toggle{display:none}

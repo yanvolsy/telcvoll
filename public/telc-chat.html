@@ -24,15 +24,20 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 @media(prefers-color-scheme:dark){
   .telc-ai-avatar.telc-ai-site-logo,.telc-ai-welcome-mark.telc-ai-site-logo{background:#15171b;border-color:#343840}
 }
+</style>
 <style>
-/* Arabic-first chat alignment: both user and assistant messages start from the right. */
+/* Message layout stays on the right; text direction follows the language of each message. */
 .telc-ai-messages{direction:rtl}
 .telc-ai-message-inner{direction:rtl!important;justify-content:flex-start!important}
-.telc-ai-message.user .telc-ai-message-inner{direction:rtl!important}
-.telc-ai-message.assistant .telc-ai-message-inner{direction:rtl!important}
-.telc-ai-message.user .telc-ai-message-body{margin-inline-start:0;margin-inline-end:auto;text-align:right}
-.telc-ai-message.assistant .telc-ai-message-body{margin-inline-start:0;margin-inline-end:auto;flex:0 1 850px;text-align:right;min-width:0}
-.telc-ai-message-content{unicode-bidi:plaintext;text-align:start}
+.telc-ai-message.user .telc-ai-message-inner,.telc-ai-message.assistant .telc-ai-message-inner{direction:rtl!important}
+.telc-ai-message.user .telc-ai-message-body{margin-inline-start:0;margin-inline-end:auto;min-width:0}
+.telc-ai-message.assistant .telc-ai-message-body{margin-inline-start:0;margin-inline-end:auto;flex:0 1 850px;min-width:0}
+.telc-ai-message-content{unicode-bidi:plaintext}
+.telc-ai-message-content.is-rtl{direction:rtl;text-align:right}
+.telc-ai-message-content.is-ltr{direction:ltr;text-align:left}
+.telc-ai-message-content.is-rtl h2,.telc-ai-message-content.is-rtl h3,.telc-ai-message-content.is-rtl h4,.telc-ai-message-content.is-rtl p,.telc-ai-message-content.is-rtl blockquote,.telc-ai-message-content.is-rtl ul,.telc-ai-message-content.is-rtl ol{direction:rtl;text-align:right}
+.telc-ai-message-content.is-ltr h2,.telc-ai-message-content.is-ltr h3,.telc-ai-message-content.is-ltr h4,.telc-ai-message-content.is-ltr p,.telc-ai-message-content.is-ltr blockquote,.telc-ai-message-content.is-ltr ul,.telc-ai-message-content.is-ltr ol{direction:ltr;text-align:left}
+.telc-ai-message-content.is-rtl code,.telc-ai-message-content.is-ltr code{unicode-bidi:isolate}
 .telc-ai-composer-inner{direction:rtl}
 .telc-ai-composer textarea{direction:auto;text-align:start;unicode-bidi:plaintext}
 @media(max-width:700px){
@@ -137,13 +142,26 @@ function renderMarkdown(text){
 }
 function plainText(s){return String(s??'').replace(/```[\s\S]*?```/g,'').replace(/[*_`#>]/g,'').replace(/\[([^\]]+)\]\([^)]*\)/g,'$1').trim();}
 function scrollBottom(){const box=$('chatMessages');box.scrollTo({top:box.scrollHeight,behavior:'smooth'});}
+function getTextDirection(text){
+  const value=String(text??'').replace(/https?:\/\/\S+/g,' ');
+  const arabic=(value.match(/[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]/g)||[]).length;
+  const latin=(value.match(/[A-Za-zÄÖÜäöüßÀ-ÿ]/g)||[]).length;
+  if(arabic===0 && latin===0)return 'rtl';
+  return arabic>latin ? 'rtl' : 'ltr';
+}
+function applyMessageDirection(content,text){
+  const dir=getTextDirection(text);
+  content.setAttribute('dir',dir);
+  content.classList.remove('is-rtl','is-ltr');
+  content.classList.add(dir==='rtl'?'is-rtl':'is-ltr');
+}
 function addMessage(role,text,{stream=true}={}){
   $('welcome')?.remove();
   const el=document.createElement('article'); el.className='telc-ai-message '+role;
   const isAssistant=role==='assistant';
   el.innerHTML=`<div class="telc-ai-message-inner">${isAssistant?'<div class="telc-ai-avatar telc-ai-site-logo" aria-hidden="true"><span class="brand-dot"></span></div>':''}<div class="telc-ai-message-body"><div class="telc-ai-message-content"></div>${isAssistant?`<div class="telc-ai-message-tools"><button type="button" class="msg-tool copy-tool" title="نسخ">${icons.copy}</button></div>`:''}</div></div>`;
   $('chatMessages').appendChild(el);
-  const content=el.querySelector('.telc-ai-message-content'); content.setAttribute('dir','auto');
+  const content=el.querySelector('.telc-ai-message-content'); applyMessageDirection(content,text);
   const finish=()=>{content.innerHTML=renderMarkdown(text);scrollBottom();};
   if(!stream || !isAssistant){content.textContent=text;}
   else {const clean=String(text);let i=0;const step=()=>{i=Math.min(clean.length,i+Math.max(3,Math.ceil(clean.length/90)));content.innerHTML=renderMarkdown(clean.slice(0,i));scrollBottom();if(i<clean.length)requestAnimationFrame(step);else finish();};requestAnimationFrame(step);}
