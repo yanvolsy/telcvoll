@@ -94,7 +94,10 @@ exports.handler = async (event) => {
   let body={};
   try { body=JSON.parse(event.body||'{}'); } catch { return json(400,{error:'Bad request.'}); }
   const message=String(body.message||'').trim().slice(0,4000);
-  const history=Array.isArray(body.history)?body.history.slice(-10):[];
+  const history=Array.isArray(body.history) ? body.history.slice(-10).map(m => ({
+    role: m?.role === 'assistant' ? 'assistant' : 'user',
+    content: String(m?.content || '').slice(0, 2000)
+  })) : [];
   const lang=body.lang==='de'?'de':'ar';
   const fallback=lang==='de'?FALLBACK_DE:FALLBACK_AR;
   const system=`You are the TELC Voll AI Assistant & Germany Mentor (مساعد التالك ومستشار ألمانيا الذكي) inside the TELC Voll platform.
@@ -171,6 +174,6 @@ TONE & BEHAVIOR:
     } catch (_) {}
     return json(200,{allowed:true,answer});
   } catch(e) {
-    return json(502,{error:'AI connection failed.',details:e.message,scopeFallback:fallback});
+    return json(502,{error:'AI connection failed.',scopeFallback:fallback});
   }
 };

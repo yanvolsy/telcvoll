@@ -85,6 +85,8 @@ async function callAI(prompt) {
   throw new Error(firstError || 'AI provider is not configured. Set AI_API_URL + AI_API_KEY, GEMINI_API_KEY, or GROQ_API_KEY in Netlify environment variables.');
 }
 exports.handler=async(event)=>{
+  if(!requireSameOrigin(event)) return json(403,{error:'Cross-origin request blocked.'});
+  if(!requestSize(event)) return json(413,{error:'Request too large.'});
   if(event.httpMethod!=='POST') return json(405,{error:'Method not allowed.'});
   const student=await requireStudent(event);
   if(!student) return json(401,{error:'unauthenticated'});
@@ -170,7 +172,7 @@ Return ONLY valid JSON:
         out=cleanJson(await callAI(rep));
       }
       return json(200,out);
-    }catch(e){return json(502,{error:e.message});}
+    }catch(e){return json(502,{error:'خدمة الذكاء الاصطناعي غير متاحة حالياً.'});}
   }
 
   // Mode 2: Teil 1 Presentation Evaluation (Audio/Text transcript)
@@ -218,7 +220,7 @@ Return ONLY valid JSON:
         out=cleanJson(await callAI(rep));
       }
       return json(200,out);
-    }catch(e){return json(502,{error:e.message});}
+    }catch(e){return json(502,{error:'خدمة الذكاء الاصطناعي غير متاحة حالياً.'});}
   }
 
   if(!id) return json(400,{error:'Missing exercise id.'});
@@ -416,5 +418,5 @@ Return ONLY JSON: {"reply":"","short_note":"","continue":true}`;
     await db().query('INSERT INTO ai_logs(student_id,kind,input_text,output_text) VALUES($1,$2,$3,$4)',
       [student.student_id,'speaking',JSON.stringify({exercise_id:id,mode,transcript}),JSON.stringify(out)]);
     return json(200,out);
-  }catch(e){ return json(502,{error:e.message}); }
+  }catch(e){ return json(502,{error:'خدمة الذكاء الاصطناعي غير متاحة حالياً.'}); }
 };

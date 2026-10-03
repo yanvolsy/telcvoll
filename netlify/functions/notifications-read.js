@@ -1,8 +1,11 @@
 const { db } = require('./_lib/db');
 const { json } = require('./_lib/auth');
 const { requireStudent } = require('./_lib/guard');
+const { requireSameOrigin, requestSize } = require('./_lib/request');
 
 exports.handler = async (event) => {
+  if (!requireSameOrigin(event)) return json(403, { error: 'Cross-origin request blocked.' });
+  if (!requestSize(event, 32 * 1024)) return json(413, { error: 'Request too large.' });
   const student = await requireStudent(event);
   if (!student) return json(401, { error: 'unauthenticated' });
   if (event.httpMethod !== 'POST') return json(405, { error: 'Method not allowed' });
@@ -40,6 +43,6 @@ exports.handler = async (event) => {
     return json(200, { ok: true });
   } catch (err) {
     console.error('[NOTIF READ ERROR]', err);
-    return json(500, { error: err.message });
+    return json(500, { error: 'تعذر تحديث الإشعارات حالياً.' });
   }
 };

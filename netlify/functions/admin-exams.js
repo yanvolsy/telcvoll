@@ -6,7 +6,7 @@ const { requireSameOrigin, requestSize } = require('./_lib/request');
 exports.handler = async (event) => {
   if (!requireSameOrigin(event)) return json(403, { error: 'Cross-origin request blocked.' });
   if (!requestSize(event)) return json(413, { error: 'Request too large.' });
-  if (!requireAdmin(event)) return json(401, { error: 'unauthenticated' });
+  if (!await requireAdmin(event)) return json(401, { error: 'unauthenticated' });
   const pool = db();
 
   if (event.httpMethod === 'POST') {
@@ -47,7 +47,7 @@ exports.handler = async (event) => {
       return json(200, { ok: true, id: examId });
     } catch (e) {
       await client.query('ROLLBACK');
-      return json(500, { error: e.message });
+      return json(500, { error: 'تعذر حفظ الامتحان حالياً.' });
     } finally {
       client.release();
     }

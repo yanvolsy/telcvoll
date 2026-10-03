@@ -26,10 +26,12 @@ async function ensureSchema(p) {
     `ALTER TABLE students ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMP NULL;`,
     `ALTER TABLE students ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW();`,
     `ALTER TABLE students ADD COLUMN IF NOT EXISTS is_blocked BOOLEAN NOT NULL DEFAULT FALSE;`,
+    `ALTER TABLE students ADD COLUMN IF NOT EXISTS session_version INT NOT NULL DEFAULT 0;`,
     `ALTER TABLE students ADD COLUMN IF NOT EXISTS is_paid BOOLEAN NOT NULL DEFAULT FALSE;`,
     `ALTER TABLE students ADD COLUMN IF NOT EXISTS plan_id INT NULL;`,
     `ALTER TABLE students ADD COLUMN IF NOT EXISTS plan_name VARCHAR(150) NULL;`,
     `ALTER TABLE students ADD COLUMN IF NOT EXISTS subscription_expires_at TIMESTAMP NULL;`,
+    `ALTER TABLE admins ADD COLUMN IF NOT EXISTS session_version INT NOT NULL DEFAULT 0;`,
     `ALTER TABLE plans ADD COLUMN IF NOT EXISTS price_dzd NUMERIC(10,2) DEFAULT 0;`,
     `ALTER TABLE plans ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT FALSE;`,
     `ALTER TABLE exercises ADD COLUMN IF NOT EXISTS access_mode VARCHAR(20) NOT NULL DEFAULT 'paid';`,
@@ -60,7 +62,7 @@ function db() {
       connectionString: process.env.DATABASE_URL,
       ssl: process.env.DATABASE_URL && process.env.DATABASE_URL.includes('localhost')
         ? false
-        : { rejectUnauthorized: false },
+        : { rejectUnauthorized: true },
       max: 5,
       connectionTimeoutMillis: 5000,
       idleTimeoutMillis: 10000,
@@ -71,8 +73,10 @@ function db() {
       console.error('Unexpected error on idle pg client', err);
     });
 
-    // Run ensureSchema once in the background
-    ensureSchema(pool).catch(() => {});
+    // Run schema bootstrap before authenticated handlers query newly-added security columns.
+    // The first cold start waits for it; subsequent calls reuse schemaReady.
+    // Handlers that call db() may still query while the migration is running, so
+    // ensureSchema is also awaited explicitly where security-critical columns are used.
   }
   return pool;
 }

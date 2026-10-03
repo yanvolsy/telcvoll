@@ -64,6 +64,7 @@ exports.handler = async (event) => {
        SET password_hash = $1,
            reset_token = NULL,
            reset_expires_at = NULL,
+           session_version = COALESCE(session_version, 0) + 1,
            updated_at = NOW()
        WHERE id = $2`,
       [passwordHash, student.id]

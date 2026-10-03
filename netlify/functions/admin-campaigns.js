@@ -101,7 +101,7 @@ function wrapInOfficialTemplate(contentHtml, subject) {
 exports.handler = async (event) => {
   if (!requireSameOrigin(event)) return json(403, { error: 'Cross-origin request blocked.' });
   if (!requestSize(event)) return json(413, { error: 'Request too large.' });
-  if (!requireAdmin(event)) return json(401, { error: 'unauthenticated' });
+  if (!await requireAdmin(event)) return json(401, { error: 'unauthenticated' });
 
   const pool = db();
 
@@ -290,7 +290,7 @@ exports.handler = async (event) => {
       return json(400, { error: 'إجراء غير مدعوم.' });
     } catch (e) {
       console.error('[CAMPAIGN ERROR]', e);
-      return json(500, { error: 'حدث خطأ أثناء معالجة الحملة: ' + e.message });
+      return json(500, { error: 'حدث خطأ أثناء معالجة الحملة.' });
     } finally {
       client.release();
     }

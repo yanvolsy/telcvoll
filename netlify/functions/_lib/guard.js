@@ -1,4 +1,4 @@
-const { db } = require('./db');
+const { db, ensureSchema } = require('./db');
 const { studentFromEvent, adminFromEvent } = require('./auth');
 
 /**
@@ -88,14 +88,18 @@ async function requireStudent(event, options = {}) {
   if (!studentId) return null;
 
   try {
+    await ensureSchema(pool);
     const sRes = await pool.query(
       `SELECT id, name, email, first_name, last_name, phone, country,
-              profile_completed, is_blocked, is_paid, subscription_expires_at
+              profile_completed, is_blocked, is_paid, subscription_expires_at, session_version
        FROM students WHERE id = $1`,
       [studentId]
     );
     const s = sRes.rows[0];
     if (!s || s.is_blocked) {
+      return null;
+    }
+    if (payload.session_version === undefined || Number(payload.session_version) !== Number(s.session_version || 0)) {
       return null;
     }
 
@@ -118,27 +122,35 @@ async function requireStudent(event, options = {}) {
     };
   } catch (err) {
     console.error('Error in requireStudent guard:', err);
-    // Transient DB error fallback: trust valid unexpired JWT
-    return {
-      student_id: studentId,
-      id: studentId,
-      name: payload.name || 'Student',
-      email: payload.email || '',
-      profile_completed: true,
-      subscription: { active: false, plan: null, expires_at: null },
-      is_paid: false,
-      ai_enabled: false,
-    };
+    // Fail closed. A database failure must never turn a stale JWT into an
+    // authenticated session or bypass an account block/subscription check.
+    return null;
   }
 }
 
-function requireAdmin(event) {
-  return adminFromEvent(event);
+async function requireAdmin(event) {
+  const payload = adminFromEvent(event);
+  if (!payload || !payload.admin_id) return null;
+  try {
+    const pool = db();
+    await ensureSchema(pool);
+    const res = await pool.query(
+      'SELECT id, email, session_version FROM admins WHERE id=$1 LIMIT 1',
+      [payload.admin_id]
+    );
+    const admin = res.rows[0];
+    if (!admin) return null;
+    if (payload.session_version === undefined || Number(payload.session_version) !== Number(admin.session_version || 0)) return null;
+    return { admin: true, admin_id: admin.id, email: admin.email };
+  } catch (err) {
+    console.error('Error in requireAdmin guard:', err);
+    return null;
+  }
 }
 
 async function requireSession(event) {
-  const admin = adminFromEvent(event);
-  if (admin) return { role: 'admin' };
+  const admin = await requireAdmin(event);
+  if (admin) return { role: 'admin', ...admin };
   const student = await requireStudent(event);
   if (student) return { role: 'student', ...student };
   return null;

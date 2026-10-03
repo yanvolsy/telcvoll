@@ -224,7 +224,7 @@ $('regForm').onsubmit = async (e) => {
         password
       }
     });
-let redirectUrl = qs('redirect');
+let redirectUrl = safeLocalRedirect(qs('redirect'));
     let hasPendingCheckout = false;
     try { hasPendingCheckout = !!sessionStorage.getItem('telc_pending_checkout'); } catch (_) {}
 
@@ -253,7 +253,7 @@ let redirectUrl = qs('redirect');
 
 // Handle Post-Auth Routing
 function routeAfterAuth() {
-  let redirectUrl = qs('redirect');
+  let redirectUrl = safeLocalRedirect(qs('redirect'));
   let hasPendingCheckout = false;
   try { hasPendingCheckout = !!sessionStorage.getItem('telc_pending_checkout'); } catch (_) {}
 

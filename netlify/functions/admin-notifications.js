@@ -75,7 +75,7 @@ async function resolveRecipients(client, targetType, targetValue) {
 exports.handler = async (event) => {
   if (!requireSameOrigin(event)) return json(403, { error: 'Cross-origin request blocked.' });
   if (!requestSize(event)) return json(413, { error: 'Request too large.' });
-  if (!requireAdmin(event)) return json(401, { error: 'unauthenticated' });
+  if (!await requireAdmin(event)) return json(401, { error: 'unauthenticated' });
 
   const pool = db();
 
@@ -184,7 +184,7 @@ exports.handler = async (event) => {
       return json(200, { ok: true, id: notifId, email_result: emailResult });
     } catch (e) {
       console.error('[ADMIN NOTIFICATION ERROR]', e);
-      return json(500, { error: 'حدث خطأ أثناء حفظ التنبيه: ' + e.message });
+      return json(500, { error: 'حدث خطأ أثناء حفظ التنبيه.' });
     } finally {
       client.release();
     }

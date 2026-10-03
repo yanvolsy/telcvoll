@@ -7,7 +7,7 @@ const { requireSameOrigin, requestSize } = require('./_lib/request');
 exports.handler = async (event) => {
   if (!requireSameOrigin(event)) return json(403, { error: 'Cross-origin request blocked.' });
   if (!requestSize(event)) return json(413, { error: 'Request too large.' });
-  if (!requireAdmin(event)) return json(401, { error: 'unauthenticated' });
+  if (!await requireAdmin(event)) return json(401, { error: 'unauthenticated' });
 
   const pool = db();
 

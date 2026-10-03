@@ -31,15 +31,19 @@ exports.handler = async (event) => {
     if ((!exercise.body || !String(exercise.body).trim()) && exercise.parent_exercise_id) {
       try {
         const parentRes = await pool.query(
-          "SELECT body, instructions, settings_json FROM exercises WHERE id=$1",
+          "SELECT id, body, instructions, settings_json, status, deleted_at, COALESCE(access_mode,'paid') AS access_mode FROM exercises WHERE id=$1",
           [exercise.parent_exercise_id]
         );
         if (parentRes.rows[0]) {
           const p = parentRes.rows[0];
-          if (!exercise.body && p.body) exercise.body = p.body;
-          if (!exercise.instructions && p.instructions) exercise.instructions = p.instructions;
-          if (p.settings_json && typeof p.settings_json === 'object') {
-            exercise.settings_json = { ...p.settings_json, ...(exercise.settings_json || {}) };
+          const parentIsAccessible = p.status === 'published' && !p.deleted_at &&
+            (String(p.access_mode).toLowerCase() === 'free' || (student.is_paid && student.subscription?.active));
+          if (parentIsAccessible) {
+            if (!exercise.body && p.body) exercise.body = p.body;
+            if (!exercise.instructions && p.instructions) exercise.instructions = p.instructions;
+            if (p.settings_json && typeof p.settings_json === 'object') {
+              exercise.settings_json = { ...p.settings_json, ...(exercise.settings_json || {}) };
+            }
           }
         }
       } catch (_) {}
@@ -99,6 +103,6 @@ exports.handler = async (event) => {
     });
   } catch (err) {
     console.error('Fatal error in exercise-get.js:', err);
-    return json(500, { error: err.message || 'Server error' });
+    return json(500, { error: 'تعذر تحميل التمرين حالياً.' });
   }
 };

@@ -14,6 +14,25 @@ exports.handler = async (event) => {
   const exam = examRes.rows[0];
   if (!exam) return json(404, { error: 'Exam not found' });
 
+  // A full published exam is treated as paid if it contains any paid exercise.
+  // Never reveal the structure/title of paid exam content to a free account.
+  if (!student.is_paid || !student.subscription?.active) {
+    const paidRes = await pool.query(
+      `SELECT 1
+       FROM exam_parts ep
+       JOIN exam_exercises ex ON ex.exam_part_id=ep.id
+       JOIN exercises e ON e.id=ex.exercise_id
+       WHERE ep.exam_id=$1
+         AND e.status='published' AND e.deleted_at IS NULL
+         AND COALESCE(e.access_mode,'paid') <> 'free'
+       LIMIT 1`,
+      [id]
+    );
+    if (paidRes.rows.length) {
+      return json(403, { error: 'payment_required', message: 'هذا الامتحان يتطلب اشتراكاً مفعلاً.' });
+    }
+  }
+
   const partsRes = await pool.query('SELECT * FROM exam_parts WHERE exam_id=$1 ORDER BY sort_order', [id]);
   const parts = [];
   for (const part of partsRes.rows) {

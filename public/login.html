@@ -170,9 +170,19 @@ $('togglePassword').onclick = () => {
   $('togglePassword').textContent = isPwd ? '🙈' : '👁';
 };
 
+function safeLocalRedirect(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  try {
+    const u = new URL(raw, window.location.origin);
+    if (u.origin !== window.location.origin) return '';
+    return u.pathname + u.search + u.hash;
+  } catch (_) { return ''; }
+}
+
 // Route after login
 function routeAfterLogin() {
-  let redirectUrl = qs('redirect');
+  let redirectUrl = safeLocalRedirect(qs('redirect'));
   let hasPendingCheckout = false;
   try { hasPendingCheckout = !!sessionStorage.getItem('telc_pending_checkout'); } catch (_) {}
 

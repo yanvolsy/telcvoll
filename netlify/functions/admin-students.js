@@ -4,7 +4,7 @@ const { requireAdmin } = require('./_lib/guard');
 const { requireSameOrigin, requestSize } = require('./_lib/request');
 
 exports.handler = async (event) => {
-  if (!requireAdmin(event)) return json(401, { error: 'unauthenticated' });
+  if (!await requireAdmin(event)) return json(401, { error: 'unauthenticated' });
   const pool = db();
 
   // Make sure all required columns exist in the database
