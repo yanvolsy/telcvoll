@@ -259,7 +259,7 @@ routeAfterLogin();
     if (code === 'account_blocked') {
       showAlert('تم حظر هذا الحساب من قبل المشرف.');
     } else {
-      showAlert(err.data?.message || err.data?.error || 'فشل تسجيل الدخول بحساب Google.');
+      showAlert(err.data?.message || err.data?.error || (err.status ? `فشل تسجيل الدخول بحساب Google (${err.status}).` : 'فشل تسجيل الدخول بحساب Google.'));
     }
   }
 }

@@ -39,7 +39,9 @@ async function ensureSchema(p) {
     `ALTER TABLE exercises ADD COLUMN IF NOT EXISTS duration_minutes INT DEFAULT NULL;`,
     `CREATE INDEX IF NOT EXISTS idx_students_google_id ON students (google_id) WHERE google_id IS NOT NULL;`,
     `CREATE INDEX IF NOT EXISTS idx_students_verification_token ON students (verification_token) WHERE verification_token IS NOT NULL;`,
-    `CREATE INDEX IF NOT EXISTS idx_exercises_access_mode ON exercises(access_mode);`
+    `CREATE INDEX IF NOT EXISTS idx_exercises_access_mode ON exercises(access_mode);`,
+    `CREATE TABLE IF NOT EXISTS rate_limits (rkey VARCHAR(255) PRIMARY KEY, attempts INTEGER NOT NULL DEFAULT 0, window_started_at TIMESTAMP NOT NULL DEFAULT NOW());`,
+    `CREATE INDEX IF NOT EXISTS idx_rate_limits_window_started_at ON rate_limits(window_started_at);`
   ];
 
   try {
