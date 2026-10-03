@@ -1511,6 +1511,11 @@ body {
   box-shadow: 0 4px 12px rgba(249, 115, 22, 0.1) !important;
 }
 
+/* Light-mode topic cards: keep a subtle neutral outline so each exercise card is clearly separated from the page background. */
+html[data-theme="light"] .topic-card {
+  border-color: #E1E5E9 !important;
+}
+
 /* Topic Cards */
 .topic-card {
   border-radius: var(--radius-lg) !important;
