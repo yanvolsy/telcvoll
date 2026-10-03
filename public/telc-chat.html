@@ -13,6 +13,18 @@
 html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
 html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}.telc-ai-subscription-lock{margin:24px auto;max-width:520px;padding:22px 24px;border:1px solid #ffd9c7;border-radius:20px;background:linear-gradient(180deg,#fffaf7,#fff);text-align:center;box-shadow:0 12px 30px rgba(20,28,45,.06)}.telc-ai-lock-title{font-size:18px;font-weight:850;color:#111827}.telc-ai-lock-text{margin-top:7px;color:#6b7280;font-size:14px;line-height:1.8}.telc-ai-lock-btn{display:inline-flex;margin-top:15px;align-items:center;justify-content:center;padding:10px 18px;border-radius:12px;background:#ff6b24;color:#fff;text-decoration:none;font-weight:800}.telc-ai-lock-btn:hover{filter:brightness(.97);transform:translateY(-1px)}@media(prefers-color-scheme:dark){.telc-ai-subscription-lock{background:#15171b;border-color:#4a2b1f}.telc-ai-lock-title{color:#f3f4f6}.telc-ai-lock-text{color:#aeb4c0}}
 </style>
+<style>
+/* TELC Voll site logo — use the same brand mark as the main platform. */
+.telc-ai-site-logo .brand-dot{display:block;width:14px;height:14px;border-radius:50%;background:var(--brand,#ff7a2f);box-shadow:0 0 0 6px rgba(255,122,47,.10)}
+.telc-ai-logo.telc-ai-site-logo{background:transparent;color:var(--brand,#ff7a2f);border:1px solid var(--line,#e6e8eb);box-shadow:none}
+.telc-ai-avatar.telc-ai-site-logo{background:var(--white,#fff);border:1px solid var(--line,#e6e8eb);box-shadow:0 4px 12px rgba(20,28,45,.06)}
+.telc-ai-welcome-mark.telc-ai-site-logo{background:var(--white,#fff);border:1px solid var(--line,#e6e8eb);box-shadow:0 12px 30px rgba(20,28,45,.08)}
+.telc-ai-site-logo .brand-dot{width:18px;height:18px}
+.telc-ai-avatar.telc-ai-site-logo .brand-dot{width:11px;height:11px;box-shadow:0 0 0 4px rgba(255,122,47,.10)}
+@media(prefers-color-scheme:dark){
+  .telc-ai-avatar.telc-ai-site-logo,.telc-ai-welcome-mark.telc-ai-site-logo{background:#15171b;border-color:#343840}
+}
+</style>
 </head>
 <body class="telc-ai-body">
 <header class="top telc-ai-top">
@@ -29,7 +41,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
   <section class="telc-ai-app" aria-label="TELC Voll AI">
     <header class="telc-ai-header">
       <div class="telc-ai-identity">
-        <div class="telc-ai-logo" aria-hidden="true">TV</div>
+        <div class="telc-ai-logo telc-ai-site-logo" aria-hidden="true"><span class="brand-dot"></span></div>
         <div>
           <div class="telc-ai-name">TELC Voll AI</div>
           <div class="telc-ai-status"><span class="telc-ai-status-dot"></span><span id="aiStatusText">جاهز للمحادثة</span></div>
@@ -44,7 +56,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 
     <div id="chatMessages" class="telc-ai-messages" aria-live="polite" aria-atomic="false">
       <div id="welcome" class="telc-ai-welcome">
-        <div class="telc-ai-welcome-mark">TV</div>
+        <div class="telc-ai-welcome-mark telc-ai-site-logo" aria-hidden="true"><span class="brand-dot"></span></div>
         <h1>كيف يمكنني مساعدتك؟</h1>
         <p>اسأل عن TELC، تعلم الألمانية، أو الدراسة والعمل في ألمانيا.</p>
         <div class="telc-ai-suggestions">
@@ -115,7 +127,7 @@ function addMessage(role,text,{stream=true}={}){
   $('welcome')?.remove();
   const el=document.createElement('article'); el.className='telc-ai-message '+role;
   const isAssistant=role==='assistant';
-  el.innerHTML=`<div class="telc-ai-message-inner">${isAssistant?'<div class="telc-ai-avatar" aria-hidden="true">TV</div>':''}<div class="telc-ai-message-body"><div class="telc-ai-message-content"></div>${isAssistant?`<div class="telc-ai-message-tools"><button type="button" class="msg-tool copy-tool" title="نسخ">${icons.copy}</button></div>`:''}</div></div>`;
+  el.innerHTML=`<div class="telc-ai-message-inner">${isAssistant?'<div class="telc-ai-avatar telc-ai-site-logo" aria-hidden="true"><span class="brand-dot"></span></div>':''}<div class="telc-ai-message-body"><div class="telc-ai-message-content"></div>${isAssistant?`<div class="telc-ai-message-tools"><button type="button" class="msg-tool copy-tool" title="نسخ">${icons.copy}</button></div>`:''}</div></div>`;
   $('chatMessages').appendChild(el);
   const content=el.querySelector('.telc-ai-message-content');
   const finish=()=>{content.innerHTML=renderMarkdown(text);scrollBottom();};
@@ -124,7 +136,7 @@ function addMessage(role,text,{stream=true}={}){
   const copy=el.querySelector('.copy-tool'); if(copy)copy.onclick=async()=>{try{await navigator.clipboard.writeText(plainText(text));copy.classList.add('done');setTimeout(()=>copy.classList.remove('done'),900);}catch{}};
   if(!isAssistant)scrollBottom(); return el;
 }
-function showTyping(){hideTyping();const el=document.createElement('div');el.id='typing';el.className='telc-ai-message assistant';el.innerHTML='<div class="telc-ai-message-inner"><div class="telc-ai-avatar">TV</div><div class="telc-ai-message-body"><div class="telc-ai-typing"><i></i><i></i><i></i></div></div></div>';$('chatMessages').appendChild(el);scrollBottom();}
+function showTyping(){hideTyping();const el=document.createElement('div');el.id='typing';el.className='telc-ai-message assistant';el.innerHTML='<div class="telc-ai-message-inner"><div class="telc-ai-avatar telc-ai-site-logo"><span class="brand-dot"></span></div><div class="telc-ai-message-body"><div class="telc-ai-typing"><i></i><i></i><i></i></div></div></div>';$('chatMessages').appendChild(el);scrollBottom();}
 function hideTyping(){$('typing')?.remove();}
 async function sendMessage(message){
   const previousHistory=history.slice(-12);
@@ -147,10 +159,10 @@ $('chatInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e
 function autoGrow(){const x=$('chatInput');x.style.height='auto';x.style.height=Math.min(x.scrollHeight,180)+'px';}
 $('chatInput').addEventListener('input',autoGrow);
 document.querySelectorAll('[data-prompt]').forEach(b=>b.onclick=()=>{$('chatInput').value=b.dataset.prompt;autoGrow();$('chatInput').focus();});
-$('newChatBtn').onclick=()=>{history=[];$('chatMessages').innerHTML='<div id="welcome" class="telc-ai-welcome"><div class="telc-ai-welcome-mark">TV</div><h1>كيف يمكنني مساعدتك؟</h1><p>اسأل عن TELC، تعلم الألمانية، أو الدراسة والعمل في ألمانيا.</p><div class="telc-ai-suggestions"><button type="button" data-prompt="اشرح لي الفرق بين obwohl و trotzdem مع أمثلة على مستوى B2">اشرح قاعدة ألمانية</button><button type="button" data-prompt="كيف أستعد لجزء Schreiben في TELC B2؟">حضّرني لـ Schreiben</button><button type="button" data-prompt="أعطني محادثة قصيرة للتدرب على Sprechen B2">تدرّب على Sprechen</button></div></div>';document.querySelectorAll('[data-prompt]').forEach(b=>b.onclick=()=>{$('chatInput').value=b.dataset.prompt;autoGrow();$('chatInput').focus();});};
+$('newChatBtn').onclick=()=>{history=[];$('chatMessages').innerHTML='<div id="welcome" class="telc-ai-welcome"><div class="telc-ai-welcome-mark telc-ai-site-logo" aria-hidden="true"><span class="brand-dot"></span></div><h1>كيف يمكنني مساعدتك؟</h1><p>اسأل عن TELC، تعلم الألمانية، أو الدراسة والعمل في ألمانيا.</p><div class="telc-ai-suggestions"><button type="button" data-prompt="اشرح لي الفرق بين obwohl و trotzdem مع أمثلة على مستوى B2">اشرح قاعدة ألمانية</button><button type="button" data-prompt="كيف أستعد لجزء Schreiben في TELC B2؟">حضّرني لـ Schreiben</button><button type="button" data-prompt="أعطني محادثة قصيرة للتدرب على Sprechen B2">تدرّب على Sprechen</button></div></div>';document.querySelectorAll('[data-prompt]').forEach(b=>b.onclick=()=>{$('chatInput').value=b.dataset.prompt;autoGrow();$('chatInput').focus();});};
 function setAiStatus(t){$('aiStatusText').textContent=t;}
 $('logoutLink').onclick=async e=>{e.preventDefault();try{await fetch('/api/auth-logout',{method:'POST',credentials:'same-origin'});}catch{}location.href='/';};
 document.addEventListener('langchange',()=>{applyI18n();});
-(async()=>{try{const r=await fetch('/api/me',{credentials:'same-origin'});if(!r.ok){location.href='/login.html?next='+encodeURIComponent('/telc-chat.html');return;}const me=await r.json();const student=me?.student;if(!student){location.href='/login.html?next='+encodeURIComponent('/telc-chat.html');return;}const activeSubscription=student.subscription?.active===true && student.is_paid===true;if(!activeSubscription){$('chatInput').disabled=true;$('sendBtn').disabled=true;$('chatInput').placeholder='المساعد متاح للمشتركين فقط';setAiStatus('يتطلب اشتراكاً مفعلاً');const box=document.createElement('div');box.className='telc-ai-subscription-lock';box.innerHTML='<div class="telc-ai-lock-title">مساعد TELC متاح للمشتركين</div><div class="telc-ai-lock-text">فعّل اشتراكك للوصول إلى المحادثة مع مساعد TELC.</div><a class="telc-ai-lock-btn" href="/plans.html">عرض الخطط</a>';$('chatMessages').appendChild(box);}else{setAiStatus('جاهز للمحادثة');}}catch{location.href='/login.html?next='+encodeURIComponent('/telc-chat.html');}})();
+(async()=>{try{const r=await fetch('/api/me',{credentials:'same-origin'});if(!r.ok){location.href='/login.html?next='+encodeURIComponent('/telc-chat.html');return;}const me=await r.json();const student=me?.student;if(!student){location.href='/login.html?next='+encodeURIComponent('/telc-chat.html');return;}const activeSubscription=me?.subscription?.active===true && me?.is_paid===true;if(!activeSubscription){$('chatInput').disabled=true;$('sendBtn').disabled=true;$('chatInput').placeholder='المساعد متاح للمشتركين فقط';setAiStatus('يتطلب اشتراكاً مفعلاً');const box=document.createElement('div');box.className='telc-ai-subscription-lock';box.innerHTML='<div class="telc-ai-lock-title">مساعد TELC متاح للمشتركين</div><div class="telc-ai-lock-text">فعّل اشتراكك للوصول إلى المحادثة مع مساعد TELC.</div><a class="telc-ai-lock-btn" href="/plans.html">عرض الخطط</a>';$('chatMessages').appendChild(box);}else{setAiStatus('جاهز للمحادثة');}}catch{location.href='/login.html?next='+encodeURIComponent('/telc-chat.html');}})();
 </script>
 </body></html>
