@@ -6,7 +6,7 @@
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
 <link rel="alternate icon" href="/assets/favicon-dark.png" type="image/png" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="/manifest.webmanifest"><style>
-.codes-page{max-width:1280px}
+.plans-page{max-width:1280px}
 .admin-hero{display:flex;justify-content:space-between;align-items:flex-end;gap:25px;margin-bottom:28px}
 .admin-hero h1{font-size:clamp(30px,4vw,46px);margin:8px 0 5px;letter-spacing:-.04em}
 .hero-actions{display:flex;gap:9px;flex-wrap:wrap}
@@ -53,10 +53,12 @@
 </style><style><!-- TELC Voll: unified homepage typography -->
 html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
 html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,html body button,html body input,html body textarea,html body select,html body label,html body a{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}</style>
-<!-- Mobile toast centering -->
+<style id="admin-mobile-toast-fix">
+/* Mobile toast centering */
 @media (max-width:700px){
   .toast{left:50% !important;right:auto !important;top:auto !important;bottom:calc(env(safe-area-inset-bottom,0px) + 18px) !important;transform:translateX(-50%) !important;width:min(360px,calc(100vw - 24px)) !important;max-width:calc(100vw - 24px) !important;box-sizing:border-box !important;text-align:center !important;overflow-wrap:anywhere !important;}
 }
+</style>
 </head>
 <body class="admin-shell">
 <header class="top admin-nav">
