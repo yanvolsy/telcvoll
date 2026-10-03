@@ -24,6 +24,20 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 @media(prefers-color-scheme:dark){
   .telc-ai-avatar.telc-ai-site-logo,.telc-ai-welcome-mark.telc-ai-site-logo{background:#15171b;border-color:#343840}
 }
+<style>
+/* Arabic-first chat alignment: both user and assistant messages start from the right. */
+.telc-ai-messages{direction:rtl}
+.telc-ai-message-inner{direction:rtl!important;justify-content:flex-start!important}
+.telc-ai-message.user .telc-ai-message-inner{direction:rtl!important}
+.telc-ai-message.assistant .telc-ai-message-inner{direction:rtl!important}
+.telc-ai-message.user .telc-ai-message-body{margin-inline-start:0;margin-inline-end:auto;text-align:right}
+.telc-ai-message.assistant .telc-ai-message-body{margin-inline-start:0;margin-inline-end:auto;flex:0 1 850px;text-align:right;min-width:0}
+.telc-ai-message-content{unicode-bidi:plaintext;text-align:start}
+.telc-ai-composer-inner{direction:rtl}
+.telc-ai-composer textarea{direction:auto;text-align:start;unicode-bidi:plaintext}
+@media(max-width:700px){
+  .telc-ai-message.assistant .telc-ai-message-body{flex-basis:min(850px,calc(100% - 42px))}
+}
 </style>
 </head>
 <body class="telc-ai-body">
@@ -68,7 +82,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
     </div>
     <form id="chatForm" class="telc-ai-composer">
       <div class="telc-ai-composer-inner">
-        <textarea id="chatInput" rows="1" maxlength="4000" data-i18n-ph="chat_placeholder" placeholder="اكتب رسالتك…" required></textarea>
+        <textarea id="chatInput" dir="auto" rows="1" maxlength="4000" data-i18n-ph="chat_placeholder" placeholder="اكتب رسالتك…" required></textarea>
         <div class="telc-ai-composer-actions">
           <button type="submit" class="composer-send-btn" id="sendBtn" aria-label="إرسال">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 4 16 8-16 8 3-8-3-8Zm3 8h13"/></svg>
@@ -129,7 +143,7 @@ function addMessage(role,text,{stream=true}={}){
   const isAssistant=role==='assistant';
   el.innerHTML=`<div class="telc-ai-message-inner">${isAssistant?'<div class="telc-ai-avatar telc-ai-site-logo" aria-hidden="true"><span class="brand-dot"></span></div>':''}<div class="telc-ai-message-body"><div class="telc-ai-message-content"></div>${isAssistant?`<div class="telc-ai-message-tools"><button type="button" class="msg-tool copy-tool" title="نسخ">${icons.copy}</button></div>`:''}</div></div>`;
   $('chatMessages').appendChild(el);
-  const content=el.querySelector('.telc-ai-message-content');
+  const content=el.querySelector('.telc-ai-message-content'); content.setAttribute('dir','auto');
   const finish=()=>{content.innerHTML=renderMarkdown(text);scrollBottom();};
   if(!stream || !isAssistant){content.textContent=text;}
   else {const clean=String(text);let i=0;const step=()=>{i=Math.min(clean.length,i+Math.max(3,Math.ceil(clean.length/90)));content.innerHTML=renderMarkdown(clean.slice(0,i));scrollBottom();if(i<clean.length)requestAnimationFrame(step);else finish();};requestAnimationFrame(step);}
