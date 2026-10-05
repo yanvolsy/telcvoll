@@ -75,7 +75,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
     <a href="/contact.html" data-i18n="nav_contact">اتصل بنا</a>
     <span id="navAuthSlot" style="display:inline-flex;gap:8px;align-items:center;">
       <a class="btn light small-btn" href="/login.html" data-auth-login>تسجيل الدخول</a>
-      <a class="btn" href="/register.html" data-auth-register>إنشاء حساب</a>
+      <a class="btn landing-final-btn" href="/register.html" data-auth-register>إنشاء حساب</a>
     </span>
   </nav>
 </header>
@@ -196,7 +196,7 @@ function renderHomepageAuth(res) {
 
   if (navSlot) {
     navSlot.innerHTML = `
-      <a class="btn small-btn nav-student-btn" href="/dashboard.html">العودة إلى منصة الطالب</a>
+      <a class="btn landing-final-btn" href="/dashboard.html">العودة إلى منصة الطالب</a>
       <a href="#" id="logoutLink" class="nav-logout-btn" style="color:var(--danger);font-size:13px;font-weight:800;padding:6px 10px;">خروج</a>
     `;
   }
