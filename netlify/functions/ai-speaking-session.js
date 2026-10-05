@@ -264,6 +264,14 @@ Return ONLY JSON: {"reply":"Bitte beginnen Sie mit Ihrer Präsentation. Ich hör
       prompt=`Create a realistic, high-quality TELC Sprechen Teil 3 (Gemeinsam etwas planen / organisieren) training model for level ${level} based ONLY on the supplied topic and task.
 ${context}
 
+LANGUAGE LEVEL FOR THE MODEL ANSWER:
+- Use clear, natural German around B2 level, even when the exercise level is higher.
+- Keep sentences short to medium and easy to memorize.
+- Prefer common B2 words and practical TELC Redemittel.
+- Avoid unnecessarily academic, literary, C1/C2, or complicated vocabulary.
+- The language must still sound mature and exam-appropriate, not A2/B1.
+- Do not sacrifice the required planning content just to make the language simple.
+
 CRITICAL RULES FOR TEIL 3 — JOINT PLANNING DIALOGUE:
 - This is a JOINT PLANNING AND NEGOTIATION DIALOGUE between two candidates (student and partner) to plan an event, project, or solve a problem.
 - Absolutely NO "Inhalt", NO "Meinung 1 / Meinung 2", NO "Erfahrung 1 / Erfahrung 2", NO "Vorteile und Nachteile" monologues!
@@ -291,6 +299,14 @@ Return ONLY JSON in this exact shape:
     } else {
       prompt=`Create a high-quality TELC ${level} Sprechen training model based ONLY on the supplied topic, task and Teil (${activeTeil}). The supplied topic is the source of truth.
 ${context}
+
+LANGUAGE LEVEL FOR THE MODEL ANSWER:
+- Use clear, natural German around B2 level.
+- Keep sentences short to medium and easy to memorize.
+- Prefer common B2 vocabulary and practical TELC expressions.
+- Avoid unnecessarily difficult C1/C2 vocabulary, long nested sentences, and overly academic wording.
+- Keep the result clearly above B1: give reasons, react to the partner, compare options, and justify decisions.
+- The model should sound like a strong B2 candidate, not like a native academic speaker.
 
 IMPORTANT FOR TEIL 2 — FOLLOW THIS ROLE DISTRIBUTION EXACTLY:
 - Meinung 1 is the STUDENT'S opinion. The student gives their own clear position and a reason.
