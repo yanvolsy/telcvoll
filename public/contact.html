@@ -36,8 +36,6 @@
 .contact-action{position:relative;margin-top:auto;display:inline-flex;align-items:center;gap:8px;padding:9px 15px;border-radius:999px;background:var(--exercise-accent-soft);color:var(--exercise-accent);font-weight:900;font-size:13px;transition:transform .25s ease,background .25s ease}
 .contact-card-new:hover .contact-action{transform:translateX(-2px);background:rgba(255,126,24,.14)}
 .contact-email{direction:ltr;unicode-bidi:plaintext}
-.contact-note{margin-top:24px;padding:18px 22px;border:1px solid var(--line);border-radius:20px;background:var(--white);text-align:center;color:var(--muted);line-height:1.8;animation:contactFadeUp .65s .58s ease both}
-.contact-note strong{color:var(--text)}
 .contact-footer{margin-top:34px;padding:34px 22px 28px;border-top:1px solid var(--line);background:rgba(255,255,255,.72);backdrop-filter:blur(12px);text-align:center;animation:contactFadeUp .65s .62s ease both}
 .contact-footer-brand{display:inline-flex;align-items:center;gap:8px;color:var(--brand);font-size:21px;font-weight:950;letter-spacing:-.04em;text-decoration:none}
 .contact-footer-brand .brand-dot{width:10px;height:10px;border-radius:50%;background:var(--brand)}
@@ -54,7 +52,7 @@
 @keyframes contactFloat{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(12px,10px,0)}}
 @keyframes contactPulse{0%,100%{box-shadow:0 0 0 7px rgba(255,126,24,.10)}50%{box-shadow:0 0 0 11px rgba(255,126,24,.04)}}
 @media(max-width:800px){.contact-grid-new{grid-template-columns:1fr}.contact-hero{padding:38px 24px}.contact-card-new{min-height:220px}.contact-page{padding-top:28px}.contact-brand{font-size:25px}}
-@media(prefers-reduced-motion:reduce){.contact-hero,.contact-brand,.contact-badge,.contact-hero h1,.contact-hero p,.contact-card-new,.contact-note,.contact-footer{animation:none!important}.contact-hero:before,.contact-hero:after,.contact-card-icon,.contact-action,.contact-social{transition:none!important}.contact-brand .brand-dot{animation:none!important}}
+@media(prefers-reduced-motion:reduce){.contact-hero,.contact-brand,.contact-badge,.contact-hero h1,.contact-hero p,.contact-card-new,.contact-footer{animation:none!important}.contact-hero:before,.contact-hero:after,.contact-card-icon,.contact-action,.contact-social{transition:none!important}.contact-brand .brand-dot{animation:none!important}}
 </style>
 <style><!-- TELC Voll: unified homepage typography -->
 html,html body,html body *{font-family:"Cairo","Segoe UI",Arial,sans-serif !important;}
@@ -111,10 +109,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
       <h2>YouTube</h2><div class="handle">@telcvoll</div><p>قناة TELC Voll على YouTube — ستتم إضافة المحتوى قريبًا.</p><span class="contact-action">فتح YouTube <span>↗</span></span>
     </a>
   </section>
-
-  <div class="contact-note">📩 <strong>هل لديك سؤال؟</strong> اكتب لنا عبر Messenger أو أرسل بريدك إلى <span class="contact-email">telcvoll@gmail.com</span>.</div>
-
-  <footer class="contact-footer">
+<footer class="contact-footer">
     <a class="contact-footer-brand" href="/" aria-label="TELC Voll"><span class="brand-dot"></span>TELC Voll</a>
     <p>منصة التدريب والتحضير لامتحانات اللغة الألمانية · B1 · B2 · C1</p>
     <div class="contact-socials" aria-label="روابط TELC Voll الاجتماعية">
@@ -126,7 +121,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
   </footer>
 </main>
 <script src="/assets/i18n.js?v=20260927-subscription-activation-mail-v10"></script>
-<script src="/assets/app.js"></script>
+<script src="/assets/app.js?v=20261005-public-session-footer-fix"></script>
 <script>
 if (qs('plan')) {
   const tb = document.getElementById('trialBanner');

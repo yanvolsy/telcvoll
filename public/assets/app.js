@@ -1,14 +1,27 @@
 // أدوات مشتركة لكل الصفحات الثابتة.
 const TELC_PUBLIC_PATHS = new Set([
   '/', '/index.html',
-  '/plans.html', '/about.html', '/contact.html',
+  '/plans.html', '/plans', '/about.html', '/about', '/contact.html', '/contact',
   '/payment-success.html',
   '/login.html', '/login', '/register.html', '/register',
   '/forgot-password.html', '/reset-password.html', '/verify-email.html'
 ]);
+const TELC_STUDENT_PROTECTED_PATHS = new Set([
+  '/dashboard.html', '/exercise.html', '/speaking.html',
+  '/self-test.html', '/mock-exam.html', '/self-test-result.html',
+  '/telc-chat.html', '/profile.html'
+]);
+function normalizeTelcPath(pathname = location.pathname) {
+  let p = String(pathname || '/').split('?')[0].split('#')[0].toLowerCase();
+  if (p.length > 1) p = p.replace(/\/+$/, '');
+  return p || '/';
+}
 function isTelcPublicPage(pathname = location.pathname) {
-  const p = String(pathname || '/').toLowerCase();
+  const p = normalizeTelcPath(pathname);
   return TELC_PUBLIC_PATHS.has(p) || p.startsWith('/admin');
+}
+function isTelcStudentProtectedPage(pathname = location.pathname) {
+  return TELC_STUDENT_PROTECTED_PATHS.has(normalizeTelcPath(pathname));
 }
 
 async function api(path, options = {}) {
@@ -395,32 +408,29 @@ document.addEventListener('DOMContentLoaded', initAdminLoginTools);
   }, { capture: true });
 })();
 
-// Enforce single active session for student
+// Enforce single active session for authenticated learner workspaces only.
 (function initStudentSessionWatcher() {
-  if (isTelcPublicPage()) return;
-  // student_token is HttpOnly; the server decides whether a session exists.
-
+  if (!isTelcStudentProtectedPage()) return;
   var checking = false;
   async function checkSingleSession() {
-    if (checking || document.hidden) return;
+    if (!isTelcStudentProtectedPage() || checking || document.hidden) return;
     checking = true;
     try {
-      var res = await fetch('/api/session', { credentials: 'include' });
+      var res = await fetch('/api/session', { credentials: 'include', cache: 'no-store' });
       if (res.status === 401) {
-        location.href = '/?error=session';
+        location.href = '/login.html?error=session';
         return;
       }
       var d = await res.json();
       if (d && d.role === null) {
-        location.href = '/?error=session';
+        location.href = '/login.html?error=session';
       }
     } catch (_) {
-      // Network glitches should not log student out
+      // Network glitches should not log the student out.
     } finally {
       checking = false;
     }
   }
-
   setInterval(checkSingleSession, 20000);
   document.addEventListener('visibilitychange', function() {
     if (document.visibilityState === 'visible') checkSingleSession();

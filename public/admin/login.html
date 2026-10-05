@@ -15,6 +15,6 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 <div id="msg"></div><form id="f"><label>كلمة المرور</label><input name="password" type="password" required placeholder="أدخل كلمة مرور المشرف" autocomplete="current-password"><button class="btn" style="width:100%">دخول</button></form>
 </div></main>
 <script src="/assets/i18n.js?v=20260927-subscription-activation-mail-v10"></script>
-<script src="/assets/app.js"></script><script>
+<script src="/assets/app.js?v=20261005-public-session-footer-fix"></script><script>
 f.onsubmit=async(e)=>{e.preventDefault();const fd=new FormData(f);try{await api('admin-login',{method:'POST',body:{password:fd.get('password')}});location.href='/admin/index.html';}catch(err){msg.innerHTML=`<div class="alert bad">${esc(err.data?.error||'بيانات الدخول غير صحيحة')}</div>`;}};
 </script></body></html>
