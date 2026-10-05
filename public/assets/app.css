@@ -12279,3 +12279,32 @@ html[data-theme="light"] .landing-body{--home-glow:rgba(255,122,47,.13);--home-g
 @media(max-width:820px){.landing-feature-stage,.landing-feature-stage-reverse{grid-template-columns:1fr;gap:30px;margin-bottom:78px}.landing-feature-stage-reverse .landing-feature-copy{order:0}.landing-demo-wrap{order:1}.landing-feature-copy{max-width:none}.landing-ai-demo,.landing-studio-demo{width:min(620px,100%);}.landing-services .landing-service{min-height:210px;}}
 @media(max-width:620px){.landing-services .landing-service-grid{grid-template-columns:1fr!important;gap:12px!important}.landing-services .landing-service{min-height:0;padding:20px 18px!important}.homepage-plans-grid{grid-template-columns:1fr}.homepage-plan-card:last-child{grid-column:auto;max-width:none}.homepage-plan-card{min-height:0}.landing-section-intro{margin-bottom:22px}.landing-section-intro h2{font-size:30px}.landing-feature-copy h2{font-size:30px}.landing-ai-demo,.landing-studio-demo{border-radius:23px}.landing-studio-demo{min-height:340px;padding:21px}.studio-wave{height:125px;gap:5px}.studio-wave span{width:4px}.landing-final-cta{margin-bottom:45px;padding:46px 18px;border-radius:23px}.landing-final-cta h2{font-size:31px}.landing-final-btn{width:100%;}}
 @media(prefers-reduced-motion:reduce){.homepage-plan-skeleton{animation:none}.demo-pulse,.studio-wave span,.studio-sweep{animation:none}.landing-body .landing-reveal{opacity:1;transform:none;filter:none;transition:none}.homepage-plan-card:hover,.landing-services .landing-service:hover{transform:none!important}.landing-ai-demo,.landing-studio-demo{transform:none!important;transition:none;}}
+
+
+/* TELC Voll — homepage hero centered layout (orbit visual removed) */
+.landing-hero{
+  grid-template-columns:1fr!important;
+  gap:0!important;
+  min-height:clamp(520px,68vh,720px);
+  align-items:center!important;
+  justify-items:center!important;
+}
+.landing-hero-copy{
+  width:min(920px,100%);
+  max-width:920px!important;
+  margin:0 auto!important;
+  text-align:center!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+}
+.landing-hero-copy .landing-kicker{margin-inline:auto!important;}
+.landing-hero-copy h1{max-width:900px!important;}
+.landing-hero-copy p{max-width:720px!important;margin-inline:auto!important;}
+.landing-hero-copy .landing-actions{justify-content:center!important;align-items:center!important;}
+@media(max-width:650px){
+  .landing-hero{min-height:500px;padding:36px 0 45px!important;}
+  .landing-hero-copy{width:100%;}
+  .landing-hero-copy h1{font-size:clamp(38px,12vw,56px)!important;}
+  .landing-hero-copy p{font-size:15px!important;max-width:620px!important;}
+}

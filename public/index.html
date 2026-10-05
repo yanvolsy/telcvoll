@@ -31,7 +31,6 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 .landing-body .landing-page{position:relative;isolation:isolate;}
 .landing-body .landing-hero,.landing-body .landing-service,.landing-body .landing-showcase-image,.landing-body .landing-showcase-copy{animation:none!important;}
 .landing-body .landing-hero-copy{opacity:0;transform:translateY(22px);animation:tvHeroCopy .78s cubic-bezier(.22,.8,.24,1) .08s forwards;}
-.landing-body .landing-hero-visual{opacity:0;transform:translateY(18px) scale(.965);animation:tvHeroVisual .95s cubic-bezier(.16,.84,.25,1) .18s forwards;}
 .landing-plans-cta{display:inline-flex;align-items:center;gap:9px;margin-top:17px;color:var(--brand);font-size:13px;font-weight:900;text-decoration:none;position:relative;width:max-content;}
 .landing-plans-cta::after{content:"";position:absolute;right:0;left:0;bottom:-6px;height:1px;background:linear-gradient(90deg,transparent,var(--brand),transparent);transform:scaleX(.3);transform-origin:center;transition:transform .28s ease;}
 .landing-plans-cta:hover::after{transform:scaleX(1);}
@@ -63,7 +62,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 @keyframes tvHeroCopy{to{opacity:1;transform:none}}@keyframes tvHeroVisual{to{opacity:1;transform:none}}@keyframes tvDashboardFloat{0%,100%{transform:rotateY(-7deg) rotateX(3deg) translateY(0)}50%{transform:rotateY(-5deg) rotateX(2deg) translateY(-10px)}}@keyframes tvStatFloat{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-9px) rotate(1deg)}}@keyframes tvGlow{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.08);opacity:1}}@keyframes tvParticle{0%,100%{transform:translate3d(0,0,0);opacity:.15}50%{transform:translate3d(10px,-15px,0);opacity:1}}@keyframes tvOrb{to{transform:rotate(360deg)}}@keyframes tvProgress{from{width:0}to{width:78%}}@keyframes tvPulse{0%,100%{transform:scale(.85);opacity:.72}50%{transform:scale(1.15);opacity:1}}
 @media(max-width:1050px){.landing-animated-visual{min-height:500px}.landing-float-stat.stat-one{left:1%}.landing-float-stat.stat-two{right:1%}}
 @media(max-width:650px){.landing-animated-visual{min-height:430px;margin-top:8px}.landing-ui-main{width:94%;padding:16px;border-radius:22px;transform:none!important}.landing-ui-welcome{margin:21px 0 16px}.landing-ui-welcome strong{font-size:27px}.landing-ui-grid{gap:8px}.landing-ui-chip{min-height:72px;padding:10px}.landing-ui-chip b{font-size:12px}.landing-float-stat{min-width:108px;padding:10px 11px;border-radius:14px}.landing-float-stat span{font-size:16px}.landing-float-stat small{font-size:9px}.stat-one{top:5%;left:-2px}.stat-two{bottom:4%;right:-2px}.landing-float-orb{width:58px;height:58px;right:4%;bottom:21%}.landing-plans-cta{font-size:12px}.showcase-dashboard{padding:15px}.showcase-score-row b{font-size:34px}}
-@media(prefers-reduced-motion:reduce){.landing-body .landing-hero-copy,.landing-body .landing-hero-visual{animation:none;opacity:1;transform:none}.visual-glow,.visual-particles i,.landing-ui-main,.landing-float-stat,.landing-float-orb,.ui-brand-dot,.progress-track span{animation:none!important}.landing-reveal{opacity:1;transform:none;transition:none}.landing-plans-cta span,.landing-plans-cta::after{transition:none}.landing-service,.landing-ui-chip,.landing-showcase-image::after{transition:none!important}}
+@media(prefers-reduced-motion:reduce){.landing-body .landing-hero-copy{animation:none;opacity:1;transform:none}.visual-glow,.visual-particles i,.landing-ui-main,.landing-float-stat,.landing-float-orb,.ui-brand-dot,.progress-track span{animation:none!important}.landing-reveal{opacity:1;transform:none;transition:none}.landing-plans-cta span,.landing-plans-cta::after{transition:none}.landing-service,.landing-ui-chip,.landing-showcase-image::after{transition:none!important}}
 </style>
 </head>
 <body class="landing-body" data-i18n-title="hero_tag">
@@ -94,28 +93,6 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
       <div class="actions landing-actions" id="heroActionsSlot">
         <a class="btn" href="/register.html" data-auth-register>ابدأ التدرب مجاناً ←</a>
         <a class="btn light" href="/login.html" data-auth-login>تسجيل الدخول</a>
-      </div>
-    </div>
-    <div class="landing-hero-visual landing-animated-visual" data-parallax>
-      <div class="home-orbit-scene" aria-label="مهارات TELC Voll">
-        <div class="home-orbit-glow home-orbit-glow-a" aria-hidden="true"></div>
-        <div class="home-orbit-glow home-orbit-glow-b" aria-hidden="true"></div>
-        <div class="home-orbit-ring home-orbit-ring-a" aria-hidden="true"></div>
-        <div class="home-orbit-ring home-orbit-ring-b" aria-hidden="true"></div>
-        <div class="home-orbit-spinner" aria-hidden="true">
-          <div class="home-orbit-item" style="--a:-18deg"><span>Lesen</span></div>
-          <div class="home-orbit-item" style="--a:54deg"><span>Hören</span></div>
-          <div class="home-orbit-item" style="--a:126deg"><span>Sprechen</span></div>
-          <div class="home-orbit-item" style="--a:198deg"><span>Schreiben</span></div>
-          <div class="home-orbit-item" style="--a:270deg"><span>Sprachbausteine</span></div>
-        </div>
-        <div class="home-orbit-core">
-          <div class="home-orbit-core-dot"></div>
-          <div class="home-orbit-brand"><span class="brand-dot"></span><b>TELC Voll</b></div>
-          <small>TRAINING · B1 · B2 · C1</small>
-        </div>
-        <div class="home-orbit-ping ping-one" aria-hidden="true"></div>
-        <div class="home-orbit-ping ping-two" aria-hidden="true"></div>
       </div>
     </div>
   </section>
