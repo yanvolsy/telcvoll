@@ -7,6 +7,9 @@ const { sendVerificationEmail } = require('./_lib/email');
 
 exports.handler = async (event) => {
   if (!requestSize(event)) return json(413, { error: 'Request too large.' });
+  if (event.httpMethod === 'POST' && !requireSameOrigin(event)) {
+    return json(403, { error: 'Cross-origin request blocked.' });
+  }
 
   const ip = clientIp(event);
   const pool = db();
@@ -91,7 +94,7 @@ exports.handler = async (event) => {
     }
 
     const res = await client.query(
-      `SELECT id, name, first_name, last_name, email, phone, email_verified
+      `SELECT id, name, first_name, last_name, email, phone, email_verified, password_hash, pending_password_hash
        FROM students
        WHERE verification_token = $1
          AND (verification_expires_at IS NULL OR verification_expires_at > NOW())
@@ -109,10 +112,13 @@ exports.handler = async (event) => {
 
     const student = res.rows[0];
 
-    // Activate student account
+    // Activate student account. For legacy students, the password is only
+    // promoted from pending_password_hash after the email token is redeemed.
     await client.query(
       `UPDATE students
        SET email_verified = TRUE,
+           password_hash = COALESCE(password_hash, pending_password_hash),
+           pending_password_hash = NULL,
            verification_token = NULL,
            verification_expires_at = NULL,
            last_login_at = NOW(),

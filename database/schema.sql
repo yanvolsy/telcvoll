@@ -37,6 +37,7 @@ ALTER TABLE students ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW()
 ALTER TABLE students ADD COLUMN IF NOT EXISTS is_blocked BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE students ADD COLUMN IF NOT EXISTS verification_token VARCHAR(120) NULL;
 ALTER TABLE students ADD COLUMN IF NOT EXISTS verification_expires_at TIMESTAMP NULL;
+ALTER TABLE students ADD COLUMN IF NOT EXISTS pending_password_hash VARCHAR(255) NULL;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_students_unique_email ON students (LOWER(TRIM(email))) WHERE email IS NOT NULL AND TRIM(email) != '';
 CREATE INDEX IF NOT EXISTS idx_students_google_id ON students (google_id) WHERE google_id IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_students_verification_token ON students (verification_token) WHERE verification_token IS NOT NULL;

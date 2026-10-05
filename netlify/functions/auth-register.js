@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const { db, ensureSchema } = require('./_lib/db');
-const { sign, setCookie, clientIp, json, hashPassword } = require('./_lib/auth');
+const { clientIp, json, hashPassword } = require('./_lib/auth');
 const { rateLimit } = require('./_lib/ratelimit');
 const { requireSameOrigin, requestSize } = require('./_lib/request');
 
@@ -72,75 +72,46 @@ exports.handler = async (event) => {
     }
 
     let studentId;
+    const passwordHash = await hashPassword(password);
 
     if (existingRes.rows.length > 0) {
       const existing = existingRes.rows[0];
       if (existing.password_hash) {
         return json(409, { error: 'هذا البريد الإلكتروني مسجل بالفعل. يرجى تسجيل الدخول.' });
       }
-      // If student existed from legacy order/code without a password, attach password to existing account!
-      const passwordHash = await hashPassword(password);
-      try {
-        await client.query(
-          `UPDATE students
-           SET name = COALESCE(NULLIF($1, ''), name),
-               first_name = COALESCE(NULLIF($2, ''), first_name),
-               last_name = COALESCE(NULLIF($3, ''), last_name),
-               phone = COALESCE(NULLIF($4, ''), phone),
-               password_hash = $5,
-               auth_provider = 'email',
-               verification_token = $6,
-               verification_expires_at = NOW() + INTERVAL '24 hours',
-               last_login_at = NOW(),
-               updated_at = NOW()
-           WHERE id = $7`,
-          [rawName, firstName, lastName, phone, passwordHash, verificationToken, existing.id]
-        );
-      } catch (updErr) {
-        // Fallback update without verification tokens if columns were unavailable
-        await client.query(
-          `UPDATE students
-           SET name = COALESCE(NULLIF($1, ''), name),
-               first_name = COALESCE(NULLIF($2, ''), first_name),
-               last_name = COALESCE(NULLIF($3, ''), last_name),
-               phone = COALESCE(NULLIF($4, ''), phone),
-               password_hash = $5,
-               updated_at = NOW()
-           WHERE id = $6`,
-          [rawName, firstName, lastName, phone, passwordHash, existing.id]
-        );
-      }
+
+      // SECURITY: Legacy students may already own paid orders. Never attach a
+      // new password to such an account until the person proves control of the
+      // email address. Store the hash as pending and activate it only after
+      // the verification token is redeemed. No session is issued here.
+      await client.query(
+        `UPDATE students
+         SET name = COALESCE(NULLIF($1, ''), name),
+             first_name = COALESCE(NULLIF($2, ''), first_name),
+             last_name = COALESCE(NULLIF($3, ''), last_name),
+             phone = COALESCE(NULLIF($4, ''), phone),
+             pending_password_hash = $5,
+             auth_provider = 'email',
+             email_verified = FALSE,
+             verification_token = $6,
+             verification_expires_at = NOW() + INTERVAL '24 hours',
+             updated_at = NOW()
+         WHERE id = $7`,
+        [rawName, firstName, lastName, phone, passwordHash, verificationToken, existing.id]
+      );
       studentId = existing.id;
     } else {
-      // Hash password securely with bcrypt
-      const passwordHash = await hashPassword(password);
-
-      // Create student account with fallback
-      let insertRes;
-      try {
-        insertRes = await client.query(
-          `INSERT INTO students(
-             name, first_name, last_name, email, phone,
-             password_hash, auth_provider, email_verified, profile_completed,
-             verification_token, verification_expires_at, is_paid,
-             created_at, updated_at, last_login_at
-           ) VALUES ($1, $2, $3, $4, $5, $6, 'email', FALSE, TRUE, $7, NOW() + INTERVAL '24 hours', FALSE, NOW(), NOW(), NOW())
-           RETURNING id, name, first_name, last_name, email, phone, email_verified`,
-          [rawName, firstName, lastName, email, phone, passwordHash, verificationToken]
-        );
-      } catch (insertErr) {
-        console.warn('[AUTH REGISTER] Primary insert notice, trying standard fallback:', insertErr.message);
-        insertRes = await client.query(
-          `INSERT INTO students(
-             name, first_name, last_name, email, phone,
-             password_hash, auth_provider, email_verified, profile_completed,
-             created_at, updated_at, last_login_at
-           ) VALUES ($1, $2, $3, $4, $5, $6, 'email', FALSE, TRUE, NOW(), NOW(), NOW())
-           RETURNING id, name, first_name, last_name, email, phone, email_verified`,
-          [rawName, firstName, lastName, email, phone, passwordHash]
-        );
-      }
-
+      // New accounts are also unusable until the email verification succeeds.
+      const insertRes = await client.query(
+        `INSERT INTO students(
+           name, first_name, last_name, email, phone,
+           password_hash, auth_provider, email_verified, profile_completed,
+           verification_token, verification_expires_at, is_paid,
+           created_at, updated_at
+         ) VALUES ($1, $2, $3, $4, $5, $6, 'email', FALSE, TRUE, $7, NOW() + INTERVAL '24 hours', FALSE, NOW(), NOW())
+         RETURNING id`,
+        [rawName, firstName, lastName, email, phone, passwordHash, verificationToken]
+      );
       studentId = insertRes.rows[0].id;
     }
 
@@ -154,20 +125,13 @@ exports.handler = async (event) => {
       console.warn('[AUTH REGISTER] Verification email non-fatal notice:', mailErr?.message);
     }
 
-    // Generate authenticated session token
-    const token = sign({
-      student_id: studentId,
-      email,
-      name: rawName,
-    });
-
+    // SECURITY: Do not issue an authenticated session before email ownership
+    // has been proven. The verification endpoint creates the session.
     return json(200, {
       ok: true,
       student: { id: studentId, name: rawName, email, phone, email_verified: false },
       verification_sent: true,
-      message: 'تم إنشاء الحساب بنجاح وإرسال رابط التفعيل إلى بريدك الإلكتروني.'
-    }, {
-      'Set-Cookie': setCookie('student_token', token, 60 * 60 * 24 * 30),
+      message: 'تم إنشاء الطلب وإرسال رابط التفعيل إلى بريدك الإلكتروني. يجب تأكيد البريد قبل تسجيل الدخول.'
     });
   } catch (err) {
     console.error('Registration error:', err);

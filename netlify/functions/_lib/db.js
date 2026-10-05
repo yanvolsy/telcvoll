@@ -20,7 +20,8 @@ async function ensureSchema(p) {
     `ALTER TABLE students ADD COLUMN IF NOT EXISTS google_id VARCHAR(190) NULL;`,
     `ALTER TABLE students ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT FALSE;`,
     `ALTER TABLE students ADD COLUMN IF NOT EXISTS verification_token VARCHAR(120) NULL;`,
-    `ALTER TABLE students ADD COLUMN IF NOT EXISTS verification_expires_at TIMESTAMP NULL;`,
+    `ALTER TABLE students ADD COLUMN IF NOT EXISTS verification_expires_at TIMESTAMP NULL;
+    ALTER TABLE students ADD COLUMN IF NOT EXISTS pending_password_hash VARCHAR(255) NULL;`,
     `ALTER TABLE students ADD COLUMN IF NOT EXISTS reset_token VARCHAR(120) NULL;`,
     `ALTER TABLE students ADD COLUMN IF NOT EXISTS reset_expires_at TIMESTAMP NULL;`,
     `ALTER TABLE students ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMP NULL;`,

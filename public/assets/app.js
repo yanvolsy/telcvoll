@@ -247,6 +247,57 @@ function initAdminLoginTools() {
 
 document.addEventListener('DOMContentLoaded', initAdminLoginTools);
 
+// DevTools deterrence for learner/public pages.
+// This is intentionally a client-side deterrent, not a security boundary.
+// Server-side authorization remains the real protection for TELC content.
+(function initDevToolsGuard() {
+  const path = (location.pathname || '').toLowerCase();
+  const excluded = path.startsWith('/admin') || /(^|\/)(login|register|forgot-password|reset-password|verify-email)\.html$/.test(path);
+  if (excluded) return;
+
+  let triggered = false;
+  async function terminateSession() {
+    if (triggered) return;
+    triggered = true;
+    try {
+      await fetch('/api/auth-logout', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: '{}',
+        keepalive: true,
+      });
+    } catch (_) {}
+    try { sessionStorage.setItem('telc_security_redirect', '1'); } catch (_) {}
+    location.replace('/?security=devtools');
+  }
+
+  document.addEventListener('keydown', function(e) {
+    const key = String(e.key || '').toLowerCase();
+    const devtoolsShortcut = key === 'f12' ||
+      ((e.ctrlKey || e.metaKey) && e.shiftKey && ['i', 'j', 'c'].includes(key));
+    if (devtoolsShortcut) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      terminateSession();
+    }
+  }, { capture: true });
+
+  // Best-effort detection when DevTools is opened through the browser menu.
+  // Do not use mobile dimensions or small window changes to avoid false positives.
+  let lastDevtoolsState = false;
+  function detectOpenedDevTools() {
+    if (triggered || /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)) return;
+    const widthGap = Math.abs(window.outerWidth - window.innerWidth);
+    const heightGap = Math.abs(window.outerHeight - window.innerHeight);
+    const open = widthGap > 180 || heightGap > 180;
+    if (open && !lastDevtoolsState) terminateSession();
+    lastDevtoolsState = open;
+  }
+  window.addEventListener('resize', detectOpenedDevTools, { passive: true });
+  setTimeout(detectOpenedDevTools, 1200);
+})();
+
 // Anti-copy & right-click protection for learner/public pages
 (function initAntiCopy() {
   if (location.pathname.startsWith('/admin')) return;

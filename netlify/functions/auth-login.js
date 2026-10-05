@@ -37,7 +37,7 @@ exports.handler = async (event) => {
 
       const { rows } = await client.query(
         `SELECT id, name, first_name, last_name, email, phone, country,
-                password_hash, auth_provider, is_blocked, profile_completed
+                password_hash, auth_provider, email_verified, is_blocked, profile_completed
          FROM students
          WHERE LOWER(TRIM(email)) = $1
          LIMIT 1`,
@@ -57,6 +57,13 @@ exports.handler = async (event) => {
       const passwordMatch = await verifyPassword(password, student.password_hash);
       if (!passwordMatch) {
         return json(401, { error: 'invalid_credentials', message: 'البريد الإلكتروني أو كلمة المرور غير صحيحة.' });
+      }
+
+      if (student.email_verified !== true) {
+        return json(403, {
+          error: 'email_not_verified',
+          message: 'يرجى تأكيد بريدك الإلكتروني أولاً. افتح رسالة التفعيل أو اطلب رابطاً جديداً.'
+        });
       }
 
       // Update last login timestamp

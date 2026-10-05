@@ -13,6 +13,7 @@ ALTER TABLE students ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW()
 ALTER TABLE students ADD COLUMN IF NOT EXISTS is_blocked BOOLEAN NOT NULL DEFAULT FALSE;
 ALTER TABLE students ADD COLUMN IF NOT EXISTS verification_token VARCHAR(120) NULL;
 ALTER TABLE students ADD COLUMN IF NOT EXISTS verification_expires_at TIMESTAMP NULL;
+ALTER TABLE students ADD COLUMN IF NOT EXISTS pending_password_hash VARCHAR(255) NULL;
 
 -- 2. Safely resolve duplicate existing emails before creating unique index
 DO $$
