@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>نتيجة الامتحان التجريبي — TELC Voll</title>
-<link rel="stylesheet" href="/assets/app.css?v=20260928-polished-v1">
+<link rel="stylesheet" href="/assets/app.css?v=20261005-orbit-footer-v3">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -98,7 +98,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
   </nav>
 </header>
 <main id="content" class="result-page"></main>
-<script src="/assets/i18n.js?v=20260927-subscription-activation-mail-v10"></script><script src="/assets/app.js?v=20261005-orbit-footer-v2"></script>
+<script src="/assets/i18n.js?v=20260927-subscription-activation-mail-v10"></script><script src="/assets/app.js?v=20261005-orbit-footer-v3"></script>
 <script>
 const r = JSON.parse(localStorage.getItem('telc_mock_result') || 'null');
 if (!r) { location.href = '/dashboard.html'; }
@@ -278,6 +278,13 @@ window.addEventListener('langchange', () => {
 
 render();
 </script>
+<section class="telc-bottom-cta" aria-label="روابط TELC Voll الأخيرة">
+  <div class="telc-bottom-actions">
+    <a class="btn telc-bottom-primary" href="/dashboard.html">العودة إلى منصة الطالب <span aria-hidden="true">←</span></a>
+    <a class="btn light" href="/plans.html">الخطط والاشتراكات</a>
+  </div>
+  <a class="telc-bottom-plans-link" href="/plans.html">عرض الخطط والأسعار <span aria-hidden="true">←</span></a>
+</section>
 <footer class="site-footer-minimal" aria-label="TELC Voll footer">
   <div>B1 · B2 · C1 — منصة التدريب والتحضير لامتحانات اللغة الألمانية النهائية — TELC Voll</div>
 </footer>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#080808"><title>لوحة الطالب</title>
-<link rel="stylesheet" href="/assets/app.css?v=20260928-polished-v1">
+<link rel="stylesheet" href="/assets/app.css?v=20261005-orbit-footer-v3">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="alternate icon" href="/assets/favicon-light.png" type="image/png" media="(prefers-color-scheme: light)">
@@ -255,7 +255,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
     </div>
   </div>
 </div>
-<script src="/assets/i18n.js?v=20260925-dashboard-fix"></script><script src="/assets/app.js?v=20261005-orbit-footer-v2"></script>
+<script src="/assets/i18n.js?v=20260925-dashboard-fix"></script><script src="/assets/app.js?v=20261005-orbit-footer-v3"></script>
 <script>
 const SECTION_ORDER=['Lesen','Hören','Sprachbausteine','Schreiben','Sprechen'];
 const TEIL_ORDER={Lesen:['Teil 1','Teil 2','Teil 3'],Hören:['Teil 1','Teil 2','Teil 3'],Sprachbausteine:['Teil 1','Teil 2'],Schreiben:['Teil 1'],Sprechen:['Teil 1','Teil 2','Teil 3']};
@@ -1486,6 +1486,13 @@ document.addEventListener('langchange', render);
   if(ml&&lk) ml.onclick=function(e){e.preventDefault();lk.onclick(e);};
 })();
 </script>
+<section class="telc-bottom-cta" aria-label="روابط TELC Voll الأخيرة">
+  <div class="telc-bottom-actions">
+    <a class="btn telc-bottom-primary" href="/dashboard.html">العودة إلى منصة الطالب <span aria-hidden="true">←</span></a>
+    <a class="btn light" href="/plans.html">الخطط والاشتراكات</a>
+  </div>
+  <a class="telc-bottom-plans-link" href="/plans.html">عرض الخطط والأسعار <span aria-hidden="true">←</span></a>
+</section>
 <footer class="site-footer-minimal" aria-label="TELC Voll footer">
   <div>B1 · B2 · C1 — منصة التدريب والتحضير لامتحانات اللغة الألمانية النهائية — TELC Voll</div>
 </footer>

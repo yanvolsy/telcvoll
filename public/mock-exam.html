@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#080808">
 <title>الامتحان التجريبي — TELC Voll</title>
-<link rel="stylesheet" href="/assets/app.css?v=20260928-polished-v1">
+<link rel="stylesheet" href="/assets/app.css?v=20261005-orbit-footer-v3">
 <link rel="icon" href="/assets/favicon-light.svg" type="image/svg+xml" media="(prefers-color-scheme: light)">
 <link rel="icon" href="/assets/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="/manifest.webmanifest">
@@ -852,7 +852,7 @@ html[data-theme="light"] .exercise-actions {
   </div>
 </header>
 <main id="app" class="mock-root"><div class="student-loading">جارٍ تحميل الامتحان…</div></main>
-<script src="/assets/i18n.js?v=20260927-subscription-activation-mail-v10"></script><script src="/assets/app.js?v=20261005-orbit-footer-v2"></script>
+<script src="/assets/i18n.js?v=20260927-subscription-activation-mail-v10"></script><script src="/assets/app.js?v=20261005-orbit-footer-v3"></script>
 <script>
 const sessionId = qs('session');
 const SECTION_ORDER = ['Lesen','Hören','Sprachbausteine','Schreiben'];
@@ -1989,6 +1989,13 @@ window.addEventListener('langchange', () => {
   await render();
 })();
 </script>
+<section class="telc-bottom-cta" aria-label="روابط TELC Voll الأخيرة">
+  <div class="telc-bottom-actions">
+    <a class="btn telc-bottom-primary" href="/dashboard.html">العودة إلى منصة الطالب <span aria-hidden="true">←</span></a>
+    <a class="btn light" href="/plans.html">الخطط والاشتراكات</a>
+  </div>
+  <a class="telc-bottom-plans-link" href="/plans.html">عرض الخطط والأسعار <span aria-hidden="true">←</span></a>
+</section>
 <footer class="site-footer-minimal" aria-label="TELC Voll footer">
   <div>B1 · B2 · C1 — منصة التدريب والتحضير لامتحانات اللغة الألمانية النهائية — TELC Voll</div>
 </footer>
