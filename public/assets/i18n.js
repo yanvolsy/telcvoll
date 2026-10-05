@@ -20,7 +20,7 @@ const I18N = {
 
     hero_tag: 'منصة تدريب TELC Voll',
     hero_title: 'تدرّب بذكاء. ادخل الامتحان بثقة.',
-    hero_desc: 'منصة تدريب احترافية لمحاكاة امتحان TELC Voll والتدرب على Lesen وHören وSprachbausteine وSchreiben وSprechen.',
+    hero_desc: 'منصة تدريب احترافية لمحاكاة امتحان TELC ',
     hero_cta1: 'ابدأ التدريب الآن', hero_cta2: 'اكتشف الخدمات',
     hero_img_alt: 'طلاب يستعدون لامتحان TELC Voll',
 
@@ -105,7 +105,7 @@ const I18N = {
 
     hero_tag: 'TELC Voll Übungsplattform',
     hero_title: 'Übe smarter. Bestehe die Prüfung mit Vertrauen.',
-    hero_desc: 'Eine professionelle Plattform für die TELC Voll-Prüfung mit Training in Lesen, Hören, Sprachbausteinen, Schreiben und Sprechen.',
+    hero_desc: 'Eine professionelle Plattform für die TELC',
     hero_cta1: 'Jetzt mit dem Training starten', hero_cta2: 'Leistungen entdecken',
     hero_img_alt: 'Studierende bereiten sich auf die TELC Voll-Prüfung vor',
 
