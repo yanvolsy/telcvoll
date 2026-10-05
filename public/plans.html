@@ -151,6 +151,20 @@
   justify-content: center;
   flex-wrap: wrap;
 }
+
+.auth-gate-overlay{font-family:"Cairo","Segoe UI",Arial,sans-serif;}
+.auth-gate-card{width:min(500px,100%);background:var(--white);border:1px solid rgba(255,122,47,.28);border-radius:26px;padding:32px;box-shadow:0 30px 90px rgba(0,0,0,.38);position:relative;text-align:right;animation:telcGateIn .28s ease both;}
+.auth-gate-close{position:absolute;top:14px;left:14px;width:38px;height:38px;border:1px solid var(--line);border-radius:50%;background:transparent;color:var(--muted);font-size:25px;line-height:1;cursor:pointer;}
+.auth-gate-kicker{display:inline-flex;padding:6px 11px;border-radius:999px;background:var(--brand-soft);color:var(--brand);font-size:11px;font-weight:900;margin-bottom:12px;}
+.auth-gate-card h2{margin:0 0 10px;color:var(--ink);font-size:clamp(23px,4vw,30px);line-height:1.35;}
+.auth-gate-card p{margin:0;color:var(--muted);font-size:14px;line-height:1.9;}
+.auth-gate-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px;}
+.auth-gate-actions .btn{width:100%;text-align:center;text-decoration:none;}
+.auth-gate-cancel{width:100%;border:0;background:transparent;color:var(--muted);font:inherit;font-size:12.5px;font-weight:800;cursor:pointer;margin-top:14px;padding:8px;}
+@keyframes telcGateIn{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:none}}
+@media(max-width:560px){.auth-gate-card{padding:25px 18px;border-radius:22px}.auth-gate-actions{grid-template-columns:1fr}.auth-gate-close{top:10px;left:10px}}
+@media(prefers-reduced-motion:reduce){.auth-gate-card{animation:none!important}}
+
 </style>
 </head>
 <body>
@@ -185,6 +199,21 @@
     </div>
   </section>
 </main>
+
+<!-- Authentication choice before paid checkout -->
+<div id="authGateModal" class="auth-gate-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.68);backdrop-filter:blur(10px);z-index:10000;align-items:center;justify-content:center;padding:16px;">
+  <div class="auth-gate-card" role="dialog" aria-modal="true" aria-labelledby="authGateTitle">
+    <button type="button" id="closeAuthGateBtn" class="auth-gate-close" aria-label="إغلاق">×</button>
+    <div class="auth-gate-kicker">TELC Voll</div>
+    <h2 id="authGateTitle">أنشئ حسابك أولاً لإتمام الاشتراك</h2>
+    <p>شراء الخطة يحتاج إلى حساب طالب. يمكنك إنشاء حساب جديد مجانًا أو تسجيل الدخول إلى حسابك الحالي، ثم نكمل مباشرة إلى الدفع.</p>
+    <div class="auth-gate-actions">
+      <a id="authGateRegisterBtn" class="btn" href="/register.html?redirect=checkout">إنشاء حساب جديد</a>
+      <a id="authGateLoginBtn" class="btn light" href="/login.html?redirect=checkout">تسجيل الدخول</a>
+    </div>
+    <button type="button" id="authGateCancelBtn" class="auth-gate-cancel">المتابعة في تصفح الخطط</button>
+  </div>
+</div>
 
 <!-- OneClick DZ Payment Checkout Modal -->
 <div id="checkoutModal" class="checkout-modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65); backdrop-filter:blur(8px); z-index:9999; align-items:center; justify-content:center; padding:16px;">
@@ -247,6 +276,27 @@ const checkoutForm = document.getElementById('checkoutForm');
 const checkoutSubmitBtn = document.getElementById('checkoutSubmitBtn');
 const checkoutError = document.getElementById('checkoutError');
 const closeCheckoutBtn = document.getElementById('closeCheckoutBtn');
+const authGateModal = document.getElementById('authGateModal');
+const authGateRegisterBtn = document.getElementById('authGateRegisterBtn');
+const authGateLoginBtn = document.getElementById('authGateLoginBtn');
+const closeAuthGateBtn = document.getElementById('closeAuthGateBtn');
+const authGateCancelBtn = document.getElementById('authGateCancelBtn');
+
+function rememberPendingCheckout(plan) {
+  try { sessionStorage.setItem('telc_pending_checkout', JSON.stringify(plan)); } catch (_) {}
+}
+
+function openAuthGate(plan) {
+  rememberPendingCheckout(plan);
+  const qsPlan = encodeURIComponent(String(plan?.id || ''));
+  if (authGateRegisterBtn) authGateRegisterBtn.href = '/register.html?redirect=checkout&plan_id=' + qsPlan;
+  if (authGateLoginBtn) authGateLoginBtn.href = '/login.html?redirect=checkout&plan_id=' + qsPlan;
+  if (authGateModal) authGateModal.style.display = 'flex';
+}
+function closeAuthGate() { if (authGateModal) authGateModal.style.display = 'none'; }
+closeAuthGateBtn?.addEventListener('click', closeAuthGate);
+authGateCancelBtn?.addEventListener('click', closeAuthGate);
+authGateModal?.addEventListener('click', e => { if (e.target === authGateModal) closeAuthGate(); });
 
 function isPlanFree(p) {
   if (!p) return false;
@@ -271,10 +321,7 @@ function openCheckout(plan) {
     return;
   }
   if (!currentUser) {
-    try {
-      sessionStorage.setItem('telc_pending_checkout', JSON.stringify(plan));
-    } catch (_) {}
-    location.href = '/login.html?redirect=checkout&plan_id=' + plan.id;
+    openAuthGate(plan);
     return;
   }
 
@@ -444,8 +491,11 @@ async function loadPlans() {
       if (pendingRaw) {
         sessionStorage.removeItem('telc_pending_checkout');
         const pendingPlan = JSON.parse(pendingRaw);
-        if (pendingPlan && pendingPlan.id) {
+        if (pendingPlan && pendingPlan.id && currentUser) {
           openCheckout(pendingPlan);
+        } else if (pendingPlan && pendingPlan.id && !currentUser) {
+          // Keep the intent until authentication succeeds.
+          rememberPendingCheckout(pendingPlan);
         }
       }
     } catch (_) {}

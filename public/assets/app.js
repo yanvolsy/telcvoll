@@ -1,4 +1,16 @@
 // أدوات مشتركة لكل الصفحات الثابتة.
+const TELC_PUBLIC_PATHS = new Set([
+  '/', '/index.html',
+  '/plans.html', '/about.html', '/contact.html',
+  '/payment-success.html',
+  '/login.html', '/login', '/register.html', '/register',
+  '/forgot-password.html', '/reset-password.html', '/verify-email.html'
+]);
+function isTelcPublicPage(pathname = location.pathname) {
+  const p = String(pathname || '/').toLowerCase();
+  return TELC_PUBLIC_PATHS.has(p) || p.startsWith('/admin');
+}
+
 async function api(path, options = {}) {
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
   const controller = new AbortController();
@@ -16,7 +28,7 @@ async function api(path, options = {}) {
     let data = {};
     try { data = await res.json(); } catch { /* no json body */ }
     if (!res.ok) {
-      const isPublicPage = ['/', '/index.html', '/contact.html', '/login.html', '/login', '/register.html', '/register', '/forgot-password.html', '/reset-password.html'].includes(location.pathname) || location.pathname.startsWith('/admin');
+      const isPublicPage = isTelcPublicPage();
       if (res.status === 401 && !isPublicPage) {
         location.href = '/login.html?error=session';
       }
@@ -252,7 +264,7 @@ document.addEventListener('DOMContentLoaded', initAdminLoginTools);
 // Server-side authorization remains the real protection for TELC content.
 (function initDevToolsGuard() {
   const path = (location.pathname || '').toLowerCase();
-  const excluded = path.startsWith('/admin') || /(^|\/)(login|register|forgot-password|reset-password|verify-email)\.html$/.test(path);
+  const excluded = isTelcPublicPage(path);
   if (excluded) return;
 
   let triggered = false;
@@ -385,7 +397,7 @@ document.addEventListener('DOMContentLoaded', initAdminLoginTools);
 
 // Enforce single active session for student
 (function initStudentSessionWatcher() {
-  if (location.pathname.startsWith('/admin') || location.pathname === '/' || location.pathname === '/index.html' || location.pathname === '/contact.html') return;
+  if (isTelcPublicPage()) return;
   // student_token is HttpOnly; the server decides whether a session exists.
 
   var checking = false;

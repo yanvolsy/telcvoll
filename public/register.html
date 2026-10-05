@@ -228,12 +228,15 @@ let redirectUrl = qs('redirect');
     let hasPendingCheckout = false;
     try { hasPendingCheckout = !!sessionStorage.getItem('telc_pending_checkout'); } catch (_) {}
 
-    if (hasPendingCheckout || redirectUrl === 'checkout') {
-      location.href = '/#plans?checkout=1';
+    // Email ownership must be confirmed before checkout or any redirect that
+    // depends on an authenticated student session. Keep the checkout intent in
+    // sessionStorage and let verify-email.html continue to the plans page.
+    if (res.verification_sent) {
+      location.href = `/verify-email.html?email=${encodeURIComponent(email)}`;
+    } else if (hasPendingCheckout || redirectUrl === 'checkout') {
+      location.href = '/plans.html?checkout=1';
     } else if (redirectUrl) {
       location.href = redirectUrl;
-    } else if (res.verification_sent) {
-      location.href = `/verify-email.html?email=${encodeURIComponent(email)}`;
     } else {
       location.href = '/dashboard.html?new_user=1';
     }
@@ -258,7 +261,7 @@ function routeAfterAuth() {
   try { hasPendingCheckout = !!sessionStorage.getItem('telc_pending_checkout'); } catch (_) {}
 
   if (hasPendingCheckout || redirectUrl === 'checkout') {
-    location.href = '/#plans?checkout=1';
+    location.href = '/plans.html?checkout=1';
   } else if (redirectUrl) {
     location.href = redirectUrl;
   } else {

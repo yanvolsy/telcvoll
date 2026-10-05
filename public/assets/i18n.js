@@ -26,14 +26,14 @@ const I18N = {
 
     services_title: 'كل ما تحتاجه للنجاح في مكان واحد',
     services_desc: 'أدوات عملية، واجهة واضحة، وتجربة تدريب قريبة من الامتحان الحقيقي.',
-    feature1_title: 'محاكاة الامتحان', feature1_desc: 'اختبارات منظمة مع وقت مستقل لكل Teil ونتيجة مباشرة بعد التصحيح.',
-    feature2_title: 'التدريب حسب المهارة', feature2_desc: 'تدرب على Lesen وHören وSprachbausteine وSchreiben وSprechen بشكل منفصل.',
+    feature1_title: 'جميع المواضيع المسربة الصحيحة مع الحل', feature1_desc: 'تدرّب على مواضيع TELC المتوفرة مع الحلول والتصحيح لتعرف كيف تُجاب الأسئلة بالشكل الصحيح.',
+    feature2_title: 'محاكاة حقيقية لامتحان TELC', feature2_desc: 'محاكاة منظمة بوقت وتقسيم قريب من تجربة الامتحان الفعلية، مع نتيجة واضحة في النهاية.',
     feature3_title: 'Meine Fehler', feature3_desc: 'احتفظ بالأخطاء المتكررة وراجع الإجابة الصحيحة والتفسير عند توفره.',
-    feature4_title: 'Sprechen AI', feature4_desc: 'سجّل إجابتك واحصل على تحليل AI للنص أو الموضوع الذي تتدرب عليه.',
-    feature6_title: 'متابعة التقدم', feature6_desc: 'لوحة شخصية تجمع الامتحانات والتمارين والتقدم في مكان واحد.',
+    feature4_title: 'مساعد TELC بالذكاء الاصطناعي', feature4_desc: 'مساعد متخصص للبحث والحوار وتعلّم اللغة الألمانية، مع أدوات تساعدك أثناء التدريب.',
+    feature6_title: 'تصحيح المواضيع بالذكاء الاصطناعي', feature6_desc: 'حلّل أخطاءك، افهم سبب الخطأ، واحصل على إجابة نموذجية تساعدك على تحسين مستواك.',
 
     studentexp_tag: 'تجربة الطالب', studentexp_title: 'لوحة تحكم مصممة للدراسة اليومية',
-    studentexp_desc: 'انتقل بين المستويات والمهارات والتمارين بسهولة، وواصل من حيث توقفت دون تعقيد.',
+    studentexp_desc: 'تدرّب، حاكي الامتحان، استخدم المساعد الذكي وتابع أخطاءك وتقدمك من واجهة واحدة واضحة.',
     studentexp_card_title: 'تقدّمك محفوظ دائماً', studentexp_card_desc: 'كل إجابة وكل نتيجة تُسجَّل تلقائياً، ويمكنك متابعة تطورك في أي وقت من لوحة التحكم.',
     studentexp_img_alt: 'طالب يستعد لامتحان TELC Voll',
 
@@ -107,11 +107,11 @@ const I18N = {
 
     services_title: 'Alles für deinen Prüfungserfolg an einem Ort',
     services_desc: 'Praktische Werkzeuge, klare Oberfläche und prüfungsnahes Training.',
-    feature1_title: 'Prüfungssimulation', feature1_desc: 'Strukturierte Tests mit eigener Zeit für jeden Teil und sofortigem Ergebnis nach der Korrektur.',
-    feature2_title: 'Training nach Fertigkeit', feature2_desc: 'Übe Lesen, Hören, Sprachbausteine, Schreiben und Sprechen einzeln.',
+    feature1_title: 'Echte veröffentlichte TELC-Themen mit Lösungen', feature1_desc: 'Übe mit verfügbaren TELC-Themen inklusive Lösungen und Korrektur, damit du die richtigen Antworten verstehst.',
+    feature2_title: 'Realistische TELC-Prüfungssimulation', feature2_desc: 'Eine strukturierte Simulation mit Zeitvorgaben und einem Ablauf, der der echten Prüfung möglichst nahekommt.',
     feature3_title: 'Meine Fehler', feature3_desc: 'Wiederholte Fehler werden gespeichert; überprüfe die richtige Antwort und ggf. die Erklärung.',
-    feature4_title: 'Sprechen AI', feature4_desc: 'Nimm deine Antwort auf und erhalte eine KI-Analyse zum Text oder Thema, das du übst.',
-    feature6_title: 'Fortschritt verfolgen', feature6_desc: 'Ein persönliches Dashboard, das Prüfungen, Übungen und Fortschritt an einem Ort vereint.',
+    feature4_title: 'TELC-Assistent mit KI', feature4_desc: 'Ein spezialisierter Assistent für Recherche, Dialog und Deutschlernen mit praktischen Trainingshilfen.',
+    feature6_title: 'KI-Korrektur für deine Texte', feature6_desc: 'Verstehe deine Fehler, erhalte konkrete Hinweise und eine Musterantwort für bessere Trainingsresultate.',
 
     studentexp_tag: 'Lernerfahrung', studentexp_title: 'Ein Dashboard für das tägliche Lernen',
     studentexp_desc: 'Wechsle einfach zwischen Niveaus, Fertigkeiten und Übungen und setze dein Training ohne Umwege fort.',

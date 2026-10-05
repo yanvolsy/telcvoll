@@ -177,7 +177,7 @@ function routeAfterLogin() {
   try { hasPendingCheckout = !!sessionStorage.getItem('telc_pending_checkout'); } catch (_) {}
 
   if (hasPendingCheckout || redirectUrl === 'checkout') {
-    location.href = '/#plans?checkout=1';
+    location.href = '/plans.html?checkout=1';
   } else if (redirectUrl) {
     location.href = redirectUrl;
   } else {

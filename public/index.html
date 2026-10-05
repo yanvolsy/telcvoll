@@ -25,8 +25,48 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
   } catch (_) {}
 })();
 </script>
+
+<style id="telcvoll-home-motion">
+.landing-body{overflow-x:hidden;background:var(--bg);}
+.landing-body .landing-page{position:relative;isolation:isolate;}
+.landing-body .landing-hero,.landing-body .landing-service,.landing-body .landing-showcase-image,.landing-body .landing-showcase-copy{animation:none!important;}
+.landing-body .landing-hero-copy{opacity:0;transform:translateY(22px);animation:tvHeroCopy .78s cubic-bezier(.22,.8,.24,1) .08s forwards;}
+.landing-body .landing-hero-visual{opacity:0;transform:translateY(18px) scale(.965);animation:tvHeroVisual .95s cubic-bezier(.16,.84,.25,1) .18s forwards;}
+.landing-plans-cta{display:inline-flex;align-items:center;gap:9px;margin-top:17px;color:var(--brand);font-size:13px;font-weight:900;text-decoration:none;position:relative;width:max-content;}
+.landing-plans-cta::after{content:"";position:absolute;right:0;left:0;bottom:-6px;height:1px;background:linear-gradient(90deg,transparent,var(--brand),transparent);transform:scaleX(.3);transform-origin:center;transition:transform .28s ease;}
+.landing-plans-cta:hover::after{transform:scaleX(1);}
+.landing-plans-cta span{transition:transform .22s ease;}
+.landing-plans-cta:hover span{transform:translateX(-4px);}
+.landing-animated-visual{min-height:560px;display:grid;place-items:center;perspective:1400px;position:relative;overflow:visible;}
+.visual-glow{position:absolute;border-radius:50%;filter:blur(12px);pointer-events:none;}
+.visual-glow-a{width:320px;height:320px;background:radial-gradient(circle,rgba(255,122,47,.24),rgba(255,122,47,0) 68%);top:6%;right:12%;animation:tvGlow 5.6s ease-in-out infinite;}
+.visual-glow-b{width:260px;height:260px;background:radial-gradient(circle,rgba(255,170,95,.14),rgba(255,170,95,0) 68%);bottom:4%;left:6%;animation:tvGlow 6.2s ease-in-out .8s infinite reverse;}
+.visual-particles{position:absolute;inset:0;pointer-events:none;}
+.visual-particles i{position:absolute;width:5px;height:5px;border-radius:50%;background:rgba(255,122,47,.75);box-shadow:0 0 16px rgba(255,122,47,.5);animation:tvParticle 6s ease-in-out infinite;}
+.visual-particles i:nth-child(1){top:14%;right:22%;animation-delay:.2s}.visual-particles i:nth-child(2){top:31%;left:14%;animation-delay:1.2s}.visual-particles i:nth-child(3){bottom:18%;right:12%;animation-delay:2.1s}.visual-particles i:nth-child(4){bottom:31%;left:22%;animation-delay:3s}.visual-particles i:nth-child(5){top:9%;left:38%;animation-delay:3.8s}.visual-particles i:nth-child(6){bottom:12%;left:42%;animation-delay:4.7s}
+.landing-ui-main{width:min(540px,88%);padding:22px;border:1px solid rgba(255,255,255,.12);border-radius:28px;background:linear-gradient(145deg,rgba(24,24,24,.96),rgba(10,10,10,.91));box-shadow:0 35px 100px rgba(0,0,0,.48),0 0 0 1px rgba(255,122,47,.08),0 0 70px rgba(255,122,47,.10);backdrop-filter:blur(18px);transform:rotateY(-7deg) rotateX(3deg);animation:tvDashboardFloat 6s ease-in-out infinite;position:relative;z-index:3;}
+.landing-ui-main::before{content:"";position:absolute;inset:0;border-radius:28px;background:linear-gradient(135deg,rgba(255,255,255,.06),transparent 38%);pointer-events:none;}
+.landing-ui-top,.landing-ui-footer,.progress-copy,.showcase-dashboard-head,.showcase-score-row,.showcase-bars>div,.showcase-bottom-line{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.landing-ui-top{color:#f5f5f5;font-size:13px}.landing-ui-top>div{display:flex;align-items:center;gap:8px}.ui-brand-dot{width:9px;height:9px;border-radius:50%;background:var(--brand);box-shadow:0 0 14px rgba(255,122,47,.72);animation:tvPulse 2.4s ease-in-out infinite}.ui-live-pill{font-size:9px;letter-spacing:.16em;padding:6px 9px;border-radius:999px;color:var(--brand);border:1px solid rgba(255,122,47,.28);background:rgba(255,122,47,.08);}
+.landing-ui-welcome{margin:31px 0 21px}.landing-ui-welcome span{display:block;color:#87928e;font-size:9px;letter-spacing:.16em;margin-bottom:5px}.landing-ui-welcome strong{font-size:33px;letter-spacing:-.035em;color:#f4f6f5;line-height:1.1}.landing-ui-progress{padding:15px;border-radius:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07)}.progress-copy{color:#bac4c0;font-size:11px}.progress-copy b{color:var(--brand);font-size:17px}.progress-track{height:8px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:10px}.progress-track span{display:block;width:78%;height:100%;background:linear-gradient(90deg,#FF7A2F,#ffb36d);border-radius:inherit;animation:tvProgress 2.6s ease-out .7s both;}
+.landing-ui-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.landing-ui-chip{min-height:88px;padding:13px;border-radius:17px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.07);display:flex;flex-direction:column;justify-content:space-between;transition:transform .25s ease,border-color .25s ease,background .25s ease;}.landing-ui-chip:hover{transform:translateY(-4px);border-color:rgba(255,122,47,.36);background:rgba(255,122,47,.06)}.landing-ui-chip small{font-size:9px;color:#69736f}.landing-ui-chip b{color:#eef3f1;font-size:14px}.landing-ui-chip span{align-self:flex-end;font-size:10px;color:var(--brand);font-weight:900}.landing-ui-chip.is-active{border-color:rgba(255,122,47,.42);box-shadow:inset 0 0 0 1px rgba(255,122,47,.08);}
+.landing-ui-footer{margin-top:14px;padding-top:13px;border-top:1px solid rgba(255,255,255,.06);color:#7f8a86;font-size:10px}.landing-ui-footer strong{color:#f0f2f1;font-size:11px}
+.landing-float-stat{position:absolute;z-index:5;padding:14px 16px;min-width:135px;border:1px solid rgba(255,255,255,.11);border-radius:18px;background:rgba(20,20,20,.9);box-shadow:0 18px 45px rgba(0,0,0,.32);backdrop-filter:blur(14px);animation:tvStatFloat 5.5s ease-in-out infinite;}
+.landing-float-stat span{display:block;color:var(--brand);font-size:19px;font-weight:950;line-height:1}.landing-float-stat small{display:block;color:#8f9b96;font-size:10px;margin-top:5px}.stat-one{top:14%;left:2%;animation-delay:.25s}.stat-two{bottom:11%;right:0;animation-delay:1.2s}.landing-float-orb{position:absolute;width:90px;height:90px;border-radius:50%;right:7%;bottom:13%;border:1px solid rgba(255,122,47,.3);box-shadow:inset 0 0 35px rgba(255,122,47,.08),0 0 40px rgba(255,122,47,.08);animation:tvOrb 7s linear infinite;}
+.landing-service-grid .landing-service{opacity:1;transform:none;}
+.landing-reveal{opacity:0;transform:translateY(28px);transition:opacity .72s ease,transform .72s cubic-bezier(.22,.8,.24,1);}
+.landing-reveal.is-visible{opacity:1;transform:none;}
+.landing-service:nth-child(2){transition-delay:.06s}.landing-service:nth-child(3){transition-delay:.12s}.landing-service:nth-child(4){transition-delay:.18s}
+.landing-service{overflow:hidden;position:relative;}.landing-service::after{content:"";position:absolute;width:120px;height:120px;border-radius:50%;right:-46px;bottom:-55px;background:radial-gradient(circle,rgba(255,122,47,.11),transparent 70%);transition:transform .45s ease;}.landing-service:hover::after{transform:scale(1.55);}
+.landing-showcase-image{position:relative;overflow:hidden;}.landing-showcase-image::after{content:"";position:absolute;inset:-30% -10% auto;height:55%;background:linear-gradient(180deg,rgba(255,122,47,.08),transparent);pointer-events:none;transform:translateY(-25%);transition:transform .8s ease;}.landing-showcase-image:hover::after{transform:translateY(5%);}
+.showcase-dashboard{padding:18px 20px 20px;border-radius:0 0 20px 20px;background:linear-gradient(145deg,#121212,#0a0a0a);border:1px solid rgba(255,255,255,.06);color:#edf2ef}.showcase-dashboard-head{font-size:10px;color:#7f8985;letter-spacing:.1em}.showcase-dashboard-head strong{font-size:10px;color:var(--brand);letter-spacing:0}.showcase-score-row{padding:22px 0 14px}.showcase-score-row small{display:block;color:#7f8985;font-size:11px}.showcase-score-row b{display:block;font-size:42px;letter-spacing:-.05em;margin-top:5px}.score-ring{width:76px;height:76px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--brand) 0 84%,rgba(255,255,255,.08) 84% 100%);position:relative}.score-ring::before{content:"";position:absolute;inset:7px;border-radius:50%;background:#0d0d0d}.score-ring span{position:relative;color:#fff;font-size:17px;font-weight:900}.showcase-bars{display:grid;gap:13px}.showcase-bars>div{font-size:10px;color:#8b9691}.showcase-bars i{height:6px;flex:1;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden}.showcase-bars i b{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#FF7A2F,#ffb36d)}.showcase-bars em{font-style:normal;color:#e6ece9;font-size:10px;font-weight:900;min-width:29px;text-align:left}.showcase-bottom-line{margin-top:17px;padding-top:13px;border-top:1px solid rgba(255,255,255,.06);font-size:10px;color:#89938f}.showcase-bottom-line strong{color:#f0f2f1}
+@keyframes tvHeroCopy{to{opacity:1;transform:none}}@keyframes tvHeroVisual{to{opacity:1;transform:none}}@keyframes tvDashboardFloat{0%,100%{transform:rotateY(-7deg) rotateX(3deg) translateY(0)}50%{transform:rotateY(-5deg) rotateX(2deg) translateY(-10px)}}@keyframes tvStatFloat{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-9px) rotate(1deg)}}@keyframes tvGlow{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.08);opacity:1}}@keyframes tvParticle{0%,100%{transform:translate3d(0,0,0);opacity:.15}50%{transform:translate3d(10px,-15px,0);opacity:1}}@keyframes tvOrb{to{transform:rotate(360deg)}}@keyframes tvProgress{from{width:0}to{width:78%}}@keyframes tvPulse{0%,100%{transform:scale(.85);opacity:.72}50%{transform:scale(1.15);opacity:1}}
+@media(max-width:1050px){.landing-animated-visual{min-height:500px}.landing-float-stat.stat-one{left:1%}.landing-float-stat.stat-two{right:1%}}
+@media(max-width:650px){.landing-animated-visual{min-height:430px;margin-top:8px}.landing-ui-main{width:94%;padding:16px;border-radius:22px;transform:none!important}.landing-ui-welcome{margin:21px 0 16px}.landing-ui-welcome strong{font-size:27px}.landing-ui-grid{gap:8px}.landing-ui-chip{min-height:72px;padding:10px}.landing-ui-chip b{font-size:12px}.landing-float-stat{min-width:108px;padding:10px 11px;border-radius:14px}.landing-float-stat span{font-size:16px}.landing-float-stat small{font-size:9px}.stat-one{top:5%;left:-2px}.stat-two{bottom:4%;right:-2px}.landing-float-orb{width:58px;height:58px;right:4%;bottom:21%}.landing-plans-cta{font-size:12px}.showcase-dashboard{padding:15px}.showcase-score-row b{font-size:34px}}
+@media(prefers-reduced-motion:reduce){.landing-body .landing-hero-copy,.landing-body .landing-hero-visual{animation:none;opacity:1;transform:none}.visual-glow,.visual-particles i,.landing-ui-main,.landing-float-stat,.landing-float-orb,.ui-brand-dot,.progress-track span{animation:none!important}.landing-reveal{opacity:1;transform:none;transition:none}.landing-plans-cta span,.landing-plans-cta::after{transition:none}.landing-service,.landing-ui-chip,.landing-showcase-image::after{transition:none!important}}
+</style>
 </head>
-<body data-i18n-title="hero_tag">
+<body class="landing-body" data-i18n-title="hero_tag">
 <header class="top landing-top">
   <a class="brand" href="/" aria-label="TELC Voll"><span class="brand-mark"><span class="brand-dot"></span>TELC Voll</span></a>
   <nav>
@@ -51,42 +91,67 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
       <div class="landing-kicker"><span class="landing-kicker-dot"></span><span data-i18n="hero_tag">منصة تدريب TELC Voll</span></div>
       <h1 data-i18n="hero_title">تدرّب بذكاء.<br><span class="hero-gradient-text">ادخل الامتحان بثقة.</span></h1>
       <p data-i18n="hero_desc">منصة تدريب احترافية لمحاكاة امتحان TELC Voll والتدرب على Lesen وHören وSprachbausteine وSchreiben وSprechen.</p>
-      <div class="landing-levels" aria-label="مستويات TELC Voll">
-        <span>B1</span><span class="active">B2</span><span>C1</span>
-      </div>
       <div class="actions landing-actions" id="heroActionsSlot">
         <a class="btn" href="/register.html" data-auth-register>ابدأ التدرب مجاناً ←</a>
         <a class="btn light" href="/login.html" data-auth-login>تسجيل الدخول</a>
       </div>
-      <div class="landing-proof"><span>✓ B1</span><span>✓ B2</span><span>✓ C1</span><span>✓ 5 مهارات</span></div>
+      <a class="landing-plans-cta" href="/plans.html">عرض الخطط والأسعار <span>←</span></a>
     </div>
-    <div class="landing-hero-visual">
-      <div class="landing-orbit landing-orbit-one"></div><div class="landing-orbit landing-orbit-two"></div>
-      <div class="landing-image-frame"><img src="/assets/hero-exam.svg" data-i18n-alt="hero_img_alt" alt="طلاب يستعدون لامتحان TELC Voll"></div>
-      <div class="landing-floating-card landing-floating-top"><strong>5</strong><span>مهارات الامتحان</span></div>
-      <div class="landing-floating-card landing-floating-bottom"><strong> B1 · B2 · C1 </strong><span>TELC Voll</span></div>
+    <div class="landing-hero-visual landing-animated-visual" data-parallax>
+      <div class="visual-glow visual-glow-a" aria-hidden="true"></div>
+      <div class="visual-glow visual-glow-b" aria-hidden="true"></div>
+      <div class="visual-particles" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="landing-ui-main">
+        <div class="landing-ui-top">
+          <div><span class="ui-brand-dot"></span><strong>TELC Voll</strong></div>
+          <span class="ui-live-pill">TRAINING</span>
+        </div>
+        <div class="landing-ui-welcome">
+          <span>DEIN NÄCHSTER SCHRITT</span>
+          <strong>Bereit für B2?</strong>
+        </div>
+        <div class="landing-ui-progress">
+          <div class="progress-copy"><span>Prüfungsfortschritt</span><b>78%</b></div>
+          <div class="progress-track"><span></span></div>
+        </div>
+        <div class="landing-ui-grid">
+          <div class="landing-ui-chip is-active"><small>01</small><b>Lesen</b><span>✓</span></div>
+          <div class="landing-ui-chip"><small>02</small><b>Hören</b><span>→</span></div>
+          <div class="landing-ui-chip"><small>03</small><b>Schreiben</b><span>→</span></div>
+          <div class="landing-ui-chip"><small>04</small><b>Sprechen AI</b><span>AI</span></div>
+        </div>
+        <div class="landing-ui-footer"><span>Simulation · Echtzeit</span><strong>Jetzt trainieren</strong></div>
+      </div>
+      <div class="landing-float-stat stat-one"><span>+24</span><small>Aufgaben heute</small></div>
+      <div class="landing-float-stat stat-two"><span>AI</span><small>Korrektur bereit</small></div>
+      <div class="landing-float-orb" aria-hidden="true"></div>
     </div>
   </section>
 
   <section id="services" class="landing-section landing-services">
     <div class="landing-heading-row"><div><span class="tag" data-i18n="nav_services">الخدمات</span><h2 data-i18n="services_title">كل ما تحتاجه للنجاح في مكان واحد</h2></div><p data-i18n="services_desc">أدوات عملية، واجهة واضحة، وتجربة تدريب قريبة من الامتحان الحقيقي.</p></div>
     <div class="landing-service-grid">
-      <article class="landing-service"><span>01</span><div><h3 data-i18n="feature1_title">محاكاة الامتحان</h3><p data-i18n="feature1_desc">اختبارات منظمة بوقت ونتيجة واضحة بعد التصحيح.</p></div></article>
-      <article class="landing-service"><span>02</span><div><h3 data-i18n="feature2_title">التدريب حسب المهارة</h3><p data-i18n="feature2_desc">تدرب على Lesen وHören وSprachbausteine وSchreiben وSprechen.</p></div></article>
-      <article class="landing-service"><span>03</span><div><h3 data-i18n="feature4_title">Sprechen AI</h3><p data-i18n="feature4_desc">تدرّب على التحدث واحصل على تحليل ذكي لإجابتك.</p></div></article>
-      <article class="landing-service"><span>04</span><div><h3 data-i18n="feature6_title">متابعة التقدم</h3><p data-i18n="feature6_desc">تابع نتائجك وتطورك عبر لوحة الطالب.</p></div></article>
+      <article class="landing-service landing-reveal"><span>01</span><div><h3 data-i18n="feature1_title">جميع المواضيع المسربة الصحيحة مع الحل</h3><p data-i18n="feature1_desc">تدرّب على مواضيع TELC المتوفرة مع الحلول والتصحيح لتعرف كيف تُجاب الأسئلة بالشكل الصحيح.</p></div></article>
+      <article class="landing-service landing-reveal"><span>02</span><div><h3 data-i18n="feature2_title">محاكاة حقيقية لامتحان TELC</h3><p data-i18n="feature2_desc">محاكاة منظمة بوقت وتقسيم قريب من تجربة الامتحان الفعلية، مع نتيجة واضحة في النهاية.</p></div></article>
+      <article class="landing-service landing-reveal"><span>03</span><div><h3 data-i18n="feature4_title">مساعد TELC بالذكاء الاصطناعي</h3><p data-i18n="feature4_desc">مساعد متخصص للبحث والحوار وتعلّم اللغة الألمانية، مع أدوات تساعدك أثناء التدريب.</p></div></article>
+      <article class="landing-service landing-reveal"><span>04</span><div><h3 data-i18n="feature6_title">تصحيح المواضيع بالذكاء الاصطناعي</h3><p data-i18n="feature6_desc">حلّل أخطاءك، افهم سبب الخطأ، واحصل على إجابة نموذجية تساعدك على تحسين مستواك.</p></div></article>
     </div>
   </section>
 
   <section class="landing-showcase">
-    <div class="landing-showcase-image">
+    <div class="landing-showcase-image landing-reveal">
       <div class="showcase-browser-bar">
         <div class="showcase-dots"><span class="dot-red"></span><span class="dot-yellow"></span><span class="dot-green"></span></div>
         <div class="showcase-url-bar">telcvoll.de/dashboard</div>
       </div>
-      <img class="visual" src="/assets/dashboard-preview.svg" alt="واجهة منصة TELC Voll">
+      <div class="showcase-dashboard">
+        <div class="showcase-dashboard-head"><span>DEIN DASHBOARD</span><strong>B2 · PRÜFUNG</strong></div>
+        <div class="showcase-score-row"><div><small>Aktueller Stand</small><b>84%</b></div><div class="score-ring"><span>84</span></div></div>
+        <div class="showcase-bars"><div><span>Lesen</span><i><b style="width:86%"></b></i><em>86%</em></div><div><span>Hören</span><i><b style="width:74%"></b></i><em>74%</em></div><div><span>Schreiben</span><i><b style="width:68%"></b></i><em>68%</em></div></div>
+        <div class="showcase-bottom-line"><span>AI Korrektur</span><strong>3 neue Hinweise</strong></div>
+      </div>
     </div>
-    <div class="landing-showcase-copy"><span class="tag" data-i18n="studentexp_tag">تجربة الطالب</span><h2 data-i18n="studentexp_title">واجهة صُممت لتبقى مركز تركيزك</h2><p class="muted" data-i18n="studentexp_desc">انتقل بين المستويات والمهارات والتمارين بسهولة، وواصل من حيث توقفت دون تعقيد.</p><div class="landing-mini-grid"><div><b>B1</b><span>Grundlagen</span></div><div class="featured"><b>B2</b><span>Prüfung</span></div><div><b>C1</b><span>Fortgeschritten</span></div></div></div>
+    <div class="landing-showcase-copy landing-reveal"><span class="tag" data-i18n="studentexp_tag">تجربة الطالب</span><h2 data-i18n="studentexp_title">كل أدواتك في مكان واحد</h2><p class="muted" data-i18n="studentexp_desc">تدرّب، حاكي الامتحان، استخدم المساعد الذكي وتابع أخطاءك وتقدمك من واجهة واحدة واضحة.</p><div class="landing-mini-grid"><div><b>B1</b><span>Grundlagen</span></div><div class="featured"><b>B2</b><span>Prüfung</span></div><div><b>C1</b><span>Fortgeschritten</span></div></div></div>
   </section>
 </main>
 <footer data-i18n="footer">TELC Voll — منصة تدريب B1 · B2 · C1</footer>
@@ -120,6 +185,43 @@ function renderHomepageAuth(res) {
 }
 
 api('me').then(renderHomepageAuth).catch(() => {});
+
+(function initLandingMotion(){
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const reveals = document.querySelectorAll('.landing-reveal');
+  if (!reduce && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries, obs) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, {threshold:.14, rootMargin:'0px 0px -60px'});
+    reveals.forEach(el => io.observe(el));
+  } else {
+    reveals.forEach(el => el.classList.add('is-visible'));
+  }
+
+  const visual = document.querySelector('[data-parallax]');
+  if (!reduce && visual && window.matchMedia('(pointer:fine)').matches) {
+    let raf = 0;
+    let x = 0, y = 0;
+    const paint = () => {
+      raf = 0;
+      visual.style.transform = 'translate3d(' + (x*4) + 'px,' + (y*4) + 'px,0)';
+    };
+    visual.addEventListener('pointermove', e => {
+      const r = visual.getBoundingClientRect();
+      x = (e.clientX-r.left)/r.width-.5;
+      y = (e.clientY-r.top)/r.height-.5;
+      if (!raf) raf = requestAnimationFrame(paint);
+    }, {passive:true});
+    visual.addEventListener('pointerleave', () => {
+      x=0;y=0;if(!raf) raf=requestAnimationFrame(paint);
+    }, {passive:true});
+  }
+})();
 
 document.addEventListener('langchange', () => location.reload());
 </script>
