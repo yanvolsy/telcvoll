@@ -37,6 +37,10 @@ const I18N = {
     studentexp_card_title: 'تقدّمك محفوظ دائماً', studentexp_card_desc: 'كل إجابة وكل نتيجة تُسجَّل تلقائياً، ويمكنك متابعة تطورك في أي وقت من لوحة التحكم.',
     studentexp_img_alt: 'طالب يستعد لامتحان TELC Voll',
 
+    home_plans_tag: 'الخطط', home_plans_title: 'اختر المدة التي تناسب تدريبك', home_plans_desc: 'خطط واضحة، وصول شامل إلى مستويات B1 وB2 وC1، ومحاكاة الامتحان والمساعد الذكي.', home_plans_fallback: 'تعذر تحميل الأسعار الآن.',
+    home_ai_tag: 'مساعد TELC', home_ai_title: 'ذكاء اصطناعي يفهم هدفك في تعلّم الألمانية', home_ai_desc: 'ابحث، اسأل، حاور، واطلب شرحًا أو تدريبًا مخصصًا. الواجهة مصممة لتشعر كأن المساعد جزء طبيعي من رحلتك داخل TELC Voll.', home_ai_point1: 'بحث وفهم سريع للسؤال', home_ai_point2: 'حوار وتدريب باللغة الألمانية', home_ai_point3: 'شرح وأمثلة وتمارين قابلة للتخصيص', home_ai_live: 'متصل الآن', home_ai_q: 'اشرح لي الفرق بين weil و denn', home_ai_a: 'weil و denn يربطان السبب، لكن ترتيب الكلمات يختلف. سأعطيك مثالين ثم تدريبًا قصيرًا.', home_ai_placeholder: 'اكتب سؤالك…',
+    home_studio_tag: 'Sprechen Studio', home_studio_title: 'تدرّب على التحدث وكأنك داخل الامتحان', home_studio_desc: 'سجّل إجابتك، راقب الموجة الصوتية، ثم احصل على تحليل واضح يساعدك على تحسين النطق والبنية وطريقة الإجابة.', home_studio_point1: 'تسجيل الإجابة داخل المتصفح', home_studio_point2: 'تحليل AI للنتيجة ونقاط التحسين', home_studio_point3: 'توجيه عملي قبل المحاولة التالية', home_studio_topic: 'Thema: Meinung und Alltag', home_studio_score: 'تحليل جاهز', home_studio_feedback1: 'النطق', home_studio_feedback2: 'البنية',
+    home_final_tag: 'ابدأ الآن', home_final_title: 'كل أدوات TELC Voll أمامك في مكان واحد', home_final_desc: 'ابدأ بحساب مجاني وتعرّف على تجربة التدريب قبل الاشتراك.',
     plans_title: 'خطتك تبدأ من هنا',
     plans_desc: 'اختر الخطة المناسبة لك؛ الأسعار والمحتوى يحددهما المشرف.',
     plans_loading: 'جارٍ تحميل الخطط…', plans_featured: 'الأكثر اختياراً', plans_day: 'يوم',
@@ -118,6 +122,10 @@ const I18N = {
     studentexp_card_title: 'Dein Fortschritt wird immer gespeichert', studentexp_card_desc: 'Jede Antwort und jedes Ergebnis wird automatisch erfasst, sodass du deine Entwicklung jederzeit im Dashboard verfolgen kannst.',
     studentexp_img_alt: 'Ein Student bereitet sich auf die TELC Voll-Prüfung vor',
 
+    home_plans_tag: 'Pläne', home_plans_title: 'Wähle die Trainingsdauer, die zu dir passt', home_plans_desc: 'Klare Tarife mit vollständigem Zugang zu B1, B2, C1, Prüfungssimulation und KI-Assistent.', home_plans_fallback: 'Preise können gerade nicht geladen werden.',
+    home_ai_tag: 'TELC Assistent', home_ai_title: 'Eine KI, die dein Ziel beim Deutschlernen versteht', home_ai_desc: 'Recherchiere, frage, dialogiere und fordere Erklärungen oder personalisierte Übungen an. Die Oberfläche fühlt sich wie ein natürlicher Teil deiner TELC-Voll-Lernreise an.', home_ai_point1: 'Schnelle Suche und Verständnis', home_ai_point2: 'Dialog und Training auf Deutsch', home_ai_point3: 'Erklärungen, Beispiele und anpassbare Übungen', home_ai_live: 'Jetzt verbunden', home_ai_q: 'Erkläre mir den Unterschied zwischen weil und denn', home_ai_a: 'weil und denn verbinden einen Grund, aber die Wortstellung ist unterschiedlich. Ich zeige dir zwei Beispiele und danach eine kurze Übung.', home_ai_placeholder: 'Deine Frage…',
+    home_studio_tag: 'Sprechen Studio', home_studio_title: 'Trainiere das Sprechen wie in der Prüfung', home_studio_desc: 'Nimm deine Antwort auf, beobachte die Sprachwelle und erhalte eine klare Analyse zu Aussprache, Struktur und Antwortstrategie.', home_studio_point1: 'Antwort direkt im Browser aufnehmen', home_studio_point2: 'KI-Analyse mit konkreten Verbesserungen', home_studio_point3: 'Praktisches Feedback für den nächsten Versuch', home_studio_topic: 'Thema: Meinung und Alltag', home_studio_score: 'Analyse bereit', home_studio_feedback1: 'Aussprache', home_studio_feedback2: 'Struktur',
+    home_final_tag: 'Jetzt starten', home_final_title: 'Alle TELC-Voll-Werkzeuge an einem Ort', home_final_desc: 'Erstelle ein kostenloses Konto und entdecke die Trainingsoberfläche vor dem Abonnement.',
     plans_title: 'Dein Plan beginnt hier',
     plans_desc: 'Wähle den passenden Plan; Preise und Inhalte werden vom Administrator festgelegt.',
     plans_loading: 'Pläne werden geladen…', plans_featured: 'Am beliebtesten', plans_day: 'Tag(e)',
