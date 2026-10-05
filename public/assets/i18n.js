@@ -107,11 +107,11 @@ const I18N = {
 
     services_title: 'Alles für deinen Prüfungserfolg an einem Ort',
     services_desc: 'Praktische Werkzeuge, klare Oberfläche und prüfungsnahes Training.',
-    feature1_title: 'Echte veröffentlichte TELC-Themen mit Lösungen', feature1_desc: 'Übe mit verfügbaren TELC-Themen inklusive Lösungen und Korrektur, damit du die richtigen Antworten verstehst.',
-    feature2_title: 'Realistische TELC-Prüfungssimulation', feature2_desc: 'Eine strukturierte Simulation mit Zeitvorgaben und einem Ablauf, der der echten Prüfung möglichst nahekommt.',
+    feature1_title: 'Alle verfügbaren TELC-Themen mit Lösungen', feature1_desc: 'Trainiere mit den richtigen verfügbaren Themen und Lösungen, um Fragen gezielt zu üben und die passende Antwortweise zu verstehen.',
+    feature2_title: 'Realistische TELC-Prüfungssimulation', feature2_desc: 'Eine Prüfungssimulation mit Zeitvorgaben und klarer Struktur, die der echten TELC-Prüfung möglichst nahekommt.',
     feature3_title: 'Meine Fehler', feature3_desc: 'Wiederholte Fehler werden gespeichert; überprüfe die richtige Antwort und ggf. die Erklärung.',
-    feature4_title: 'TELC-Assistent mit KI', feature4_desc: 'Ein spezialisierter Assistent für Recherche, Dialog und Deutschlernen mit praktischen Trainingshilfen.',
-    feature6_title: 'KI-Korrektur für deine Texte', feature6_desc: 'Verstehe deine Fehler, erhalte konkrete Hinweise und eine Musterantwort für bessere Trainingsresultate.',
+    feature4_title: 'TELC-Assistent mit KI', feature4_desc: 'Eine spezialisierte KI für Recherche, Dialog und Deutschlernen, die dich während des Trainings begleitet.',
+    feature6_title: 'KI-Korrektur für deine Texte', feature6_desc: 'Verstehe deine Fehler, erfahre warum sie entstehen und erhalte eine Musterantwort zur Verbesserung deiner Übungen.',
 
     studentexp_tag: 'Lernerfahrung', studentexp_title: 'Ein Dashboard für das tägliche Lernen',
     studentexp_desc: 'Wechsle einfach zwischen Niveaus, Fertigkeiten und Übungen und setze dein Training ohne Umwege fort.',

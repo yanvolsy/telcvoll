@@ -58,8 +58,10 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
 </div>
 <div id="eval" class="card" hidden></div>
 </div></div></main>
-<footer>TELC Voll</footer>
-<script src="/assets/app.js?v=20261005-public-session-footer-fix"></script>
+<footer class="site-footer-minimal" aria-label="TELC Voll footer">
+  <div>B1 · B2 · C1 — منصة التدريب والتحضير لامتحانات اللغة الألمانية النهائية — TELC Voll</div>
+</footer>
+<script src="/assets/app.js?v=20261005-orbit-footer-v2"></script>
 <script>
 const id=new URLSearchParams(location.search).get('id');
 const $=x=>document.getElementById(x); let ex=null, history=[], transcript=[], recognition=null, busy=false, voiceRunning=false, speakingNow=false, turnToken=0, modelBusy=false, isPaidStudent=false;

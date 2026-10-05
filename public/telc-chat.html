@@ -99,7 +99,7 @@ html body h1,html body h2,html body h3,html body h4,html body h5,html body h6,ht
     <p class="telc-ai-disclaimer">قد يخطئ الذكاء الاصطناعي. تحقّق من المعلومات الرسمية المتعلقة بالتأشيرات والقوانين.</p>
   </section>
 </main>
-<script src="/assets/i18n.js?v=20260927-subscription-activation-mail-v10"></script><script src="/assets/app.js?v=20261005-public-session-footer-fix"></script>
+<script src="/assets/i18n.js?v=20260927-subscription-activation-mail-v10"></script><script src="/assets/app.js?v=20261005-orbit-footer-v2"></script>
 <script>
 const $ = id => document.getElementById(id);
 let history = [];
@@ -197,4 +197,7 @@ $('logoutLink').onclick=async e=>{e.preventDefault();try{await fetch('/api/auth-
 document.addEventListener('langchange',()=>{applyI18n();});
 (async()=>{try{const r=await fetch('/api/me',{credentials:'same-origin'});if(!r.ok){location.href='/login.html?next='+encodeURIComponent('/telc-chat.html');return;}const me=await r.json();const student=me?.student;if(!student){location.href='/login.html?next='+encodeURIComponent('/telc-chat.html');return;}const activeSubscription=me?.subscription?.active===true && me?.is_paid===true;if(!activeSubscription){$('chatInput').disabled=true;$('sendBtn').disabled=true;$('chatInput').placeholder='المساعد متاح للمشتركين فقط';setAiStatus('يتطلب اشتراكاً مفعلاً');const box=document.createElement('div');box.className='telc-ai-subscription-lock';box.innerHTML='<div class="telc-ai-lock-title">مساعد TELC متاح للمشتركين</div><div class="telc-ai-lock-text">فعّل اشتراكك للوصول إلى المحادثة مع مساعد TELC.</div><a class="telc-ai-lock-btn" href="/plans.html">عرض الخطط</a>';$('chatMessages').appendChild(box);}else{setAiStatus('جاهز للمحادثة');}}catch{location.href='/login.html?next='+encodeURIComponent('/telc-chat.html');}})();
 </script>
+<footer class="site-footer-minimal" aria-label="TELC Voll footer">
+  <div>B1 · B2 · C1 — منصة التدريب والتحضير لامتحانات اللغة الألمانية النهائية — TELC Voll</div>
+</footer>
 </body></html>

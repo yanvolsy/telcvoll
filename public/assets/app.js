@@ -1,3 +1,4 @@
+// TELC Voll shared runtime — public/session safe v20261005-orbit-footer-v2
 // أدوات مشتركة لكل الصفحات الثابتة.
 const TELC_PUBLIC_PATHS = new Set([
   '/', '/index.html',
@@ -22,6 +23,19 @@ function isTelcPublicPage(pathname = location.pathname) {
 }
 function isTelcStudentProtectedPage(pathname = location.pathname) {
   return TELC_STUDENT_PROTECTED_PATHS.has(normalizeTelcPath(pathname));
+}
+
+// Public pages must never become session-gated. Clean an old session error left
+// in the URL and explicitly mark the document so future auth helpers can respect it.
+if (isTelcPublicPage()) {
+  try {
+    const u = new URL(location.href);
+    if (u.searchParams.get('error') === 'session') {
+      u.searchParams.delete('error');
+      history.replaceState(null, document.title, u.pathname + (u.search ? u.search : '') + u.hash);
+    }
+    document.documentElement.dataset.telcPublicPage = '1';
+  } catch (_) {}
 }
 
 async function api(path, options = {}) {
