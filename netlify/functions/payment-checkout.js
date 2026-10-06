@@ -51,15 +51,17 @@ exports.handler = async (event) => {
     return json(422, { error: 'يجب الموافقة على شروط الاستخدام للمتابعة.' });
   }
 
+  if (!authenticatedStudentId || !authStudent) {
+    return json(401, { error: 'يجب تسجيل الدخول أولاً لإتمام عملية الدفع وتفعيل الاشتراك.' });
+  }
+
   const pool = db();
 
-  if (authenticatedStudentId) {
-    const verifiedRes = await pool.query('SELECT email_verified, is_blocked FROM students WHERE id=$1', [authenticatedStudentId]);
-    const account = verifiedRes.rows[0];
-    if (!account || account.is_blocked) return json(403, { error: 'الحساب غير متاح للدفع.' });
-    if (account.email_verified !== true) {
-      return json(403, { error: 'يرجى تأكيد بريدك الإلكتروني قبل إتمام عملية الدفع.' });
-    }
+  const verifiedRes = await pool.query('SELECT email_verified, is_blocked FROM students WHERE id=$1', [authenticatedStudentId]);
+  const account = verifiedRes.rows[0];
+  if (!account || account.is_blocked) return json(403, { error: 'الحساب غير متاح للدفع.' });
+  if (account.email_verified !== true) {
+    return json(403, { error: 'يرجى تأكيد بريدك الإلكتروني قبل إتمام عملية الدفع.' });
   }
 
   // 1. Enforce Rate Limiting & Fast Duplicate Prevention (IP & Email limits)

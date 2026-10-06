@@ -336,7 +336,16 @@ function openCheckout(plan) {
 
   if (currentUser) {
     if (document.getElementById('custName')) document.getElementById('custName').value = currentUser.name || '';
-    if (document.getElementById('custEmail')) document.getElementById('custEmail').value = currentUser.email || '';
+    if (document.getElementById('custEmail')) {
+      const emailEl = document.getElementById('custEmail');
+      emailEl.value = currentUser.email || '';
+      // Lock email to the authenticated account — server already enforces this,
+      // but we make it visible to the user as well to prevent confusion.
+      emailEl.readOnly = true;
+      emailEl.style.background = 'var(--bg, #f5f5f5)';
+      emailEl.style.cursor = 'not-allowed';
+      emailEl.title = 'البريد الإلكتروني مرتبط بحسابك ولا يمكن تغييره أثناء الدفع.';
+    }
     if (document.getElementById('custPhone')) document.getElementById('custPhone').value = currentUser.phone || '';
   }
 

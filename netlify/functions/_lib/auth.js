@@ -29,7 +29,7 @@ function setCookie(name, value, maxAgeSeconds) {
   return cookie.serialize(name, value, {
     httpOnly: true,
     secure: !isDev,
-    sameSite: 'Lax',
+    sameSite: 'Strict',
     path: '/',
     maxAge: maxAgeSeconds,
   });
@@ -40,7 +40,7 @@ function clearCookie(name) {
   return cookie.serialize(name, '', {
     httpOnly: true,
     secure: !isDev,
-    sameSite: 'Lax',
+    sameSite: 'Strict',
     path: '/',
     maxAge: 0,
   });

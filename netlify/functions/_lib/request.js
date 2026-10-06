@@ -50,7 +50,9 @@ function requireSameOrigin(event) {
     }
     if (originHost === 'telcvoll.de' || originHost === 'www.telcvoll.de' ||
         originHost === 'telcvoll.app' || originHost === 'www.telcvoll.app' ||
-        originHost.endsWith('.netlify.app') || originHost === 'localhost' || originHost === '127.0.0.1') {
+        originHost.endsWith('.netlify.app') ||
+        ((originHost === 'localhost' || originHost === '127.0.0.1') &&
+          (process.env.NETLIFY_DEV === 'true' || process.env.NODE_ENV === 'development'))) {
       return true;
     }
   } catch (_) {}

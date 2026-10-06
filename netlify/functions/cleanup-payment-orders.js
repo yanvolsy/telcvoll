@@ -12,6 +12,11 @@ exports.handler = async () => {
         AND created_at < NOW() - INTERVAL '2 hours'
       RETURNING id, order_id
     `);
+    // Clean up stale rate limits older than 24 hours
+    await pool.query(`DELETE FROM rate_limits WHERE window_started_at < NOW() - INTERVAL '24 hours'`);
+    // Clean up stale payment attempts older than 24 hours
+    await pool.query(`DELETE FROM payment_attempts WHERE created_at < NOW() - INTERVAL '24 hours'`);
+
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },

@@ -138,7 +138,7 @@ exports.handler = async (event) => {
     if (err.code === '23505') {
       return json(409, { error: 'هذا البريد الإلكتروني مسجل بالفعل. يرجى تسجيل الدخول.' });
     }
-    return json(500, { error: 'حدث خطأ أثناء إنشاء الحساب. يرجى المحاولة مرة أخرى: ' + (err.message || '') });
+    return json(500, { error: 'حدث خطأ أثناء إنشاء الحساب. يرجى المحاولة مرة أخرى.' });
   } finally {
     client.release();
   }
